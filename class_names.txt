@@ -1,0 +1,4 @@
+Bacterial_Spot
+Cercospora_Leaf_Spot
+Curl_Virus
+Healthy_Leaf

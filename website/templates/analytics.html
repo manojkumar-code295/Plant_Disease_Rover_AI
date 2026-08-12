@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Analytics | Precision Agriculture</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #1f2937;
+        }
+
+        /* HEADER */
+
+        header {
+            background: #12372a;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header p {
+            margin-top: 6px;
+            color: #cbded3;
+        }
+
+        /* NAVIGATION */
+
+        nav {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #2f7d57;
+        }
+
+        /* MAIN */
+
+        main {
+            max-width: 1300px;
+            margin: auto;
+            padding: 35px 40px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            color: #12372a;
+            font-size: 24px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* SUMMARY */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .summary-card span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .summary-card h2 {
+            margin-top: 10px;
+            color: #12372a;
+            font-size: 30px;
+        }
+
+        .healthy {
+            color: #16a34a !important;
+        }
+
+        .diseased {
+            color: #dc2626 !important;
+        }
+
+        /* ANALYTICS GRID */
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            color: #12372a;
+            margin-bottom: 25px;
+        }
+
+        /* BAR CHART */
+
+        .chart-row {
+            margin-bottom: 22px;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .chart-label strong {
+            color: #12372a;
+        }
+
+        .bar-background {
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            background: #23613e;
+            border-radius: 20px;
+            transition: width 0.5s ease;
+        }
+
+        .bar.bacterial {
+            background: #dc2626;
+        }
+
+        .bar.cercospora {
+            background: #d97706;
+        }
+
+        .bar.curl {
+            background: #7c3aed;
+        }
+
+        .bar.healthy-bar {
+            background: #16a34a;
+        }
+
+        /* DONUT STYLE */
+
+        .distribution {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
+        }
+
+        .circle {
+
+            width: 220px;
+            height: 220px;
+
+            border-radius: 50%;
+
+            background:
+                conic-gradient(
+                    #16a34a 0deg,
+                    #16a34a
+                    calc(
+                        {{ data.healthy }}
+                        /
+                        {{ data.total if data.total > 0 else 1 }}
+                        * 360deg
+                    ),
+                    #dc2626
+                    calc(
+                        {{ data.healthy }}
+                        /
+                        {{ data.total if data.total > 0 else 1 }}
+                        * 360deg
+                    ),
+                    #dc2626 360deg
+                );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle-inner {
+
+            width: 130px;
+            height: 130px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+        }
+
+        .circle-inner strong {
+            font-size: 28px;
+            color: #12372a;
+        }
+
+        .circle-inner span {
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        /* LEGEND */
+
+        .legend {
+            margin-top: 25px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+
+        .legend-healthy {
+            background: #16a34a;
+        }
+
+        .legend-diseased {
+            background: #dc2626;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width: 900px) {
+
+            .summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media(max-width: 600px) {
+
+            main {
+                padding: 25px 20px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <h1>
+        🌱 Precision Agriculture Smart Rover
+    </h1>
+
+    <p>
+        AI Detection Analytics
+    </p>
+
+</header>
+
+
+<!-- NAVIGATION -->
+
+<nav>
+
+    <a href="/">
+        Dashboard
+    </a>
+
+    <a href="/rover">
+        Rover Control
+    </a>
+
+    <a href="/dataset">
+        Dataset
+    </a>
+
+    <a href="/analytics">
+        Analytics
+    </a>
+
+    <a href="/settings">
+        Settings
+    </a>
+
+</nav>
+
+
+<!-- MAIN -->
+
+<main>
+
+
+    <div class="page-title">
+
+        <h2>
+            Analytics Dashboard
+        </h2>
+
+        <p>
+            AI prediction statistics and disease distribution
+        </p>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+
+        <div class="summary-card">
+
+            <span>
+                Total Predictions
+            </span>
+
+            <h2>
+                {{ data.total }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Healthy Leaves
+            </span>
+
+            <h2 class="healthy">
+                {{ data.healthy }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Diseased Leaves
+            </span>
+
+            <h2 class="diseased">
+                {{ data.diseased }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Disease Types
+            </span>
+
+            <h2>
+                3
+            </h2>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ANALYTICS -->
+
+    <div class="analytics-grid">
+
+
+        <!-- DISEASE COUNTS -->
+
+        <div class="card">
+
+            <h3>
+                Disease Detection Count
+            </h3>
+
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+
+                    <span>
+                        Healthy Leaf
+                    </span>
+
+                    <strong>
+                        {{ data.healthy }}
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        class="bar healthy-bar"
+                        style="width:
+                        {% if data.total > 0 %}
+                            {{ (data.healthy / data.total) * 100 }}%
+                        {% else %}
+                            0%
+                        {% endif %};">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+
+                    <span>
+                        Bacterial Spot
+                    </span>
+
+                    <strong>
+                        {{ data.bacterial_spot }}
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        class="bar bacterial"
+                        style="width:
+                        {% if data.total > 0 %}
+                            {{ (data.bacterial_spot / data.total) * 100 }}%
+                        {% else %}
+                            0%
+                        {% endif %};">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+
+                    <span>
+                        Cercospora Leaf Spot
+                    </span>
+
+                    <strong>
+                        {{ data.cercospora }}
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        class="bar cercospora"
+                        style="width:
+                        {% if data.total > 0 %}
+                            {{ (data.cercospora / data.total) * 100 }}%
+                        {% else %}
+                            0%
+                        {% endif %};">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-row">
+
+                <div class="chart-label">
+
+                    <span>
+                        Curl Virus
+                    </span>
+
+                    <strong>
+                        {{ data.curl_virus }}
+                    </strong>
+
+                </div>
+
+                <div class="bar-background">
+
+                    <div
+                        class="bar curl"
+                        style="width:
+                        {% if data.total > 0 %}
+                            {{ (data.curl_virus / data.total) * 100 }}%
+                        {% else %}
+                            0%
+                        {% endif %};">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- DISTRIBUTION -->
+
+        <div class="card">
+
+            <h3>
+                Healthy vs Diseased
+            </h3>
+
+
+            <div class="distribution">
+
+                <div class="circle">
+
+                    <div class="circle-inner">
+
+                        <strong>
+                            {{ data.total }}
+                        </strong>
+
+                        <span>
+                            Predictions
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="legend">
+
+                <div class="legend-item">
+
+                    <div class="legend-box legend-healthy">
+                    </div>
+
+                    Healthy:
+                    {{ data.healthy }}
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <div class="legend-box legend-diseased">
+                    </div>
+
+                    Diseased:
+                    {{ data.diseased }}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</main>
+
+
+</body>
+
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Rover Control | Precision Agriculture</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #1f2937;
+        }
+
+        /* HEADER */
+
+        header {
+            background: #12372a;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header p {
+            margin-top: 6px;
+            color: #cbded3;
+        }
+
+        /* NAVIGATION */
+
+        nav {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #2f7d57;
+        }
+
+        /* MAIN */
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 35px 40px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            color: #12372a;
+            font-size: 24px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* LAYOUT */
+
+        .control-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .card h3 {
+            color: #12372a;
+            margin-bottom: 25px;
+        }
+
+        /* ROVER STATUS */
+
+        .rover-status {
+            background: #edf7ef;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .rover-status span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .rover-status h2 {
+            margin-top: 7px;
+            color: #dc2626;
+        }
+
+        /* DIRECTION CONTROLS */
+
+        .direction-control {
+            display: grid;
+            grid-template-columns: repeat(3, 90px);
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .control-button {
+            height: 65px;
+            border: none;
+            border-radius: 12px;
+            background: #23613e;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .control-button:hover {
+            background: #17452c;
+            transform: translateY(-2px);
+        }
+
+        .control-button:active {
+            transform: scale(0.96);
+        }
+
+        .empty {
+            visibility: hidden;
+        }
+
+        .stop-button {
+            background: #dc2626;
+        }
+
+        .stop-button:hover {
+            background: #b91c1c;
+        }
+
+        /* PUMP */
+
+        .pump-section {
+            margin-top: 30px;
+            border-top: 1px solid #eeeeee;
+            padding-top: 25px;
+        }
+
+        .pump-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .pump-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .pump-on {
+            background: #16a34a;
+            color: white;
+        }
+
+        .pump-off {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* CURRENT COMMAND */
+
+        .command-box {
+            background: #f4f7f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .command-box span {
+            display: block;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .command-box h2 {
+            margin-top: 8px;
+            color: #12372a;
+        }
+
+        /* NOTICE */
+
+        .notice {
+            margin-top: 25px;
+            padding: 15px;
+            background: #fff7ed;
+            border-left: 4px solid #f97316;
+            border-radius: 8px;
+            color: #7c2d12;
+            line-height: 1.5;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width: 800px) {
+
+            main {
+                padding: 25px 20px;
+            }
+
+            .control-layout {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <h1>
+        🌱 Precision Agriculture Smart Rover
+    </h1>
+
+    <p>
+        Rover Control System
+    </p>
+
+</header>
+
+
+<!-- NAVIGATION -->
+
+<nav>
+
+    <a href="/">
+        Dashboard
+    </a>
+
+    <a href="/rover">
+        Rover Control
+    </a>
+
+    <a href="/dataset">
+        Dataset
+    </a>
+
+    <a href="/analytics">
+        Analytics
+    </a>
+
+    <a href="/settings">
+        Settings
+    </a>
+
+</nav>
+
+
+<!-- MAIN -->
+
+<main>
+
+
+    <div class="page-title">
+
+        <h2>
+            Rover Control
+        </h2>
+
+        <p>
+            Control the rover movement and water pump
+        </p>
+
+    </div>
+
+
+    <div class="control-layout">
+
+
+        <!-- MOVEMENT -->
+
+        <div class="card">
+
+            <h3>
+                🚜 Rover Movement
+            </h3>
+
+
+            <div class="rover-status">
+
+                <span>
+                    Rover Status
+                </span>
+
+                <h2>
+                    NOT CONNECTED
+                </h2>
+
+            </div>
+
+
+            <div class="direction-control">
+
+
+                <div class="empty"></div>
+
+
+                <button
+                    class="control-button"
+                    onclick="setCommand('FORWARD')">
+
+                    ↑
+                    <br>
+                    Forward
+
+                </button>
+
+
+                <div class="empty"></div>
+
+
+                <button
+                    class="control-button"
+                    onclick="setCommand('LEFT')">
+
+                    ←
+                    <br>
+                    Left
+
+                </button>
+
+
+                <button
+                    class="control-button stop-button"
+                    onclick="setCommand('STOP')">
+
+                    ■
+                    <br>
+                    Stop
+
+                </button>
+
+
+                <button
+                    class="control-button"
+                    onclick="setCommand('RIGHT')">
+
+                    →
+                    <br>
+                    Right
+
+                </button>
+
+
+                <div class="empty"></div>
+
+
+                <button
+                    class="control-button"
+                    onclick="setCommand('REVERSE')">
+
+                    ↓
+                    <br>
+                    Reverse
+
+                </button>
+
+
+                <div class="empty"></div>
+
+
+            </div>
+
+
+            <div class="command-box">
+
+                <span>
+                    Current Command
+                </span>
+
+                <h2 id="current-command">
+                    STOP
+                </h2>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- PUMP -->
+
+        <div class="card">
+
+            <h3>
+                💧 Water / Spray Pump
+            </h3>
+
+
+            <div class="rover-status">
+
+                <span>
+                    Pump Status
+                </span>
+
+                <h2
+                    id="pump-status"
+                    style="color:#dc2626;">
+
+                    OFF
+
+                </h2>
+
+            </div>
+
+
+            <div class="pump-buttons">
+
+
+                <button
+                    class="pump-button pump-on"
+                    onclick="pumpControl('ON')">
+
+                    💧 Pump ON
+
+                </button>
+
+
+                <button
+                    class="pump-button pump-off"
+                    onclick="pumpControl('OFF')">
+
+                    Pump OFF
+
+                </button>
+
+
+            </div>
+
+
+            <div class="command-box">
+
+                <span>
+                    Pump Command
+                </span>
+
+                <h2 id="pump-command">
+                    OFF
+                </h2>
+
+            </div>
+
+
+            <div class="notice">
+
+                <strong>
+                    Phase 1:
+                </strong>
+
+                Rover controls are currently
+                interface-only.
+
+                <br><br>
+
+                In Phase 2, these controls will
+                be connected to Raspberry Pi /
+                Blynk IoT.
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</main>
+
+
+<script>
+
+    function setCommand(command) {
+
+        document.getElementById(
+            "current-command"
+        ).textContent = command;
+
+    }
+
+
+    function pumpControl(status) {
+
+        document.getElementById(
+            "pump-status"
+        ).textContent = status;
+
+        document.getElementById(
+            "pump-command"
+        ).textContent = status;
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dataset & History | Precision Agriculture</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #1f2937;
+        }
+
+        /* HEADER */
+
+        header {
+            background: #12372a;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header p {
+            margin-top: 6px;
+            color: #cbded3;
+        }
+
+        /* NAVIGATION */
+
+        nav {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #2f7d57;
+        }
+
+        /* MAIN */
+
+        main {
+            max-width: 1400px;
+            margin: auto;
+            padding: 35px 40px;
+        }
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            color: #12372a;
+            font-size: 24px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        /* SUMMARY */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .summary-card span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .summary-card h2 {
+            margin-top: 8px;
+            color: #12372a;
+            font-size: 28px;
+        }
+
+        /* HISTORY */
+
+        .history-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .history-card h3 {
+            color: #12372a;
+            margin-bottom: 20px;
+        }
+
+        /* TABLE */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th {
+            background: #edf7ef;
+            color: #12372a;
+            padding: 14px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #eeeeee;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: #fafdfb;
+        }
+
+        /* IMAGE */
+
+        .history-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #eaf2ec;
+        }
+
+        /* DISEASE */
+
+        .disease {
+            font-weight: bold;
+            color: #23613e;
+        }
+
+        /* EMPTY */
+
+        .empty-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-history h3 {
+            color: #12372a;
+            margin-bottom: 10px;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width: 800px) {
+
+            main {
+                padding: 25px 20px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 15px 20px;
+                flex-wrap: wrap;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+    <h1>
+        🌱 Precision Agriculture Smart Rover
+    </h1>
+
+    <p>
+        Prediction Dataset & History
+    </p>
+
+</header>
+
+
+<!-- NAVIGATION -->
+
+<nav>
+
+    <a href="/">
+        Dashboard
+    </a>
+
+    <a href="/rover">
+        Rover Control
+    </a>
+
+    <a href="/dataset">
+        Dataset
+    </a>
+
+    <a href="/analytics">
+        Analytics
+    </a>
+
+    <a href="/settings">
+        Settings
+    </a>
+
+</nav>
+
+
+<!-- MAIN -->
+
+<main>
+
+
+    <div class="page-title">
+
+        <h2>
+            Prediction History
+        </h2>
+
+        <p>
+            All AI detection results stored by the system
+        </p>
+
+    </div>
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+
+        <div class="summary-card">
+
+            <span>
+                Total Predictions
+            </span>
+
+            <h2>
+                {{ history|length }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Latest Detection
+            </span>
+
+            <h2>
+
+                {% if history %}
+
+                    {{ history[0]["disease"] }}
+
+                {% else %}
+
+                    None
+
+                {% endif %}
+
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                System
+            </span>
+
+            <h2>
+                ONLINE
+            </h2>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- HISTORY TABLE -->
+
+    <div class="history-card">
+
+        <h3>
+            Saved Predictions
+        </h3>
+
+
+        {% if history %}
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ID
+                        </th>
+
+                        <th>
+                            Image
+                        </th>
+
+                        <th>
+                            Disease
+                        </th>
+
+                        <th>
+                            Chemical
+                        </th>
+
+                        <th>
+                            Fertilizer
+                        </th>
+
+                        <th>
+                            Treatment
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Time
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    {% for item in history %}
+
+
+                    <tr>
+
+
+                        <td>
+                            {{ item["id"] }}
+                        </td>
+
+
+                        <td>
+
+                            <img
+                                class="history-image"
+                                src="{{ url_for(
+                                    'static',
+                                    filename='images/' + item['image']
+                                ) }}"
+                                alt="Chili leaf image"
+                            >
+
+                        </td>
+
+
+                        <td class="disease">
+
+                            {{ item["disease"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["chemical"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["fertilizer"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["treatment"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["date"] }}
+
+                        </td>
+
+
+                        <td>
+
+                            {{ item["time"] }}
+
+                        </td>
+
+
+                    </tr>
+
+
+                    {% endfor %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        {% else %}
+
+
+        <div class="empty-history">
+
+            <h3>
+                No Predictions Yet
+            </h3>
+
+            <p>
+                Run your AI prediction program to create
+                the first history record.
+            </p>
+
+        </div>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</main>
+
+
+</body>
+
+</html>

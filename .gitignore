@@ -1,0 +1,17 @@
+# Training dataset
+dataset/
+
+# AI model files
+*.keras
+
+# Training graphs
+accuracy_graph.png
+loss_graph.png
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.env/
