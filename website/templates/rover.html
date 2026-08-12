@@ -10,6 +10,7 @@
 
     <title>Rover Control | Precision Agriculture</title>
 
+
     <style>
 
         * {
@@ -18,233 +19,517 @@
             padding: 0;
         }
 
+
         body {
+
             font-family: Arial, sans-serif;
+
             background: #f4f7f5;
+
             color: #1f2937;
         }
 
-        /* HEADER */
+
+        /* =================================================
+           HEADER
+        ================================================= */
 
         header {
+
             background: #12372a;
+
             color: white;
+
             padding: 22px 40px;
         }
 
+
         header h1 {
+
             font-size: 26px;
         }
 
+
         header p {
+
             margin-top: 6px;
+
             color: #cbded3;
         }
 
-        /* NAVIGATION */
+
+        /* =================================================
+           NAVIGATION
+        ================================================= */
 
         nav {
+
             background: white;
+
             padding: 15px 40px;
+
             display: flex;
+
             gap: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
         }
 
+
         nav a {
+
             text-decoration: none;
+
             color: #374151;
+
             font-weight: bold;
         }
 
+
         nav a:hover {
+
             color: #2f7d57;
         }
 
-        /* MAIN */
+
+        /* =================================================
+           MAIN
+        ================================================= */
 
         main {
+
             max-width: 1100px;
+
             margin: auto;
+
             padding: 35px 40px;
         }
 
+
         .page-title {
+
             margin-bottom: 25px;
         }
 
+
         .page-title h2 {
+
             color: #12372a;
+
             font-size: 24px;
         }
 
+
         .page-title p {
+
             color: #6b7280;
+
             margin-top: 6px;
         }
 
-        /* LAYOUT */
+
+        /* =================================================
+           LAYOUT
+        ================================================= */
 
         .control-layout {
+
             display: grid;
+
             grid-template-columns: 1fr 1fr;
+
             gap: 25px;
         }
 
+
         .card {
+
             background: white;
+
             padding: 30px;
+
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.06);
         }
+
 
         .card h3 {
+
             color: #12372a;
+
             margin-bottom: 25px;
         }
 
-        /* ROVER STATUS */
+
+        /* =================================================
+           ROVER STATUS
+        ================================================= */
 
         .rover-status {
+
             background: #edf7ef;
+
             padding: 18px;
+
             border-radius: 10px;
+
             margin-bottom: 25px;
         }
 
+
         .rover-status span {
+
             color: #6b7280;
+
             font-size: 13px;
         }
 
+
         .rover-status h2 {
+
             margin-top: 7px;
+
             color: #dc2626;
         }
 
-        /* DIRECTION CONTROLS */
+
+        .connected {
+
+            color: #16a34a !important;
+        }
+
+
+        .disconnected {
+
+            color: #dc2626 !important;
+        }
+
+
+        /* =================================================
+           DIRECTION CONTROLS
+        ================================================= */
 
         .direction-control {
+
             display: grid;
-            grid-template-columns: repeat(3, 90px);
+
+            grid-template-columns:
+                repeat(3, 90px);
+
             justify-content: center;
+
             gap: 12px;
         }
 
+
         .control-button {
+
             height: 65px;
+
             border: none;
+
             border-radius: 12px;
+
             background: #23613e;
+
             color: white;
+
             font-size: 16px;
+
             font-weight: bold;
+
             cursor: pointer;
+
             transition: 0.2s;
         }
 
+
         .control-button:hover {
+
             background: #17452c;
+
             transform: translateY(-2px);
         }
 
+
         .control-button:active {
+
             transform: scale(0.96);
         }
 
+
+        .control-button:disabled {
+
+            opacity: 0.5;
+
+            cursor: not-allowed;
+
+            transform: none;
+        }
+
+
         .empty {
+
             visibility: hidden;
         }
 
+
         .stop-button {
+
             background: #dc2626;
         }
 
+
         .stop-button:hover {
+
             background: #b91c1c;
         }
 
-        /* PUMP */
+
+        /* =================================================
+           PUMP
+        ================================================= */
 
         .pump-section {
+
             margin-top: 30px;
-            border-top: 1px solid #eeeeee;
+
+            border-top:
+                1px solid #eeeeee;
+
             padding-top: 25px;
         }
 
+
         .pump-buttons {
+
             display: flex;
+
             gap: 15px;
         }
 
+
         .pump-button {
+
             flex: 1;
+
             padding: 16px;
+
             border: none;
+
             border-radius: 10px;
+
             font-size: 16px;
+
             font-weight: bold;
+
             cursor: pointer;
         }
 
+
+        .pump-button:disabled {
+
+            opacity: 0.5;
+
+            cursor: not-allowed;
+        }
+
+
         .pump-on {
+
             background: #16a34a;
+
             color: white;
         }
+
 
         .pump-off {
+
             background: #dc2626;
+
             color: white;
         }
 
-        /* CURRENT COMMAND */
+
+        /* =================================================
+           CURRENT COMMAND
+        ================================================= */
 
         .command-box {
+
             background: #f4f7f5;
+
             padding: 20px;
+
             border-radius: 10px;
+
             margin-top: 20px;
+
             text-align: center;
         }
 
+
         .command-box span {
+
             display: block;
+
             color: #6b7280;
+
             font-size: 13px;
         }
 
+
         .command-box h2 {
+
             margin-top: 8px;
+
             color: #12372a;
         }
 
-        /* NOTICE */
+
+        /* =================================================
+           MESSAGE BOX
+        ================================================= */
+
+        .message-box {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            text-align: center;
+
+            font-weight: bold;
+
+            display: none;
+        }
+
+
+        .message-success {
+
+            display: block;
+
+            background: #dcfce7;
+
+            color: #166534;
+        }
+
+
+        .message-error {
+
+            display: block;
+
+            background: #fee2e2;
+
+            color: #991b1b;
+        }
+
+
+        .message-info {
+
+            display: block;
+
+            background: #dbeafe;
+
+            color: #1e40af;
+        }
+
+
+        /* =================================================
+           NOTICE
+        ================================================= */
 
         .notice {
+
             margin-top: 25px;
+
             padding: 15px;
+
             background: #fff7ed;
-            border-left: 4px solid #f97316;
+
+            border-left:
+                4px solid #f97316;
+
             border-radius: 8px;
+
             color: #7c2d12;
+
             line-height: 1.5;
         }
 
-        /* RESPONSIVE */
+
+        /* =================================================
+           CONNECTION INFO
+        ================================================= */
+
+        .connection-box {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #f9fafb;
+
+            border:
+                1px solid #e5e7eb;
+        }
+
+
+        .connection-box p {
+
+            font-size: 14px;
+
+            color: #6b7280;
+
+            margin-top: 5px;
+        }
+
+
+        /* =================================================
+           RESPONSIVE
+        ================================================= */
 
         @media(max-width: 800px) {
 
             main {
+
                 padding: 25px 20px;
             }
 
+
             .control-layout {
+
                 grid-template-columns: 1fr;
             }
 
+
             nav {
+
                 padding: 15px 20px;
+
                 flex-wrap: wrap;
+            }
+
+
+            .direction-control {
+
+                grid-template-columns:
+                    repeat(3, 75px);
+            }
+
+
+            .control-button {
+
+                height: 60px;
+
+                font-size: 14px;
             }
 
         }
@@ -257,7 +542,9 @@
 <body>
 
 
-<!-- HEADER -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header>
 
@@ -272,7 +559,9 @@
 </header>
 
 
-<!-- NAVIGATION -->
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
 
 <nav>
 
@@ -299,7 +588,9 @@
 </nav>
 
 
-<!-- MAIN -->
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
 <main>
 
@@ -311,7 +602,7 @@
         </h2>
 
         <p>
-            Control the rover movement and water pump
+            Control the rover movement and spray pump
         </p>
 
     </div>
@@ -320,7 +611,9 @@
     <div class="control-layout">
 
 
-        <!-- MOVEMENT -->
+        <!-- =================================================
+             MOVEMENT
+        ================================================== -->
 
         <div class="card">
 
@@ -329,91 +622,133 @@
             </h3>
 
 
+            <!-- ROVER STATUS -->
+
             <div class="rover-status">
 
                 <span>
-                    Rover Status
+                    Rover Connection
                 </span>
 
-                <h2>
+                <h2
+                    id="rover-status"
+                    class="disconnected"
+                >
                     NOT CONNECTED
                 </h2>
 
             </div>
 
 
+            <!-- DIRECTION BUTTONS -->
+
             <div class="direction-control">
 
+
+                <!-- TOP LEFT -->
 
                 <div class="empty"></div>
 
 
+                <!-- FORWARD -->
+
                 <button
                     class="control-button"
-                    onclick="setCommand('FORWARD')">
+                    onclick="sendCommand('forward')"
+                >
 
                     ↑
+
                     <br>
+
                     Forward
 
                 </button>
 
 
+                <!-- TOP RIGHT -->
+
                 <div class="empty"></div>
 
 
+                <!-- LEFT -->
+
                 <button
                     class="control-button"
-                    onclick="setCommand('LEFT')">
+                    onclick="sendCommand('left')"
+                >
 
                     ←
+
                     <br>
+
                     Left
 
                 </button>
 
 
+                <!-- STOP -->
+
                 <button
                     class="control-button stop-button"
-                    onclick="setCommand('STOP')">
+                    onclick="sendCommand('stop')"
+                >
 
                     ■
+
                     <br>
+
                     Stop
 
                 </button>
 
 
+                <!-- RIGHT -->
+
                 <button
                     class="control-button"
-                    onclick="setCommand('RIGHT')">
+                    onclick="sendCommand('right')"
+                >
 
                     →
+
                     <br>
+
                     Right
 
                 </button>
 
 
+                <!-- BOTTOM LEFT -->
+
                 <div class="empty"></div>
 
 
+                <!-- BACKWARD -->
+
                 <button
                     class="control-button"
-                    onclick="setCommand('REVERSE')">
+                    onclick="sendCommand('backward')"
+                >
 
                     ↓
+
                     <br>
-                    Reverse
+
+                    Backward
 
                 </button>
 
+
+                <!-- BOTTOM RIGHT -->
 
                 <div class="empty"></div>
 
 
             </div>
 
+
+            <!-- CURRENT COMMAND -->
 
             <div class="command-box">
 
@@ -428,17 +763,46 @@
             </div>
 
 
+            <!-- MESSAGE -->
+
+            <div
+                id="message-box"
+                class="message-box"
+            >
+            </div>
+
+
+            <!-- CONNECTION INFO -->
+
+            <div class="connection-box">
+
+                <strong>
+                    Raspberry Pi
+                </strong>
+
+                <p>
+                    The Raspberry Pi will receive
+                    these commands and control the
+                    motor driver through GPIO.
+                </p>
+
+            </div>
+
         </div>
 
 
-        <!-- PUMP -->
+        <!-- =================================================
+             PUMP
+        ================================================== -->
 
         <div class="card">
 
             <h3>
-                💧 Water / Spray Pump
+                💧 Spray Pump
             </h3>
 
+
+            <!-- PUMP STATUS -->
 
             <div class="rover-status">
 
@@ -448,21 +812,23 @@
 
                 <h2
                     id="pump-status"
-                    style="color:#dc2626;">
-
+                    style="color:#dc2626;"
+                >
                     OFF
-
                 </h2>
 
             </div>
 
+
+            <!-- PUMP BUTTONS -->
 
             <div class="pump-buttons">
 
 
                 <button
                     class="pump-button pump-on"
-                    onclick="pumpControl('ON')">
+                    onclick="pumpControl(true)"
+                >
 
                     💧 Pump ON
 
@@ -471,7 +837,8 @@
 
                 <button
                     class="pump-button pump-off"
-                    onclick="pumpControl('OFF')">
+                    onclick="pumpControl(false)"
+                >
 
                     Pump OFF
 
@@ -480,6 +847,8 @@
 
             </div>
 
+
+            <!-- PUMP COMMAND -->
 
             <div class="command-box">
 
@@ -494,23 +863,24 @@
             </div>
 
 
+            <!-- NOTICE -->
+
             <div class="notice">
 
                 <strong>
-                    Phase 1:
+                    Current Stage:
                 </strong>
 
-                Rover controls are currently
-                interface-only.
+                Website control is ready.
 
                 <br><br>
 
-                In Phase 2, these controls will
-                be connected to Raspberry Pi /
-                Blynk IoT.
+                When the Raspberry Pi is connected,
+                it will receive these commands and
+                control the rover motors through
+                the motor driver.
 
             </div>
-
 
         </div>
 
@@ -521,28 +891,455 @@
 </main>
 
 
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
 <script>
 
-    function setCommand(command) {
 
+/* =========================================================
+   SHOW MESSAGE
+========================================================= */
+
+function showMessage(
+    message,
+    type = "info"
+) {
+
+    const box =
+        document.getElementById(
+            "message-box"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.className =
+        "message-box message-" + type;
+
+
+    setTimeout(
+        function() {
+
+            box.style.display =
+                "none";
+
+        },
+        3000
+    );
+}
+
+
+/* =========================================================
+   SEND ROVER COMMAND
+========================================================= */
+
+async function sendCommand(
+    command
+) {
+
+    const commandDisplay =
         document.getElementById(
             "current-command"
-        ).textContent = command;
+        );
+
+
+    // Immediately update screen
+
+    commandDisplay.textContent =
+        command.toUpperCase();
+
+
+    showMessage(
+        "Sending " +
+        command.toUpperCase() +
+        " command...",
+        "info"
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/rover/control",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        command:
+                            command
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            commandDisplay.textContent =
+                command.toUpperCase();
+
+
+            showMessage(
+                "Command sent successfully: " +
+                command.toUpperCase(),
+                "success"
+            );
+
+
+            updateRoverStatus(
+                data.rover
+            );
+
+        }
+
+        else {
+
+            showMessage(
+                "Command failed: " +
+                (
+                    data.message ||
+                    "Unknown error"
+                ),
+                "error"
+            );
+
+        }
+
 
     }
 
+    catch (error) {
 
-    function pumpControl(status) {
+        console.error(
+            "Command error:",
+            error
+        );
 
+
+        showMessage(
+            "Could not connect to server.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PUMP CONTROL
+========================================================= */
+
+async function pumpControl(
+    state
+) {
+
+    const pumpStatus =
         document.getElementById(
             "pump-status"
-        ).textContent = status;
+        );
 
+
+    const pumpCommand =
         document.getElementById(
             "pump-command"
-        ).textContent = status;
+        );
+
+
+    const command =
+        state
+            ? "pump_on"
+            : "pump_off";
+
+
+    pumpCommand.textContent =
+        state
+            ? "ON"
+            : "OFF";
+
+
+    pumpStatus.textContent =
+        state
+            ? "ON"
+            : "OFF";
+
+
+    pumpStatus.style.color =
+        state
+            ? "#16a34a"
+            : "#dc2626";
+
+
+    showMessage(
+        state
+            ? "Turning pump ON..."
+            : "Turning pump OFF...",
+        "info"
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/rover/pump",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        state:
+                            state
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            showMessage(
+                state
+                    ? "Pump turned ON"
+                    : "Pump turned OFF",
+                "success"
+            );
+
+        }
+
+        else {
+
+            showMessage(
+                "Pump command failed.",
+                "error"
+            );
+
+        }
+
 
     }
+
+    catch (error) {
+
+        console.error(
+            "Pump error:",
+            error
+        );
+
+
+        showMessage(
+            "Could not connect to server.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE ROVER STATUS
+========================================================= */
+
+function updateRoverStatus(
+    rover
+) {
+
+    if (!rover) {
+
+        return;
+
+    }
+
+
+    const status =
+        document.getElementById(
+            "rover-status"
+        );
+
+
+    if (
+        rover.connected
+    ) {
+
+        status.textContent =
+            "CONNECTED";
+
+        status.className =
+            "connected";
+
+    }
+
+    else {
+
+        status.textContent =
+            "NOT CONNECTED";
+
+        status.className =
+            "disconnected";
+
+    }
+
+
+    const command =
+        document.getElementById(
+            "current-command"
+        );
+
+
+    if (
+        rover.direction
+    ) {
+
+        command.textContent =
+            rover.direction.toUpperCase();
+
+    }
+
+
+    const pump =
+        document.getElementById(
+            "pump-status"
+        );
+
+
+    const pumpCommand =
+        document.getElementById(
+            "pump-command"
+        );
+
+
+    if (
+        rover.pump
+    ) {
+
+        pump.textContent =
+            "ON";
+
+        pumpCommand.textContent =
+            "ON";
+
+        pump.style.color =
+            "#16a34a";
+
+    }
+
+    else {
+
+        pump.textContent =
+            "OFF";
+
+        pumpCommand.textContent =
+            "OFF";
+
+        pump.style.color =
+            "#dc2626";
+
+    }
+
+}
+
+
+/* =========================================================
+   GET ROVER STATUS
+========================================================= */
+
+async function getRoverStatus() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/rover/status"
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            return;
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            data.success
+        ) {
+
+            updateRoverStatus(
+                data.rover
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.log(
+            "Rover status unavailable."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CHECK STATUS EVERY 2 SECONDS
+========================================================= */
+
+setInterval(
+    getRoverStatus,
+    2000
+);
+
+
+/* =========================================================
+   INITIAL STATUS CHECK
+========================================================= */
+
+getRoverStatus();
+
 
 </script>
 
