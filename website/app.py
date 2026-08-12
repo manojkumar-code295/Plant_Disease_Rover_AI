@@ -1,24 +1,53 @@
-from flask import Flask, render_template, request, jsonify
-import json
+# ============================================================
+# PRECISION AGRICULTURE SMART ROVER
+# COMPLETE FLASK WEBSITE BACKEND
+# ============================================================
+
 import os
-import sqlite3
+import json
+import uuid
 from datetime import datetime
-from werkzeug.utils import secure_filename
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    redirect,
+    url_for
+)
 
 
-# =========================================================
+# ============================================================
 # FLASK APPLICATION
-# =========================================================
+# ============================================================
 
 app = Flask(__name__)
 
+app.config["JSON_SORT_KEYS"] = False
 
-# =========================================================
-# PROJECT PATHS
-# =========================================================
+
+# ============================================================
+# PROJECT DIRECTORIES
+# ============================================================
 
 BASE_DIR = os.path.dirname(
     os.path.abspath(__file__)
+)
+
+TEMPLATE_FOLDER = os.path.join(
+    BASE_DIR,
+    "templates"
+)
+
+STATIC_FOLDER = os.path.join(
+    BASE_DIR,
+    "static"
+)
+
+IMAGE_FOLDER = os.path.join(
+    STATIC_FOLDER,
+    "images"
 )
 
 RESULT_FILE = os.path.join(
@@ -26,21 +55,15 @@ RESULT_FILE = os.path.join(
     "result.json"
 )
 
-DATABASE_FILE = os.path.join(
+HISTORY_FILE = os.path.join(
     BASE_DIR,
-    "rover.db"
-)
-
-IMAGE_FOLDER = os.path.join(
-    BASE_DIR,
-    "static",
-    "images"
+    "history.json"
 )
 
 
-# =========================================================
-# CREATE REQUIRED FOLDERS
-# =========================================================
+# ============================================================
+# CREATE DIRECTORIES
+# ============================================================
 
 os.makedirs(
     IMAGE_FOLDER,
@@ -48,397 +71,619 @@ os.makedirs(
 )
 
 
-# =========================================================
-# DATABASE INITIALIZATION
-# =========================================================
+# ============================================================
+# FLASK CONFIGURATION
+# ============================================================
 
-def initialize_database():
+app.template_folder = TEMPLATE_FOLDER
+app.static_folder = STATIC_FOLDER
+
+
+# ============================================================
+# DEFAULT RESULT
+# ============================================================
+
+DEFAULT_RESULT = {
+
+    "image": "",
+
+    "disease": "No prediction yet",
+
+    "chemical": "Not available",
+
+    "fertilizer": "Not available",
+
+    "treatment": "No prediction has been processed yet.",
+
+    "confidence": 0.0,
+
+    "timestamp": ""
+}
+
+
+# ============================================================
+# DEFAULT ROVER STATE
+# ============================================================
+
+rover_state = {
+
+    "connected": False,
+
+    "direction": "Stopped",
+
+    "speed": 0,
+
+    "pump": False,
+
+    "mode": "Manual"
+}
+
+
+# ============================================================
+# DEFAULT SETTINGS
+# ============================================================
+
+rover_settings = {
+
+    "auto_mode": False,
+
+    "spray_enabled": True,
+
+    "detection_enabled": True,
+
+    "confidence_threshold": 80,
+
+    "speed": 50
+}
+
+
+# ============================================================
+# JSON HELPERS
+# ============================================================
+
+def load_json_file(
+    file_path,
+    default_value
+):
 
     try:
 
-        connection = sqlite3.connect(
-            DATABASE_FILE
-        )
+        if not os.path.exists(
+            file_path
+        ):
 
-        cursor = connection.cursor()
+            return default_value
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS predictions (
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8"
+        ) as f:
 
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-                image TEXT,
-
-                disease TEXT,
-
-                chemical TEXT,
-
-                fertilizer TEXT,
-
-                treatment TEXT,
-
-                date TEXT,
-
-                time TEXT
-            )
-        """)
-
-        connection.commit()
-
-        connection.close()
-
-        print(
-            "Database initialized successfully."
-        )
+            return json.load(f)
 
     except Exception as e:
 
         print(
-            "Database initialization error:",
+            "JSON READ ERROR:",
+            file_path,
             e
         )
 
+        return default_value
 
-initialize_database()
 
-
-# =========================================================
-# READ LATEST AI RESULT
-# =========================================================
-
-def get_latest_result():
-
-    if not os.path.exists(
-        RESULT_FILE
-    ):
-
-        return {
-
-            "image": "",
-
-            "disease":
-                "No detection yet",
-
-            "chemical":
-                "Waiting for AI result",
-
-            "fertilizer":
-                "Waiting for AI result",
-
-            "treatment":
-                "Run the AI prediction first."
-        }
+def save_json_file(
+    file_path,
+    data
+):
 
     try:
 
         with open(
-            RESULT_FILE,
-            "r",
+            file_path,
+            "w",
             encoding="utf-8"
-        ) as file:
+        ) as f:
 
-            return json.load(file)
+            json.dump(
+                data,
+                f,
+                indent=4
+            )
+
+        return True
 
     except Exception as e:
 
         print(
-            "Error reading result.json:",
+            "JSON WRITE ERROR:",
+            file_path,
             e
         )
 
-        return {
-
-            "image": "",
-
-            "disease":
-                "Unable to read result",
-
-            "chemical":
-                "-",
-
-            "fertilizer":
-                "-",
-
-            "treatment":
-                "-"
-        }
+        return False
 
 
-# =========================================================
-# READ PREDICTION HISTORY
-# =========================================================
+# ============================================================
+# RESULT FUNCTIONS
+# ============================================================
 
-def get_prediction_history():
+def get_latest_result():
 
-    if not os.path.exists(
-        DATABASE_FILE
+    result = load_json_file(
+        RESULT_FILE,
+        DEFAULT_RESULT.copy()
+    )
+
+    if not isinstance(
+        result,
+        dict
     ):
 
-        return []
+        result = DEFAULT_RESULT.copy()
 
-    try:
+    # Make sure every field exists
+    for key, value in DEFAULT_RESULT.items():
 
-        connection = sqlite3.connect(
-            DATABASE_FILE
-        )
+        if key not in result:
 
-        connection.row_factory = sqlite3.Row
+            result[key] = value
 
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            SELECT
-                id,
-                image,
-                disease,
-                chemical,
-                fertilizer,
-                treatment,
-                date,
-                time
-            FROM predictions
-            ORDER BY id DESC
-        """)
-
-        rows = cursor.fetchall()
-
-        connection.close()
-
-        return rows
-
-    except Exception as e:
-
-        print(
-            "Error reading database:",
-            e
-        )
-
-        return []
+    return result
 
 
-# =========================================================
-# GET ANALYTICS DATA
-# =========================================================
+def save_latest_result(
+    result
+):
+
+    return save_json_file(
+        RESULT_FILE,
+        result
+    )
+
+
+# ============================================================
+# HISTORY FUNCTIONS
+# ============================================================
+
+def get_history():
+
+    history = load_json_file(
+        HISTORY_FILE,
+        []
+    )
+
+    if not isinstance(
+        history,
+        list
+    ):
+
+        history = []
+
+    return history
+
+
+def save_history(
+    history
+):
+
+    return save_json_file(
+        HISTORY_FILE,
+        history
+    )
+
+
+def add_history_record(
+    result
+):
+
+    history = get_history()
+
+    history.insert(
+        0,
+        result
+    )
+
+    # Keep latest 100 predictions
+    history = history[:100]
+
+    save_history(
+        history
+    )
+
+    return history
+
+
+# ============================================================
+# ANALYTICS
+# ============================================================
 
 def get_analytics():
 
-    analytics = {
+    history = get_history()
 
-        "total": 0,
+    total = len(
+        history
+    )
 
-        "healthy": 0,
+    healthy = 0
 
-        "diseased": 0,
+    bacterial_spot = 0
 
-        "bacterial_spot": 0,
+    cercospora = 0
 
-        "cercospora": 0,
+    curl_virus = 0
 
-        "curl_virus": 0
+    unclear = 0
+
+    other = 0
+
+    confidence_total = 0.0
+
+    confidence_count = 0
+
+
+    for record in history:
+
+        disease = str(
+            record.get(
+                "disease",
+                ""
+            )
+        ).lower()
+
+
+        # --------------------------------------------
+        # DISEASE COUNTS
+        # --------------------------------------------
+
+        if "healthy" in disease:
+
+            healthy += 1
+
+        elif "bacterial" in disease:
+
+            bacterial_spot += 1
+
+        elif "cercospora" in disease:
+
+            cercospora += 1
+
+        elif "curl" in disease:
+
+            curl_virus += 1
+
+        elif "unclear" in disease:
+
+            unclear += 1
+
+        else:
+
+            other += 1
+
+
+        # --------------------------------------------
+        # CONFIDENCE
+        # --------------------------------------------
+
+        try:
+
+            confidence = float(
+                record.get(
+                    "confidence",
+                    0
+                )
+            )
+
+            confidence_total += confidence
+
+            confidence_count += 1
+
+        except Exception:
+
+            pass
+
+
+    if confidence_count > 0:
+
+        average_confidence = (
+            confidence_total /
+            confidence_count
+        )
+
+    else:
+
+        average_confidence = 0
+
+
+    diseased = (
+        bacterial_spot
+        +
+        cercospora
+        +
+        curl_virus
+    )
+
+
+    if total > 0:
+
+        disease_percentage = (
+            diseased /
+            total
+        ) * 100
+
+        healthy_percentage = (
+            healthy /
+            total
+        ) * 100
+
+    else:
+
+        disease_percentage = 0
+
+        healthy_percentage = 0
+
+
+    latest = get_latest_result()
+
+
+    statistics = {
+
+        # Main values
+        "total": total,
+
+        "healthy": healthy,
+
+        "diseased": diseased,
+
+        "unclear": unclear,
+
+        "other": other,
+
+        # Individual diseases
+        "bacterial_spot":
+            bacterial_spot,
+
+        "cercospora":
+            cercospora,
+
+        "cercospora_leaf_spot":
+            cercospora,
+
+        "curl_virus":
+            curl_virus,
+
+        # Percentages
+        "healthy_percentage":
+            round(
+                healthy_percentage,
+                2
+            ),
+
+        "disease_percentage":
+            round(
+                disease_percentage,
+                2
+            ),
+
+        # Confidence
+        "average_confidence":
+            round(
+                average_confidence,
+                2
+            ),
+
+        # Latest prediction
+        "last_prediction":
+            latest.get(
+                "disease",
+                "No prediction yet"
+            ),
+
+        "last_confidence":
+            latest.get(
+                "confidence",
+                0
+            ),
+
+        "last_image":
+            latest.get(
+                "image",
+                ""
+            ),
+
+        "last_timestamp":
+            latest.get(
+                "timestamp",
+                ""
+            )
     }
 
-    if not os.path.exists(
-        DATABASE_FILE
-    ):
-
-        return analytics
-
-    try:
-
-        connection = sqlite3.connect(
-            DATABASE_FILE
-        )
-
-        cursor = connection.cursor()
+    return statistics
 
 
-        # ---------------------------------------------
-        # TOTAL PREDICTIONS
-        # ---------------------------------------------
+# ============================================================
+# CONTEXT DATA
+# ============================================================
 
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM predictions
-        """)
+def get_dashboard_data():
 
-        analytics["total"] = (
-            cursor.fetchone()[0]
-        )
+    result = get_latest_result()
 
+    statistics = get_analytics()
 
-        # ---------------------------------------------
-        # HEALTHY LEAVES
-        # ---------------------------------------------
+    history = get_history()
 
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM predictions
-            WHERE disease = 'Healthy Leaf'
-        """)
+    return {
 
-        analytics["healthy"] = (
-            cursor.fetchone()[0]
-        )
+        "result":
+            result,
 
+        "detection":
+            result,
 
-        # ---------------------------------------------
-        # DISEASED
-        # ---------------------------------------------
+        "latest_result":
+            result,
 
-        analytics["diseased"] = (
+        "statistics":
+            statistics,
 
-            analytics["total"]
-            -
-            analytics["healthy"]
-        )
+        "history":
+            history,
+
+        "rover":
+            rover_state,
+
+        "settings":
+            rover_settings
+    }
 
 
-        # ---------------------------------------------
-        # BACTERIAL SPOT
-        # ---------------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM predictions
-            WHERE disease = 'Bacterial Spot'
-        """)
-
-        analytics["bacterial_spot"] = (
-            cursor.fetchone()[0]
-        )
-
-
-        # ---------------------------------------------
-        # CERCOSPORA
-        # ---------------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM predictions
-            WHERE disease = 'Cercospora Leaf Spot'
-        """)
-
-        analytics["cercospora"] = (
-            cursor.fetchone()[0]
-        )
-
-
-        # ---------------------------------------------
-        # CURL VIRUS
-        # ---------------------------------------------
-
-        cursor.execute("""
-            SELECT COUNT(*)
-            FROM predictions
-            WHERE disease = 'Curl Virus'
-        """)
-
-        analytics["curl_virus"] = (
-            cursor.fetchone()[0]
-        )
-
-
-        connection.close()
-
-        return analytics
-
-    except Exception as e:
-
-        print(
-            "Error calculating analytics:",
-            e
-        )
-
-        return analytics
-
-
-# =========================================================
-# DASHBOARD
-# =========================================================
-
-@# =========================================================
-# DASHBOARD
-# =========================================================
+# ============================================================
+# HOME / DASHBOARD
+# ============================================================
 
 @app.route("/")
 def dashboard():
 
-    # Get latest AI prediction
-    result = get_latest_result()
-
-    # Get prediction statistics
-    statistics = get_analytics()
+    data = get_dashboard_data()
 
     return render_template(
         "dashboard.html",
-        detection=result,
-        statistics=statistics
+        **data
     )
 
-# =========================================================
-# ROVER CONTROL
-# =========================================================
 
-@app.route("/rover")
-def rover():
+# ============================================================
+# ANALYTICS PAGE
+# ============================================================
+
+@app.route("/analytics")
+def analytics():
+
+    result = get_latest_result()
+
+    statistics = get_analytics()
+
+    history = get_history()
 
     return render_template(
-        "rover.html"
+
+        "analytics.html",
+
+        result=result,
+
+        detection=result,
+
+        latest_result=result,
+
+        statistics=statistics,
+
+        history=history,
+
+        rover=rover_state,
+
+        settings=rover_settings
     )
 
 
-# =========================================================
-# DATASET / PREDICTION HISTORY
-# =========================================================
+# ============================================================
+# DATASET PAGE
+# ============================================================
 
 @app.route("/dataset")
 def dataset():
 
-    history = get_prediction_history()
+    result = get_latest_result()
+
+    statistics = get_analytics()
+
+    history = get_history()
 
     return render_template(
 
         "dataset.html",
 
-        history=history
+        result=result,
+
+        detection=result,
+
+        latest_result=result,
+
+        statistics=statistics,
+
+        history=history,
+
+        rover=rover_state,
+
+        settings=rover_settings
     )
 
 
-# =========================================================
-# ANALYTICS
-# =========================================================
+# ============================================================
+# ROVER PAGE
+# ============================================================
 
-# =========================================================
-# ANALYTICS
-# =========================================================
+@app.route("/rover")
+def rover():
 
-@app.route("/analytics")
-def analytics():
+    result = get_latest_result()
 
-    # Get analytics information from database
     statistics = get_analytics()
 
     return render_template(
-        "analytics.html",
-        data=statistics,
-        statistics=statistics
+
+        "rover.html",
+
+        result=result,
+
+        detection=result,
+
+        latest_result=result,
+
+        statistics=statistics,
+
+        rover=rover_state,
+
+        rover_state=rover_state,
+
+        settings=rover_settings
     )
 
-# =========================================================
-# SETTINGS
-# =========================================================
+
+# ============================================================
+# SETTINGS PAGE
+# ============================================================
 
 @app.route("/settings")
 def settings():
 
+    result = get_latest_result()
+
+    statistics = get_analytics()
+
     return render_template(
-        "settings.html"
+
+        "settings.html",
+
+        result=result,
+
+        detection=result,
+
+        latest_result=result,
+
+        statistics=statistics,
+
+        rover=rover_state,
+
+        settings=rover_settings
     )
 
 
-# =========================================================
+# ============================================================
 # API HEALTH CHECK
-# =========================================================
+# ============================================================
 
 @app.route(
     "/api/health",
@@ -448,20 +693,89 @@ def health():
 
     return jsonify({
 
-        "status":
-            "online",
+        "api":
+            "working",
 
         "service":
             "Precision Agriculture Smart Rover",
 
-        "api":
-            "working"
+        "status":
+            "online"
     })
 
 
-# =========================================================
-# API - RECEIVE AI RESULT
-# =========================================================
+# ============================================================
+# API - GET LATEST RESULT
+# ============================================================
+
+@app.route(
+    "/api/result",
+    methods=["GET"]
+)
+def api_result():
+
+    result = get_latest_result()
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "result":
+            result
+    })
+
+
+# ============================================================
+# API - GET HISTORY
+# ============================================================
+
+@app.route(
+    "/api/history",
+    methods=["GET"]
+)
+def api_history():
+
+    history = get_history()
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "count":
+            len(history),
+
+        "history":
+            history
+    })
+
+
+# ============================================================
+# API - GET ANALYTICS
+# ============================================================
+
+@app.route(
+    "/api/analytics",
+    methods=["GET"]
+)
+def api_analytics():
+
+    statistics = get_analytics()
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "statistics":
+            statistics
+    })
+
+
+# ============================================================
+# MAIN AI RESULT API
+# ============================================================
 
 @app.route(
     "/api/update-result",
@@ -471,23 +785,23 @@ def update_result():
 
     try:
 
-        print()
+        print("\n")
         print(
-            "========================================"
+            "=============================================="
         )
 
         print(
-            "      NEW AI RESULT RECEIVED"
+            "       NEW AI RESULT RECEIVED"
         )
 
         print(
-            "========================================"
+            "=============================================="
         )
 
 
-        # =================================================
-        # READ FORM DATA
-        # =================================================
+        # ====================================================
+        # GET DATA FROM PREDICT.PY
+        # ====================================================
 
         disease = request.form.get(
             "disease",
@@ -496,27 +810,59 @@ def update_result():
 
         chemical = request.form.get(
             "chemical",
-            "-"
+            "Not available"
         )
 
         fertilizer = request.form.get(
             "fertilizer",
-            "-"
+            "Not available"
         )
 
         treatment = request.form.get(
             "treatment",
-            "-"
+            "Not available"
+        )
+
+        confidence = request.form.get(
+            "confidence",
+            "0"
         )
 
 
-        # =================================================
-        # READ IMAGE
-        # =================================================
+        # ====================================================
+        # CONVERT CONFIDENCE
+        # ====================================================
+
+        try:
+
+            confidence_value = float(
+                confidence
+            )
+
+        except Exception:
+
+            confidence_value = 0.0
+
+
+        # Keep confidence between 0 and 100
+
+        confidence_value = max(
+            0.0,
+            min(
+                100.0,
+                confidence_value
+            )
+        )
+
+
+        # ====================================================
+        # GET IMAGE
+        # ====================================================
 
         image = request.files.get(
             "image"
         )
+
 
         if image is None:
 
@@ -534,40 +880,63 @@ def update_result():
             }), 400
 
 
-        # =================================================
-        # SECURE IMAGE NAME
-        # =================================================
+        # ====================================================
+        # IMAGE FILENAME
+        # ====================================================
 
-        filename = secure_filename(
+        original_filename = (
             image.filename
+            or
+            "leaf.jpg"
         )
 
-        if not filename:
 
-            return jsonify({
+        # Remove unsafe path components
 
-                "success":
-                    False,
-
-                "message":
-                    "Invalid image filename"
-            }), 400
+        original_filename = os.path.basename(
+            original_filename
+        )
 
 
-        # =================================================
+        # Generate unique filename
+
+        file_extension = os.path.splitext(
+            original_filename
+        )[1]
+
+
+        if not file_extension:
+
+            file_extension = ".jpg"
+
+
+        filename = (
+            datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
+            +
+            "_"
+            +
+            uuid.uuid4().hex[:6]
+            +
+            file_extension
+        )
+
+
+        # ====================================================
         # SAVE IMAGE
-        # =================================================
+        # ====================================================
 
         image_path = os.path.join(
-
             IMAGE_FOLDER,
-
             filename
         )
+
 
         image.save(
             image_path
         )
+
 
         print(
             "Image saved:",
@@ -575,24 +944,14 @@ def update_result():
         )
 
 
-        # =================================================
-        # GET CURRENT DATE AND TIME
-        # =================================================
-
-        now = datetime.now()
-
-        current_date = (
-            now.strftime("%Y-%m-%d")
-        )
-
-        current_time = (
-            now.strftime("%H:%M:%S")
-        )
-
-
-        # =================================================
+        # ====================================================
         # CREATE RESULT
-        # =================================================
+        # ====================================================
+
+        timestamp = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+
 
         result = {
 
@@ -609,114 +968,42 @@ def update_result():
                 fertilizer,
 
             "treatment":
-                treatment
+                treatment,
+
+            "confidence":
+                round(
+                    confidence_value,
+                    2
+                ),
+
+            "timestamp":
+                timestamp
         }
 
 
-        # =================================================
-        # SAVE result.json
-        # =================================================
+        # ====================================================
+        # SAVE LATEST RESULT
+        # ====================================================
 
-        with open(
-
-            RESULT_FILE,
-
-            "w",
-
-            encoding="utf-8"
-
-        ) as file:
-
-            json.dump(
-
-                result,
-
-                file,
-
-                indent=4
-            )
-
-
-        print(
-            "Result saved to result.json."
+        save_latest_result(
+            result
         )
 
 
-        # =================================================
-        # SAVE PREDICTION TO DATABASE
-        # =================================================
+        # ====================================================
+        # ADD TO HISTORY
+        # ====================================================
 
-        try:
-
-            connection = sqlite3.connect(
-                DATABASE_FILE
-            )
-
-            cursor = connection.cursor()
-
-            cursor.execute("""
-                INSERT INTO predictions (
-
-                    image,
-                    disease,
-                    chemical,
-                    fertilizer,
-                    treatment,
-                    date,
-                    time
-
-                )
-
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (
-
-                filename,
-
-                disease,
-
-                chemical,
-
-                fertilizer,
-
-                treatment,
-
-                current_date,
-
-                current_time
-            ))
-
-            connection.commit()
-
-            connection.close()
-
-            print(
-                "Prediction added to database."
-            )
-
-        except Exception as e:
-
-            print(
-                "Database save error:",
-                e
-            )
-
-
-        # =================================================
-        # SUCCESS RESPONSE
-        # =================================================
-
-        print()
-        print(
-            "========================================"
+        add_history_record(
+            result
         )
 
-        print(
-            "      AI RESULT UPDATED SUCCESSFULLY"
-        )
 
-        print(
-            "========================================"
-        )
+        # ====================================================
+        # PRINT RESULT
+        # ====================================================
+
+        print("\nAI RESULT:")
 
         print(
             "Disease:",
@@ -724,10 +1011,34 @@ def update_result():
         )
 
         print(
-            "Image:",
-            filename
+            "Confidence:",
+            f"{confidence_value:.2f}%"
         )
 
+        print(
+            "Chemical:",
+            chemical
+        )
+
+        print(
+            "Fertilizer:",
+            fertilizer
+        )
+
+        print(
+            "Treatment:",
+            treatment
+        )
+
+
+        print(
+            "\nResult saved successfully."
+        )
+
+
+        # ====================================================
+        # RETURN JSON
+        # ====================================================
 
         return jsonify({
 
@@ -739,26 +1050,27 @@ def update_result():
 
             "result":
                 result
-
-        }), 200
+        })
 
 
     except Exception as e:
 
-        print()
+        print("\n")
         print(
-            "========================================"
+            "=============================================="
         )
 
         print(
-            "           API ERROR"
+            "              API ERROR"
         )
 
         print(
-            "========================================"
+            "=============================================="
         )
 
-        print(e)
+        print(
+            str(e)
+        )
 
 
         return jsonify({
@@ -768,57 +1080,164 @@ def update_result():
 
             "message":
                 str(e)
-
         }), 500
 
 
-# =========================================================
-# OPTIONAL - CLEAR CURRENT RESULT
-# =========================================================
+# ============================================================
+# ROVER CONTROL API
+# ============================================================
 
 @app.route(
-    "/api/clear-result",
+    "/api/rover/control",
     methods=["POST"]
 )
-def clear_result():
+def rover_control():
 
     try:
 
-        result = {
+        data = request.get_json(
+            silent=True
+        )
 
-            "image": "",
+        if data is None:
 
-            "disease":
-                "No detection yet",
+            data = request.form
 
-            "chemical":
-                "Waiting for AI result",
 
-            "fertilizer":
-                "Waiting for AI result",
-
-            "treatment":
-                "Run the AI prediction first."
-        }
-
-        with open(
-
-            RESULT_FILE,
-
-            "w",
-
-            encoding="utf-8"
-
-        ) as file:
-
-            json.dump(
-
-                result,
-
-                file,
-
-                indent=4
+        command = str(
+            data.get(
+                "command",
+                "stop"
             )
+        ).lower()
+
+
+        # ----------------------------------------------------
+        # FORWARD
+        # ----------------------------------------------------
+
+        if command == "forward":
+
+            rover_state[
+                "direction"
+            ] = "Forward"
+
+
+        # ----------------------------------------------------
+        # BACKWARD
+        # ----------------------------------------------------
+
+        elif command == "backward":
+
+            rover_state[
+                "direction"
+            ] = "Backward"
+
+
+        # ----------------------------------------------------
+        # LEFT
+        # ----------------------------------------------------
+
+        elif command == "left":
+
+            rover_state[
+                "direction"
+            ] = "Left"
+
+
+        # ----------------------------------------------------
+        # RIGHT
+        # ----------------------------------------------------
+
+        elif command == "right":
+
+            rover_state[
+                "direction"
+            ] = "Right"
+
+
+        # ----------------------------------------------------
+        # STOP
+        # ----------------------------------------------------
+
+        elif command == "stop":
+
+            rover_state[
+                "direction"
+            ] = "Stopped"
+
+
+        # ----------------------------------------------------
+        # PUMP ON
+        # ----------------------------------------------------
+
+        elif command == "pump_on":
+
+            rover_state[
+                "pump"
+            ] = True
+
+
+        # ----------------------------------------------------
+        # PUMP OFF
+        # ----------------------------------------------------
+
+        elif command == "pump_off":
+
+            rover_state[
+                "pump"
+            ] = False
+
+
+        # ----------------------------------------------------
+        # CONNECT
+        # ----------------------------------------------------
+
+        elif command == "connect":
+
+            rover_state[
+                "connected"
+            ] = True
+
+
+        # ----------------------------------------------------
+        # DISCONNECT
+        # ----------------------------------------------------
+
+        elif command == "disconnect":
+
+            rover_state[
+                "connected"
+            ] = False
+
+            rover_state[
+                "direction"
+            ] = "Stopped"
+
+
+        # ----------------------------------------------------
+        # UNKNOWN COMMAND
+        # ----------------------------------------------------
+
+        else:
+
+            return jsonify({
+
+                "success":
+                    False,
+
+                "message":
+                    "Unknown rover command",
+
+                "command":
+                    command
+            }), 400
+
+
+        print(
+            "Rover command:",
+            command
+        )
 
 
         return jsonify({
@@ -827,7 +1246,13 @@ def clear_result():
                 True,
 
             "message":
-                "Current result cleared"
+                "Rover command received",
+
+            "command":
+                command,
+
+            "rover":
+                rover_state
         })
 
 
@@ -840,13 +1265,470 @@ def clear_result():
 
             "message":
                 str(e)
-
         }), 500
 
 
-# =========================================================
-# ERROR HANDLER - PAGE NOT FOUND
-# =========================================================
+# ============================================================
+# ROVER STATUS API
+# ============================================================
+
+@app.route(
+    "/api/rover/status",
+    methods=["GET"]
+)
+def rover_status():
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "rover":
+            rover_state
+    })
+
+
+# ============================================================
+# ROVER SPEED API
+# ============================================================
+
+@app.route(
+    "/api/rover/speed",
+    methods=["POST"]
+)
+def rover_speed():
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if data is None:
+
+            data = request.form
+
+
+        speed = int(
+            data.get(
+                "speed",
+                50
+            )
+        )
+
+
+        speed = max(
+            0,
+            min(
+                100,
+                speed
+            )
+        )
+
+
+        rover_state[
+            "speed"
+        ] = speed
+
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "speed":
+                speed,
+
+            "rover":
+                rover_state
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e)
+        }), 500
+
+
+# ============================================================
+# PUMP API
+# ============================================================
+
+@app.route(
+    "/api/rover/pump",
+    methods=["POST"]
+)
+def rover_pump():
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if data is None:
+
+            data = request.form
+
+
+        state = data.get(
+            "state",
+            False
+        )
+
+
+        if isinstance(
+            state,
+            str
+        ):
+
+            state = state.lower() in [
+                "true",
+                "1",
+                "on",
+                "yes"
+            ]
+
+
+        rover_state[
+            "pump"
+        ] = bool(
+            state
+        )
+
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "pump":
+                rover_state["pump"]
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e)
+        }), 500
+
+
+# ============================================================
+# SETTINGS API
+# ============================================================
+
+@app.route(
+    "/api/settings",
+    methods=["GET"]
+)
+def get_settings():
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "settings":
+            rover_settings
+    })
+
+
+# ============================================================
+# UPDATE SETTINGS
+# ============================================================
+
+@app.route(
+    "/api/settings",
+    methods=["POST"]
+)
+def update_settings():
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if data is None:
+
+            data = request.form
+
+
+        # --------------------------------------------
+        # AUTO MODE
+        # --------------------------------------------
+
+        if "auto_mode" in data:
+
+            value = data.get(
+                "auto_mode"
+            )
+
+            if isinstance(
+                value,
+                str
+            ):
+
+                value = value.lower() in [
+                    "true",
+                    "1",
+                    "yes",
+                    "on"
+                ]
+
+            rover_settings[
+                "auto_mode"
+            ] = bool(
+                value
+            )
+
+
+        # --------------------------------------------
+        # SPRAY
+        # --------------------------------------------
+
+        if "spray_enabled" in data:
+
+            value = data.get(
+                "spray_enabled"
+            )
+
+            if isinstance(
+                value,
+                str
+            ):
+
+                value = value.lower() in [
+                    "true",
+                    "1",
+                    "yes",
+                    "on"
+                ]
+
+            rover_settings[
+                "spray_enabled"
+            ] = bool(
+                value
+            )
+
+
+        # --------------------------------------------
+        # DETECTION
+        # --------------------------------------------
+
+        if "detection_enabled" in data:
+
+            value = data.get(
+                "detection_enabled"
+            )
+
+            if isinstance(
+                value,
+                str
+            ):
+
+                value = value.lower() in [
+                    "true",
+                    "1",
+                    "yes",
+                    "on"
+                ]
+
+            rover_settings[
+                "detection_enabled"
+            ] = bool(
+                value
+            )
+
+
+        # --------------------------------------------
+        # CONFIDENCE THRESHOLD
+        # --------------------------------------------
+
+        if "confidence_threshold" in data:
+
+            try:
+
+                threshold = float(
+                    data.get(
+                        "confidence_threshold"
+                    )
+                )
+
+                threshold = max(
+                    0,
+                    min(
+                        100,
+                        threshold
+                    )
+                )
+
+                rover_settings[
+                    "confidence_threshold"
+                ] = threshold
+
+            except Exception:
+
+                pass
+
+
+        # --------------------------------------------
+        # SPEED
+        # --------------------------------------------
+
+        if "speed" in data:
+
+            try:
+
+                speed = int(
+                    data.get(
+                        "speed"
+                    )
+                )
+
+                speed = max(
+                    0,
+                    min(
+                        100,
+                        speed
+                    )
+                )
+
+                rover_settings[
+                    "speed"
+                ] = speed
+
+            except Exception:
+
+                pass
+
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Settings updated",
+
+            "settings":
+                rover_settings
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e)
+        }), 500
+
+
+# ============================================================
+# CLEAR HISTORY
+# ============================================================
+
+@app.route(
+    "/api/history/clear",
+    methods=["POST"]
+)
+def clear_history():
+
+    try:
+
+        save_history(
+            []
+        )
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Prediction history cleared"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e)
+        }), 500
+
+
+# ============================================================
+# RESET LATEST RESULT
+# ============================================================
+
+@app.route(
+    "/api/result/clear",
+    methods=["POST"]
+)
+def clear_result():
+
+    try:
+
+        save_latest_result(
+            DEFAULT_RESULT.copy()
+        )
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Latest result cleared"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(e)
+        }), 500
+
+
+# ============================================================
+# FAVICON
+# ============================================================
+
+@app.route(
+    "/favicon.ico"
+)
+def favicon():
+
+    return "", 204
+
+
+# ============================================================
+# ERROR HANDLERS
+# ============================================================
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -856,27 +1738,58 @@ def page_not_found(error):
         "success":
             False,
 
-        "message":
-            "Requested URL was not found on the server."
-
+        "error":
+            "Page not found"
     }), 404
 
 
-# =========================================================
+@app.errorhandler(500)
+def internal_server_error(error):
+
+    return jsonify({
+
+        "success":
+            False,
+
+        "error":
+            "Internal server error"
+    }), 500
+
+
+# ============================================================
 # START SERVER
-# =========================================================
+# ============================================================
 
 if __name__ == "__main__":
 
     port = int(
-
         os.environ.get(
-
             "PORT",
-
             5000
         )
     )
+
+    print(
+        "=============================================="
+    )
+
+    print(
+        "PRECISION AGRICULTURE SMART ROVER"
+    )
+
+    print(
+        "Flask server starting..."
+    )
+
+    print(
+        "Port:",
+        port
+    )
+
+    print(
+        "=============================================="
+    )
+
 
     app.run(
 
