@@ -356,18 +356,24 @@ def get_analytics():
 # DASHBOARD
 # =========================================================
 
+@# =========================================================
+# DASHBOARD
+# =========================================================
+
 @app.route("/")
 def dashboard():
 
+    # Get latest AI prediction
     result = get_latest_result()
 
+    # Get prediction statistics
+    statistics = get_analytics()
+
     return render_template(
-
         "dashboard.html",
-
-        detection=result
+        detection=result,
+        statistics=statistics
     )
-
 
 # =========================================================
 # ROVER CONTROL
@@ -402,18 +408,21 @@ def dataset():
 # ANALYTICS
 # =========================================================
 
+# =========================================================
+# ANALYTICS
+# =========================================================
+
 @app.route("/analytics")
 def analytics():
 
-    data = get_analytics()
+    # Get analytics information from database
+    statistics = get_analytics()
 
     return render_template(
-
         "analytics.html",
-
-        data=data
+        data=statistics,
+        statistics=statistics
     )
-
 
 # =========================================================
 # SETTINGS
