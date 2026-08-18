@@ -5,9 +5,17 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-<title>Plant Leaf Detection | Precision Agriculture Smart Rover</title>
+<meta name="theme-color"
+      content="#12372a">
+
+<meta name="description"
+      content="Precision Agriculture Smart Rover - AI Plant Disease Detection">
+
+<title>Precision Agriculture Smart Rover</title>
+
 
 <style>
 
@@ -21,6 +29,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: #f4f7f5;
@@ -31,8 +43,16 @@ a {
     text-decoration: none;
 }
 
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
 .app {
-    display: flex;
     min-height: 100vh;
 }
 
@@ -42,24 +62,33 @@ a {
 ========================================================= */
 
 .sidebar {
-    width: 245px;
-    min-height: 100vh;
-    background: #102f25;
-    color: white;
-    padding: 25px 16px;
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
+
+    width: 245px;
+
+    background: #102f25;
+    color: white;
+
+    padding: 25px 16px;
+
+    z-index: 1000;
+
+    overflow-y: auto;
 }
 
 .logo {
-    padding: 5px 12px 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.10);
+    padding: 5px 12px 25px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,0.1);
 }
 
 .logo-icon {
-    font-size: 32px;
+    font-size: 34px;
     margin-bottom: 8px;
 }
 
@@ -80,20 +109,30 @@ a {
     font-size: 10px;
     font-weight: bold;
     letter-spacing: 1.2px;
-    margin: 28px 12px 10px;
+
+    margin:
+        28px 12px 10px;
+
     text-transform: uppercase;
 }
 
 .menu a {
     display: flex;
     align-items: center;
+
     gap: 13px;
+
     color: #c5d7cf;
+
     padding: 13px 14px;
+
     border-radius: 10px;
+
     margin-bottom: 5px;
+
     font-size: 14px;
     font-weight: bold;
+
     transition: 0.2s;
 }
 
@@ -105,7 +144,10 @@ a {
 .menu a.active {
     background: #2d7653;
     color: white;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+
+    box-shadow:
+        0 5px 15px
+        rgba(0,0,0,0.15);
 }
 
 .menu-icon {
@@ -114,30 +156,44 @@ a {
     font-size: 17px;
 }
 
+
+/* =========================================================
+   CONNECTION
+========================================================= */
+
 .sidebar-bottom {
     position: absolute;
+
     left: 16px;
     right: 16px;
     bottom: 25px;
 }
 
 .connection-box {
-    background: rgba(255,255,255,0.07);
+    background:
+        rgba(255,255,255,0.07);
+
     border-radius: 11px;
+
     padding: 14px;
 }
 
 .connection-title {
     color: #91afa2;
+
     font-size: 11px;
+
     margin-bottom: 8px;
 }
 
 .connection-status {
     display: flex;
     align-items: center;
+
     gap: 8px;
+
     color: #d8e9e1;
+
     font-size: 12px;
     font-weight: bold;
 }
@@ -145,9 +201,14 @@ a {
 .green-dot {
     width: 8px;
     height: 8px;
+
     background: #36d477;
+
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(54,212,119,0.7);
+
+    box-shadow:
+        0 0 8px
+        rgba(54,212,119,0.7);
 }
 
 
@@ -157,18 +218,40 @@ a {
 
 .main {
     margin-left: 245px;
-    width: calc(100% - 245px);
+
+    width:
+        calc(100% - 245px);
+
     min-height: 100vh;
 }
 
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
 .topbar {
-    height: 78px;
+    min-height: 78px;
+
     background: white;
-    border-bottom: 1px solid #e5ebe7;
+
+    border-bottom:
+        1px solid
+        #e5ebe7;
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
-    padding: 0 38px;
+
+    padding:
+        15px 38px;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 100;
 }
 
 .topbar-title h2 {
@@ -179,25 +262,46 @@ a {
 .topbar-title p {
     color: #87918c;
     font-size: 12px;
+
     margin-top: 4px;
 }
 
 .system-badge {
     display: flex;
+
     align-items: center;
+
     gap: 9px;
+
     background: #edf9f1;
+
     color: #168044;
-    border: 1px solid #ccebd7;
-    padding: 9px 15px;
+
+    border:
+        1px solid
+        #ccebd7;
+
+    padding:
+        9px 15px;
+
     border-radius: 30px;
+
     font-size: 12px;
+
     font-weight: bold;
 }
 
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
 .content {
     padding: 32px 38px;
+
     max-width: 1500px;
+
+    margin: auto;
 }
 
 
@@ -216,7 +320,9 @@ a {
 
 .welcome p {
     color: #78837d;
+
     margin-top: 7px;
+
     font-size: 13px;
 }
 
@@ -227,67 +333,104 @@ a {
 
 .statistics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 18px;
+
     margin-bottom: 32px;
 }
 
 .stat-card {
     background: white;
-    border: 1px solid #e7ece9;
+
+    border:
+        1px solid
+        #e7ece9;
+
     border-radius: 15px;
+
     padding: 20px;
-    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
+
+    box-shadow:
+        0 5px 20px
+        rgba(20,60,40,0.04);
+
     position: relative;
+
     overflow: hidden;
 }
 
 .stat-card::after {
     content: "";
+
     position: absolute;
+
     right: -25px;
     top: -25px;
+
     width: 80px;
     height: 80px;
+
     border-radius: 50%;
+
     background: #edf7ef;
 }
 
 .stat-top {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
 }
 
 .stat-label {
     color: #89938e;
+
     font-size: 11px;
+
     font-weight: bold;
+
     text-transform: uppercase;
 }
 
 .stat-icon {
     width: 38px;
     height: 38px;
+
     border-radius: 10px;
+
     display: flex;
+
     justify-content: center;
     align-items: center;
+
     background: #edf7ef;
+
     font-size: 18px;
+
     position: relative;
+
     z-index: 1;
 }
 
 .stat-number {
     margin-top: 13px;
+
     font-size: 30px;
+
     color: #12372a;
+
+    font-weight: bold;
 }
 
 .stat-subtitle {
     margin-top: 5px;
+
     color: #9aa49f;
+
     font-size: 10px;
 }
 
@@ -306,18 +449,23 @@ a {
 
 .section-heading {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
+
     margin-bottom: 15px;
 }
 
 .section-heading h3 {
     color: #12372a;
+
     font-size: 17px;
 }
 
 .section-heading span {
     color: #89938e;
+
     font-size: 11px;
 }
 
@@ -328,15 +476,25 @@ a {
 
 .detection-grid {
     display: grid;
-    grid-template-columns: 1.05fr 1fr;
+
+    grid-template-columns:
+        1.05fr 1fr;
+
     gap: 22px;
 }
 
 .card {
     background: white;
-    border: 1px solid #e7ece9;
+
+    border:
+        1px solid
+        #e7ece9;
+
     border-radius: 16px;
-    box-shadow: 0 5px 20px rgba(20,60,40,0.05);
+
+    box-shadow:
+        0 5px 20px
+        rgba(20,60,40,0.05);
 }
 
 
@@ -350,56 +508,84 @@ a {
 
 .image-card-header {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
+
     margin-bottom: 15px;
 }
 
 .image-card-header h3 {
     color: #12372a;
+
     font-size: 15px;
 }
 
 .image-label {
     background: #eef6f0;
+
     color: #31704f;
+
     padding: 6px 10px;
+
     border-radius: 20px;
+
     font-size: 10px;
+
     font-weight: bold;
 }
 
 .image-box {
     width: 100%;
+
     height: 365px;
+
     background: #edf4ef;
+
     border-radius: 13px;
+
     overflow: hidden;
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
-    border: 1px solid #dfe9e2;
+
+    border:
+        1px solid
+        #dfe9e2;
 }
 
 .image-box img {
     width: 100%;
     height: 100%;
+
     object-fit: contain;
+
     display: block;
 }
 
 .image-placeholder {
     font-size: 55px;
+
     opacity: 0.5;
 }
 
 .image-name {
     margin-top: 11px;
+
     color: #89938e;
+
     font-size: 11px;
+
     text-align: center;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
+
     white-space: nowrap;
 }
 
@@ -414,112 +600,219 @@ a {
 
 .result-header {
     display: flex;
+
     justify-content: space-between;
+
     align-items: center;
+
     margin-bottom: 18px;
 }
 
 .result-header h3 {
     color: #12372a;
+
     font-size: 15px;
 }
 
 .ai-badge {
     background: #eaf7ee;
+
     color: #168044;
+
     padding: 6px 10px;
+
     border-radius: 20px;
+
     font-size: 10px;
+
     font-weight: bold;
 }
 
 .detection-result {
-    background: linear-gradient(
-        135deg,
-        #edf8f0,
-        #f7fbf8
-    );
-    border: 1px solid #d9ebde;
+    background:
+        linear-gradient(
+            135deg,
+            #edf8f0,
+            #f7fbf8
+        );
+
+    border:
+        1px solid
+        #d9ebde;
+
     border-radius: 13px;
+
     padding: 20px;
+
     margin-bottom: 17px;
 }
 
 .detection-result small {
     color: #78837d;
+
     font-size: 11px;
 }
 
 .detection-result h1 {
     color: #23613e;
+
     font-size: 25px;
+
     margin-top: 7px;
+
+    word-break: break-word;
 }
 
 .result-status {
     display: inline-block;
+
     margin-top: 10px;
+
     background: #dff5e6;
+
     color: #187441;
+
     padding: 5px 10px;
+
     border-radius: 20px;
+
     font-size: 10px;
+
     font-weight: bold;
 }
 
 .info-box {
     display: flex;
+
     gap: 14px;
+
     align-items: flex-start;
+
     padding: 14px 0;
-    border-bottom: 1px solid #edf0ee;
+
+    border-bottom:
+        1px solid
+        #edf0ee;
 }
 
 .info-icon {
     width: 36px;
     height: 36px;
+
     min-width: 36px;
+
     border-radius: 9px;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     background: #f0f6f2;
+
     font-size: 17px;
 }
 
 .info-content span {
     display: block;
+
     color: #89938e;
+
     font-size: 10px;
+
     margin-bottom: 5px;
 }
 
 .info-content strong {
     color: #374151;
+
     font-size: 13px;
+
     line-height: 1.5;
+
+    word-break: break-word;
 }
 
 .treatment-box {
     margin-top: 5px;
+
     padding-top: 14px;
 }
 
 .treatment-box span {
     color: #89938e;
+
     font-size: 10px;
 }
 
 .treatment-box p {
     margin-top: 7px;
+
     color: #4b5563;
+
     font-size: 12px;
+
     line-height: 1.6;
 }
 
 
 /* =========================================================
-   SYSTEM STATUS
+   CONFIDENCE
+========================================================= */
+
+.confidence-box {
+    margin-top: 18px;
+}
+
+.confidence-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+}
+
+.confidence-header span {
+    color: #89938e;
+
+    font-size: 10px;
+
+    font-weight: bold;
+}
+
+#confidence-value {
+    color: #28734e;
+}
+
+.progress {
+    width: 100%;
+
+    height: 8px;
+
+    background: #e8efea;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+
+    height: 100%;
+
+    background: #2d7653;
+
+    border-radius: 20px;
+
+    transition:
+        width 0.5s ease;
+}
+
+
+/* =========================================================
+   STATUS
 ========================================================= */
 
 .status-section {
@@ -528,36 +821,59 @@ a {
 
 .status-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 18px;
 }
 
 .status-card {
     background: white;
-    border: 1px solid #e7ece9;
+
+    border:
+        1px solid
+        #e7ece9;
+
     border-radius: 14px;
+
     padding: 20px;
+
     display: flex;
+
     align-items: center;
+
     gap: 15px;
-    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
+
+    box-shadow:
+        0 5px 20px
+        rgba(20,60,40,0.04);
 }
 
 .status-icon {
     width: 46px;
     height: 46px;
+
     border-radius: 12px;
+
     background: #edf7ef;
+
     display: flex;
+
     justify-content: center;
+
     align-items: center;
+
     font-size: 22px;
 }
 
 .status-info span {
     display: block;
+
     color: #8a948f;
+
     font-size: 10px;
+
     margin-bottom: 5px;
 }
 
@@ -584,45 +900,66 @@ a {
 
 .quick-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
     gap: 18px;
 }
 
 .quick-card {
     background: white;
-    border: 1px solid #e7ece9;
+
+    border:
+        1px solid
+        #e7ece9;
+
     border-radius: 14px;
+
     padding: 18px;
+
     transition: 0.2s;
 }
 
 .quick-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(20,60,40,0.07);
+
+    box-shadow:
+        0 8px 22px
+        rgba(20,60,40,0.07);
 }
 
 .quick-icon {
     font-size: 23px;
+
     margin-bottom: 10px;
 }
 
 .quick-card h4 {
     color: #12372a;
+
     font-size: 13px;
 }
 
 .quick-card p {
     color: #89938e;
+
     font-size: 11px;
+
     margin-top: 5px;
+
     line-height: 1.5;
 }
 
 .quick-card a {
     display: inline-block;
+
     margin-top: 12px;
+
     color: #28734e;
+
     font-size: 11px;
+
     font-weight: bold;
 }
 
@@ -633,39 +970,69 @@ a {
 
 .live-update {
     position: fixed;
+
     right: 20px;
     bottom: 20px;
+
     background: #12372a;
+
     color: white;
-    padding: 9px 14px;
+
+    padding: 10px 15px;
+
     border-radius: 25px;
+
     font-size: 11px;
+
     font-weight: bold;
-    box-shadow: 0 5px 18px rgba(0,0,0,0.15);
+
+    box-shadow:
+        0 5px 18px
+        rgba(0,0,0,0.15);
+
     z-index: 9999;
-    opacity: 0.92;
+
+    transition: 0.2s;
 }
 
 .live-update-dot {
     display: inline-block;
+
     width: 7px;
     height: 7px;
+
     background: #36d477;
+
     border-radius: 50%;
+
     margin-right: 7px;
-    box-shadow: 0 0 7px rgba(54,212,119,0.8);
+
+    box-shadow:
+        0 0 7px
+        rgba(54,212,119,0.8);
 }
 
 .live-flash {
-    animation: liveFlash 0.7s ease-in-out 2;
+    animation:
+        liveFlash 0.7s
+        ease-in-out 2;
 }
 
 @keyframes liveFlash {
 
     50% {
-        transform: scale(1.04);
+        transform: scale(1.05);
     }
 
+}
+
+
+/* =========================================================
+   MOBILE NAVIGATION
+========================================================= */
+
+.mobile-nav {
+    display: none;
 }
 
 
@@ -675,8 +1042,11 @@ a {
 
 footer {
     text-align: center;
+
     color: #9aa49f;
+
     font-size: 10px;
+
     padding: 25px;
 }
 
@@ -693,16 +1063,21 @@ footer {
 
 }
 
+
 @media(max-width:800px) {
 
     .sidebar {
         width: 70px;
-        padding: 20px 8px;
+
+        padding:
+            20px 8px;
     }
 
     .logo {
         text-align: center;
-        padding: 5px 0 20px;
+
+        padding:
+            5px 0 20px;
     }
 
     .logo h1,
@@ -714,7 +1089,9 @@ footer {
 
     .menu a {
         justify-content: center;
-        padding: 13px 5px;
+
+        padding:
+            13px 5px;
     }
 
     .menu-icon {
@@ -723,15 +1100,19 @@ footer {
 
     .main {
         margin-left: 70px;
-        width: calc(100% - 70px);
+
+        width:
+            calc(100% - 70px);
     }
 
     .topbar {
-        padding: 0 20px;
+        padding:
+            15px 20px;
     }
 
     .content {
-        padding: 25px 20px;
+        padding:
+            25px 20px;
     }
 
     .statistics-grid,
@@ -742,22 +1123,162 @@ footer {
 
 }
 
+
 @media(max-width:550px) {
+
+    body {
+        padding-bottom: 70px;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .main {
+        margin-left: 0;
+
+        width: 100%;
+    }
+
+    .topbar {
+        min-height: 65px;
+
+        padding:
+            10px 15px;
+    }
+
+    .topbar-title h2 {
+        font-size: 15px;
+    }
 
     .topbar-title p {
         display: none;
     }
 
     .system-badge {
-        padding: 7px 10px;
+        padding:
+            7px 10px;
+
+        font-size: 10px;
+    }
+
+    .content {
+        padding:
+            20px 14px;
     }
 
     .welcome h1 {
         font-size: 21px;
     }
 
+    .statistics-grid {
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-number {
+        font-size: 27px;
+    }
+
     .image-box {
         height: 280px;
+    }
+
+    .detection-result h1 {
+        font-size: 21px;
+    }
+
+    .live-update {
+        right: 10px;
+        bottom: 80px;
+
+        font-size: 9px;
+
+        padding:
+            8px 11px;
+    }
+
+    .mobile-nav {
+        position: fixed;
+
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        height: 68px;
+
+        background: white;
+
+        border-top:
+            1px solid
+            #dfe7e2;
+
+        display: flex;
+
+        justify-content:
+            space-around;
+
+        align-items: center;
+
+        z-index: 9998;
+
+        box-shadow:
+            0 -5px 20px
+            rgba(0,0,0,0.08);
+    }
+
+    .mobile-nav a {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        gap: 3px;
+
+        color: #789088;
+
+        font-size: 9px;
+
+        font-weight: bold;
+    }
+
+    .mobile-nav a span {
+        font-size: 20px;
+    }
+
+    .mobile-nav a.active {
+        color: #28734e;
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE EFFECT
+========================================================= */
+
+.updated {
+    animation:
+        updateGlow 0.8s
+        ease;
+}
+
+@keyframes updateGlow {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
     }
 
 }
@@ -806,65 +1327,45 @@ footer {
 
         <a href="/" class="active">
 
-            <span class="menu-icon">
-                🏠
-            </span>
+            <span class="menu-icon">🏠</span>
 
-            <span>
-                Dashboard
-            </span>
+            <span>Dashboard</span>
 
         </a>
 
 
         <a href="/rover">
 
-            <span class="menu-icon">
-                🚜
-            </span>
+            <span class="menu-icon">🚜</span>
 
-            <span>
-                Rover Control
-            </span>
+            <span>Rover Control</span>
 
         </a>
 
 
         <a href="/dataset">
 
-            <span class="menu-icon">
-                📁
-            </span>
+            <span class="menu-icon">📁</span>
 
-            <span>
-                Dataset
-            </span>
+            <span>Dataset</span>
 
         </a>
 
 
         <a href="/analytics">
 
-            <span class="menu-icon">
-                📊
-            </span>
+            <span class="menu-icon">📊</span>
 
-            <span>
-                Analytics
-            </span>
+            <span>Analytics</span>
 
         </a>
 
 
         <a href="/settings">
 
-            <span class="menu-icon">
-                ⚙️
-            </span>
+            <span class="menu-icon">⚙️</span>
 
-            <span>
-                Settings
-            </span>
+            <span>Settings</span>
 
         </a>
 
@@ -920,7 +1421,9 @@ footer {
 
         <span class="green-dot"></span>
 
-        AI System Online
+        <span id="system-status-text">
+            AI System Online
+        </span>
 
     </div>
 
@@ -1023,7 +1526,7 @@ footer {
 
         {% else %}
 
-        0% of all predictions
+        0.0% of all predictions
 
         {% endif %}
 
@@ -1069,7 +1572,7 @@ footer {
 
         {% else %}
 
-        0% of all predictions
+        0.0% of all predictions
 
         {% endif %}
 
@@ -1092,7 +1595,7 @@ footer {
     </h3>
 
     <span id="analysis-status">
-        Latest Analysis
+        Live Monitoring
     </span>
 
 </div>
@@ -1131,9 +1634,8 @@ footer {
             src="{{ url_for(
                 'static',
                 filename='images/' + detection.image
-            ) }}?initial={{ detection.timestamp }}"
-            alt="Latest Plant Leaf"
-        >
+            ) }}?v={{ detection.timestamp }}"
+            alt="Latest Plant Leaf">
 
         {% else %}
 
@@ -1154,7 +1656,7 @@ footer {
         class="image-name"
         id="image-name">
 
-        {{ detection.image }}
+        {{ detection.image or "No image available" }}
 
     </div>
 
@@ -1183,7 +1685,7 @@ footer {
     <div class="detection-result">
 
         <small>
-            THIS IS
+            DETECTED DISEASE
         </small>
 
 
@@ -1204,8 +1706,6 @@ footer {
 
     </div>
 
-
-    <!-- CHEMICAL -->
 
     <div class="info-box">
 
@@ -1230,8 +1730,6 @@ footer {
     </div>
 
 
-    <!-- FERTILIZER -->
-
     <div class="info-box">
 
         <div class="info-icon">
@@ -1255,8 +1753,6 @@ footer {
     </div>
 
 
-    <!-- TREATMENT -->
-
     <div class="treatment-box">
 
         <span>
@@ -1268,6 +1764,37 @@ footer {
             {{ detection.treatment }}
 
         </p>
+
+    </div>
+
+
+    <!-- CONFIDENCE -->
+
+    <div class="confidence-box">
+
+        <div class="confidence-header">
+
+            <span>
+                AI CONFIDENCE
+            </span>
+
+            <span id="confidence-value">
+                {{ detection.confidence or 0 }}%
+            </span>
+
+        </div>
+
+
+        <div class="progress">
+
+            <div
+                class="progress-bar"
+                id="confidence-bar"
+                style="width: {{ detection.confidence or 0 }}%;">
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -1289,8 +1816,8 @@ footer {
         System Status
     </h3>
 
-    <span>
-        Current System State
+    <span id="status-time">
+        Waiting for live data...
     </span>
 
 </div>
@@ -1311,8 +1838,12 @@ footer {
             AI MODEL
         </span>
 
-        <strong class="status-online">
+        <strong
+            class="status-online"
+            id="ai-status">
+
             ONLINE
+
         </strong>
 
     </div>
@@ -1332,8 +1863,12 @@ footer {
             ROVER
         </span>
 
-        <strong class="status-offline">
+        <strong
+            id="rover-status"
+            class="status-offline">
+
             NOT CONNECTED
+
         </strong>
 
     </div>
@@ -1350,11 +1885,15 @@ footer {
     <div class="status-info">
 
         <span>
-            WATER / SPRAY PUMP
+            SPRAY PUMP
         </span>
 
-        <strong class="status-offline">
+        <strong
+            id="pump-status"
+            class="status-offline">
+
             OFF
+
         </strong>
 
     </div>
@@ -1478,6 +2017,59 @@ AI-Based Plant Leaf Disease Detection System
 
 
 <!-- =========================================================
+     MOBILE NAVIGATION
+========================================================= -->
+
+<nav class="mobile-nav">
+
+    <a href="/" class="active">
+
+        <span>🏠</span>
+
+        Dashboard
+
+    </a>
+
+
+    <a href="/rover">
+
+        <span>🚜</span>
+
+        Rover
+
+    </a>
+
+
+    <a href="/dataset">
+
+        <span>📁</span>
+
+        Dataset
+
+    </a>
+
+
+    <a href="/analytics">
+
+        <span>📊</span>
+
+        Analytics
+
+    </a>
+
+
+    <a href="/settings">
+
+        <span>⚙️</span>
+
+        Settings
+
+    </a>
+
+</nav>
+
+
+<!-- =========================================================
      LIVE INDICATOR
 ========================================================= -->
 
@@ -1500,10 +2092,26 @@ AI-Based Plant Leaf Disease Detection System
 
 <script>
 
+/*
+=========================================================
+PRECISION AGRICULTURE SMART ROVER
+LIVE DASHBOARD ENGINE
 
-/* =========================================================
-   LIVE MONITORING VARIABLES
-========================================================= */
+IMPORTANT:
+
+This page does NOT need browser refresh.
+
+It asks Flask for fresh data continuously.
+
+API:
+
+/api/dashboard-state
+/api/rover/status
+
+Cache busting is added to every request.
+=========================================================
+*/
+
 
 let lastResultKey = "";
 
@@ -1511,12 +2119,39 @@ let firstLoad = true;
 
 let requestInProgress = false;
 
+let consecutiveErrors = 0;
+
 
 /* =========================================================
-   CREATE UNIQUE RESULT KEY
+   HELPER
+========================================================= */
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+    if (element) {
+
+        element.textContent =
+            value ?? "";
+
+    }
+
+}
+
+
+/* =========================================================
+   RESULT KEY
 ========================================================= */
 
 function makeResultKey(result) {
+
+    if (!result) {
+
+        return "";
+
+    }
 
     return [
 
@@ -1528,34 +2163,15 @@ function makeResultKey(result) {
 
         result.disease || "",
 
-        result.confidence || ""
+        result.confidence || "",
+
+        result.chemical || "",
+
+        result.fertilizer || "",
+
+        result.treatment || ""
 
     ].join("|");
-
-}
-
-
-/* =========================================================
-   SET TEXT HELPER
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (element) {
-
-        element.textContent =
-            value;
-
-    }
 
 }
 
@@ -1564,9 +2180,7 @@ function setText(
    UPDATE STATISTICS
 ========================================================= */
 
-function updateStatistics(
-    statistics
-) {
+function updateStatistics(statistics) {
 
     if (!statistics) {
 
@@ -1576,21 +2190,13 @@ function updateStatistics(
 
 
     const total =
-        Number(
-            statistics.total || 0
-        );
-
+        Number(statistics.total || 0);
 
     const healthy =
-        Number(
-            statistics.healthy || 0
-        );
-
+        Number(statistics.healthy || 0);
 
     const diseased =
-        Number(
-            statistics.diseased || 0
-        );
+        Number(statistics.diseased || 0);
 
 
     setText(
@@ -1613,21 +2219,13 @@ function updateStatistics(
 
     const healthyPercentage =
         total > 0
-        ? (
-            healthy /
-            total *
-            100
-        ).toFixed(1)
+        ? ((healthy / total) * 100).toFixed(1)
         : "0.0";
 
 
     const diseasedPercentage =
         total > 0
-        ? (
-            diseased /
-            total *
-            100
-        ).toFixed(1)
+        ? ((diseased / total) * 100).toFixed(1)
         : "0.0";
 
 
@@ -1648,19 +2246,171 @@ function updateStatistics(
 
 
 /* =========================================================
-   UPDATE IMAGE
+   UPDATE RESULT
 ========================================================= */
 
-function updateImage(
-    filename
-) {
+function updateResult(result) {
 
-    if (!filename) {
+    if (!result) {
 
         return;
 
     }
 
+
+    setText(
+        "disease-result",
+        result.disease ||
+        "No prediction yet"
+    );
+
+
+    setText(
+        "chemical-result",
+        result.chemical ||
+        "Not available"
+    );
+
+
+    setText(
+        "fertilizer-result",
+        result.fertilizer ||
+        "Not available"
+    );
+
+
+    setText(
+        "treatment-result",
+        result.treatment ||
+        "No prediction has been processed yet."
+    );
+
+
+    /* Confidence */
+
+    const confidence =
+        Number(
+            result.confidence || 0
+        );
+
+
+    setText(
+        "confidence-value",
+        confidence.toFixed(2) + "%"
+    );
+
+
+    const confidenceBar =
+        document.getElementById(
+            "confidence-bar"
+        );
+
+
+    if (confidenceBar) {
+
+        confidenceBar.style.width =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    confidence
+                )
+            ) + "%";
+
+    }
+
+
+    /* Image */
+
+    updateImage(
+        result.image
+    );
+
+
+    /* Animation */
+
+    const cards =
+        document.querySelectorAll(
+            ".detection-result, .stat-card"
+        );
+
+
+    cards.forEach(function(card) {
+
+        card.classList.remove(
+            "updated"
+        );
+
+        void card.offsetWidth;
+
+        card.classList.add(
+            "updated"
+        );
+
+    });
+
+
+    setText(
+        "analysis-status",
+        "NEW AI RESULT RECEIVED"
+    );
+
+
+    setText(
+        "result-status",
+        "DETECTION COMPLETE"
+    );
+
+
+    setText(
+        "live-update-text",
+        "NEW AI RESULT RECEIVED"
+    );
+
+
+    const indicator =
+        document.getElementById(
+            "live-indicator"
+        );
+
+
+    if (indicator) {
+
+        indicator.classList.remove(
+            "live-flash"
+        );
+
+        void indicator.offsetWidth;
+
+        indicator.classList.add(
+            "live-flash"
+        );
+
+    }
+
+
+    setTimeout(function() {
+
+        setText(
+            "analysis-status",
+            "Live Monitoring"
+        );
+
+        setText(
+            "live-update-text",
+            "Live Monitoring"
+        );
+
+    }, 3000);
+
+}
+
+
+/* =========================================================
+   UPDATE IMAGE
+========================================================= */
+
+function updateImage(filename) {
 
     const imageBox =
         document.getElementById(
@@ -1675,59 +2425,53 @@ function updateImage(
     }
 
 
-    let imageElement =
+    if (!filename) {
+
+        return;
+
+    }
+
+
+    let image =
         document.getElementById(
             "latest-leaf-image"
         );
 
 
-    /*
-     * Create image if necessary.
-     */
-
-    if (!imageElement) {
+    if (!image) {
 
         imageBox.innerHTML = "";
 
 
-        imageElement =
+        image =
             document.createElement(
                 "img"
             );
 
 
-        imageElement.id =
+        image.id =
             "latest-leaf-image";
 
 
-        imageElement.alt =
+        image.alt =
             "Latest Plant Leaf";
 
 
-        imageElement.style.width =
-            "100%";
-
-
-        imageElement.style.height =
-            "100%";
-
-
-        imageElement.style.objectFit =
-            "contain";
-
-
         imageBox.appendChild(
-            imageElement
+            image
         );
 
     }
 
 
     /*
-     * Cache-busting URL.
-     */
+     IMPORTANT:
 
-    const imageUrl =
+     Timestamp prevents browser from showing
+     the previous image.
+    */
+
+    const imageURL =
 
         "/static/images/" +
 
@@ -1735,13 +2479,13 @@ function updateImage(
             filename
         ) +
 
-        "?live=" +
+        "?v=" +
 
         Date.now();
 
 
-    imageElement.src =
-        imageUrl;
+    image.src =
+        imageURL;
 
 
     setText(
@@ -1753,164 +2497,139 @@ function updateImage(
 
 
 /* =========================================================
-   UPDATE DASHBOARD RESULT
+   UPDATE ROVER
 ========================================================= */
 
-function updateDashboard(
-    result
-) {
+async function updateRoverStatus() {
 
-    console.log(
-        "Updating dashboard:",
-        result
-    );
+    try {
 
-
-    /*
-     * Disease
-     */
-
-    setText(
-        "disease-result",
-        result.disease ||
-        "Unknown"
-    );
+        const url =
+            "/api/rover/status?v=" +
+            Date.now();
 
 
-    /*
-     * Chemical
-     */
+        const response =
+            await fetch(
+                url,
+                {
+                    method: "GET",
+                    cache: "no-store",
+                    credentials: "same-origin",
 
-    setText(
-        "chemical-result",
-        result.chemical ||
-        "Not available"
-    );
+                    headers: {
+                        "Cache-Control":
+                            "no-cache, no-store, must-revalidate",
 
-
-    /*
-     * Fertilizer
-     */
-
-    setText(
-        "fertilizer-result",
-        result.fertilizer ||
-        "Not available"
-    );
+                        "Pragma":
+                            "no-cache"
+                    }
+                }
+            );
 
 
-    /*
-     * Treatment
-     */
+        if (!response.ok) {
 
-    setText(
-        "treatment-result",
-        result.treatment ||
-        "Not available"
-    );
+            return;
+
+        }
 
 
-    /*
-     * Image
-     */
-
-    updateImage(
-        result.image || ""
-    );
+        const data =
+            await response.json();
 
 
-    /*
-     * Analysis status
-     */
+        if (
+            !data ||
+            !data.success ||
+            !data.rover
+        ) {
 
-    setText(
-        "analysis-status",
-        "NEW ANALYSIS RECEIVED"
-    );
+            return;
 
-
-    /*
-     * Result status
-     */
-
-    setText(
-        "result-status",
-        "DETECTION COMPLETE"
-    );
+        }
 
 
-    /*
-     * Live indicator
-     */
-
-    setText(
-        "live-update-text",
-        "NEW AI RESULT RECEIVED"
-    );
+        const rover =
+            data.rover;
 
 
-    const liveIndicator =
-        document.getElementById(
-            "live-indicator"
-        );
+        const roverStatus =
+            document.getElementById(
+                "rover-status"
+            );
 
 
-    if (liveIndicator) {
+        if (roverStatus) {
 
-        liveIndicator.classList.remove(
-            "live-flash"
-        );
+            if (rover.connected) {
+
+                roverStatus.textContent =
+                    "CONNECTED";
+
+                roverStatus.className =
+                    "status-online";
+
+            } else {
+
+                roverStatus.textContent =
+                    "NOT CONNECTED";
+
+                roverStatus.className =
+                    "status-offline";
+
+            }
+
+        }
 
 
-        void liveIndicator.offsetWidth;
+        const pumpStatus =
+            document.getElementById(
+                "pump-status"
+            );
 
 
-        liveIndicator.classList.add(
-            "live-flash"
-        );
+        if (pumpStatus) {
+
+            if (rover.pump) {
+
+                pumpStatus.textContent =
+                    "ON";
+
+                pumpStatus.className =
+                    "status-online";
+
+            } else {
+
+                pumpStatus.textContent =
+                    "OFF";
+
+                pumpStatus.className =
+                    "status-offline";
+
+            }
+
+        }
 
     }
 
+    catch(error) {
 
-    /*
-     * Return to normal message.
-     */
+        console.log(
+            "Rover status error:",
+            error
+        );
 
-    setTimeout(
-
-        function() {
-
-            setText(
-                "analysis-status",
-                "Latest Analysis"
-            );
-
-
-            setText(
-                "live-update-text",
-                "Live Monitoring"
-            );
-
-        },
-
-        3000
-
-    );
+    }
 
 }
 
 
 /* =========================================================
-   CHECK SERVER
+   MAIN LIVE UPDATE
 ========================================================= */
 
-async function checkForNewResult() {
-
-
-    /*
-     * Don't allow two requests at
-     * the same time.
-     */
+async function checkDashboard() {
 
     if (requestInProgress) {
 
@@ -1925,30 +2644,28 @@ async function checkForNewResult() {
 
     try {
 
-
         /*
-         * Create a completely unique URL
-         * every second.
-         *
-         * This prevents browser,
-         * CDN and proxy caching.
-         */
+        Generate a NEW URL every time.
+
+        This is extremely important for
+        Render + browser + CDN caching.
+        */
 
         const url =
 
             "/api/dashboard-state" +
 
-            "?live=" +
+            "?_=" +
 
             Date.now() +
 
-            "&random=" +
+            "&r=" +
 
             Math.random();
 
 
         console.log(
-            "Checking server..."
+            "Checking live dashboard..."
         );
 
 
@@ -1958,15 +2675,11 @@ async function checkForNewResult() {
                 url,
 
                 {
+                    method: "GET",
 
-                    method:
-                        "GET",
+                    cache: "no-store",
 
-                    cache:
-                        "no-store",
-
-                    credentials:
-                        "same-origin",
+                    credentials: "same-origin",
 
                     headers: {
 
@@ -1977,80 +2690,64 @@ async function checkForNewResult() {
                             "no-cache",
 
                         "Expires":
-                            "0"
+                            "0",
 
+                        "Accept":
+                            "application/json"
                     }
-
                 }
 
             );
 
 
-        /*
-         * Server returned error.
-         */
-
         if (!response.ok) {
 
-            console.log(
-                "Server HTTP error:",
+            throw new Error(
+                "HTTP " +
                 response.status
             );
 
-
-            setText(
-                "live-update-text",
-                "SERVER ERROR"
-            );
-
-
-            return;
-
         }
 
-
-        /*
-         * Convert response to JSON.
-         */
 
         const data =
             await response.json();
 
 
-        /*
-         * Validate response.
-         */
-
         if (
             !data ||
-            !data.success
+            data.success !== true
         ) {
 
-            console.log(
-                "Invalid server response:",
-                data
+            throw new Error(
+                "Invalid API response"
             );
-
-
-            return;
 
         }
 
 
-        /*
-         * Print server time.
-         */
+        consecutiveErrors = 0;
 
-        console.log(
-            "Server time:",
-            data.server_time ||
-            "not provided"
+
+        /*
+        SERVER IS WORKING
+        */
+
+        setText(
+            "system-status-text",
+            "AI System Online"
+        );
+
+
+        setText(
+            "live-update-text",
+            "Live Monitoring"
         );
 
 
         /*
-         * Update statistics.
-         */
+        UPDATE STATISTICS
+        */
 
         updateStatistics(
             data.statistics
@@ -2058,39 +2755,54 @@ async function checkForNewResult() {
 
 
         /*
-         * Get latest result.
-         */
+        UPDATE SERVER TIME
+        */
+
+        if (data.server_time) {
+
+            setText(
+                "status-time",
+                "Last checked: " +
+                data.server_time
+            );
+
+        }
+
+
+        /*
+        GET RESULT
+        */
 
         const result =
             data.result || {};
 
 
-        /*
-         * Create unique key.
-         */
-
-        const currentResultKey =
+        const currentKey =
             makeResultKey(
                 result
             );
 
 
-        /* =================================================
-           FIRST LOAD
-        ================================================= */
+        /*
+        FIRST LOAD
+        */
 
         if (firstLoad) {
 
             lastResultKey =
-                currentResultKey;
-
+                currentKey;
 
             firstLoad =
                 false;
 
 
-            console.log(
-                "===================================="
+            /*
+            Make sure dashboard has
+            current data immediately.
+            */
+
+            updateResult(
+                result
             );
 
 
@@ -2099,92 +2811,62 @@ async function checkForNewResult() {
             );
 
 
-            console.log(
-                "Current result:",
-                result
-            );
-
-
-            console.log(
-                "===================================="
-            );
-
-
-            setText(
-                "live-update-text",
-                "Live Monitoring"
-            );
-
-
-            return;
-
         }
 
+        /*
+        NEW RESULT
+        */
 
-        /* =================================================
-           CHECK FOR NEW RESULT
-        ================================================= */
-
-        if (
-            currentResultKey !==
+        else if (
+            currentKey !==
             lastResultKey
         ) {
 
-
             console.log(
-                "===================================="
+                "NEW AI RESULT DETECTED"
             );
 
-
-            console.log(
-                "NEW AI RESULT RECEIVED!"
-            );
-
-
-            console.log(
-                result
-            );
-
-
-            console.log(
-                "===================================="
-            );
-
-
-            /*
-             * Store new result key.
-             */
 
             lastResultKey =
-                currentResultKey;
+                currentKey;
 
 
-            /*
-             * Update entire dashboard
-             * without refreshing page.
-             */
-
-            updateDashboard(
+            updateResult(
                 result
             );
 
         }
 
+
     }
 
-    catch (error) {
+    catch(error) {
+
+        consecutiveErrors++;
 
 
         console.log(
-            "Live connection error:",
+            "Dashboard connection error:",
             error
         );
 
 
         setText(
-            "live-update-text",
-            "WAITING FOR SERVER..."
+            "system-status-text",
+            "Connecting..."
         );
+
+
+        if (
+            consecutiveErrors >= 3
+        ) {
+
+            setText(
+                "live-update-text",
+                "Reconnecting..."
+            );
+
+        }
 
     }
 
@@ -2199,26 +2881,99 @@ async function checkForNewResult() {
 
 
 /* =========================================================
-   START IMMEDIATELY
+   START LIVE SYSTEM
 ========================================================= */
 
-checkForNewResult();
+console.log(
+    "=========================================="
+);
+
+console.log(
+    "PRECISION AGRICULTURE SMART ROVER"
+);
+
+console.log(
+    "LIVE DASHBOARD STARTING"
+);
+
+console.log(
+    "=========================================="
+);
 
 
-/* =========================================================
-   CHECK EVERY 1 SECOND
-========================================================= */
+/*
+IMPORTANT:
+
+Run immediately.
+*/
+
+checkDashboard();
+
+updateRoverStatus();
+
+
+/*
+Check dashboard every 1 second.
+*/
 
 setInterval(
+    checkDashboard,
+    1000
+);
 
+
+/*
+Check rover every 1 second.
+*/
+
+setInterval(
+    updateRoverStatus,
+    1000
+);
+
+
+/*
+When user returns to the app/browser,
+immediately check again.
+*/
+
+document.addEventListener(
+    "visibilitychange",
     function() {
 
-        checkForNewResult();
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
 
-    },
+            checkDashboard();
 
-    1000
+            updateRoverStatus();
 
+        }
+
+    }
+);
+
+
+/*
+When internet connection comes back,
+immediately check server.
+*/
+
+window.addEventListener(
+    "online",
+    function() {
+
+        console.log(
+            "Internet connection restored."
+        );
+
+        checkDashboard();
+
+        updateRoverStatus();
+
+    }
 );
 
 
