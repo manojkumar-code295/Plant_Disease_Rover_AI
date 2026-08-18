@@ -3,713 +3,766 @@
 
 <head>
 
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Plant Leaf Detection | Precision Agriculture Smart Rover</title>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f7f5;
-            color: #1f2937;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        /* =====================================================
-           APP
-        ===================================================== */
-
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* =====================================================
-           SIDEBAR
-        ===================================================== */
-
-        .sidebar {
-            width: 245px;
-            min-height: 100vh;
-            background: #102f25;
-            color: white;
-            padding: 25px 16px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-        }
-
-        .logo {
-            padding: 5px 12px 28px;
-            border-bottom: 1px solid rgba(255,255,255,0.10);
-        }
-
-        .logo-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .logo h1 {
-            font-size: 17px;
-            line-height: 1.4;
-        }
-
-        .logo p {
-            color: #a9c5b8;
-            font-size: 11px;
-            margin-top: 5px;
-            line-height: 1.4;
-        }
-
-        .menu-title {
-            color: #78988a;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 1.2px;
-            margin: 28px 12px 10px;
-            text-transform: uppercase;
-        }
-
-        .menu a {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-            color: #c5d7cf;
-            padding: 13px 14px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            font-size: 14px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .menu a:hover {
-            background: #1b4938;
-            color: white;
-        }
-
-        .menu a.active {
-            background: #2d7653;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        }
-
-        .menu-icon {
-            width: 22px;
-            text-align: center;
-            font-size: 17px;
-        }
-
-        .sidebar-bottom {
-            position: absolute;
-            left: 16px;
-            right: 16px;
-            bottom: 25px;
-        }
-
-        .connection-box {
-            background: rgba(255,255,255,0.07);
-            border-radius: 11px;
-            padding: 14px;
-        }
-
-        .connection-title {
-            color: #91afa2;
-            font-size: 11px;
-            margin-bottom: 8px;
-        }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #d8e9e1;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .green-dot {
-            width: 8px;
-            height: 8px;
-            background: #36d477;
-            border-radius: 50%;
-            box-shadow: 0 0 8px rgba(54,212,119,0.7);
-        }
-
-        /* =====================================================
-           MAIN
-        ===================================================== */
-
-        .main {
-            margin-left: 245px;
-            width: calc(100% - 245px);
-            min-height: 100vh;
-        }
-
-        .topbar {
-            height: 78px;
-            background: white;
-            border-bottom: 1px solid #e5ebe7;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 38px;
-        }
-
-        .topbar-title h2 {
-            font-size: 20px;
-            color: #12372a;
-        }
-
-        .topbar-title p {
-            color: #87918c;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .system-badge {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            background: #edf9f1;
-            color: #168044;
-            border: 1px solid #ccebd7;
-            padding: 9px 15px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .content {
-            padding: 32px 38px;
-            max-width: 1500px;
-        }
-
-        /* =====================================================
-           WELCOME
-        ===================================================== */
-
-        .welcome {
-            margin-bottom: 25px;
-        }
-
-        .welcome h1 {
-            color: #12372a;
-            font-size: 25px;
-        }
-
-        .welcome p {
-            color: #78837d;
-            margin-top: 7px;
-            font-size: 13px;
-        }
-
-        /* =====================================================
-           STATISTICS
-        ===================================================== */
-
-        .statistics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: white;
-            border: 1px solid #e7ece9;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(20,60,40,0.04);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            right: -25px;
-            top: -25px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #edf7ef;
-        }
-
-        .stat-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stat-label {
-            color: #89938e;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .stat-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #edf7ef;
-            font-size: 18px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-number {
-            margin-top: 13px;
-            font-size: 30px;
-            color: #12372a;
-        }
-
-        .stat-subtitle {
-            margin-top: 5px;
-            color: #9aa49f;
-            font-size: 10px;
-        }
-
-        .healthy-number {
-            color: #16a34a;
-        }
-
-        .diseased-number {
-            color: #dc2626;
-        }
-
-        /* =====================================================
-           SECTION
-        ===================================================== */
-
-        .section-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .section-heading h3 {
-            color: #12372a;
-            font-size: 17px;
-        }
-
-        .section-heading span {
-            color: #89938e;
-            font-size: 11px;
-        }
-
-        /* =====================================================
-           DETECTION
-        ===================================================== */
-
-        .detection-grid {
-            display: grid;
-            grid-template-columns: 1.05fr 1fr;
-            gap: 22px;
-        }
-
-        .card {
-            background: white;
-            border: 1px solid #e7ece9;
-            border-radius: 16px;
-            box-shadow: 0 5px 20px rgba(20,60,40,0.05);
-        }
-
-        /* IMAGE */
-
-        .image-card {
-            padding: 20px;
-        }
-
-        .image-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .image-card-header h3 {
-            color: #12372a;
-            font-size: 15px;
-        }
-
-        .image-label {
-            background: #eef6f0;
-            color: #31704f;
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .image-box {
-            width: 100%;
-            height: 365px;
-            background: #edf4ef;
-            border-radius: 13px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid #dfe9e2;
-        }
-
-        .image-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-
-        .image-placeholder {
-            font-size: 55px;
-            opacity: 0.5;
-        }
-
-        .image-name {
-            margin-top: 11px;
-            color: #89938e;
-            font-size: 11px;
-            text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* RESULT */
-
-        .result-card {
-            padding: 20px;
-        }
-
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-
-        .result-header h3 {
-            color: #12372a;
-            font-size: 15px;
-        }
-
-        .ai-badge {
-            background: #eaf7ee;
-            color: #168044;
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .detection-result {
-            background: linear-gradient(
-                135deg,
-                #edf8f0,
-                #f7fbf8
-            );
-            border: 1px solid #d9ebde;
-            border-radius: 13px;
-            padding: 20px;
-            margin-bottom: 17px;
-        }
-
-        .detection-result small {
-            color: #78837d;
-            font-size: 11px;
-        }
-
-        .detection-result h1 {
-            color: #23613e;
-            font-size: 25px;
-            margin-top: 7px;
-        }
-
-        .result-status {
-            display: inline-block;
-            margin-top: 10px;
-            background: #dff5e6;
-            color: #187441;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .info-box {
-            display: flex;
-            gap: 14px;
-            align-items: flex-start;
-            padding: 14px 0;
-            border-bottom: 1px solid #edf0ee;
-        }
-
-        .info-box:last-child {
-            border-bottom: none;
-        }
-
-        .info-icon {
-            width: 36px;
-            height: 36px;
-            min-width: 36px;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f0f6f2;
-            font-size: 17px;
-        }
-
-        .info-content span {
-            display: block;
-            color: #89938e;
-            font-size: 10px;
-            margin-bottom: 5px;
-        }
-
-        .info-content strong {
-            color: #374151;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .treatment-box {
-            margin-top: 5px;
-            padding-top: 14px;
-        }
-
-        .treatment-box span {
-            color: #89938e;
-            font-size: 10px;
-        }
-
-        .treatment-box p {
-            margin-top: 7px;
-            color: #4b5563;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        /* =====================================================
-           SYSTEM STATUS
-        ===================================================== */
-
-        .status-section {
-            margin-top: 30px;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-        }
-
-        .status-card {
-            background: white;
-            border: 1px solid #e7ece9;
-            border-radius: 14px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 5px 20px rgba(20,60,40,0.04);
-        }
-
-        .status-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            background: #edf7ef;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-        }
-
-        .status-info span {
-            display: block;
-            color: #8a948f;
-            font-size: 10px;
-            margin-bottom: 5px;
-        }
-
-        .status-info strong {
-            font-size: 14px;
-        }
-
-        .status-online {
-            color: #16a34a;
-        }
-
-        .status-offline {
-            color: #dc2626;
-        }
-
-        /* =====================================================
-           QUICK ACCESS
-        ===================================================== */
-
-        .quick-section {
-            margin-top: 30px;
-        }
-
-        .quick-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-        }
-
-        .quick-card {
-            background: white;
-            border: 1px solid #e7ece9;
-            border-radius: 14px;
-            padding: 18px;
-            transition: 0.2s;
-        }
-
-        .quick-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(20,60,40,0.07);
-        }
-
-        .quick-icon {
-            font-size: 23px;
-            margin-bottom: 10px;
-        }
-
-        .quick-card h4 {
-            color: #12372a;
-            font-size: 13px;
-        }
-
-        .quick-card p {
-            color: #89938e;
-            font-size: 11px;
-            margin-top: 5px;
-            line-height: 1.5;
-        }
-
-        .quick-card a {
-            display: inline-block;
-            margin-top: 12px;
-            color: #28734e;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* =====================================================
-           FOOTER
-        ===================================================== */
-
-        footer {
-            text-align: center;
-            color: #9aa49f;
-            font-size: 10px;
-            padding: 25px;
-        }
-
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
-
-        @media(max-width: 1050px) {
-
-            .detection-grid {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media(max-width: 800px) {
-
-            .sidebar {
-                width: 70px;
-                padding: 20px 8px;
-            }
-
-            .logo {
-                text-align: center;
-                padding: 5px 0 20px;
-            }
-
-            .logo h1,
-            .logo p,
-            .menu-title,
-            .connection-box {
-                display: none;
-            }
-
-            .menu a {
-                justify-content: center;
-                padding: 13px 5px;
-            }
-
-            .menu-icon {
-                font-size: 20px;
-            }
-
-            .main {
-                margin-left: 70px;
-                width: calc(100% - 70px);
-            }
-
-            .topbar {
-                padding: 0 20px;
-            }
-
-            .content {
-                padding: 25px 20px;
-            }
-
-            .statistics-grid,
-            .status-grid,
-            .quick-grid {
-                grid-template-columns: 1fr;
-            }
-
-        }
-
-        @media(max-width: 550px) {
-
-            .topbar-title p {
-                display: none;
-            }
-
-            .system-badge {
-                padding: 7px 10px;
-            }
-
-            .welcome h1 {
-                font-size: 21px;
-            }
-
-            .image-box {
-                height: 280px;
-            }
-
-        }
-
-    </style>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Plant Leaf Detection | Precision Agriculture Smart Rover</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f7f5;
+    color: #1f2937;
+}
+
+a {
+    text-decoration: none;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    width: 245px;
+    min-height: 100vh;
+    background: #102f25;
+    color: white;
+    padding: 25px 16px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.logo {
+    padding: 5px 12px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.logo-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.logo h1 {
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.logo p {
+    color: #a9c5b8;
+    font-size: 11px;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.menu-title {
+    color: #78988a;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+    margin: 28px 12px 10px;
+    text-transform: uppercase;
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    color: #c5d7cf;
+    padding: 13px 14px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.menu a:hover {
+    background: #1b4938;
+    color: white;
+}
+
+.menu a.active {
+    background: #2d7653;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.menu-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 17px;
+}
+
+.sidebar-bottom {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 25px;
+}
+
+.connection-box {
+    background: rgba(255,255,255,0.07);
+    border-radius: 11px;
+    padding: 14px;
+}
+
+.connection-title {
+    color: #91afa2;
+    font-size: 11px;
+    margin-bottom: 8px;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d8e9e1;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.green-dot {
+    width: 8px;
+    height: 8px;
+    background: #36d477;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(54,212,119,0.7);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    margin-left: 245px;
+    width: calc(100% - 245px);
+    min-height: 100vh;
+}
+
+.topbar {
+    height: 78px;
+    background: white;
+    border-bottom: 1px solid #e5ebe7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 38px;
+}
+
+.topbar-title h2 {
+    font-size: 20px;
+    color: #12372a;
+}
+
+.topbar-title p {
+    color: #87918c;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.system-badge {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #edf9f1;
+    color: #168044;
+    border: 1px solid #ccebd7;
+    padding: 9px 15px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.content {
+    padding: 32px 38px;
+    max-width: 1500px;
+}
+
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome {
+    margin-bottom: 25px;
+}
+
+.welcome h1 {
+    color: #12372a;
+    font-size: 25px;
+}
+
+.welcome p {
+    color: #78837d;
+    margin-top: 7px;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #e7ece9;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: "";
+    position: absolute;
+    right: -25px;
+    top: -25px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #edf7ef;
+}
+
+.stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    color: #89938e;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #edf7ef;
+    font-size: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-number {
+    margin-top: 13px;
+    font-size: 30px;
+    color: #12372a;
+}
+
+.stat-subtitle {
+    margin-top: 5px;
+    color: #9aa49f;
+    font-size: 10px;
+}
+
+.healthy-number {
+    color: #16a34a;
+}
+
+.diseased-number {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-heading h3 {
+    color: #12372a;
+    font-size: 17px;
+}
+
+.section-heading span {
+    color: #89938e;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   DETECTION
+========================================================= */
+
+.detection-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 22px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #e7ece9;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(20,60,40,0.05);
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.image-card {
+    padding: 20px;
+}
+
+.image-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.image-card-header h3 {
+    color: #12372a;
+    font-size: 15px;
+}
+
+.image-label {
+    background: #eef6f0;
+    color: #31704f;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.image-box {
+    width: 100%;
+    height: 365px;
+    background: #edf4ef;
+    border-radius: 13px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #dfe9e2;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.image-placeholder {
+    font-size: 55px;
+    opacity: 0.5;
+}
+
+.image-name {
+    margin-top: 11px;
+    color: #89938e;
+    font-size: 11px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   RESULT
+========================================================= */
+
+.result-card {
+    padding: 20px;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.result-header h3 {
+    color: #12372a;
+    font-size: 15px;
+}
+
+.ai-badge {
+    background: #eaf7ee;
+    color: #168044;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.detection-result {
+    background: linear-gradient(
+        135deg,
+        #edf8f0,
+        #f7fbf8
+    );
+    border: 1px solid #d9ebde;
+    border-radius: 13px;
+    padding: 20px;
+    margin-bottom: 17px;
+}
+
+.detection-result small {
+    color: #78837d;
+    font-size: 11px;
+}
+
+.detection-result h1 {
+    color: #23613e;
+    font-size: 25px;
+    margin-top: 7px;
+}
+
+.result-status {
+    display: inline-block;
+    margin-top: 10px;
+    background: #dff5e6;
+    color: #187441;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.info-box {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid #edf0ee;
+}
+
+.info-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f6f2;
+    font-size: 17px;
+}
+
+.info-content span {
+    display: block;
+    color: #89938e;
+    font-size: 10px;
+    margin-bottom: 5px;
+}
+
+.info-content strong {
+    color: #374151;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.treatment-box {
+    margin-top: 5px;
+    padding-top: 14px;
+}
+
+.treatment-box span {
+    color: #89938e;
+    font-size: 10px;
+}
+
+.treatment-box p {
+    margin-top: 7px;
+    color: #4b5563;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   SYSTEM STATUS
+========================================================= */
+
+.status-section {
+    margin-top: 30px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.status-card {
+    background: white;
+    border: 1px solid #e7ece9;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
+}
+
+.status-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #edf7ef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+}
+
+.status-info span {
+    display: block;
+    color: #8a948f;
+    font-size: 10px;
+    margin-bottom: 5px;
+}
+
+.status-info strong {
+    font-size: 14px;
+}
+
+.status-online {
+    color: #16a34a;
+}
+
+.status-offline {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   QUICK ACCESS
+========================================================= */
+
+.quick-section {
+    margin-top: 30px;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.quick-card {
+    background: white;
+    border: 1px solid #e7ece9;
+    border-radius: 14px;
+    padding: 18px;
+    transition: 0.2s;
+}
+
+.quick-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(20,60,40,0.07);
+}
+
+.quick-icon {
+    font-size: 23px;
+    margin-bottom: 10px;
+}
+
+.quick-card h4 {
+    color: #12372a;
+    font-size: 13px;
+}
+
+.quick-card p {
+    color: #89938e;
+    font-size: 11px;
+    margin-top: 5px;
+    line-height: 1.5;
+}
+
+.quick-card a {
+    display: inline-block;
+    margin-top: 12px;
+    color: #28734e;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   LIVE INDICATOR
+========================================================= */
+
+.live-update {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: #12372a;
+    color: white;
+    padding: 9px 14px;
+    border-radius: 25px;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.15);
+    z-index: 9999;
+    opacity: 0.92;
+}
+
+.live-update-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #36d477;
+    border-radius: 50%;
+    margin-right: 7px;
+    box-shadow: 0 0 7px rgba(54,212,119,0.8);
+}
+
+.live-flash {
+    animation: liveFlash 0.7s ease-in-out 2;
+}
+
+@keyframes liveFlash {
+
+    50% {
+        transform: scale(1.04);
+    }
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    text-align: center;
+    color: #9aa49f;
+    font-size: 10px;
+    padding: 25px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1050px) {
+
+    .detection-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width:800px) {
+
+    .sidebar {
+        width: 70px;
+        padding: 20px 8px;
+    }
+
+    .logo {
+        text-align: center;
+        padding: 5px 0 20px;
+    }
+
+    .logo h1,
+    .logo p,
+    .menu-title,
+    .connection-box {
+        display: none;
+    }
+
+    .menu a {
+        justify-content: center;
+        padding: 13px 5px;
+    }
+
+    .menu-icon {
+        font-size: 20px;
+    }
+
+    .main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+    }
+
+    .topbar {
+        padding: 0 20px;
+    }
+
+    .content {
+        padding: 25px 20px;
+    }
+
+    .statistics-grid,
+    .status-grid,
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media(max-width:550px) {
+
+    .topbar-title p {
+        display: none;
+    }
+
+    .system-badge {
+        padding: 7px 10px;
+    }
+
+    .welcome h1 {
+        font-size: 21px;
+    }
+
+    .image-box {
+        height: 280px;
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -720,674 +773,1456 @@
 <div class="app">
 
 
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <div class="logo">
+    <div class="logo">
 
-            <div class="logo-icon">
-                🌱
-            </div>
-
-            <h1>
-                Precision Agriculture
-                Smart Rover
-            </h1>
-
-            <p>
-                AI-Powered Plant Monitoring System
-            </p>
-
+        <div class="logo-icon">
+            🌱
         </div>
 
-
-        <div class="menu-title">
-            Main Menu
-        </div>
-
-
-        <div class="menu">
-
-            <a href="/" class="active">
-
-                <span class="menu-icon">
-                    🏠
-                </span>
-
-                <span>
-                    Dashboard
-                </span>
-
-            </a>
-
-
-            <a href="/rover">
-
-                <span class="menu-icon">
-                    🚜
-                </span>
-
-                <span>
-                    Rover Control
-                </span>
-
-            </a>
-
-
-            <a href="/dataset">
-
-                <span class="menu-icon">
-                    📁
-                </span>
-
-                <span>
-                    Dataset
-                </span>
-
-            </a>
-
-
-            <a href="/analytics">
-
-                <span class="menu-icon">
-                    📊
-                </span>
-
-                <span>
-                    Analytics
-                </span>
-
-            </a>
-
-
-            <a href="/settings">
-
-                <span class="menu-icon">
-                    ⚙️
-                </span>
-
-                <span>
-                    Settings
-                </span>
-
-            </a>
-
-        </div>
-
-
-        <div class="sidebar-bottom">
-
-            <div class="connection-box">
-
-                <div class="connection-title">
-                    AI SYSTEM
-                </div>
-
-                <div class="connection-status">
-
-                    <span class="green-dot"></span>
-
-                    System Online
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <div class="main">
-
-
-        <!-- TOP BAR -->
-
-        <header class="topbar">
-
-            <div class="topbar-title">
-
-                <h2>
-                    Plant Leaf Detection Dashboard
-                </h2>
-
-                <p>
-                    Precision Agriculture Smart Rover
-                </p>
-
-            </div>
-
-
-            <div class="system-badge">
-
-                <span class="green-dot"></span>
-
-                AI System Online
-
-            </div>
-
-        </header>
-
-
-        <!-- CONTENT -->
-
-        <main class="content">
-
-
-            <!-- WELCOME -->
-
-            <section class="welcome">
-
-                <h1>
-                    Plant Leaf Detection
-                </h1>
-
-                <p>
-                    AI-based plant leaf disease detection
-                    and agricultural recommendation
-                </p>
-
-            </section>
-
-
-            <!-- =================================================
-                 STATISTICS
-            ================================================== -->
-
-            <section class="statistics-grid">
-
-
-                <!-- TOTAL -->
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            Total Predictions
-                        </div>
-
-                        <div class="stat-icon">
-                            🔍
-                        </div>
-
-                    </div>
-
-                    <div class="stat-number">
-
-                        {{ statistics.total }}
-
-                    </div>
-
-                    <div class="stat-subtitle">
-                        Total AI analyses
-                    </div>
-
-                </div>
-
-
-                <!-- HEALTHY -->
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            Healthy Leaves
-                        </div>
-
-                        <div class="stat-icon">
-                            🌿
-                        </div>
-
-                    </div>
-
-                    <div class="stat-number healthy-number">
-
-                        {{ statistics.healthy }}
-
-                    </div>
-
-                    <div class="stat-subtitle">
-
-                        {% if statistics.total > 0 %}
-
-                            {{ "%.1f"|format(
-                                (statistics.healthy /
-                                statistics.total) * 100
-                            ) }}% of all predictions
-
-                        {% else %}
-
-                            0% of all predictions
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-                <!-- DISEASED -->
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            Diseased Leaves
-                        </div>
-
-                        <div class="stat-icon">
-                            ⚠️
-                        </div>
-
-                    </div>
-
-                    <div class="stat-number diseased-number">
-
-                        {{ statistics.diseased }}
-
-                    </div>
-
-                    <div class="stat-subtitle">
-
-                        {% if statistics.total > 0 %}
-
-                            {{ "%.1f"|format(
-                                (statistics.diseased /
-                                statistics.total) * 100
-                            ) }}% of all predictions
-
-                        {% else %}
-
-                            0% of all predictions
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-            </section>
-
-
-            <!-- =================================================
-                 AI DETECTION
-            ================================================== -->
-
-            <div class="section-heading">
-
-                <h3>
-                    AI Detection
-                </h3>
-
-                <span>
-                    Latest Analysis
-                </span>
-
-            </div>
-
-
-            <section class="detection-grid">
-
-
-                <!-- IMAGE -->
-
-                <div class="card image-card">
-
-                    <div class="image-card-header">
-
-                        <h3>
-                            🌿 Latest Plant Leaf Image
-                        </h3>
-
-                        <span class="image-label">
-                            AI INPUT
-                        </span>
-
-                    </div>
-
-
-                    <div class="image-box">
-
-                        {% if detection.image %}
-
-                            <img
-                                src="{{ url_for(
-                                    'static',
-                                    filename='images/' + detection.image
-                                ) }}"
-                                alt="Latest Plant Leaf"
-                            >
-
-                        {% else %}
-
-                            <div class="image-placeholder">
-                                🌿
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <div class="image-name">
-
-                        {{ detection.image }}
-
-                    </div>
-
-                </div>
-
-
-                <!-- RESULT -->
-
-                <div class="card result-card">
-
-                    <div class="result-header">
-
-                        <h3>
-                            🤖 Detection Result
-                        </h3>
-
-                        <span class="ai-badge">
-                            AI ANALYZED
-                        </span>
-
-                    </div>
-
-
-                    <div class="detection-result">
-
-                        <small>
-                            THIS IS
-                        </small>
-
-                        <h1>
-                            {{ detection.disease }}
-                        </h1>
-
-                        <span class="result-status">
-                            DETECTION COMPLETE
-                        </span>
-
-                    </div>
-
-
-                    <!-- CHEMICAL -->
-
-                    <div class="info-box">
-
-                        <div class="info-icon">
-                            💊
-                        </div>
-
-                        <div class="info-content">
-
-                            <span>
-                                RECOMMENDED CHEMICAL
-                            </span>
-
-                            <strong>
-                                {{ detection.chemical }}
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- FERTILIZER -->
-
-                    <div class="info-box">
-
-                        <div class="info-icon">
-                            🌱
-                        </div>
-
-                        <div class="info-content">
-
-                            <span>
-                                RECOMMENDED FERTILIZER
-                            </span>
-
-                            <strong>
-                                {{ detection.fertilizer }}
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- TREATMENT -->
-
-                    <div class="treatment-box">
-
-                        <span>
-                            RECOMMENDED TREATMENT
-                        </span>
-
-                        <p>
-                            {{ detection.treatment }}
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-            </section>
-
-
-            <!-- =================================================
-                 SYSTEM STATUS
-            ================================================== -->
-
-            <section class="status-section">
-
-                <div class="section-heading">
-
-                    <h3>
-                        System Status
-                    </h3>
-
-                    <span>
-                        Current System State
-                    </span>
-
-                </div>
-
-
-                <div class="status-grid">
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            🤖
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                AI MODEL
-                            </span>
-
-                            <strong class="status-online">
-                                ONLINE
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            🚜
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                ROVER
-                            </span>
-
-                            <strong class="status-offline">
-                                NOT CONNECTED
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            💧
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                WATER / SPRAY PUMP
-                            </span>
-
-                            <strong class="status-offline">
-                                OFF
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 QUICK ACCESS
-            ================================================== -->
-
-            <section class="quick-section">
-
-                <div class="section-heading">
-
-                    <h3>
-                        Quick Access
-                    </h3>
-
-                    <span>
-                        Project Modules
-                    </span>
-
-                </div>
-
-
-                <div class="quick-grid">
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            🚜
-                        </div>
-
-                        <h4>
-                            Rover Control
-                        </h4>
-
-                        <p>
-                            Control rover movement and
-                            spray pump from the control panel.
-                        </p>
-
-                        <a href="/rover">
-                            Open Control →
-                        </a>
-
-                    </div>
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            📁
-                        </div>
-
-                        <h4>
-                            Prediction History
-                        </h4>
-
-                        <p>
-                            View previously analyzed plant
-                            leaf images and AI results.
-                        </p>
-
-                        <a href="/dataset">
-                            View Dataset →
-                        </a>
-
-                    </div>
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            📊
-                        </div>
-
-                        <h4>
-                            Analytics
-                        </h4>
-
-                        <p>
-                            View plant disease statistics
-                            and prediction graphs.
-                        </p>
-
-                        <a href="/analytics">
-                            View Analytics →
-                        </a>
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-        </main>
-
-
-        <footer>
-
-            Precision Agriculture Smart Rover
-            &nbsp;•&nbsp;
-            AI-Based Plant Leaf Disease Detection System
-
-        </footer>
-
+        <h1>
+            Precision Agriculture
+            Smart Rover
+        </h1>
+
+        <p>
+            AI-Powered Plant Monitoring System
+        </p>
 
     </div>
 
 
+    <div class="menu-title">
+        Main Menu
+    </div>
+
+
+    <div class="menu">
+
+        <a href="/" class="active">
+
+            <span class="menu-icon">
+                🏠
+            </span>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <a href="/rover">
+
+            <span class="menu-icon">
+                🚜
+            </span>
+
+            <span>
+                Rover Control
+            </span>
+
+        </a>
+
+
+        <a href="/dataset">
+
+            <span class="menu-icon">
+                📁
+            </span>
+
+            <span>
+                Dataset
+            </span>
+
+        </a>
+
+
+        <a href="/analytics">
+
+            <span class="menu-icon">
+                📊
+            </span>
+
+            <span>
+                Analytics
+            </span>
+
+        </a>
+
+
+        <a href="/settings">
+
+            <span class="menu-icon">
+                ⚙️
+            </span>
+
+            <span>
+                Settings
+            </span>
+
+        </a>
+
+    </div>
+
+
+    <div class="sidebar-bottom">
+
+        <div class="connection-box">
+
+            <div class="connection-title">
+                AI SYSTEM
+            </div>
+
+            <div class="connection-status">
+
+                <span class="green-dot"></span>
+
+                System Online
+
+            </div>
+
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<div class="main">
+
+
+<header class="topbar">
+
+    <div class="topbar-title">
+
+        <h2>
+            Plant Leaf Detection Dashboard
+        </h2>
+
+        <p>
+            Precision Agriculture Smart Rover
+        </p>
+
+    </div>
+
+
+    <div class="system-badge">
+
+        <span class="green-dot"></span>
+
+        AI System Online
+
+    </div>
+
+</header>
+
+
+<main class="content">
+
+
+<!-- =========================================================
+     WELCOME
+========================================================= -->
+
+<section class="welcome">
+
+    <h1>
+        Plant Leaf Detection
+    </h1>
+
+    <p>
+        AI-based plant leaf disease detection
+        and agricultural recommendation
+    </p>
+
+</section>
+
+
+<!-- =========================================================
+     STATISTICS
+========================================================= -->
+
+<section class="statistics-grid">
+
+
+<div class="stat-card">
+
+    <div class="stat-top">
+
+        <div class="stat-label">
+            Total Predictions
+        </div>
+
+        <div class="stat-icon">
+            🔍
+        </div>
+
+    </div>
+
+
+    <div
+        class="stat-number"
+        id="total-predictions">
+
+        {{ statistics.total }}
+
+    </div>
+
+
+    <div class="stat-subtitle">
+        Total AI analyses
+    </div>
+
 </div>
+
+
+<div class="stat-card">
+
+    <div class="stat-top">
+
+        <div class="stat-label">
+            Healthy Leaves
+        </div>
+
+        <div class="stat-icon">
+            🌿
+        </div>
+
+    </div>
+
+
+    <div
+        class="stat-number healthy-number"
+        id="healthy-predictions">
+
+        {{ statistics.healthy }}
+
+    </div>
+
+
+    <div
+        class="stat-subtitle"
+        id="healthy-percent">
+
+        {% if statistics.total > 0 %}
+
+        {{ "%.1f"|format(
+            (statistics.healthy /
+            statistics.total) * 100
+        ) }}% of all predictions
+
+        {% else %}
+
+        0% of all predictions
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="stat-card">
+
+    <div class="stat-top">
+
+        <div class="stat-label">
+            Diseased Leaves
+        </div>
+
+        <div class="stat-icon">
+            ⚠️
+        </div>
+
+    </div>
+
+
+    <div
+        class="stat-number diseased-number"
+        id="diseased-predictions">
+
+        {{ statistics.diseased }}
+
+    </div>
+
+
+    <div
+        class="stat-subtitle"
+        id="diseased-percent">
+
+        {% if statistics.total > 0 %}
+
+        {{ "%.1f"|format(
+            (statistics.diseased /
+            statistics.total) * 100
+        ) }}% of all predictions
+
+        {% else %}
+
+        0% of all predictions
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+<!-- =========================================================
+     AI DETECTION
+========================================================= -->
+
+<div class="section-heading">
+
+    <h3>
+        AI Detection
+    </h3>
+
+    <span id="analysis-status">
+        Latest Analysis
+    </span>
+
+</div>
+
+
+<section class="detection-grid">
+
+
+<!-- =========================================================
+     IMAGE
+========================================================= -->
+
+<div class="card image-card">
+
+    <div class="image-card-header">
+
+        <h3>
+            🌿 Latest Plant Leaf Image
+        </h3>
+
+        <span class="image-label">
+            AI INPUT
+        </span>
+
+    </div>
+
+
+    <div
+        class="image-box"
+        id="image-box">
+
+        {% if detection.image %}
+
+        <img
+            id="latest-leaf-image"
+            src="{{ url_for(
+                'static',
+                filename='images/' + detection.image
+            ) }}?initial={{ detection.timestamp }}"
+            alt="Latest Plant Leaf"
+        >
+
+        {% else %}
+
+        <div
+            class="image-placeholder"
+            id="image-placeholder">
+
+            🌿
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div
+        class="image-name"
+        id="image-name">
+
+        {{ detection.image }}
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RESULT
+========================================================= -->
+
+<div class="card result-card">
+
+    <div class="result-header">
+
+        <h3>
+            🤖 Detection Result
+        </h3>
+
+        <span class="ai-badge">
+            AI ANALYZED
+        </span>
+
+    </div>
+
+
+    <div class="detection-result">
+
+        <small>
+            THIS IS
+        </small>
+
+
+        <h1 id="disease-result">
+
+            {{ detection.disease }}
+
+        </h1>
+
+
+        <span
+            class="result-status"
+            id="result-status">
+
+            DETECTION COMPLETE
+
+        </span>
+
+    </div>
+
+
+    <!-- CHEMICAL -->
+
+    <div class="info-box">
+
+        <div class="info-icon">
+            💊
+        </div>
+
+        <div class="info-content">
+
+            <span>
+                RECOMMENDED CHEMICAL
+            </span>
+
+            <strong id="chemical-result">
+
+                {{ detection.chemical }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- FERTILIZER -->
+
+    <div class="info-box">
+
+        <div class="info-icon">
+            🌱
+        </div>
+
+        <div class="info-content">
+
+            <span>
+                RECOMMENDED FERTILIZER
+            </span>
+
+            <strong id="fertilizer-result">
+
+                {{ detection.fertilizer }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- TREATMENT -->
+
+    <div class="treatment-box">
+
+        <span>
+            RECOMMENDED TREATMENT
+        </span>
+
+        <p id="treatment-result">
+
+            {{ detection.treatment }}
+
+        </p>
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+<!-- =========================================================
+     SYSTEM STATUS
+========================================================= -->
+
+<section class="status-section">
+
+<div class="section-heading">
+
+    <h3>
+        System Status
+    </h3>
+
+    <span>
+        Current System State
+    </span>
+
+</div>
+
+
+<div class="status-grid">
+
+
+<div class="status-card">
+
+    <div class="status-icon">
+        🤖
+    </div>
+
+    <div class="status-info">
+
+        <span>
+            AI MODEL
+        </span>
+
+        <strong class="status-online">
+            ONLINE
+        </strong>
+
+    </div>
+
+</div>
+
+
+<div class="status-card">
+
+    <div class="status-icon">
+        🚜
+    </div>
+
+    <div class="status-info">
+
+        <span>
+            ROVER
+        </span>
+
+        <strong class="status-offline">
+            NOT CONNECTED
+        </strong>
+
+    </div>
+
+</div>
+
+
+<div class="status-card">
+
+    <div class="status-icon">
+        💧
+    </div>
+
+    <div class="status-info">
+
+        <span>
+            WATER / SPRAY PUMP
+        </span>
+
+        <strong class="status-offline">
+            OFF
+        </strong>
+
+    </div>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+<!-- =========================================================
+     QUICK ACCESS
+========================================================= -->
+
+<section class="quick-section">
+
+<div class="section-heading">
+
+    <h3>
+        Quick Access
+    </h3>
+
+    <span>
+        Project Modules
+    </span>
+
+</div>
+
+
+<div class="quick-grid">
+
+
+<div class="quick-card">
+
+    <div class="quick-icon">
+        🚜
+    </div>
+
+    <h4>
+        Rover Control
+    </h4>
+
+    <p>
+        Control rover movement and
+        spray pump from the control panel.
+    </p>
+
+    <a href="/rover">
+        Open Control →
+    </a>
+
+</div>
+
+
+<div class="quick-card">
+
+    <div class="quick-icon">
+        📁
+    </div>
+
+    <h4>
+        Prediction History
+    </h4>
+
+    <p>
+        View previously analyzed plant
+        leaf images and AI results.
+    </p>
+
+    <a href="/dataset">
+        View Dataset →
+    </a>
+
+</div>
+
+
+<div class="quick-card">
+
+    <div class="quick-icon">
+        📊
+    </div>
+
+    <h4>
+        Analytics
+    </h4>
+
+    <p>
+        View plant disease statistics
+        and prediction graphs.
+    </p>
+
+    <a href="/analytics">
+        View Analytics →
+    </a>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<footer>
+
+Precision Agriculture Smart Rover
+&nbsp;•&nbsp;
+AI-Based Plant Leaf Disease Detection System
+
+</footer>
+
+
+</div>
+
+</div>
+
+
+<!-- =========================================================
+     LIVE INDICATOR
+========================================================= -->
+
+<div
+    class="live-update"
+    id="live-indicator">
+
+    <span class="live-update-dot"></span>
+
+    <span id="live-update-text">
+        Connecting...
+    </span>
+
+</div>
+
+
+<!-- =========================================================
+     LIVE JAVASCRIPT
+========================================================= -->
+
+<script>
+
+
+/* =========================================================
+   LIVE MONITORING VARIABLES
+========================================================= */
+
+let lastResultKey = "";
+
+let firstLoad = true;
+
+let requestInProgress = false;
+
+
+/* =========================================================
+   CREATE UNIQUE RESULT KEY
+========================================================= */
+
+function makeResultKey(result) {
+
+    return [
+
+        result.result_id || "",
+
+        result.timestamp || "",
+
+        result.image || "",
+
+        result.disease || "",
+
+        result.confidence || ""
+
+    ].join("|");
+
+}
+
+
+/* =========================================================
+   SET TEXT HELPER
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE STATISTICS
+========================================================= */
+
+function updateStatistics(
+    statistics
+) {
+
+    if (!statistics) {
+
+        return;
+
+    }
+
+
+    const total =
+        Number(
+            statistics.total || 0
+        );
+
+
+    const healthy =
+        Number(
+            statistics.healthy || 0
+        );
+
+
+    const diseased =
+        Number(
+            statistics.diseased || 0
+        );
+
+
+    setText(
+        "total-predictions",
+        total
+    );
+
+
+    setText(
+        "healthy-predictions",
+        healthy
+    );
+
+
+    setText(
+        "diseased-predictions",
+        diseased
+    );
+
+
+    const healthyPercentage =
+        total > 0
+        ? (
+            healthy /
+            total *
+            100
+        ).toFixed(1)
+        : "0.0";
+
+
+    const diseasedPercentage =
+        total > 0
+        ? (
+            diseased /
+            total *
+            100
+        ).toFixed(1)
+        : "0.0";
+
+
+    setText(
+        "healthy-percent",
+        healthyPercentage +
+        "% of all predictions"
+    );
+
+
+    setText(
+        "diseased-percent",
+        diseasedPercentage +
+        "% of all predictions"
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE IMAGE
+========================================================= */
+
+function updateImage(
+    filename
+) {
+
+    if (!filename) {
+
+        return;
+
+    }
+
+
+    const imageBox =
+        document.getElementById(
+            "image-box"
+        );
+
+
+    if (!imageBox) {
+
+        return;
+
+    }
+
+
+    let imageElement =
+        document.getElementById(
+            "latest-leaf-image"
+        );
+
+
+    /*
+     * Create image if necessary.
+     */
+
+    if (!imageElement) {
+
+        imageBox.innerHTML = "";
+
+
+        imageElement =
+            document.createElement(
+                "img"
+            );
+
+
+        imageElement.id =
+            "latest-leaf-image";
+
+
+        imageElement.alt =
+            "Latest Plant Leaf";
+
+
+        imageElement.style.width =
+            "100%";
+
+
+        imageElement.style.height =
+            "100%";
+
+
+        imageElement.style.objectFit =
+            "contain";
+
+
+        imageBox.appendChild(
+            imageElement
+        );
+
+    }
+
+
+    /*
+     * Cache-busting URL.
+     */
+
+    const imageUrl =
+
+        "/static/images/" +
+
+        encodeURIComponent(
+            filename
+        ) +
+
+        "?live=" +
+
+        Date.now();
+
+
+    imageElement.src =
+        imageUrl;
+
+
+    setText(
+        "image-name",
+        filename
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE DASHBOARD RESULT
+========================================================= */
+
+function updateDashboard(
+    result
+) {
+
+    console.log(
+        "Updating dashboard:",
+        result
+    );
+
+
+    /*
+     * Disease
+     */
+
+    setText(
+        "disease-result",
+        result.disease ||
+        "Unknown"
+    );
+
+
+    /*
+     * Chemical
+     */
+
+    setText(
+        "chemical-result",
+        result.chemical ||
+        "Not available"
+    );
+
+
+    /*
+     * Fertilizer
+     */
+
+    setText(
+        "fertilizer-result",
+        result.fertilizer ||
+        "Not available"
+    );
+
+
+    /*
+     * Treatment
+     */
+
+    setText(
+        "treatment-result",
+        result.treatment ||
+        "Not available"
+    );
+
+
+    /*
+     * Image
+     */
+
+    updateImage(
+        result.image || ""
+    );
+
+
+    /*
+     * Analysis status
+     */
+
+    setText(
+        "analysis-status",
+        "NEW ANALYSIS RECEIVED"
+    );
+
+
+    /*
+     * Result status
+     */
+
+    setText(
+        "result-status",
+        "DETECTION COMPLETE"
+    );
+
+
+    /*
+     * Live indicator
+     */
+
+    setText(
+        "live-update-text",
+        "NEW AI RESULT RECEIVED"
+    );
+
+
+    const liveIndicator =
+        document.getElementById(
+            "live-indicator"
+        );
+
+
+    if (liveIndicator) {
+
+        liveIndicator.classList.remove(
+            "live-flash"
+        );
+
+
+        void liveIndicator.offsetWidth;
+
+
+        liveIndicator.classList.add(
+            "live-flash"
+        );
+
+    }
+
+
+    /*
+     * Return to normal message.
+     */
+
+    setTimeout(
+
+        function() {
+
+            setText(
+                "analysis-status",
+                "Latest Analysis"
+            );
+
+
+            setText(
+                "live-update-text",
+                "Live Monitoring"
+            );
+
+        },
+
+        3000
+
+    );
+
+}
+
+
+/* =========================================================
+   CHECK SERVER
+========================================================= */
+
+async function checkForNewResult() {
+
+
+    /*
+     * Don't allow two requests at
+     * the same time.
+     */
+
+    if (requestInProgress) {
+
+        return;
+
+    }
+
+
+    requestInProgress =
+        true;
+
+
+    try {
+
+
+        /*
+         * Create a completely unique URL
+         * every second.
+         *
+         * This prevents browser,
+         * CDN and proxy caching.
+         */
+
+        const url =
+
+            "/api/dashboard-state" +
+
+            "?live=" +
+
+            Date.now() +
+
+            "&random=" +
+
+            Math.random();
+
+
+        console.log(
+            "Checking server..."
+        );
+
+
+        const response =
+            await fetch(
+
+                url,
+
+                {
+
+                    method:
+                        "GET",
+
+                    cache:
+                        "no-store",
+
+                    credentials:
+                        "same-origin",
+
+                    headers: {
+
+                        "Cache-Control":
+                            "no-cache, no-store, must-revalidate",
+
+                        "Pragma":
+                            "no-cache",
+
+                        "Expires":
+                            "0"
+
+                    }
+
+                }
+
+            );
+
+
+        /*
+         * Server returned error.
+         */
+
+        if (!response.ok) {
+
+            console.log(
+                "Server HTTP error:",
+                response.status
+            );
+
+
+            setText(
+                "live-update-text",
+                "SERVER ERROR"
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * Convert response to JSON.
+         */
+
+        const data =
+            await response.json();
+
+
+        /*
+         * Validate response.
+         */
+
+        if (
+            !data ||
+            !data.success
+        ) {
+
+            console.log(
+                "Invalid server response:",
+                data
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * Print server time.
+         */
+
+        console.log(
+            "Server time:",
+            data.server_time ||
+            "not provided"
+        );
+
+
+        /*
+         * Update statistics.
+         */
+
+        updateStatistics(
+            data.statistics
+        );
+
+
+        /*
+         * Get latest result.
+         */
+
+        const result =
+            data.result || {};
+
+
+        /*
+         * Create unique key.
+         */
+
+        const currentResultKey =
+            makeResultKey(
+                result
+            );
+
+
+        /* =================================================
+           FIRST LOAD
+        ================================================= */
+
+        if (firstLoad) {
+
+            lastResultKey =
+                currentResultKey;
+
+
+            firstLoad =
+                false;
+
+
+            console.log(
+                "===================================="
+            );
+
+
+            console.log(
+                "LIVE MONITORING STARTED"
+            );
+
+
+            console.log(
+                "Current result:",
+                result
+            );
+
+
+            console.log(
+                "===================================="
+            );
+
+
+            setText(
+                "live-update-text",
+                "Live Monitoring"
+            );
+
+
+            return;
+
+        }
+
+
+        /* =================================================
+           CHECK FOR NEW RESULT
+        ================================================= */
+
+        if (
+            currentResultKey !==
+            lastResultKey
+        ) {
+
+
+            console.log(
+                "===================================="
+            );
+
+
+            console.log(
+                "NEW AI RESULT RECEIVED!"
+            );
+
+
+            console.log(
+                result
+            );
+
+
+            console.log(
+                "===================================="
+            );
+
+
+            /*
+             * Store new result key.
+             */
+
+            lastResultKey =
+                currentResultKey;
+
+
+            /*
+             * Update entire dashboard
+             * without refreshing page.
+             */
+
+            updateDashboard(
+                result
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+
+        console.log(
+            "Live connection error:",
+            error
+        );
+
+
+        setText(
+            "live-update-text",
+            "WAITING FOR SERVER..."
+        );
+
+    }
+
+    finally {
+
+        requestInProgress =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   START IMMEDIATELY
+========================================================= */
+
+checkForNewResult();
+
+
+/* =========================================================
+   CHECK EVERY 1 SECOND
+========================================================= */
+
+setInterval(
+
+    function() {
+
+        checkForNewResult();
+
+    },
+
+    1000
+
+);
+
+
+</script>
 
 
 </body>
