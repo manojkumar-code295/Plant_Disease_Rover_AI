@@ -1,3 +1,6 @@
+
+
+
 # ============================================================
 # PRECISION AGRICULTURE SMART ROVER
 # COMPLETE FLASK WEBSITE BACKEND
@@ -25,6 +28,24 @@ from flask import (
 app = Flask(__name__)
 
 app.config["JSON_SORT_KEYS"] = False
+
+
+# ============================================================
+# DISABLE CACHING FOR LIVE DASHBOARD / API
+# ============================================================
+
+@app.after_request
+def add_no_cache_headers(response):
+
+    response.headers["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate, "
+        "max-age=0, s-maxage=0"
+    )
+
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 # ============================================================
@@ -727,6 +748,44 @@ def api_result():
 
 
 # ============================================================
+# API - LIVE DASHBOARD STATE
+# ============================================================
+
+@app.route(
+    "/api/dashboard-state",
+    methods=["GET"]
+)
+def api_dashboard_state():
+
+    result = get_latest_result()
+    statistics = get_analytics()
+
+    response = jsonify({
+
+        "success":
+            True,
+
+        "result":
+            result,
+
+        "statistics":
+            statistics,
+
+        "server_time":
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+    response.headers["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate, "
+        "max-age=0, s-maxage=0"
+    )
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
+
+# ============================================================
 # API - GET HISTORY
 # ============================================================
 
@@ -954,6 +1013,9 @@ def update_result():
 
 
         result = {
+
+            "result_id":
+                uuid.uuid4().hex,
 
             "image":
                 filename,
