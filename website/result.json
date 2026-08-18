@@ -1,7 +1,8 @@
 {
-    "image": "IMG_20250620_143057.jpg",
-    "disease": "Curl Virus",
-    "chemical": "Insecticide for whitefly/vector control",
+    "image": "Bacterial_Spot_001.jpg",
+    "disease": "Bacterial Spot",
+    "chemical": "Copper oxychloride-based bactericide",
     "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Remove severely affected leaves and control insect vectors."
+    "treatment": "Remove infected leaves and avoid excess moisture.",
+    "confidence": 99.49
 }
