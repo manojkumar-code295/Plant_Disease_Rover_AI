@@ -14,6 +14,25 @@
 <meta name="description"
       content="Precision Agriculture Smart Rover - AI Plant Disease Detection">
 
+<!-- =========================================================
+     PWA / MOBILE APP
+========================================================= -->
+
+<link rel="manifest"
+      href="{{ url_for('static', filename='manifest.json') }}">
+
+<meta name="mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent">
+
+<meta name="apple-mobile-web-app-title"
+      content="Smart Rover">
+
 <title>Precision Agriculture Smart Rover</title>
 
 
@@ -82,9 +101,7 @@ button {
 .logo {
     padding: 5px 12px 25px;
 
-    border-bottom:
-        1px solid
-        rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .logo-icon {
@@ -110,8 +127,7 @@ button {
     font-weight: bold;
     letter-spacing: 1.2px;
 
-    margin:
-        28px 12px 10px;
+    margin: 28px 12px 10px;
 
     text-transform: uppercase;
 }
@@ -145,9 +161,7 @@ button {
     background: #2d7653;
     color: white;
 
-    box-shadow:
-        0 5px 15px
-        rgba(0,0,0,0.15);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
 }
 
 .menu-icon {
@@ -170,8 +184,7 @@ button {
 }
 
 .connection-box {
-    background:
-        rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.07);
 
     border-radius: 11px;
 
@@ -206,9 +219,7 @@ button {
 
     border-radius: 50%;
 
-    box-shadow:
-        0 0 8px
-        rgba(54,212,119,0.7);
+    box-shadow: 0 0 8px rgba(54,212,119,0.7);
 }
 
 
@@ -219,8 +230,7 @@ button {
 .main {
     margin-left: 245px;
 
-    width:
-        calc(100% - 245px);
+    width: calc(100% - 245px);
 
     min-height: 100vh;
 }
@@ -235,9 +245,7 @@ button {
 
     background: white;
 
-    border-bottom:
-        1px solid
-        #e5ebe7;
+    border-bottom: 1px solid #e5ebe7;
 
     display: flex;
 
@@ -245,8 +253,7 @@ button {
 
     justify-content: space-between;
 
-    padding:
-        15px 38px;
+    padding: 15px 38px;
 
     position: sticky;
     top: 0;
@@ -277,18 +284,30 @@ button {
 
     color: #168044;
 
-    border:
-        1px solid
-        #ccebd7;
+    border: 1px solid #ccebd7;
 
-    padding:
-        9px 15px;
+    padding: 9px 15px;
 
     border-radius: 30px;
 
     font-size: 12px;
 
     font-weight: bold;
+}
+
+
+/* =========================================================
+   ONLINE / OFFLINE
+========================================================= */
+
+.online-mode {
+    background: #edf9f1 !important;
+    color: #168044 !important;
+}
+
+.offline-mode {
+    background: #7f1d1d !important;
+    color: white !important;
 }
 
 
@@ -334,8 +353,7 @@ button {
 .statistics-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 18px;
 
@@ -345,17 +363,13 @@ button {
 .stat-card {
     background: white;
 
-    border:
-        1px solid
-        #e7ece9;
+    border: 1px solid #e7ece9;
 
     border-radius: 15px;
 
     padding: 20px;
 
-    box-shadow:
-        0 5px 20px
-        rgba(20,60,40,0.04);
+    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
 
     position: relative;
 
@@ -477,8 +491,7 @@ button {
 .detection-grid {
     display: grid;
 
-    grid-template-columns:
-        1.05fr 1fr;
+    grid-template-columns: 1.05fr 1fr;
 
     gap: 22px;
 }
@@ -486,15 +499,11 @@ button {
 .card {
     background: white;
 
-    border:
-        1px solid
-        #e7ece9;
+    border: 1px solid #e7ece9;
 
     border-radius: 16px;
 
-    box-shadow:
-        0 5px 20px
-        rgba(20,60,40,0.05);
+    box-shadow: 0 5px 20px rgba(20,60,40,0.05);
 }
 
 
@@ -553,9 +562,7 @@ button {
 
     align-items: center;
 
-    border:
-        1px solid
-        #dfe9e2;
+    border: 1px solid #dfe9e2;
 }
 
 .image-box img {
@@ -629,16 +636,13 @@ button {
 }
 
 .detection-result {
-    background:
-        linear-gradient(
-            135deg,
-            #edf8f0,
-            #f7fbf8
-        );
+    background: linear-gradient(
+        135deg,
+        #edf8f0,
+        #f7fbf8
+    );
 
-    border:
-        1px solid
-        #d9ebde;
+    border: 1px solid #d9ebde;
 
     border-radius: 13px;
 
@@ -690,9 +694,7 @@ button {
 
     padding: 14px 0;
 
-    border-bottom:
-        1px solid
-        #edf0ee;
+    border-bottom: 1px solid #edf0ee;
 }
 
 .info-icon {
@@ -806,8 +808,7 @@ button {
 
     border-radius: 20px;
 
-    transition:
-        width 0.5s ease;
+    transition: width 0.5s ease;
 }
 
 
@@ -822,8 +823,7 @@ button {
 .status-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 18px;
 }
@@ -831,9 +831,7 @@ button {
 .status-card {
     background: white;
 
-    border:
-        1px solid
-        #e7ece9;
+    border: 1px solid #e7ece9;
 
     border-radius: 14px;
 
@@ -845,9 +843,7 @@ button {
 
     gap: 15px;
 
-    box-shadow:
-        0 5px 20px
-        rgba(20,60,40,0.04);
+    box-shadow: 0 5px 20px rgba(20,60,40,0.04);
 }
 
 .status-icon {
@@ -901,8 +897,7 @@ button {
 .quick-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
 
     gap: 18px;
 }
@@ -910,9 +905,7 @@ button {
 .quick-card {
     background: white;
 
-    border:
-        1px solid
-        #e7ece9;
+    border: 1px solid #e7ece9;
 
     border-radius: 14px;
 
@@ -924,9 +917,7 @@ button {
 .quick-card:hover {
     transform: translateY(-2px);
 
-    box-shadow:
-        0 8px 22px
-        rgba(20,60,40,0.07);
+    box-shadow: 0 8px 22px rgba(20,60,40,0.07);
 }
 
 .quick-icon {
@@ -986,9 +977,7 @@ button {
 
     font-weight: bold;
 
-    box-shadow:
-        0 5px 18px
-        rgba(0,0,0,0.15);
+    box-shadow: 0 5px 18px rgba(0,0,0,0.15);
 
     z-index: 9999;
 
@@ -1007,15 +996,11 @@ button {
 
     margin-right: 7px;
 
-    box-shadow:
-        0 0 7px
-        rgba(54,212,119,0.8);
+    box-shadow: 0 0 7px rgba(54,212,119,0.8);
 }
 
 .live-flash {
-    animation:
-        liveFlash 0.7s
-        ease-in-out 2;
+    animation: liveFlash 0.7s ease-in-out 2;
 }
 
 @keyframes liveFlash {
@@ -1024,6 +1009,73 @@ button {
         transform: scale(1.05);
     }
 
+}
+
+
+/* =========================================================
+   UPDATE EFFECT
+========================================================= */
+
+.updated {
+    animation: updateGlow 0.8s ease;
+}
+
+@keyframes updateGlow {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+
+/* =========================================================
+   INSTALL APP BUTTON
+========================================================= */
+
+.install-app-button {
+
+    display: none;
+
+    position: fixed;
+
+    left: 50%;
+
+    bottom: 82px;
+
+    transform: translateX(-50%);
+
+    background: #2d7653;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 25px;
+
+    padding: 11px 18px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+
+    z-index: 10000;
+
+    cursor: pointer;
+}
+
+.install-app-button:hover {
+    background: #23613e;
 }
 
 
@@ -1069,15 +1121,13 @@ footer {
     .sidebar {
         width: 70px;
 
-        padding:
-            20px 8px;
+        padding: 20px 8px;
     }
 
     .logo {
         text-align: center;
 
-        padding:
-            5px 0 20px;
+        padding: 5px 0 20px;
     }
 
     .logo h1,
@@ -1090,8 +1140,7 @@ footer {
     .menu a {
         justify-content: center;
 
-        padding:
-            13px 5px;
+        padding: 13px 5px;
     }
 
     .menu-icon {
@@ -1101,18 +1150,15 @@ footer {
     .main {
         margin-left: 70px;
 
-        width:
-            calc(100% - 70px);
+        width: calc(100% - 70px);
     }
 
     .topbar {
-        padding:
-            15px 20px;
+        padding: 15px 20px;
     }
 
     .content {
-        padding:
-            25px 20px;
+        padding: 25px 20px;
     }
 
     .statistics-grid,
@@ -1143,8 +1189,7 @@ footer {
     .topbar {
         min-height: 65px;
 
-        padding:
-            10px 15px;
+        padding: 10px 15px;
     }
 
     .topbar-title h2 {
@@ -1156,15 +1201,13 @@ footer {
     }
 
     .system-badge {
-        padding:
-            7px 10px;
+        padding: 7px 10px;
 
         font-size: 10px;
     }
 
     .content {
-        padding:
-            20px 14px;
+        padding: 20px 14px;
     }
 
     .welcome h1 {
@@ -1197,8 +1240,7 @@ footer {
 
         font-size: 9px;
 
-        padding:
-            8px 11px;
+        padding: 8px 11px;
     }
 
     .mobile-nav {
@@ -1212,22 +1254,17 @@ footer {
 
         background: white;
 
-        border-top:
-            1px solid
-            #dfe7e2;
+        border-top: 1px solid #dfe7e2;
 
         display: flex;
 
-        justify-content:
-            space-around;
+        justify-content: space-around;
 
         align-items: center;
 
         z-index: 9998;
 
-        box-shadow:
-            0 -5px 20px
-            rgba(0,0,0,0.08);
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.08);
     }
 
     .mobile-nav a {
@@ -1252,33 +1289,6 @@ footer {
 
     .mobile-nav a.active {
         color: #28734e;
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE EFFECT
-========================================================= */
-
-.updated {
-    animation:
-        updateGlow 0.8s
-        ease;
-}
-
-@keyframes updateGlow {
-
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.02);
-    }
-
-    100% {
-        transform: scale(1);
     }
 
 }
@@ -1417,7 +1427,8 @@ footer {
     </div>
 
 
-    <div class="system-badge">
+    <div class="system-badge"
+         id="system-badge">
 
         <span class="green-dot"></span>
 
@@ -1432,10 +1443,6 @@ footer {
 
 <main class="content">
 
-
-<!-- =========================================================
-     WELCOME
-========================================================= -->
 
 <section class="welcome">
 
@@ -1472,15 +1479,12 @@ footer {
 
     </div>
 
-
-    <div
-        class="stat-number"
-        id="total-predictions">
+    <div class="stat-number"
+         id="total-predictions">
 
         {{ statistics.total }}
 
     </div>
-
 
     <div class="stat-subtitle">
         Total AI analyses
@@ -1503,19 +1507,15 @@ footer {
 
     </div>
 
-
-    <div
-        class="stat-number healthy-number"
-        id="healthy-predictions">
+    <div class="stat-number healthy-number"
+         id="healthy-predictions">
 
         {{ statistics.healthy }}
 
     </div>
 
-
-    <div
-        class="stat-subtitle"
-        id="healthy-percent">
+    <div class="stat-subtitle"
+         id="healthy-percent">
 
         {% if statistics.total > 0 %}
 
@@ -1549,19 +1549,15 @@ footer {
 
     </div>
 
-
-    <div
-        class="stat-number diseased-number"
-        id="diseased-predictions">
+    <div class="stat-number diseased-number"
+         id="diseased-predictions">
 
         {{ statistics.diseased }}
 
     </div>
 
-
-    <div
-        class="stat-subtitle"
-        id="diseased-percent">
+    <div class="stat-subtitle"
+         id="diseased-percent">
 
         {% if statistics.total > 0 %}
 
@@ -1623,9 +1619,8 @@ footer {
     </div>
 
 
-    <div
-        class="image-box"
-        id="image-box">
+    <div class="image-box"
+         id="image-box">
 
         {% if detection.image %}
 
@@ -1639,9 +1634,8 @@ footer {
 
         {% else %}
 
-        <div
-            class="image-placeholder"
-            id="image-placeholder">
+        <div class="image-placeholder"
+             id="image-placeholder">
 
             🌿
 
@@ -1652,9 +1646,8 @@ footer {
     </div>
 
 
-    <div
-        class="image-name"
-        id="image-name">
+    <div class="image-name"
+         id="image-name">
 
         {{ detection.image or "No image available" }}
 
@@ -1688,17 +1681,14 @@ footer {
             DETECTED DISEASE
         </small>
 
-
         <h1 id="disease-result">
 
             {{ detection.disease }}
 
         </h1>
 
-
-        <span
-            class="result-status"
-            id="result-status">
+        <span class="result-status"
+              id="result-status">
 
             DETECTION COMPLETE
 
@@ -1768,8 +1758,6 @@ footer {
     </div>
 
 
-    <!-- CONFIDENCE -->
-
     <div class="confidence-box">
 
         <div class="confidence-header">
@@ -1779,7 +1767,9 @@ footer {
             </span>
 
             <span id="confidence-value">
+
                 {{ detection.confidence or 0 }}%
+
             </span>
 
         </div>
@@ -1787,10 +1777,9 @@ footer {
 
         <div class="progress">
 
-            <div
-                class="progress-bar"
-                id="confidence-bar"
-                style="width: {{ detection.confidence or 0 }}%;">
+            <div class="progress-bar"
+                 id="confidence-bar"
+                 style="width: {{ detection.confidence or 0 }}%;">
 
             </div>
 
@@ -1838,9 +1827,8 @@ footer {
             AI MODEL
         </span>
 
-        <strong
-            class="status-online"
-            id="ai-status">
+        <strong class="status-online"
+                id="ai-status">
 
             ONLINE
 
@@ -1863,9 +1851,8 @@ footer {
             ROVER
         </span>
 
-        <strong
-            id="rover-status"
-            class="status-offline">
+        <strong id="rover-status"
+                class="status-offline">
 
             NOT CONNECTED
 
@@ -1888,9 +1875,8 @@ footer {
             SPRAY PUMP
         </span>
 
-        <strong
-            id="pump-status"
-            class="status-offline">
+        <strong id="pump-status"
+                class="status-offline">
 
             OFF
 
@@ -2070,12 +2056,24 @@ AI-Based Plant Leaf Disease Detection System
 
 
 <!-- =========================================================
+     INSTALL APP BUTTON
+========================================================= -->
+
+<button
+    id="install-app-button"
+    class="install-app-button">
+
+    📱 Install Smart Rover App
+
+</button>
+
+
+<!-- =========================================================
      LIVE INDICATOR
 ========================================================= -->
 
-<div
-    class="live-update"
-    id="live-indicator">
+<div class="live-update"
+     id="live-indicator">
 
     <span class="live-update-dot"></span>
 
@@ -2087,31 +2085,10 @@ AI-Based Plant Leaf Disease Detection System
 
 
 <!-- =========================================================
-     LIVE JAVASCRIPT
+     JAVASCRIPT
 ========================================================= -->
 
 <script>
-
-/*
-=========================================================
-PRECISION AGRICULTURE SMART ROVER
-LIVE DASHBOARD ENGINE
-
-IMPORTANT:
-
-This page does NOT need browser refresh.
-
-It asks Flask for fresh data continuously.
-
-API:
-
-/api/dashboard-state
-/api/rover/status
-
-Cache busting is added to every request.
-=========================================================
-*/
-
 
 let lastResultKey = "";
 
@@ -2120,6 +2097,8 @@ let firstLoad = true;
 let requestInProgress = false;
 
 let consecutiveErrors = 0;
+
+let deferredInstallPrompt = null;
 
 
 /* =========================================================
@@ -2148,27 +2127,18 @@ function setText(id, value) {
 function makeResultKey(result) {
 
     if (!result) {
-
         return "";
-
     }
 
     return [
 
         result.result_id || "",
-
         result.timestamp || "",
-
         result.image || "",
-
         result.disease || "",
-
         result.confidence || "",
-
         result.chemical || "",
-
         result.fertilizer || "",
-
         result.treatment || ""
 
     ].join("|");
@@ -2177,17 +2147,14 @@ function makeResultKey(result) {
 
 
 /* =========================================================
-   UPDATE STATISTICS
+   STATISTICS
 ========================================================= */
 
 function updateStatistics(statistics) {
 
     if (!statistics) {
-
         return;
-
     }
-
 
     const total =
         Number(statistics.total || 0);
@@ -2204,12 +2171,10 @@ function updateStatistics(statistics) {
         total
     );
 
-
     setText(
         "healthy-predictions",
         healthy
     );
-
 
     setText(
         "diseased-predictions",
@@ -2246,15 +2211,100 @@ function updateStatistics(statistics) {
 
 
 /* =========================================================
+   UPDATE IMAGE
+========================================================= */
+
+function updateImage(filename) {
+
+    const imageBox =
+        document.getElementById(
+            "image-box"
+        );
+
+    if (!imageBox) {
+        return;
+    }
+
+    if (!filename) {
+        return;
+    }
+
+
+    let image =
+        document.getElementById(
+            "latest-leaf-image"
+        );
+
+
+    if (!image) {
+
+        imageBox.innerHTML = "";
+
+        image =
+            document.createElement("img");
+
+        image.id =
+            "latest-leaf-image";
+
+        image.alt =
+            "Latest Plant Leaf";
+
+        image.style.width =
+            "100%";
+
+        image.style.height =
+            "100%";
+
+        image.style.objectFit =
+            "contain";
+
+        imageBox.appendChild(image);
+
+    }
+
+
+    /*
+       CACHE PROTECTION
+
+       Every camera image receives
+       a unique URL.
+    */
+
+    const imageURL =
+
+        "/static/images/" +
+
+        encodeURIComponent(filename) +
+
+        "?v=" +
+
+        Date.now() +
+
+        "&r=" +
+
+        Math.random();
+
+
+    image.src =
+        imageURL;
+
+
+    setText(
+        "image-name",
+        filename
+    );
+
+}
+
+
+/* =========================================================
    UPDATE RESULT
 ========================================================= */
 
 function updateResult(result) {
 
     if (!result) {
-
         return;
-
     }
 
 
@@ -2286,8 +2336,6 @@ function updateResult(result) {
     );
 
 
-    /* Confidence */
-
     const confidence =
         Number(
             result.confidence || 0
@@ -2309,6 +2357,7 @@ function updateResult(result) {
     if (confidenceBar) {
 
         confidenceBar.style.width =
+
             Math.max(
                 0,
                 Math.min(
@@ -2320,14 +2369,14 @@ function updateResult(result) {
     }
 
 
-    /* Image */
-
     updateImage(
         result.image
     );
 
 
-    /* Animation */
+    /*
+       Animation
+    */
 
     const cards =
         document.querySelectorAll(
@@ -2407,97 +2456,7 @@ function updateResult(result) {
 
 
 /* =========================================================
-   UPDATE IMAGE
-========================================================= */
-
-function updateImage(filename) {
-
-    const imageBox =
-        document.getElementById(
-            "image-box"
-        );
-
-
-    if (!imageBox) {
-
-        return;
-
-    }
-
-
-    if (!filename) {
-
-        return;
-
-    }
-
-
-    let image =
-        document.getElementById(
-            "latest-leaf-image"
-        );
-
-
-    if (!image) {
-
-        imageBox.innerHTML = "";
-
-
-        image =
-            document.createElement(
-                "img"
-            );
-
-
-        image.id =
-            "latest-leaf-image";
-
-
-        image.alt =
-            "Latest Plant Leaf";
-
-
-        imageBox.appendChild(
-            image
-        );
-
-    }
-
-
-    /*
-     IMPORTANT:
-
-     Timestamp prevents browser from showing
-     the previous image.
-    */
-
-    const imageURL =
-
-        "/static/images/" +
-
-        encodeURIComponent(
-            filename
-        ) +
-
-        "?v=" +
-
-        Date.now();
-
-
-    image.src =
-        imageURL;
-
-
-    setText(
-        "image-name",
-        filename
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE ROVER
+   ROVER STATUS
 ========================================================= */
 
 async function updateRoverStatus() {
@@ -2505,8 +2464,16 @@ async function updateRoverStatus() {
     try {
 
         const url =
-            "/api/rover/status?v=" +
-            Date.now();
+
+            "/api/rover/status" +
+
+            "?v=" +
+
+            Date.now() +
+
+            "&r=" +
+
+            Math.random();
 
 
         const response =
@@ -2514,24 +2481,32 @@ async function updateRoverStatus() {
                 url,
                 {
                     method: "GET",
+
                     cache: "no-store",
-                    credentials: "same-origin",
+
+                    credentials:
+                        "same-origin",
 
                     headers: {
+
                         "Cache-Control":
                             "no-cache, no-store, must-revalidate",
 
                         "Pragma":
-                            "no-cache"
+                            "no-cache",
+
+                        "Expires":
+                            "0",
+
+                        "Accept":
+                            "application/json"
                     }
                 }
             );
 
 
         if (!response.ok) {
-
             return;
-
         }
 
 
@@ -2544,9 +2519,7 @@ async function updateRoverStatus() {
             !data.success ||
             !data.rover
         ) {
-
             return;
-
         }
 
 
@@ -2570,7 +2543,9 @@ async function updateRoverStatus() {
                 roverStatus.className =
                     "status-online";
 
-            } else {
+            }
+
+            else {
 
                 roverStatus.textContent =
                     "NOT CONNECTED";
@@ -2599,7 +2574,9 @@ async function updateRoverStatus() {
                 pumpStatus.className =
                     "status-online";
 
-            } else {
+            }
+
+            else {
 
                 pumpStatus.textContent =
                     "OFF";
@@ -2626,30 +2603,20 @@ async function updateRoverStatus() {
 
 
 /* =========================================================
-   MAIN LIVE UPDATE
+   MAIN LIVE DASHBOARD
 ========================================================= */
 
 async function checkDashboard() {
 
     if (requestInProgress) {
-
         return;
-
     }
 
 
-    requestInProgress =
-        true;
+    requestInProgress = true;
 
 
     try {
-
-        /*
-        Generate a NEW URL every time.
-
-        This is extremely important for
-        Render + browser + CDN caching.
-        */
 
         const url =
 
@@ -2664,11 +2631,6 @@ async function checkDashboard() {
             Math.random();
 
 
-        console.log(
-            "Checking live dashboard..."
-        );
-
-
         const response =
             await fetch(
 
@@ -2679,7 +2641,8 @@ async function checkDashboard() {
 
                     cache: "no-store",
 
-                    credentials: "same-origin",
+                    credentials:
+                        "same-origin",
 
                     headers: {
 
@@ -2730,7 +2693,7 @@ async function checkDashboard() {
 
 
         /*
-        SERVER IS WORKING
+           SERVER ONLINE
         */
 
         setText(
@@ -2745,8 +2708,27 @@ async function checkDashboard() {
         );
 
 
+        const systemBadge =
+            document.getElementById(
+                "system-badge"
+            );
+
+
+        if (systemBadge) {
+
+            systemBadge.classList.remove(
+                "offline-mode"
+            );
+
+            systemBadge.classList.add(
+                "online-mode"
+            );
+
+        }
+
+
         /*
-        UPDATE STATISTICS
+           STATISTICS
         */
 
         updateStatistics(
@@ -2755,7 +2737,7 @@ async function checkDashboard() {
 
 
         /*
-        UPDATE SERVER TIME
+           SERVER TIME
         */
 
         if (data.server_time) {
@@ -2770,7 +2752,7 @@ async function checkDashboard() {
 
 
         /*
-        GET RESULT
+           RESULT
         */
 
         const result =
@@ -2778,13 +2760,11 @@ async function checkDashboard() {
 
 
         const currentKey =
-            makeResultKey(
-                result
-            );
+            makeResultKey(result);
 
 
         /*
-        FIRST LOAD
+           FIRST LOAD
         */
 
         if (firstLoad) {
@@ -2796,11 +2776,6 @@ async function checkDashboard() {
                 false;
 
 
-            /*
-            Make sure dashboard has
-            current data immediately.
-            */
-
             updateResult(
                 result
             );
@@ -2810,11 +2785,11 @@ async function checkDashboard() {
                 "LIVE MONITORING STARTED"
             );
 
-
         }
 
+
         /*
-        NEW RESULT
+           NEW RESULT
         */
 
         else if (
@@ -2837,7 +2812,6 @@ async function checkDashboard() {
 
         }
 
-
     }
 
     catch(error) {
@@ -2855,6 +2829,25 @@ async function checkDashboard() {
             "system-status-text",
             "Connecting..."
         );
+
+
+        const systemBadge =
+            document.getElementById(
+                "system-badge"
+            );
+
+
+        if (systemBadge) {
+
+            systemBadge.classList.remove(
+                "online-mode"
+            );
+
+            systemBadge.classList.add(
+                "offline-mode"
+            );
+
+        }
 
 
         if (
@@ -2881,7 +2874,191 @@ async function checkDashboard() {
 
 
 /* =========================================================
-   START LIVE SYSTEM
+   PWA INSTALL PROMPT
+========================================================= */
+
+window.addEventListener(
+    "beforeinstallprompt",
+    function(event) {
+
+        /*
+           Stop browser's automatic prompt.
+        */
+
+        event.preventDefault();
+
+
+        deferredInstallPrompt =
+            event;
+
+
+        const installButton =
+            document.getElementById(
+                "install-app-button"
+            );
+
+
+        if (installButton) {
+
+            installButton.style.display =
+                "block";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INSTALL APP
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        const installButton =
+            document.getElementById(
+                "install-app-button"
+            );
+
+
+        if (!installButton) {
+            return;
+        }
+
+
+        installButton.addEventListener(
+            "click",
+            async function() {
+
+                if (!deferredInstallPrompt) {
+
+                    console.log(
+                        "Install prompt not available."
+                    );
+
+                    return;
+
+                }
+
+
+                deferredInstallPrompt.prompt();
+
+
+                const choice =
+                    await deferredInstallPrompt.userChoice;
+
+
+                console.log(
+                    "Install result:",
+                    choice.outcome
+                );
+
+
+                deferredInstallPrompt =
+                    null;
+
+
+                installButton.style.display =
+                    "none";
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   APP INSTALLED
+========================================================= */
+
+window.addEventListener(
+    "appinstalled",
+    function() {
+
+        console.log(
+            "Precision Agriculture Smart Rover installed."
+        );
+
+
+        const installButton =
+            document.getElementById(
+                "install-app-button"
+            );
+
+
+        if (installButton) {
+
+            installButton.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            navigator.serviceWorker.register(
+                "{{ url_for(
+                    'static',
+                    filename='service-worker.js'
+                ) }}"
+            )
+
+            .then(
+                function(registration) {
+
+                    console.log(
+                        "=========================================="
+                    );
+
+                    console.log(
+                        "SMART ROVER SERVICE WORKER REGISTERED"
+                    );
+
+                    console.log(
+                        "Scope:",
+                        registration.scope
+                    );
+
+                    console.log(
+                        "=========================================="
+                    );
+
+                }
+            )
+
+            .catch(
+                function(error) {
+
+                    console.error(
+                        "Service worker registration failed:",
+                        error
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START SYSTEM
 ========================================================= */
 
 console.log(
@@ -2902,9 +3079,7 @@ console.log(
 
 
 /*
-IMPORTANT:
-
-Run immediately.
+   Run immediately.
 */
 
 checkDashboard();
@@ -2913,7 +3088,7 @@ updateRoverStatus();
 
 
 /*
-Check dashboard every 1 second.
+   Check AI dashboard every 1 second.
 */
 
 setInterval(
@@ -2923,7 +3098,7 @@ setInterval(
 
 
 /*
-Check rover every 1 second.
+   Check rover every 1 second.
 */
 
 setInterval(
@@ -2932,10 +3107,9 @@ setInterval(
 );
 
 
-/*
-When user returns to the app/browser,
-immediately check again.
-*/
+/* =========================================================
+   VISIBILITY CHANGE
+========================================================= */
 
 document.addEventListener(
     "visibilitychange",
@@ -2945,6 +3119,10 @@ document.addEventListener(
             document.visibilityState ===
             "visible"
         ) {
+
+            console.log(
+                "App became visible. Updating data..."
+            );
 
             checkDashboard();
 
@@ -2956,10 +3134,9 @@ document.addEventListener(
 );
 
 
-/*
-When internet connection comes back,
-immediately check server.
-*/
+/* =========================================================
+   INTERNET RESTORED
+========================================================= */
 
 window.addEventListener(
     "online",
@@ -2969,6 +3146,7 @@ window.addEventListener(
             "Internet connection restored."
         );
 
+
         checkDashboard();
 
         updateRoverStatus();
@@ -2976,6 +3154,52 @@ window.addEventListener(
     }
 );
 
+
+/* =========================================================
+   INTERNET LOST
+========================================================= */
+
+window.addEventListener(
+    "offline",
+    function() {
+
+        console.log(
+            "Internet connection lost."
+        );
+
+
+        setText(
+            "system-status-text",
+            "Offline"
+        );
+
+
+        setText(
+            "live-update-text",
+            "No Internet Connection"
+        );
+
+
+        const systemBadge =
+            document.getElementById(
+                "system-badge"
+            );
+
+
+        if (systemBadge) {
+
+            systemBadge.classList.remove(
+                "online-mode"
+            );
+
+            systemBadge.classList.add(
+                "offline-mode"
+            );
+
+        }
+
+    }
+);
 
 </script>
 

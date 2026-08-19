@@ -1,15 +1,15 @@
 # ============================================================
-# CHILI DISEASE AI - PREDICTION PROGRAM
-# Precision Agriculture Smart Rover
+# PRECISION AGRICULTURE SMART ROVER
+# CHILI DISEASE AI PREDICTION SYSTEM
 # ============================================================
 
+import tensorflow as tf
+import numpy as np
+import cv2
 import os
 import json
-import shutil
-import mimetypes
+import time
 import requests
-import numpy as np
-import tensorflow as tf
 
 from PIL import Image
 from tkinter import Tk, filedialog
@@ -19,18 +19,24 @@ from tkinter import Tk, filedialog
 # SETTINGS
 # ============================================================
 
-# Online Render website
 WEBSITE_URL = "https://precision-agriculture-smart-rover.onrender.com"
 
-# AI model
 MODEL_PATH = "chili_disease_model.keras"
+CLASS_NAMES_FILE = "class_names.txt"
 
-# Image size expected by the model
 IMAGE_SIZE = (224, 224)
 
-# Minimum confidence required
-# 80% = strict prediction
-CONFIDENCE_THRESHOLD = 0.80
+CONFIDENCE_THRESHOLD = 0.60
+
+MIN_LEAF_AREA = 5000
+
+PADDING = 20
+
+CROP_FOLDER = "cropped_leaves"
+
+API_TIMEOUT = 90
+
+MAX_API_RETRIES = 3
 
 
 # ============================================================
@@ -46,81 +52,53 @@ MODEL_FILE = os.path.join(
     MODEL_PATH
 )
 
-CLASS_NAMES_FILE = os.path.join(
+CLASS_FILE = os.path.join(
     BASE_DIR,
-    "class_names.txt"
+    CLASS_NAMES_FILE
 )
 
-WEBSITE_FOLDER = os.path.join(
+CROP_FOLDER_PATH = os.path.join(
     BASE_DIR,
-    "website"
+    CROP_FOLDER
 )
-
-RESULT_FILE = os.path.join(
-    WEBSITE_FOLDER,
-    "result.json"
-)
-
-IMAGE_FOLDER = os.path.join(
-    WEBSITE_FOLDER,
-    "static",
-    "images"
-)
-
-
-# ============================================================
-# CREATE REQUIRED FOLDERS
-# ============================================================
 
 os.makedirs(
-    IMAGE_FOLDER,
+    CROP_FOLDER_PATH,
     exist_ok=True
 )
 
 
 # ============================================================
-# CHECK MODEL
+# CHECK REQUIRED FILES
 # ============================================================
+
+print()
+print("=" * 60)
+print("       CHILI DISEASE AI SYSTEM")
+print("=" * 60)
+print()
 
 if not os.path.exists(MODEL_FILE):
 
-    print("\nERROR: AI model not found.")
-
-    print("\nExpected model:")
+    print("ERROR: AI model not found:")
     print(MODEL_FILE)
-
-    print("\nMake sure this file exists:")
-    print("chili_disease_model.keras")
-
-    input("\nPress Enter to exit...")
-    exit()
+    input("Press Enter to close...")
+    raise SystemExit
 
 
-# ============================================================
-# CHECK CLASS NAMES
-# ============================================================
+if not os.path.exists(CLASS_FILE):
 
-if not os.path.exists(CLASS_NAMES_FILE):
-
-    print("\nERROR: class_names.txt not found.")
-
-    print("\nExpected file:")
-    print(CLASS_NAMES_FILE)
-
-    input("\nPress Enter to exit...")
-    exit()
+    print("ERROR: Class names file not found:")
+    print(CLASS_FILE)
+    input("Press Enter to close...")
+    raise SystemExit
 
 
 # ============================================================
 # LOAD AI MODEL
 # ============================================================
 
-print("\n")
-print("================================================")
-print("        CHILI DISEASE AI MODEL")
-print("================================================")
-
-print("\nLoading AI model...")
+print("Loading AI model...")
 
 try:
 
@@ -128,15 +106,17 @@ try:
         MODEL_FILE
     )
 
-    print("AI model loaded successfully.")
-
 except Exception as e:
 
-    print("\nERROR while loading AI model:")
+    print()
+    print("ERROR: Could not load AI model.")
     print(e)
 
-    input("\nPress Enter to exit...")
-    exit()
+    input("Press Enter to close...")
+    raise SystemExit
+
+
+print("AI model loaded successfully.")
 
 
 # ============================================================
@@ -146,32 +126,36 @@ except Exception as e:
 try:
 
     with open(
-        CLASS_NAMES_FILE,
+        CLASS_FILE,
         "r",
         encoding="utf-8"
-    ) as f:
+    ) as file:
 
         class_names = [
             line.strip()
-            for line in f.readlines()
+            for line in file.readlines()
             if line.strip()
         ]
 
 except Exception as e:
 
-    print("\nERROR while loading class names:")
+    print()
+    print("ERROR: Could not load class names.")
     print(e)
 
-    input("\nPress Enter to exit...")
-    exit()
+    input("Press Enter to close...")
+    raise SystemExit
 
 
-print("\nClasses detected by model:")
+print()
+print("Classes:")
 
-for i, class_name in enumerate(class_names):
+for index, name in enumerate(class_names):
 
     print(
-        f"{i}: {class_name}"
+        index,
+        "->",
+        name
     )
 
 
@@ -193,6 +177,7 @@ disease_info = {
             "Remove infected leaves and avoid excess moisture."
     },
 
+
     "Cercospora_Leaf_Spot": {
 
         "chemical":
@@ -205,6 +190,7 @@ disease_info = {
             "Remove infected leaves and maintain good air circulation."
     },
 
+
     "Curl_Virus": {
 
         "chemical":
@@ -216,6 +202,7 @@ disease_info = {
         "treatment":
             "Remove severely affected leaves and control insect vectors."
     },
+
 
     "Healthy_Leaf": {
 
@@ -235,36 +222,34 @@ disease_info = {
 # SELECT IMAGE
 # ============================================================
 
-print("\n")
-print("================================================")
-print("        SELECT CHILI LEAF IMAGE")
-print("================================================")
-
 root = Tk()
 
 root.withdraw()
 
-root.attributes(
-    "-topmost",
-    True
-)
+print()
+print("=" * 60)
+print("             SELECT LEAF IMAGE")
+print("=" * 60)
 
 image_path = filedialog.askopenfilename(
 
     title="Select Chili Leaf Image",
 
     filetypes=[
+
         (
             "Image files",
-            "*.jpg *.jpeg *.png *.JPG *.JPEG *.PNG"
+            "*.jpg *.jpeg *.png"
         ),
+
         (
             "JPEG files",
-            "*.jpg *.jpeg *.JPG *.JPEG"
+            "*.jpg *.jpeg"
         ),
+
         (
             "PNG files",
-            "*.png *.PNG"
+            "*.png"
         )
     ]
 )
@@ -272,121 +257,280 @@ image_path = filedialog.askopenfilename(
 root.destroy()
 
 
-# ============================================================
-# CHECK IMAGE SELECTION
-# ============================================================
-
 if not image_path:
 
-    print("\nNo image selected.")
+    print()
+    print("No image selected.")
 
-    print("\nProgram stopped.")
-
-    input("\nPress Enter to exit...")
-
-    exit()
+    raise SystemExit
 
 
-print("\nSelected image:")
+print()
+print("Selected image:")
 print(image_path)
 
 
 # ============================================================
-# LOAD ORIGINAL IMAGE
+# LOAD IMAGE
 # ============================================================
 
 try:
 
-    original_image = Image.open(
+    original_pil = Image.open(
         image_path
     ).convert("RGB")
 
-    print("\nOriginal image loaded successfully.")
-
 except Exception as e:
 
-    print("\nERROR: Unable to open image.")
-
+    print()
+    print("ERROR: Unable to open image.")
     print(e)
 
-    input("\nPress Enter to exit...")
-
-    exit()
+    input("Press Enter to close...")
+    raise SystemExit
 
 
 # ============================================================
-# GET IMAGE FILENAME
+# CONVERT PIL -> OPENCV
 # ============================================================
 
-image_filename = os.path.basename(
+original_rgb = np.array(
+    original_pil
+)
+
+original_bgr = cv2.cvtColor(
+    original_rgb,
+    cv2.COLOR_RGB2BGR
+)
+
+
+# ============================================================
+# LEAF DETECTION
+# ============================================================
+
+print()
+print("Detecting leaf...")
+
+
+hsv = cv2.cvtColor(
+    original_bgr,
+    cv2.COLOR_BGR2HSV
+)
+
+
+# ============================================================
+# GREEN MASK
+# ============================================================
+
+lower_green = np.array([
+    25,
+    35,
+    30
+])
+
+upper_green = np.array([
+    95,
+    255,
+    255
+])
+
+
+mask = cv2.inRange(
+    hsv,
+    lower_green,
+    upper_green
+)
+
+
+# ============================================================
+# REMOVE NOISE
+# ============================================================
+
+kernel = np.ones(
+    (5, 5),
+    np.uint8
+)
+
+
+mask = cv2.morphologyEx(
+    mask,
+    cv2.MORPH_OPEN,
+    kernel
+)
+
+
+mask = cv2.morphologyEx(
+    mask,
+    cv2.MORPH_CLOSE,
+    kernel
+)
+
+
+# ============================================================
+# FIND CONTOURS
+# ============================================================
+
+contours, _ = cv2.findContours(
+
+    mask,
+
+    cv2.RETR_EXTERNAL,
+
+    cv2.CHAIN_APPROX_SIMPLE
+)
+
+
+# ============================================================
+# FIND LARGEST LEAF REGION
+# ============================================================
+
+best_contour = None
+
+best_area = 0
+
+
+for contour in contours:
+
+    area = cv2.contourArea(
+        contour
+    )
+
+    if area < MIN_LEAF_AREA:
+
+        continue
+
+    if area > best_area:
+
+        best_area = area
+
+        best_contour = contour
+
+
+# ============================================================
+# CREATE CROP
+# ============================================================
+
+if best_contour is not None:
+
+    x, y, w, h = cv2.boundingRect(
+        best_contour
+    )
+
+    x1 = max(
+        0,
+        x - PADDING
+    )
+
+    y1 = max(
+        0,
+        y - PADDING
+    )
+
+    x2 = min(
+        original_bgr.shape[1],
+        x + w + PADDING
+    )
+
+    y2 = min(
+        original_bgr.shape[0],
+        y + h + PADDING
+    )
+
+    leaf_crop = original_bgr[
+        y1:y2,
+        x1:x2
+    ]
+
+    print("Leaf detected successfully.")
+
+else:
+
+    print()
+    print("WARNING: Leaf could not be detected.")
+
+    print(
+        "Using the complete image instead."
+    )
+
+    leaf_crop = original_bgr
+
+
+# ============================================================
+# SAVE CROPPED LEAF
+# ============================================================
+
+original_filename = os.path.basename(
     image_path
 )
 
+name_without_extension = os.path.splitext(
+    original_filename
+)[0]
 
-# ============================================================
-# COPY IMAGE TO LOCAL WEBSITE FOLDER
-# ============================================================
 
-website_image_path = os.path.join(
-    IMAGE_FOLDER,
-    image_filename
+crop_filename = (
+    name_without_extension
+    +
+    "_leaf_crop.jpg"
 )
 
-try:
 
-    shutil.copy2(
-        image_path,
-        website_image_path
-    )
+crop_path = os.path.join(
+    CROP_FOLDER_PATH,
+    crop_filename
+)
 
-    print("\nImage copied to website folder.")
 
-except Exception as e:
+cv2.imwrite(
+    crop_path,
+    leaf_crop
+)
 
-    print("\nWARNING: Could not copy image locally.")
 
-    print(e)
+print()
+print("Cropped leaf saved:")
+print(crop_path)
 
 
 # ============================================================
 # PREPROCESS IMAGE
 # ============================================================
 
-print("\nPreprocessing image...")
+print()
+print("Sending cropped leaf to AI model...")
 
-try:
 
-    image = original_image.resize(
-        IMAGE_SIZE
-    )
+leaf_rgb = cv2.cvtColor(
+    leaf_crop,
+    cv2.COLOR_BGR2RGB
+)
 
-    image_array = np.array(
-        image,
-        dtype=np.float32
-    )
 
-    # Add batch dimension
-    image_array = np.expand_dims(
-        image_array,
-        axis=0
-    )
+leaf_pil = Image.fromarray(
+    leaf_rgb
+)
 
-except Exception as e:
 
-    print("\nERROR during image preprocessing:")
+leaf_pil = leaf_pil.resize(
+    IMAGE_SIZE
+)
 
-    print(e)
 
-    input("\nPress Enter to exit...")
+image_array = np.array(
+    leaf_pil,
+    dtype=np.float32
+)
 
-    exit()
+
+image_array = np.expand_dims(
+    image_array,
+    axis=0
+)
 
 
 # ============================================================
 # AI PREDICTION
 # ============================================================
-
-print("\nAnalyzing image with AI model...")
 
 try:
 
@@ -397,162 +541,64 @@ try:
 
 except Exception as e:
 
-    print("\nERROR during AI prediction:")
-
+    print()
+    print("ERROR during AI prediction:")
     print(e)
 
-    input("\nPress Enter to exit...")
+    input("Press Enter to close...")
+    raise SystemExit
 
-    exit()
-
-
-# ============================================================
-# CLEAN PREDICTION ARRAY
-# ============================================================
-
-try:
-
-    probabilities = np.asarray(
-        predictions[0],
-        dtype=np.float32
-    )
-
-except Exception as e:
-
-    print("\nERROR reading model output:")
-
-    print(e)
-
-    input("\nPress Enter to exit...")
-
-    exit()
-
-
-# ============================================================
-# HANDLE MODEL OUTPUT
-# ============================================================
-
-# If model returns values that do not look like probabilities,
-# convert them using softmax.
-
-probability_sum = float(
-    np.sum(probabilities)
-)
-
-if (
-    np.any(probabilities < 0)
-    or
-    np.any(probabilities > 1)
-    or
-    not np.isclose(
-        probability_sum,
-        1.0,
-        atol=0.05
-    )
-):
-
-    exp_values = np.exp(
-        probabilities -
-        np.max(probabilities)
-    )
-
-    probabilities = (
-        exp_values /
-        np.sum(exp_values)
-    )
-
-
-# ============================================================
-# CHECK CLASS COUNT
-# ============================================================
-
-if len(probabilities) != len(class_names):
-
-    print("\nERROR:")
-    print(
-        "Number of model outputs does not match "
-        "number of class names."
-    )
-
-    print(
-        "\nModel outputs:",
-        len(probabilities)
-    )
-
-    print(
-        "Class names:",
-        len(class_names)
-    )
-
-    print("\nModel probabilities:")
-
-    print(probabilities)
-
-    input("\nPress Enter to exit...")
-
-    exit()
-
-
-# ============================================================
-# GET PREDICTION
-# ============================================================
 
 predicted_index = int(
     np.argmax(
-        probabilities
+        predictions[0]
     )
 )
 
+
 confidence = float(
-    probabilities[
+    predictions[0][
         predicted_index
     ]
 )
+
+
+if predicted_index >= len(class_names):
+
+    print("ERROR: Model class index is invalid.")
+
+    input("Press Enter to close...")
+    raise SystemExit
+
 
 predicted_class = class_names[
     predicted_index
 ]
 
 
-# ============================================================
-# DISPLAY ALL CLASS CONFIDENCES
-# ============================================================
-
-print("\n")
-print("================================================")
-print("             AI CONFIDENCE SCORES")
-print("================================================")
-
-for i, class_name in enumerate(class_names):
-
-    print(
-        f"{class_name.replace('_', ' '):30s}"
-        f": {probabilities[i] * 100:.2f}%"
-    )
-
-
-print("\n================================================")
+confidence_percent = (
+    confidence * 100
+)
 
 
 # ============================================================
-# DISPLAY TOP PREDICTION
+# DISPLAY AI RESULT
 # ============================================================
 
-print("\nTop prediction:")
+print()
+print("=" * 60)
+print("              AI RESULT")
+print("=" * 60)
+print()
 
 print(
-    predicted_class.replace(
-        "_",
-        " "
-    )
+    "Prediction:",
+    predicted_class
 )
 
 print(
-    f"Confidence: {confidence * 100:.2f}%"
-)
-
-print(
-    f"Required: {CONFIDENCE_THRESHOLD * 100:.0f}%"
+    "Confidence:",
+    f"{confidence_percent:.2f}%"
 )
 
 
@@ -562,55 +608,19 @@ print(
 
 if confidence < CONFIDENCE_THRESHOLD:
 
-    # --------------------------------------------------------
-    # LOW CONFIDENCE
-    # --------------------------------------------------------
+    disease = "Image Unclear"
 
-    final_disease = "Image Unclear"
+    chemical = "Not recommended"
 
-    final_chemical = "Not recommended"
+    fertilizer = "Not available"
 
-    final_fertilizer = "Not available"
-
-    final_treatment = (
-        "Please capture a clearer chili leaf image."
+    treatment = (
+        "Please capture a clearer leaf image."
     )
-
-
-    print("\n")
-    print("================================================")
-    print("             CHILI LEAF AI RESULT")
-    print("================================================")
-
-    print("\nRESULT: IMAGE UNCLEAR")
-
-    print(
-        f"\nAI Confidence: "
-        f"{confidence * 100:.2f}%"
-    )
-
-    print(
-        f"Required Confidence: "
-        f"{CONFIDENCE_THRESHOLD * 100:.0f}%"
-    )
-
-    print(
-        "\nThe AI is not confident enough "
-        "to identify the disease."
-    )
-
-    print(
-        "\nPlease capture a clearer chili leaf image."
-    )
-
 
 else:
 
-    # --------------------------------------------------------
-    # HIGH CONFIDENCE
-    # --------------------------------------------------------
-
-    final_disease = predicted_class.replace(
+    disease = predicted_class.replace(
         "_",
         " "
     )
@@ -632,229 +642,257 @@ else:
         }
     )
 
-    final_chemical = info[
+    chemical = info[
         "chemical"
     ]
 
-    final_fertilizer = info[
+    fertilizer = info[
         "fertilizer"
     ]
 
-    final_treatment = info[
+    treatment = info[
         "treatment"
     ]
 
 
-    print("\n")
-    print("================================================")
-    print("             CHILI LEAF AI RESULT")
-    print("================================================")
+# ============================================================
+# PRINT FINAL RESULT
+# ============================================================
 
-    print("\nDisease:")
+print()
+print("Disease:")
+print(disease)
 
-    print(
-        final_disease
-    )
+print()
+print("Chemical:")
+print(chemical)
 
-    print("\nConfidence:")
+print()
+print("Fertilizer:")
+print(fertilizer)
 
-    print(
-        f"{confidence * 100:.2f}%"
-    )
+print()
+print("Treatment:")
+print(treatment)
 
-    print("\nRecommended Chemical:")
-
-    print(
-        final_chemical
-    )
-
-    print("\nRecommended Fertilizer:")
-
-    print(
-        final_fertilizer
-    )
-
-    print("\nTreatment:")
-
-    print(
-        final_treatment
-    )
+print()
+print("=" * 60)
 
 
 # ============================================================
-# CREATE RESULT DATA
+# WEBSITE API
 # ============================================================
 
-result = {
-
-    "image":
-        image_filename,
-
-    "disease":
-        final_disease,
-
-    "chemical":
-        final_chemical,
-
-    "fertilizer":
-        final_fertilizer,
-
-    "treatment":
-        final_treatment,
-
-    "confidence":
-        round(
-            confidence * 100,
-            2
-        )
-}
-
-
-# ============================================================
-# SAVE RESULT LOCALLY
-# ============================================================
-
-try:
-
-    with open(
-        RESULT_FILE,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        json.dump(
-            result,
-            f,
-            indent=4
-        )
-
-    print("\n")
-    print(
-        "Local result.json updated successfully."
-    )
-
-except Exception as e:
-
-    print("\nWARNING:")
-    print(
-        "Could not save local result.json."
-    )
-
-    print(e)
-
-
-# ============================================================
-# SEND RESULT TO ONLINE WEBSITE
-# ============================================================
-
-print("\n")
-print("================================================")
-print("          UPDATING ONLINE WEBSITE")
-print("================================================")
-
-api_url = (
+API_URL = (
     WEBSITE_URL
-    + "/api/update-result"
+    +
+    "/api/update-result"
 )
 
 
-try:
-
-    # Determine correct MIME type
-    mime_type, _ = mimetypes.guess_type(
-        image_path
-    )
-
-    if mime_type is None:
-
-        mime_type = "image/jpeg"
+HEALTH_URL = (
+    WEBSITE_URL
+    +
+    "/api/health"
+)
 
 
-    # Open image for upload
-    with open(
-        image_path,
-        "rb"
-    ) as image_file:
-
-        files = {
-
-            "image": (
-
-                image_filename,
-
-                image_file,
-
-                mime_type
-            )
-        }
+DASHBOARD_URL = (
+    WEBSITE_URL
+    +
+    "/api/dashboard-state"
+)
 
 
-        data = {
+# ============================================================
+# WAKE / CHECK RENDER SERVER
+# ============================================================
 
-            "disease":
-                final_disease,
+print()
+print("=" * 60)
+print("       CONNECTING TO ONLINE WEBSITE")
+print("=" * 60)
 
-            "chemical":
-                final_chemical,
+print()
+print("Website:")
+print(WEBSITE_URL)
 
-            "fertilizer":
-                final_fertilizer,
-
-            "treatment":
-                final_treatment,
-
-            "confidence":
-                f"{confidence * 100:.2f}"
-        }
+print()
+print("Checking Render server...")
 
 
-        response = requests.post(
+server_ready = False
 
-            api_url,
 
-            files=files,
+for attempt in range(1, MAX_API_RETRIES + 1):
 
-            data=data,
+    try:
 
-            timeout=60
+        health_response = requests.get(
+            HEALTH_URL,
+            timeout=API_TIMEOUT,
+            headers={
+                "Cache-Control":
+                    "no-cache"
+            }
         )
 
+        print(
+            "Health check attempt",
+            attempt,
+            "-",
+            health_response.status_code
+        )
 
-    # ========================================================
-    # SERVER RESPONSE
-    # ========================================================
+        if health_response.status_code == 200:
 
-    print("\nServer status code:")
+            server_ready = True
+
+            print(
+                "Render server is ONLINE."
+            )
+
+            break
+
+    except Exception as e:
+
+        print(
+            "Health check error:",
+            str(e)
+        )
+
+    if attempt < MAX_API_RETRIES:
+
+        print(
+            "Waiting 5 seconds..."
+        )
+
+        time.sleep(5)
+
+
+if not server_ready:
+
+    print()
+    print("=" * 60)
+    print("ERROR: Render server could not be reached.")
+    print("=" * 60)
+
+    print()
+    print(
+        "Open this URL in your browser:"
+    )
 
     print(
-        response.status_code
+        WEBSITE_URL + "/api/health"
     )
 
+    input(
+        "Press Enter to close..."
+    )
 
-    if response.status_code == 200:
+    raise SystemExit
 
-        print("\n")
+
+# ============================================================
+# SEND AI RESULT TO FLASK
+# ============================================================
+
+print()
+print("=" * 60)
+print("       SENDING AI RESULT TO WEBSITE")
+print("=" * 60)
+
+
+upload_success = False
+
+
+for attempt in range(1, MAX_API_RETRIES + 1):
+
+    print()
+    print(
+        "Upload attempt:",
+        attempt,
+        "/",
+        MAX_API_RETRIES
+    )
+
+    try:
+
+        with open(
+            crop_path,
+            "rb"
+        ) as image_file:
+
+            files = {
+
+                "image": (
+
+                    crop_filename,
+
+                    image_file,
+
+                    "image/jpeg"
+                )
+            }
+
+
+            data = {
+
+                "disease":
+                    disease,
+
+                "chemical":
+                    chemical,
+
+                "fertilizer":
+                    fertilizer,
+
+                "treatment":
+                    treatment,
+
+                "confidence":
+                    str(
+                        confidence_percent
+                    )
+            }
+
+
+            response = requests.post(
+
+                API_URL,
+
+                files=files,
+
+                data=data,
+
+                timeout=API_TIMEOUT,
+
+                headers={
+
+                    "Cache-Control":
+                        "no-cache"
+                }
+            )
+
+
+        print()
         print(
-            "================================================"
+            "Server status code:",
+            response.status_code
         )
 
+
+        print()
         print(
-            "       ONLINE WEBSITE UPDATED SUCCESSFULLY!"
+            "Server response:"
         )
 
-        print(
-            "================================================"
-        )
 
-
-        # Try to display JSON response
         try:
 
             server_response = (
                 response.json()
             )
-
-            print("\nServer response:")
 
             print(
                 json.dumps(
@@ -866,111 +904,275 @@ try:
         except Exception:
 
             print(
-                "\nServer response:"
-            )
-
-            print(
                 response.text
             )
 
+            server_response = {}
 
-    else:
 
-        print("\n")
+        if (
+
+            response.status_code == 200
+
+            and
+
+            server_response.get(
+                "success"
+            ) is True
+
+        ):
+
+            upload_success = True
+
+            print()
+            print("=" * 60)
+            print(
+                "   WEBSITE UPDATED SUCCESSFULLY"
+            )
+            print("=" * 60)
+
+            break
+
+
+        else:
+
+            print()
+            print(
+                "Website rejected the result."
+            )
+
+    except requests.exceptions.Timeout:
+
+        print()
         print(
-            "================================================"
+            "Request timed out."
+        )
+
+    except requests.exceptions.ConnectionError:
+
+        print()
+        print(
+            "Connection error."
+        )
+
+    except Exception as e:
+
+        print()
+        print(
+            "Upload error:"
         )
 
         print(
-            "          ONLINE WEBSITE UPDATE FAILED"
+            str(e)
         )
 
+
+    if attempt < MAX_API_RETRIES:
+
+        print()
         print(
-            "================================================"
+            "Waiting 5 seconds before retry..."
         )
 
-        print(
-            "\nStatus code:",
-            response.status_code
-        )
-
-        print(
-            "\nResponse:"
-        )
-
-        print(
-            response.text
-        )
-
-
-except requests.exceptions.Timeout:
-
-    print("\nERROR: Website request timed out.")
-
-    print(
-        "The Render service may be waking up."
-    )
-
-    print(
-        "Please try again."
-    )
-
-
-except requests.exceptions.ConnectionError:
-
-    print("\nERROR: Could not connect to website.")
-
-    print(
-        "Check your internet connection."
-    )
-
-    print(
-        "Website:",
-        WEBSITE_URL
-    )
-
-
-except Exception as e:
-
-    print(
-        "\nERROR while updating online website:"
-    )
-
-    print(e)
+        time.sleep(5)
 
 
 # ============================================================
-# PROCESS COMPLETE
+# VERIFY RESULT ON SERVER
 # ============================================================
 
-print("\n")
-print("================================================")
-print("                PROCESS COMPLETE")
-print("================================================")
+if upload_success:
 
-print(
-    "\nYour prediction has been processed."
-)
+    print()
+    print("=" * 60)
+    print("       VERIFYING LIVE DASHBOARD")
+    print("=" * 60)
 
-print(
-    "The selected image and AI result "
-    "were sent to the online website."
-)
+    time.sleep(2)
 
-print(
-    "\nWebsite:"
-)
+    try:
 
-print(
-    WEBSITE_URL
-)
+        verify_response = requests.get(
 
-print("\n")
+            DASHBOARD_URL,
+
+            timeout=API_TIMEOUT,
+
+            headers={
+
+                "Cache-Control":
+                    "no-cache"
+            }
+        )
+
+
+        print()
+        print(
+            "Verification status:",
+            verify_response.status_code
+        )
+
+
+        if verify_response.status_code == 200:
+
+            verify_data = (
+                verify_response.json()
+            )
+
+
+            print()
+            print(
+                "Current server result:"
+            )
+
+
+            print(
+                json.dumps(
+                    verify_data.get(
+                        "result",
+                        {}
+                    ),
+                    indent=4
+                )
+            )
+
+
+            server_result = (
+                verify_data.get(
+                    "result",
+                    {}
+                )
+            )
+
+
+            server_disease = (
+                server_result.get(
+                    "disease",
+                    ""
+                )
+            )
+
+
+            server_confidence = (
+                server_result.get(
+                    "confidence",
+                    0
+                )
+            )
+
+
+            if (
+
+                server_disease ==
+                disease
+
+                and
+
+                abs(
+                    float(
+                        server_confidence
+                    )
+                    -
+                    confidence_percent
+                ) < 0.1
+
+            ):
+
+                print()
+                print("=" * 60)
+                print(
+                    "       LIVE UPDATE VERIFIED"
+                )
+                print("=" * 60)
+
+                print()
+                print(
+                    "Disease:",
+                    server_disease
+                )
+
+                print(
+                    "Confidence:",
+                    server_confidence
+                )
+
+                print()
+                print(
+                    "The website has received the"
+                    " new AI prediction."
+                )
+
+            else:
+
+                print()
+                print(
+                    "WARNING:"
+                )
+
+                print(
+                    "Prediction was uploaded, "
+                    "but verification did not "
+                    "match the new result."
+                )
+
+        else:
+
+            print(
+                "Could not verify dashboard."
+            )
+
+
+    except Exception as e:
+
+        print()
+        print(
+            "Verification error:"
+        )
+
+        print(
+            str(e)
+        )
+
+
+else:
+
+    print()
+    print("=" * 60)
+    print(
+        "       WEBSITE UPDATE FAILED"
+    )
+    print("=" * 60)
+
+    print()
+    print(
+        "The AI prediction was completed,"
+    )
+
+    print(
+        "but it could not be sent to Render."
+    )
 
 
 # ============================================================
-# END
+# FINISHED
 # ============================================================
+
+print()
+print("=" * 60)
+print("             PROCESS COMPLETE")
+print("=" * 60)
+
+print()
+
+print(
+    "Cropped image:"
+)
+
+print(
+    crop_path
+)
+
+print()
 
 input(
     "Press Enter to close..."

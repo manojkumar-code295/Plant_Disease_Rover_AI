@@ -24,7 +24,8 @@ from flask import (
     render_template,
     request,
     jsonify,
-    make_response
+    make_response,
+    send_from_directory
 )
 
 
@@ -32,7 +33,12 @@ from flask import (
 # FLASK APPLICATION
 # ============================================================
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder="static",
+    static_url_path="/static",
+    template_folder="templates"
+)
 
 app.config["JSON_SORT_KEYS"] = False
 
@@ -578,6 +584,18 @@ def dashboard():
     return render_template(
         "dashboard.html",
         **data
+    )
+
+
+# ============================================================
+# PWA STATIC ICONS
+# ============================================================
+
+@app.route("/static/icons/<path:filename>")
+def pwa_icon(filename):
+    return send_from_directory(
+        os.path.join(STATIC_FOLDER, "icons"),
+        filename
     )
 
 
