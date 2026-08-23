@@ -3,538 +3,771 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>Rover Control | Precision Agriculture</title>
+<meta name="theme-color"
+      content="#0B3D2E">
 
+<title>Smart Rover Control</title>
 
-    <style>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<style>
 
+/* =========================================================
+   BASIC
+========================================================= */
 
-        body {
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-            font-family: Arial, sans-serif;
+body {
 
-            background: #f4f7f5;
+    font-family: Arial, sans-serif;
 
-            color: #1f2937;
-        }
+    background: #f4f7f5;
 
+    color: #1f2937;
 
-        /* =================================================
-           HEADER
-        ================================================= */
+    min-height: 100vh;
+}
 
-        header {
 
-            background: #12372a;
+/* =========================================================
+   HEADER
+========================================================= */
 
-            color: white;
+header {
 
-            padding: 22px 40px;
-        }
+    background: #12372a;
 
+    color: white;
 
-        header h1 {
+    padding: 18px 20px;
 
-            font-size: 26px;
-        }
+    text-align: center;
+}
 
+header h1 {
 
-        header p {
+    font-size: 23px;
+}
 
-            margin-top: 6px;
+header p {
 
-            color: #cbded3;
-        }
+    margin-top: 5px;
 
+    color: #cbded3;
 
-        /* =================================================
-           NAVIGATION
-        ================================================= */
+    font-size: 14px;
+}
 
-        nav {
 
-            background: white;
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
-            padding: 15px 40px;
+nav {
 
-            display: flex;
+    background: white;
 
-            gap: 30px;
+    padding: 13px 15px;
 
-            box-shadow:
-                0 2px 8px rgba(0,0,0,0.08);
-        }
+    display: flex;
 
+    justify-content: center;
 
-        nav a {
+    flex-wrap: wrap;
 
-            text-decoration: none;
+    gap: 18px;
 
-            color: #374151;
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.08);
+}
 
-            font-weight: bold;
-        }
+nav a {
 
+    text-decoration: none;
 
-        nav a:hover {
+    color: #374151;
 
-            color: #2f7d57;
-        }
+    font-weight: bold;
 
+    font-size: 14px;
+}
 
-        /* =================================================
-           MAIN
-        ================================================= */
+nav a:hover {
 
-        main {
+    color: #23613e;
+}
 
-            max-width: 1100px;
 
-            margin: auto;
+/* =========================================================
+   MAIN
+========================================================= */
 
-            padding: 35px 40px;
-        }
+main {
 
+    max-width: 1050px;
 
-        .page-title {
+    margin: auto;
 
-            margin-bottom: 25px;
-        }
+    padding: 25px 18px;
+}
 
+.page-title {
 
-        .page-title h2 {
+    margin-bottom: 20px;
+}
 
-            color: #12372a;
+.page-title h2 {
 
-            font-size: 24px;
-        }
+    color: #12372a;
 
+    font-size: 25px;
+}
 
-        .page-title p {
+.page-title p {
 
-            color: #6b7280;
+    margin-top: 5px;
 
-            margin-top: 6px;
-        }
+    color: #6b7280;
+}
 
 
-        /* =================================================
-           LAYOUT
-        ================================================= */
+/* =========================================================
+   LAYOUT
+========================================================= */
 
-        .control-layout {
+.control-layout {
 
-            display: grid;
+    display: grid;
 
-            grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        1fr 1fr;
 
-            gap: 25px;
-        }
+    gap: 22px;
+}
 
+.card {
 
-        .card {
+    background: white;
 
-            background: white;
+    padding: 24px;
 
-            padding: 30px;
+    border-radius: 17px;
 
-            border-radius: 15px;
+    box-shadow:
+        0 4px 15px rgba(0,0,0,0.07);
+}
 
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.06);
-        }
+.card h3 {
 
+    color: #12372a;
 
-        .card h3 {
+    margin-bottom: 18px;
+}
 
-            color: #12372a;
 
-            margin-bottom: 25px;
-        }
+/* =========================================================
+   STATUS
+========================================================= */
 
+.rover-status {
 
-        /* =================================================
-           ROVER STATUS
-        ================================================= */
+    background: #edf7ef;
 
-        .rover-status {
+    padding: 15px;
 
-            background: #edf7ef;
+    border-radius: 11px;
 
-            padding: 18px;
+    margin-bottom: 20px;
 
-            border-radius: 10px;
+    text-align: center;
+}
 
-            margin-bottom: 25px;
-        }
+.rover-status span {
 
+    color: #6b7280;
 
-        .rover-status span {
+    font-size: 13px;
+}
 
-            color: #6b7280;
+.rover-status h2 {
 
-            font-size: 13px;
-        }
+    margin-top: 6px;
 
+    font-size: 19px;
+}
 
-        .rover-status h2 {
+.connected {
 
-            margin-top: 7px;
+    color: #16a34a !important;
+}
 
-            color: #dc2626;
-        }
+.disconnected {
 
+    color: #dc2626 !important;
+}
 
-        .connected {
 
-            color: #16a34a !important;
-        }
+/* =========================================================
+   STEERING AREA
+========================================================= */
 
+.steering-area {
 
-        .disconnected {
+    text-align: center;
 
-            color: #dc2626 !important;
-        }
+    padding: 5px 0 15px;
+}
 
+.steering-title {
 
-        /* =================================================
-           DIRECTION CONTROLS
-        ================================================= */
+    font-size: 14px;
 
-        .direction-control {
+    color: #6b7280;
 
-            display: grid;
+    margin-bottom: 12px;
+}
 
-            grid-template-columns:
-                repeat(3, 90px);
 
-            justify-content: center;
+/* =========================================================
+   STEERING WHEEL
+========================================================= */
 
-            gap: 12px;
-        }
+.steering-wheel {
 
+    width: 210px;
 
-        .control-button {
+    height: 210px;
 
-            height: 65px;
+    border-radius: 50%;
 
-            border: none;
+    margin: auto;
 
-            border-radius: 12px;
+    position: relative;
 
-            background: #23613e;
+    background:
+        radial-gradient(
+            circle,
+            #1f2937 0,
+            #1f2937 19%,
+            transparent 20%
+        );
 
-            color: white;
+    border: 17px solid #12372a;
 
-            font-size: 16px;
+    box-shadow:
+        inset 0 0 0 5px #2f7d57,
+        0 8px 18px rgba(0,0,0,0.18);
 
-            font-weight: bold;
+    cursor: grab;
 
-            cursor: pointer;
+    touch-action: none;
 
-            transition: 0.2s;
-        }
+    user-select: none;
 
+    transition:
+        transform 0.12s ease;
+}
 
-        .control-button:hover {
+.steering-wheel:active {
 
-            background: #17452c;
+    cursor: grabbing;
+}
 
-            transform: translateY(-2px);
-        }
 
+/* =========================================================
+   STEERING SPOKES
+========================================================= */
 
-        .control-button:active {
+.spoke {
 
-            transform: scale(0.96);
-        }
+    position: absolute;
 
+    background: #12372a;
 
-        .control-button:disabled {
+    border-radius: 8px;
+}
 
-            opacity: 0.5;
+.spoke-vertical {
 
-            cursor: not-allowed;
+    width: 17px;
 
-            transform: none;
-        }
+    height: 75px;
 
+    left: 50%;
 
-        .empty {
+    top: 50%;
 
-            visibility: hidden;
-        }
+    transform:
+        translate(-50%, -50%);
+}
 
+.spoke-left {
 
-        .stop-button {
+    width: 70px;
 
-            background: #dc2626;
-        }
+    height: 17px;
 
+    left: 8px;
 
-        .stop-button:hover {
+    top: 50%;
 
-            background: #b91c1c;
-        }
+    transform:
+        translateY(-50%)
+        rotate(-18deg);
 
+    transform-origin: right center;
+}
 
-        /* =================================================
-           PUMP
-        ================================================= */
+.spoke-right {
 
-        .pump-section {
+    width: 70px;
 
-            margin-top: 30px;
+    height: 17px;
 
-            border-top:
-                1px solid #eeeeee;
+    right: 8px;
 
-            padding-top: 25px;
-        }
+    top: 50%;
 
+    transform:
+        translateY(-50%)
+        rotate(18deg);
 
-        .pump-buttons {
+    transform-origin: left center;
+}
 
-            display: flex;
 
-            gap: 15px;
-        }
+/* =========================================================
+   STEERING CENTER
+========================================================= */
 
+.steering-center {
 
-        .pump-button {
+    position: absolute;
 
-            flex: 1;
+    width: 58px;
 
-            padding: 16px;
+    height: 58px;
 
-            border: none;
+    left: 50%;
 
-            border-radius: 10px;
+    top: 50%;
 
-            font-size: 16px;
+    transform:
+        translate(-50%, -50%);
 
-            font-weight: bold;
+    border-radius: 50%;
 
-            cursor: pointer;
-        }
+    background: #23613e;
 
+    border: 5px solid white;
 
-        .pump-button:disabled {
+    display: flex;
 
-            opacity: 0.5;
+    align-items: center;
 
-            cursor: not-allowed;
-        }
+    justify-content: center;
 
+    color: white;
 
-        .pump-on {
+    font-size: 25px;
 
-            background: #16a34a;
+    font-weight: bold;
 
-            color: white;
-        }
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.2);
+}
 
 
-        .pump-off {
+/* =========================================================
+   STEERING INDICATOR
+========================================================= */
 
-            background: #dc2626;
+.steering-indicator {
 
-            color: white;
-        }
+    margin-top: 12px;
 
+    font-weight: bold;
 
-        /* =================================================
-           CURRENT COMMAND
-        ================================================= */
+    color: #12372a;
 
-        .command-box {
+    font-size: 15px;
+}
 
-            background: #f4f7f5;
 
-            padding: 20px;
+/* =========================================================
+   MOVEMENT BUTTONS
+========================================================= */
 
-            border-radius: 10px;
+.movement-buttons {
 
-            margin-top: 20px;
+    margin-top: 18px;
 
-            text-align: center;
-        }
+    display: grid;
 
+    grid-template-columns:
+        repeat(3, 1fr);
 
-        .command-box span {
+    gap: 10px;
 
-            display: block;
+    max-width: 330px;
 
-            color: #6b7280;
+    margin-left: auto;
 
-            font-size: 13px;
-        }
+    margin-right: auto;
+}
 
+.move-button {
 
-        .command-box h2 {
+    border: none;
 
-            margin-top: 8px;
+    min-height: 62px;
 
-            color: #12372a;
-        }
+    border-radius: 13px;
 
+    background: #23613e;
 
-        /* =================================================
-           MESSAGE BOX
-        ================================================= */
+    color: white;
 
-        .message-box {
+    font-weight: bold;
 
-            margin-top: 20px;
+    font-size: 14px;
 
-            padding: 15px;
+    cursor: pointer;
 
-            border-radius: 10px;
+    touch-action: manipulation;
 
-            text-align: center;
+    box-shadow:
+        0 4px 8px rgba(0,0,0,0.12);
 
-            font-weight: bold;
+    transition: 0.12s;
+}
 
-            display: none;
-        }
+.move-button:hover {
 
+    background: #17452c;
+}
 
-        .message-success {
+.move-button:active,
+.move-button.active {
 
-            display: block;
+    transform: scale(0.95);
 
-            background: #dcfce7;
+    background: #0f3823;
+}
 
-            color: #166534;
-        }
+.move-button.forward {
 
+    grid-column: 2;
+}
 
-        .message-error {
+.move-button.left {
 
-            display: block;
+    grid-column: 1;
+}
 
-            background: #fee2e2;
+.move-button.stop {
 
-            color: #991b1b;
-        }
+    grid-column: 2;
 
+    background: #dc2626;
+}
 
-        .message-info {
+.move-button.stop:hover {
 
-            display: block;
+    background: #b91c1c;
+}
 
-            background: #dbeafe;
+.move-button.right {
 
-            color: #1e40af;
-        }
+    grid-column: 3;
+}
 
+.move-button.backward {
 
-        /* =================================================
-           NOTICE
-        ================================================= */
+    grid-column: 2;
+}
 
-        .notice {
 
-            margin-top: 25px;
+/* =========================================================
+   COMMAND
+========================================================= */
 
-            padding: 15px;
+.command-box {
 
-            background: #fff7ed;
+    background: #f4f7f5;
 
-            border-left:
-                4px solid #f97316;
+    padding: 17px;
 
-            border-radius: 8px;
+    border-radius: 10px;
 
-            color: #7c2d12;
+    margin-top: 18px;
 
-            line-height: 1.5;
-        }
+    text-align: center;
+}
 
+.command-box span {
 
-        /* =================================================
-           CONNECTION INFO
-        ================================================= */
+    display: block;
 
-        .connection-box {
+    color: #6b7280;
 
-            margin-top: 20px;
+    font-size: 13px;
+}
 
-            padding: 15px;
+.command-box h2 {
 
-            border-radius: 10px;
+    margin-top: 7px;
 
-            background: #f9fafb;
+    color: #12372a;
+}
 
-            border:
-                1px solid #e5e7eb;
-        }
 
+/* =========================================================
+   MESSAGE
+========================================================= */
 
-        .connection-box p {
+.message-box {
 
-            font-size: 14px;
+    margin-top: 15px;
 
-            color: #6b7280;
+    padding: 13px;
 
-            margin-top: 5px;
-        }
+    border-radius: 10px;
 
+    text-align: center;
 
-        /* =================================================
-           RESPONSIVE
-        ================================================= */
+    font-weight: bold;
 
-        @media(max-width: 800px) {
+    display: none;
+}
 
-            main {
+.message-success {
 
-                padding: 25px 20px;
-            }
+    display: block;
 
+    background: #dcfce7;
 
-            .control-layout {
+    color: #166534;
+}
 
-                grid-template-columns: 1fr;
-            }
+.message-error {
 
+    display: block;
 
-            nav {
+    background: #fee2e2;
 
-                padding: 15px 20px;
+    color: #991b1b;
+}
 
-                flex-wrap: wrap;
-            }
+.message-info {
 
+    display: block;
 
-            .direction-control {
+    background: #dbeafe;
 
-                grid-template-columns:
-                    repeat(3, 75px);
-            }
+    color: #1e40af;
+}
 
 
-            .control-button {
+/* =========================================================
+   PUMP
+========================================================= */
 
-                height: 60px;
+.pump-buttons {
 
-                font-size: 14px;
-            }
+    display: flex;
 
-        }
+    gap: 12px;
+}
 
-    </style>
+.pump-button {
+
+    flex: 1;
+
+    padding: 17px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.pump-on {
+
+    background: #16a34a;
+
+    color: white;
+}
+
+.pump-off {
+
+    background: #dc2626;
+
+    color: white;
+}
+
+.pump-button:active {
+
+    transform: scale(0.97);
+}
+
+
+/* =========================================================
+   PUMP STATUS
+========================================================= */
+
+.pump-status {
+
+    margin-top: 20px;
+
+    background: #f4f7f5;
+
+    padding: 18px;
+
+    text-align: center;
+
+    border-radius: 11px;
+}
+
+.pump-status span {
+
+    display: block;
+
+    font-size: 13px;
+
+    color: #6b7280;
+}
+
+.pump-status strong {
+
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 22px;
+
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   NOTICE
+========================================================= */
+
+.notice {
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    background: #fff7ed;
+
+    border-left:
+        4px solid #f97316;
+
+    border-radius: 8px;
+
+    color: #7c2d12;
+
+    line-height: 1.5;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+.keyboard-info {
+
+    margin-top: 15px;
+
+    text-align: center;
+
+    color: #6b7280;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+.keyboard-info strong {
+
+    color: #12372a;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width: 800px) {
+
+    .control-layout {
+
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media(max-width: 420px) {
+
+    main {
+
+        padding:
+            20px 12px;
+    }
+
+    .card {
+
+        padding: 18px;
+    }
+
+    .steering-wheel {
+
+        width: 185px;
+
+        height: 185px;
+
+        border-width: 15px;
+    }
+
+    .movement-buttons {
+
+        max-width: 300px;
+    }
+
+    .move-button {
+
+        min-height: 58px;
+
+        font-size: 13px;
+    }
+
+    header h1 {
+
+        font-size: 19px;
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -542,9 +775,9 @@
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================================
      HEADER
-===================================================== -->
+========================================================= -->
 
 <header>
 
@@ -553,15 +786,15 @@
     </h1>
 
     <p>
-        Rover Control System
+        Smart Rover Control System
     </p>
 
 </header>
 
 
-<!-- =====================================================
+<!-- =========================================================
      NAVIGATION
-===================================================== -->
+========================================================= -->
 
 <nav>
 
@@ -570,7 +803,7 @@
     </a>
 
     <a href="/rover">
-        Rover Control
+        🚜 Rover
     </a>
 
     <a href="/dataset">
@@ -588,378 +821,526 @@
 </nav>
 
 
-<!-- =====================================================
+<!-- =========================================================
      MAIN
-===================================================== -->
+========================================================= -->
 
 <main>
 
 
-    <div class="page-title">
+<div class="page-title">
 
-        <h2>
-            Rover Control
+    <h2>
+        🚜 Rover Control
+    </h2>
+
+    <p>
+        Steering, movement and spray control
+    </p>
+
+</div>
+
+
+<div class="control-layout">
+
+
+<!-- ========================================================
+     MOVEMENT CARD
+========================================================= -->
+
+<div class="card">
+
+    <h3>
+        🎡 Steering & Movement
+    </h3>
+
+
+    <!-- STATUS -->
+
+    <div class="rover-status">
+
+        <span>
+            Raspberry Pi / Rover Connection
+        </span>
+
+        <h2
+            id="rover-status"
+            class="disconnected"
+        >
+            NOT CONNECTED
         </h2>
 
-        <p>
-            Control the rover movement and spray pump
-        </p>
-
     </div>
 
 
-    <div class="control-layout">
+    <!-- STEERING -->
 
+    <div class="steering-area">
 
-        <!-- =================================================
-             MOVEMENT
-        ================================================== -->
+        <div class="steering-title">
 
-        <div class="card">
+            Drag the steering wheel
+            left or right
 
-            <h3>
-                🚜 Rover Movement
-            </h3>
+        </div>
 
 
-            <!-- ROVER STATUS -->
+        <div
+            id="steering-wheel"
+            class="steering-wheel"
+        >
 
-            <div class="rover-status">
+            <div class="spoke spoke-vertical"></div>
 
-                <span>
-                    Rover Connection
-                </span>
+            <div class="spoke spoke-left"></div>
 
-                <h2
-                    id="rover-status"
-                    class="disconnected"
-                >
-                    NOT CONNECTED
-                </h2>
+            <div class="spoke spoke-right"></div>
 
-            </div>
-
-
-            <!-- DIRECTION BUTTONS -->
-
-            <div class="direction-control">
-
-
-                <!-- TOP LEFT -->
-
-                <div class="empty"></div>
-
-
-                <!-- FORWARD -->
-
-                <button
-                    class="control-button"
-                    onclick="sendCommand('forward')"
-                >
-
-                    ↑
-
-                    <br>
-
-                    Forward
-
-                </button>
-
-
-                <!-- TOP RIGHT -->
-
-                <div class="empty"></div>
-
-
-                <!-- LEFT -->
-
-                <button
-                    class="control-button"
-                    onclick="sendCommand('left')"
-                >
-
-                    ←
-
-                    <br>
-
-                    Left
-
-                </button>
-
-
-                <!-- STOP -->
-
-                <button
-                    class="control-button stop-button"
-                    onclick="sendCommand('stop')"
-                >
-
-                    ■
-
-                    <br>
-
-                    Stop
-
-                </button>
-
-
-                <!-- RIGHT -->
-
-                <button
-                    class="control-button"
-                    onclick="sendCommand('right')"
-                >
-
-                    →
-
-                    <br>
-
-                    Right
-
-                </button>
-
-
-                <!-- BOTTOM LEFT -->
-
-                <div class="empty"></div>
-
-
-                <!-- BACKWARD -->
-
-                <button
-                    class="control-button"
-                    onclick="sendCommand('backward')"
-                >
-
-                    ↓
-
-                    <br>
-
-                    Backward
-
-                </button>
-
-
-                <!-- BOTTOM RIGHT -->
-
-                <div class="empty"></div>
-
-
-            </div>
-
-
-            <!-- CURRENT COMMAND -->
-
-            <div class="command-box">
-
-                <span>
-                    Current Command
-                </span>
-
-                <h2 id="current-command">
-                    STOP
-                </h2>
-
-            </div>
-
-
-            <!-- MESSAGE -->
-
-            <div
-                id="message-box"
-                class="message-box"
-            >
-            </div>
-
-
-            <!-- CONNECTION INFO -->
-
-            <div class="connection-box">
-
-                <strong>
-                    Raspberry Pi
-                </strong>
-
-                <p>
-                    The Raspberry Pi will receive
-                    these commands and control the
-                    motor driver through GPIO.
-                </p>
-
+            <div class="steering-center">
+                🚜
             </div>
 
         </div>
 
 
-        <!-- =================================================
-             PUMP
-        ================================================== -->
-
-        <div class="card">
-
-            <h3>
-                💧 Spray Pump
-            </h3>
-
-
-            <!-- PUMP STATUS -->
-
-            <div class="rover-status">
-
-                <span>
-                    Pump Status
-                </span>
-
-                <h2
-                    id="pump-status"
-                    style="color:#dc2626;"
-                >
-                    OFF
-                </h2>
-
-            </div>
-
-
-            <!-- PUMP BUTTONS -->
-
-            <div class="pump-buttons">
-
-
-                <button
-                    class="pump-button pump-on"
-                    onclick="pumpControl(true)"
-                >
-
-                    💧 Pump ON
-
-                </button>
-
-
-                <button
-                    class="pump-button pump-off"
-                    onclick="pumpControl(false)"
-                >
-
-                    Pump OFF
-
-                </button>
-
-
-            </div>
-
-
-            <!-- PUMP COMMAND -->
-
-            <div class="command-box">
-
-                <span>
-                    Pump Command
-                </span>
-
-                <h2 id="pump-command">
-                    OFF
-                </h2>
-
-            </div>
-
-
-            <!-- NOTICE -->
-
-            <div class="notice">
-
-                <strong>
-                    Current Stage:
-                </strong>
-
-                Website control is ready.
-
-                <br><br>
-
-                When the Raspberry Pi is connected,
-                it will receive these commands and
-                control the rover motors through
-                the motor driver.
-
-            </div>
-
+        <div
+            id="steering-indicator"
+            class="steering-indicator"
+        >
+            Steering: CENTER
         </div>
+
+    </div>
+
+
+    <!-- MOVEMENT BUTTONS -->
+
+    <div class="movement-buttons">
+
+
+        <button
+            id="forward-btn"
+            class="move-button forward"
+            onmousedown="startMove('forward')"
+            onmouseup="stopMove()"
+            onmouseleave="stopMove()"
+            ontouchstart="startMove('forward',event)"
+            ontouchend="stopMove(event)"
+        >
+
+            ▲<br>
+            FORWARD
+
+        </button>
+
+
+        <button
+            id="left-btn"
+            class="move-button left"
+            onmousedown="startMove('left')"
+            onmouseup="stopMove()"
+            onmouseleave="stopMove()"
+            ontouchstart="startMove('left',event)"
+            ontouchend="stopMove(event)"
+        >
+
+            ◀<br>
+            LEFT
+
+        </button>
+
+
+        <button
+            id="stop-btn"
+            class="move-button stop"
+            onclick="emergencyStop()"
+        >
+
+            ■<br>
+            STOP
+
+        </button>
+
+
+        <button
+            id="right-btn"
+            class="move-button right"
+            onmousedown="startMove('right')"
+            onmouseup="stopMove()"
+            onmouseleave="stopMove()"
+            ontouchstart="startMove('right',event)"
+            ontouchend="stopMove(event)"
+        >
+
+            ▶<br>
+            RIGHT
+
+        </button>
+
+
+        <button
+            id="backward-btn"
+            class="move-button backward"
+            onmousedown="startMove('backward')"
+            onmouseup="stopMove()"
+            onmouseleave="stopMove()"
+            ontouchstart="startMove('backward',event)"
+            ontouchend="stopMove(event)"
+        >
+
+            ▼<br>
+            REVERSE
+
+        </button>
 
 
     </div>
 
+
+    <!-- CURRENT COMMAND -->
+
+    <div class="command-box">
+
+        <span>
+            Current Command
+        </span>
+
+        <h2 id="current-command">
+            STOP
+        </h2>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <div
+        id="message-box"
+        class="message-box"
+    >
+    </div>
+
+
+    <!-- KEYBOARD -->
+
+    <div class="keyboard-info">
+
+        <strong>W</strong>
+        Forward &nbsp;
+
+        <strong>A</strong>
+        Left &nbsp;
+
+        <strong>S</strong>
+        Reverse &nbsp;
+
+        <strong>D</strong>
+        Right &nbsp;
+
+        <strong>Space</strong>
+        Stop
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================
+     PUMP CARD
+========================================================= -->
+
+<div class="card">
+
+    <h3>
+        💧 Spray Pump
+    </h3>
+
+
+    <div class="rover-status">
+
+        <span>
+            Pump Status
+        </span>
+
+        <h2
+            id="pump-status"
+            style="color:#dc2626;"
+        >
+            OFF
+        </h2>
+
+    </div>
+
+
+    <div class="pump-buttons">
+
+        <button
+            class="pump-button pump-on"
+            onclick="pumpControl(true)"
+        >
+
+            💧 PUMP ON
+
+        </button>
+
+
+        <button
+            class="pump-button pump-off"
+            onclick="pumpControl(false)"
+        >
+
+            PUMP OFF
+
+        </button>
+
+    </div>
+
+
+    <div class="pump-status">
+
+        <span>
+            Current Pump Command
+        </span>
+
+        <strong id="pump-command">
+            OFF
+        </strong>
+
+    </div>
+
+
+    <div class="notice">
+
+        <strong>
+            Control System
+        </strong>
+
+        <br><br>
+
+        The steering wheel and movement
+        buttons send commands to the Flask
+        server.
+
+        <br><br>
+
+        The Raspberry Pi will receive the
+        commands and control the motor driver.
+
+        <br><br>
+
+        <strong>
+            Safety:
+        </strong>
+
+        Press STOP immediately whenever
+        required.
+
+    </div>
+
+</div>
+
+
+</div>
 
 </main>
 
 
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
-
 <script>
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let currentMovement = "stop";
+
+let movementActive = false;
+
+let steeringAngle = 0;
+
+let steeringDragging = false;
+
+let steeringStartX = 0;
+
+let steeringStartAngle = 0;
+
+let messageTimer = null;
 
 
 /* =========================================================
-   SHOW MESSAGE
+   MESSAGE
 ========================================================= */
 
-function showMessage(
-    message,
-    type = "info"
-) {
+function showMessage(message, type="info") {
 
     const box =
         document.getElementById(
             "message-box"
         );
 
-
-    box.textContent =
-        message;
-
+    box.textContent = message;
 
     box.className =
         "message-box message-" + type;
 
+    box.style.display = "block";
 
-    setTimeout(
-        function() {
+    clearTimeout(messageTimer);
+
+    messageTimer =
+        setTimeout(function() {
 
             box.style.display =
                 "none";
 
-        },
-        3000
-    );
+        }, 2200);
 }
 
 
 /* =========================================================
-   SEND ROVER COMMAND
+   UPDATE COMMAND
 ========================================================= */
 
-async function sendCommand(
-    command
-) {
+function updateCommandDisplay(command) {
 
-    const commandDisplay =
-        document.getElementById(
-            "current-command"
-        );
-
-
-    // Immediately update screen
-
-    commandDisplay.textContent =
+    document.getElementById(
+        "current-command"
+    ).textContent =
         command.toUpperCase();
 
+}
 
-    showMessage(
-        "Sending " +
-        command.toUpperCase() +
-        " command...",
-        "info"
+
+/* =========================================================
+   START MOVEMENT
+========================================================= */
+
+function startMove(command, event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+    if (
+        movementActive &&
+        currentMovement === command
+    ) {
+
+        return;
+
+    }
+
+    movementActive = true;
+
+    currentMovement = command;
+
+    const button =
+        document.getElementById(
+            command + "-btn"
+        );
+
+    if (button) {
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+    updateCommandDisplay(
+        command
     );
 
+    sendCommand(
+        command
+    );
+
+}
+
+
+/* =========================================================
+   STOP MOVEMENT
+========================================================= */
+
+function stopMove(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+    if (!movementActive) {
+
+        return;
+
+    }
+
+    movementActive = false;
+
+    currentMovement = "stop";
+
+    removeActiveButtons();
+
+    sendCommand("stop");
+
+}
+
+
+/* =========================================================
+   EMERGENCY STOP
+========================================================= */
+
+function emergencyStop() {
+
+    movementActive = false;
+
+    currentMovement = "stop";
+
+    removeActiveButtons();
+
+    updateCommandDisplay(
+        "stop"
+    );
+
+    sendCommand(
+        "stop"
+    );
+
+}
+
+
+/* =========================================================
+   REMOVE ACTIVE BUTTONS
+========================================================= */
+
+function removeActiveButtons() {
+
+    document
+        .querySelectorAll(
+            ".move-button"
+        )
+        .forEach(function(button) {
+
+            button.classList.remove(
+                "active"
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   SEND COMMAND
+========================================================= */
+
+async function sendCommand(command) {
+
+    updateCommandDisplay(
+        command
+    );
 
     try {
 
@@ -971,8 +1352,10 @@ async function sendCommand(
                     method: "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
                     body: JSON.stringify({
@@ -995,49 +1378,44 @@ async function sendCommand(
             data.success
         ) {
 
-            commandDisplay.textContent =
-                command.toUpperCase();
-
-
-            showMessage(
-                "Command sent successfully: " +
-                command.toUpperCase(),
-                "success"
-            );
-
-
             updateRoverStatus(
                 data.rover
             );
+
+            if (
+                command !== "stop"
+            ) {
+
+                showMessage(
+                    command.toUpperCase()
+                    + " command sent",
+                    "success"
+                );
+
+            }
 
         }
 
         else {
 
             showMessage(
-                "Command failed: " +
-                (
-                    data.message ||
-                    "Unknown error"
-                ),
+                data.message ||
+                "Command failed",
                 "error"
             );
 
         }
-
 
     }
 
     catch (error) {
 
         console.error(
-            "Command error:",
             error
         );
 
-
         showMessage(
-            "Could not connect to server.",
+            "Server not connected",
             "error"
         );
 
@@ -1047,55 +1425,186 @@ async function sendCommand(
 
 
 /* =========================================================
-   PUMP CONTROL
+   STEERING WHEEL
 ========================================================= */
 
-async function pumpControl(
-    state
-) {
+const steeringWheel =
+    document.getElementById(
+        "steering-wheel"
+    );
 
-    const pumpStatus =
+
+const steeringIndicator =
+    document.getElementById(
+        "steering-indicator"
+    );
+
+
+function updateSteering(angle) {
+
+    steeringAngle =
+        Math.max(
+            -70,
+            Math.min(
+                70,
+                angle
+            )
+        );
+
+
+    steeringWheel.style.transform =
+        "rotate(" +
+        steeringAngle +
+        "deg)";
+
+
+    if (steeringAngle < -10) {
+
+        steeringIndicator.textContent =
+            "Steering: LEFT";
+
+        sendCommand("left");
+
+    }
+
+    else if (steeringAngle > 10) {
+
+        steeringIndicator.textContent =
+            "Steering: RIGHT";
+
+        sendCommand("right");
+
+    }
+
+    else {
+
+        steeringIndicator.textContent =
+            "Steering: CENTER";
+
+    }
+
+}
+
+
+/* =========================================================
+   POINTER START
+========================================================= */
+
+steeringWheel.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        steeringDragging = true;
+
+        steeringStartX =
+            event.clientX;
+
+        steeringStartAngle =
+            steeringAngle;
+
+        steeringWheel.setPointerCapture(
+            event.pointerId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   POINTER MOVE
+========================================================= */
+
+steeringWheel.addEventListener(
+    "pointermove",
+    function(event) {
+
+        if (!steeringDragging) {
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+        const movement =
+            event.clientX -
+            steeringStartX;
+
+        updateSteering(
+            steeringStartAngle +
+            movement * 0.7
+        );
+
+    }
+);
+
+
+/* =========================================================
+   POINTER RELEASE
+========================================================= */
+
+function releaseSteering() {
+
+    if (!steeringDragging) {
+
+        return;
+
+    }
+
+    steeringDragging = false;
+
+    steeringAngle = 0;
+
+    steeringWheel.style.transform =
+        "rotate(0deg)";
+
+    steeringIndicator.textContent =
+        "Steering: CENTER";
+
+}
+
+
+steeringWheel.addEventListener(
+    "pointerup",
+    releaseSteering
+);
+
+steeringWheel.addEventListener(
+    "pointercancel",
+    releaseSteering
+);
+
+
+/* =========================================================
+   PUMP
+========================================================= */
+
+async function pumpControl(state) {
+
+    const status =
         document.getElementById(
             "pump-status"
         );
 
-
-    const pumpCommand =
+    const command =
         document.getElementById(
             "pump-command"
         );
 
 
-    const command =
-        state
-            ? "pump_on"
-            : "pump_off";
+    status.textContent =
+        state ? "ON" : "OFF";
+
+    command.textContent =
+        state ? "ON" : "OFF";
 
 
-    pumpCommand.textContent =
-        state
-            ? "ON"
-            : "OFF";
-
-
-    pumpStatus.textContent =
-        state
-            ? "ON"
-            : "OFF";
-
-
-    pumpStatus.style.color =
+    status.style.color =
         state
             ? "#16a34a"
             : "#dc2626";
-
-
-    showMessage(
-        state
-            ? "Turning pump ON..."
-            : "Turning pump OFF...",
-        "info"
-    );
 
 
     try {
@@ -1108,8 +1617,10 @@ async function pumpControl(
                     method: "POST",
 
                     headers: {
+
                         "Content-Type":
                             "application/json"
+
                     },
 
                     body: JSON.stringify({
@@ -1134,8 +1645,8 @@ async function pumpControl(
 
             showMessage(
                 state
-                    ? "Pump turned ON"
-                    : "Pump turned OFF",
+                    ? "Pump ON"
+                    : "Pump OFF",
                 "success"
             );
 
@@ -1144,25 +1655,18 @@ async function pumpControl(
         else {
 
             showMessage(
-                "Pump command failed.",
+                "Pump command failed",
                 "error"
             );
 
         }
 
-
     }
 
     catch (error) {
 
-        console.error(
-            "Pump error:",
-            error
-        );
-
-
         showMessage(
-            "Could not connect to server.",
+            "Server not connected",
             "error"
         );
 
@@ -1172,12 +1676,10 @@ async function pumpControl(
 
 
 /* =========================================================
-   UPDATE ROVER STATUS
+   ROVER STATUS
 ========================================================= */
 
-function updateRoverStatus(
-    rover
-) {
+function updateRoverStatus(rover) {
 
     if (!rover) {
 
@@ -1192,9 +1694,7 @@ function updateRoverStatus(
         );
 
 
-    if (
-        rover.connected
-    ) {
+    if (rover.connected) {
 
         status.textContent =
             "CONNECTED";
@@ -1215,59 +1715,33 @@ function updateRoverStatus(
     }
 
 
-    const command =
-        document.getElementById(
-            "current-command"
-        );
+    if (rover.pump !== undefined) {
+
+        const pumpStatus =
+            document.getElementById(
+                "pump-status"
+            );
+
+        const pumpCommand =
+            document.getElementById(
+                "pump-command"
+            );
 
 
-    if (
-        rover.direction
-    ) {
-
-        command.textContent =
-            rover.direction.toUpperCase();
-
-    }
-
-
-    const pump =
-        document.getElementById(
-            "pump-status"
-        );
-
-
-    const pumpCommand =
-        document.getElementById(
-            "pump-command"
-        );
-
-
-    if (
-        rover.pump
-    ) {
-
-        pump.textContent =
-            "ON";
+        pumpStatus.textContent =
+            rover.pump
+                ? "ON"
+                : "OFF";
 
         pumpCommand.textContent =
-            "ON";
+            rover.pump
+                ? "ON"
+                : "OFF";
 
-        pump.style.color =
-            "#16a34a";
-
-    }
-
-    else {
-
-        pump.textContent =
-            "OFF";
-
-        pumpCommand.textContent =
-            "OFF";
-
-        pump.style.color =
-            "#dc2626";
+        pumpStatus.style.color =
+            rover.pump
+                ? "#16a34a"
+                : "#dc2626";
 
     }
 
@@ -1275,7 +1749,7 @@ function updateRoverStatus(
 
 
 /* =========================================================
-   GET ROVER STATUS
+   GET STATUS
 ========================================================= */
 
 async function getRoverStatus() {
@@ -1288,9 +1762,7 @@ async function getRoverStatus() {
             );
 
 
-        if (
-            !response.ok
-        ) {
+        if (!response.ok) {
 
             return;
 
@@ -1301,9 +1773,7 @@ async function getRoverStatus() {
             await response.json();
 
 
-        if (
-            data.success
-        ) {
+        if (data.success) {
 
             updateRoverStatus(
                 data.rover
@@ -1316,7 +1786,7 @@ async function getRoverStatus() {
     catch (error) {
 
         console.log(
-            "Rover status unavailable."
+            "Status unavailable"
         );
 
     }
@@ -1325,24 +1795,96 @@ async function getRoverStatus() {
 
 
 /* =========================================================
-   CHECK STATUS EVERY 2 SECONDS
+   KEYBOARD
 ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.repeat) {
+
+            return;
+
+        }
+
+
+        const key =
+            event.key.toLowerCase();
+
+
+        if (key === "w") {
+
+            startMove("forward");
+
+        }
+
+        else if (key === "a") {
+
+            startMove("left");
+
+        }
+
+        else if (key === "s") {
+
+            startMove("backward");
+
+        }
+
+        else if (key === "d") {
+
+            startMove("right");
+
+        }
+
+        else if (
+            event.code === "Space"
+        ) {
+
+            emergencyStop();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        const key =
+            event.key.toLowerCase();
+
+
+        if (
+            key === "w" ||
+            key === "a" ||
+            key === "s" ||
+            key === "d"
+        ) {
+
+            stopMove();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL STATUS
+========================================================= */
+
+getRoverStatus();
+
 
 setInterval(
     getRoverStatus,
     2000
 );
 
-
-/* =========================================================
-   INITIAL STATUS CHECK
-========================================================= */
-
-getRoverStatus();
-
-
 </script>
-
 
 </body>
 
