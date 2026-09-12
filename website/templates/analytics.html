@@ -24,7 +24,7 @@
             color: #1f2937;
         }
 
-        /* HEADER */
+        /* ================= HEADER ================= */
 
         header {
             background: #12372a;
@@ -41,14 +41,15 @@
             color: #cbded3;
         }
 
-        /* NAVIGATION */
+        /* ================= NAVIGATION ================= */
 
         nav {
             background: white;
             padding: 15px 40px;
             display: flex;
-            gap: 30px;
+            gap: 28px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
         }
 
         nav a {
@@ -61,7 +62,11 @@
             color: #2f7d57;
         }
 
-        /* MAIN */
+        nav a.active {
+            color: #23613e;
+        }
+
+        /* ================= MAIN ================= */
 
         main {
             max-width: 1400px;
@@ -83,7 +88,7 @@
             margin-top: 6px;
         }
 
-        /* SUMMARY */
+        /* ================= SUMMARY ================= */
 
         .summary {
             display: grid;
@@ -118,7 +123,7 @@
             color: #dc2626 !important;
         }
 
-        /* ANALYTICS GRID */
+        /* ================= ANALYTICS GRID ================= */
 
         .analytics-grid {
             display: grid;
@@ -138,7 +143,7 @@
             margin-bottom: 25px;
         }
 
-        /* BAR CHART */
+        /* ================= BAR CHART ================= */
 
         .chart-row {
             margin-bottom: 22px;
@@ -185,7 +190,7 @@
             background: #16a34a;
         }
 
-        /* DONUT */
+        /* ================= DONUT ================= */
 
         .distribution {
             display: flex;
@@ -234,7 +239,7 @@
             font-size: 12px;
         }
 
-        /* LEGEND */
+        /* ================= LEGEND ================= */
 
         .legend {
             margin-top: 25px;
@@ -262,7 +267,7 @@
             background: #dc2626;
         }
 
-        /* HISTORY */
+        /* ================= HISTORY ================= */
 
         .history-card {
             margin-top: 30px;
@@ -335,10 +340,6 @@
             background: #f8faf9;
         }
 
-        .disease-name {
-            font-weight: bold;
-        }
-
         .healthy-text {
             color: #16a34a;
             font-weight: bold;
@@ -387,7 +388,24 @@
             border-radius: 8px;
         }
 
-        /* RESPONSIVE */
+        /* ================= DAILY DATA BUTTON ================= */
+
+        .daily-data-link {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 20px;
+            background: #23613e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .daily-data-link:hover {
+            background: #12372a;
+        }
+
+        /* ================= RESPONSIVE ================= */
 
         @media(max-width: 900px) {
 
@@ -413,7 +431,7 @@
 
             nav {
                 padding: 15px 20px;
-                flex-wrap: wrap;
+                gap: 18px;
             }
 
             header {
@@ -435,7 +453,9 @@
 <body>
 
 
-<!-- HEADER -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header>
 
@@ -450,7 +470,9 @@
 </header>
 
 
-<!-- NAVIGATION -->
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
 
 <nav>
 
@@ -466,8 +488,14 @@
         Dataset
     </a>
 
-    <a href="/analytics">
+    <a href="/analytics" class="active">
         Analytics
+    </a>
+
+    <!-- NEW DAILY DATA PAGE -->
+
+    <a href="/daily-data">
+        Daily Data
     </a>
 
     <a href="/settings">
@@ -477,10 +505,14 @@
 </nav>
 
 
-<!-- MAIN -->
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
 <main>
 
+
+    <!-- PAGE TITLE -->
 
     <div class="page-title">
 
@@ -495,10 +527,14 @@
     </div>
 
 
-    <!-- SUMMARY -->
+    <!-- =================================================
+         SUMMARY
+    ================================================= -->
 
     <div class="summary">
 
+
+        <!-- TOTAL -->
 
         <div class="summary-card">
 
@@ -513,6 +549,8 @@
         </div>
 
 
+        <!-- HEALTHY -->
+
         <div class="summary-card">
 
             <span>
@@ -526,6 +564,8 @@
         </div>
 
 
+        <!-- DISEASED -->
+
         <div class="summary-card">
 
             <span>
@@ -538,6 +578,8 @@
 
         </div>
 
+
+        <!-- DISEASE TYPES -->
 
         <div class="summary-card">
 
@@ -555,12 +597,16 @@
     </div>
 
 
-    <!-- ANALYTICS -->
+    <!-- =================================================
+         ANALYTICS GRID
+    ================================================= -->
 
     <div class="analytics-grid">
 
 
-        <!-- DISEASE COUNTS -->
+        <!-- =============================================
+             DISEASE COUNTS
+        ============================================== -->
 
         <div class="card">
 
@@ -602,7 +648,7 @@
             </div>
 
 
-            <!-- BACTERIAL -->
+            <!-- BACTERIAL SPOT -->
 
             <div class="chart-row">
 
@@ -704,7 +750,9 @@
         </div>
 
 
-        <!-- DISTRIBUTION -->
+        <!-- =============================================
+             HEALTHY VS DISEASED
+        ============================================== -->
 
         <div class="card">
 
@@ -772,17 +820,36 @@
     </div>
 
 
-    <!-- ================================================= -->
-    <!-- PREDICTION HISTORY -->
-    <!-- ================================================= -->
+    <!-- =================================================
+         DAILY DATA LINK
+    ================================================= -->
+
+    <div>
+
+        <a
+            href="/daily-data"
+            class="daily-data-link">
+
+            📊 View Daily Prediction Data →
+
+        </a>
+
+    </div>
+
+
+    <!-- =================================================
+         PREDICTION HISTORY
+    ================================================= -->
 
     <div class="card history-card">
+
 
         <div class="history-header">
 
             <h3>
                 Prediction History
             </h3>
+
 
             <button
                 class="refresh-button"
@@ -875,18 +942,25 @@
 </main>
 
 
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
 <script>
 
+
 /* =========================================================
-   LOAD HISTORY FROM FLASK
-   ========================================================= */
+   LOAD HISTORY
+========================================================= */
 
 async function loadHistory() {
+
 
     const tableBody =
         document.getElementById(
             "historyTableBody"
         );
+
 
     const status =
         document.getElementById(
@@ -895,11 +969,19 @@ async function loadHistory() {
 
 
     tableBody.innerHTML = `
+
         <tr>
-            <td colspan="8" class="loading">
+
+            <td
+                colspan="8"
+                class="loading">
+
                 Loading prediction history...
+
             </td>
+
         </tr>
+
     `;
 
 
@@ -909,13 +991,15 @@ async function loadHistory() {
 
     try {
 
-        const response = await fetch(
-            "/api/history",
-            {
-                method: "GET",
-                cache: "no-store"
-            }
-        );
+
+        const response =
+            await fetch(
+                "/api/history",
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
 
 
         if (!response.ok) {
@@ -948,12 +1032,17 @@ async function loadHistory() {
             data.history;
 
 
-        /* EMPTY HISTORY */
+        /* =========================================
+           EMPTY HISTORY
+        ========================================= */
 
         if (history.length === 0) {
 
+
             tableBody.innerHTML = `
+
                 <tr>
+
                     <td
                         colspan="8"
                         class="no-history">
@@ -961,24 +1050,31 @@ async function loadHistory() {
                         No prediction history available yet.
 
                     </td>
+
                 </tr>
+
             `;
+
 
             status.textContent =
                 "No predictions have been recorded yet.";
+
 
             return;
 
         }
 
 
-        /* DISPLAY HISTORY */
+        /* =========================================
+           DISPLAY HISTORY
+        ========================================= */
 
         tableBody.innerHTML = "";
 
 
         history.forEach(
             (record, index) => {
+
 
                 const row =
                     document.createElement(
@@ -1040,7 +1136,9 @@ async function loadHistory() {
 
                 if (image) {
 
+
                     imageHTML = `
+
                         <a
                             class="view-image"
                             href="/static/images/${encodeURIComponent(image)}"
@@ -1049,6 +1147,7 @@ async function loadHistory() {
                             View
 
                         </a>
+
                     `;
 
                 }
@@ -1091,7 +1190,9 @@ async function loadHistory() {
                 `;
 
 
-                tableBody.appendChild(row);
+                tableBody.appendChild(
+                    row
+                );
 
             }
         );
@@ -1109,7 +1210,10 @@ async function loadHistory() {
 
 
     }
+
+
     catch (error) {
+
 
         console.error(
             "HISTORY ERROR:",
@@ -1145,9 +1249,10 @@ async function loadHistory() {
 
 /* =========================================================
    HTML ESCAPE
-   ========================================================= */
+========================================================= */
 
 function escapeHTML(value) {
+
 
     return String(value)
 
@@ -1180,8 +1285,8 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   LOAD HISTORY WHEN PAGE OPENS
-   ========================================================= */
+   PAGE LOAD
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -1191,6 +1296,7 @@ document.addEventListener(
 
     }
 );
+
 
 </script>
 

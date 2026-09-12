@@ -31,7 +31,9 @@ app.config["JSON_SORT_KEYS"] = False
 # DIRECTORIES
 # ============================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 TEMPLATE_FOLDER = os.path.join(
     BASE_DIR,
@@ -58,7 +60,6 @@ HISTORY_FILE = os.path.join(
     "history.json"
 )
 
-# NEW: DAILY DATA FILE
 DAILY_DATA_FILE = os.path.join(
     BASE_DIR,
     "daily_data.json"
@@ -93,7 +94,7 @@ def add_no_cache_headers(response):
 
 
 # ============================================================
-# DEFAULT AI RESULT
+# DEFAULT RESULT
 # ============================================================
 
 DEFAULT_RESULT = {
@@ -108,8 +109,9 @@ DEFAULT_RESULT = {
 
     "fertilizer": "Not available",
 
-    "treatment":
-        "No prediction has been processed yet.",
+    "treatment": (
+        "No prediction has been processed yet."
+    ),
 
     "confidence": 0.0,
 
@@ -181,15 +183,17 @@ def load_json_file(
             file_path,
             "r",
             encoding="utf-8"
-        ) as f:
+        ) as file:
 
-            return json.load(f)
+            data = json.load(file)
 
-    except Exception as e:
+        return data
+
+    except Exception as error:
 
         print(
             "JSON READ ERROR:",
-            e
+            error
         )
 
         return default_value
@@ -206,28 +210,28 @@ def save_json_file(
             file_path,
             "w",
             encoding="utf-8"
-        ) as f:
+        ) as file:
 
             json.dump(
                 data,
-                f,
+                file,
                 indent=4
             )
 
         return True
 
-    except Exception as e:
+    except Exception as error:
 
         print(
             "JSON WRITE ERROR:",
-            e
+            error
         )
 
         return False
 
 
 # ============================================================
-# RESULT
+# RESULT FUNCTIONS
 # ============================================================
 
 def get_latest_result():
@@ -262,7 +266,7 @@ def save_latest_result(result):
 
 
 # ============================================================
-# HISTORY
+# HISTORY FUNCTIONS
 # ============================================================
 
 def get_history():
@@ -299,16 +303,18 @@ def add_history_record(result):
         result
     )
 
-    # Keep existing history behaviour
+    # Keep maximum 100 history records
     history = history[:100]
 
-    save_history(history)
+    save_history(
+        history
+    )
 
     return history
 
 
 # ============================================================
-# DAILY DATA
+# DAILY DATA FUNCTIONS
 # ============================================================
 
 def get_daily_data():
@@ -336,6 +342,45 @@ def save_daily_data(daily_data):
     )
 
 
+# ============================================================
+# CREATE EMPTY DAY
+# ============================================================
+
+def create_empty_day(date):
+
+    return {
+
+        "date": date,
+
+        "total": 0,
+
+        "healthy": 0,
+
+        "diseased": 0,
+
+        "bacterial_spot": 0,
+
+        "cercospora": 0,
+
+        "curl_virus": 0,
+
+        "unclear": 0,
+
+        "other": 0,
+
+        "confidence_total": 0.0,
+
+        "confidence_count": 0,
+
+        "records": []
+
+    }
+
+
+# ============================================================
+# ADD DAILY RECORD
+# ============================================================
+
 def add_daily_record(result):
 
     daily_data = get_daily_data()
@@ -347,8 +392,9 @@ def add_daily_record(result):
         )
     )
 
-    # Extract date from:
-    # YYYY-MM-DD HH:MM:SS
+    # --------------------------------------------------------
+    # GET DATE
+    # --------------------------------------------------------
 
     if len(timestamp) >= 10:
 
@@ -361,37 +407,15 @@ def add_daily_record(result):
         )
 
 
-    # Create date if it doesn't exist
+    # --------------------------------------------------------
+    # CREATE DAY
+    # --------------------------------------------------------
 
     if date not in daily_data:
 
-        daily_data[date] = {
-
-            "date": date,
-
-            "total": 0,
-
-            "healthy": 0,
-
-            "diseased": 0,
-
-            "bacterial_spot": 0,
-
-            "cercospora": 0,
-
-            "curl_virus": 0,
-
-            "unclear": 0,
-
-            "other": 0,
-
-            "confidence_total": 0.0,
-
-            "confidence_count": 0,
-
-            "records": []
-
-        }
+        daily_data[date] = create_empty_day(
+            date
+        )
 
 
     day = daily_data[date]
@@ -401,7 +425,12 @@ def add_daily_record(result):
     # TOTAL
     # --------------------------------------------------------
 
-    day["total"] += 1
+    day["total"] = int(
+        day.get(
+            "total",
+            0
+        )
+    ) + 1
 
 
     # --------------------------------------------------------
@@ -413,43 +442,88 @@ def add_daily_record(result):
             "disease",
             ""
         )
-    ).lower()
+    ).strip().lower()
 
 
     if "healthy" in disease:
 
-        day["healthy"] += 1
+        day["healthy"] = int(
+            day.get(
+                "healthy",
+                0
+            )
+        ) + 1
 
 
     elif "bacterial" in disease:
 
-        day["bacterial_spot"] += 1
+        day["bacterial_spot"] = int(
+            day.get(
+                "bacterial_spot",
+                0
+            )
+        ) + 1
 
-        day["diseased"] += 1
+        day["diseased"] = int(
+            day.get(
+                "diseased",
+                0
+            )
+        ) + 1
 
 
     elif "cercospora" in disease:
 
-        day["cercospora"] += 1
+        day["cercospora"] = int(
+            day.get(
+                "cercospora",
+                0
+            )
+        ) + 1
 
-        day["diseased"] += 1
+        day["diseased"] = int(
+            day.get(
+                "diseased",
+                0
+            )
+        ) + 1
 
 
     elif "curl" in disease:
 
-        day["curl_virus"] += 1
+        day["curl_virus"] = int(
+            day.get(
+                "curl_virus",
+                0
+            )
+        ) + 1
 
-        day["diseased"] += 1
+        day["diseased"] = int(
+            day.get(
+                "diseased",
+                0
+            )
+        ) + 1
 
 
     elif "unclear" in disease:
 
-        day["unclear"] += 1
+        day["unclear"] = int(
+            day.get(
+                "unclear",
+                0
+            )
+        ) + 1
 
 
     else:
 
-        day["other"] += 1
+        day["other"] = int(
+            day.get(
+                "other",
+                0
+            )
+        ) + 1
 
 
     # --------------------------------------------------------
@@ -465,9 +539,27 @@ def add_daily_record(result):
             )
         )
 
-        day["confidence_total"] += confidence
+        confidence = max(
+            0.0,
+            min(
+                100.0,
+                confidence
+            )
+        )
 
-        day["confidence_count"] += 1
+        day["confidence_total"] = float(
+            day.get(
+                "confidence_total",
+                0
+            )
+        ) + confidence
+
+        day["confidence_count"] = int(
+            day.get(
+                "confidence_count",
+                0
+            )
+        ) + 1
 
     except Exception:
 
@@ -475,13 +567,29 @@ def add_daily_record(result):
 
 
     # --------------------------------------------------------
-    # COMPLETE RECORD
+    # STORE COMPLETE RECORD
     # --------------------------------------------------------
 
-    day["records"].insert(
+    records = day.get(
+        "records",
+        []
+    )
+
+    if not isinstance(
+        records,
+        list
+    ):
+
+        records = []
+
+
+    records.insert(
         0,
         result
     )
+
+
+    day["records"] = records
 
 
     # --------------------------------------------------------
@@ -495,6 +603,10 @@ def add_daily_record(result):
     return daily_data
 
 
+# ============================================================
+# DAILY DATA LIST
+# ============================================================
+
 def get_daily_data_list():
 
     daily_data = get_daily_data()
@@ -504,22 +616,33 @@ def get_daily_data_list():
 
     for date, day in daily_data.items():
 
-        confidence_count = day.get(
-            "confidence_count",
-            0
+        if not isinstance(
+            day,
+            dict
+        ):
+
+            continue
+
+
+        confidence_total = float(
+            day.get(
+                "confidence_total",
+                0
+            )
         )
 
-        confidence_total = day.get(
-            "confidence_total",
-            0
+        confidence_count = int(
+            day.get(
+                "confidence_count",
+                0
+            )
         )
 
 
-        if confidence_count:
+        if confidence_count > 0:
 
             average_confidence = round(
-                confidence_total
-                /
+                confidence_total /
                 confidence_count,
                 2
             )
@@ -538,51 +661,67 @@ def get_daily_data_list():
                 ),
 
             "total":
-                day.get(
-                    "total",
-                    0
+                int(
+                    day.get(
+                        "total",
+                        0
+                    )
                 ),
 
             "healthy":
-                day.get(
-                    "healthy",
-                    0
+                int(
+                    day.get(
+                        "healthy",
+                        0
+                    )
                 ),
 
             "diseased":
-                day.get(
-                    "diseased",
-                    0
+                int(
+                    day.get(
+                        "diseased",
+                        0
+                    )
                 ),
 
             "bacterial_spot":
-                day.get(
-                    "bacterial_spot",
-                    0
+                int(
+                    day.get(
+                        "bacterial_spot",
+                        0
+                    )
                 ),
 
             "cercospora":
-                day.get(
-                    "cercospora",
-                    0
+                int(
+                    day.get(
+                        "cercospora",
+                        0
+                    )
                 ),
 
             "curl_virus":
-                day.get(
-                    "curl_virus",
-                    0
+                int(
+                    day.get(
+                        "curl_virus",
+                        0
+                    )
                 ),
 
             "unclear":
-                day.get(
-                    "unclear",
-                    0
+                int(
+                    day.get(
+                        "unclear",
+                        0
+                    )
                 ),
 
             "other":
-                day.get(
-                    "other",
-                    0
+                int(
+                    day.get(
+                        "other",
+                        0
+                    )
                 ),
 
             "average_confidence":
@@ -598,12 +737,10 @@ def get_daily_data_list():
 
 
     # Newest date first
-
     result.sort(
-        key=lambda x: x["date"],
+        key=lambda item: item["date"],
         reverse=True
     )
-
 
     return result
 
@@ -635,6 +772,10 @@ def get_analytics():
     confidence_count = 0
 
 
+    # --------------------------------------------------------
+    # PROCESS HISTORY
+    # --------------------------------------------------------
+
     for record in history:
 
         disease = str(
@@ -642,7 +783,7 @@ def get_analytics():
                 "disease",
                 ""
             )
-        ).lower()
+        ).strip().lower()
 
 
         if "healthy" in disease:
@@ -675,12 +816,24 @@ def get_analytics():
             other += 1
 
 
+        # ----------------------------------------------------
+        # CONFIDENCE
+        # ----------------------------------------------------
+
         try:
 
             confidence = float(
                 record.get(
                     "confidence",
                     0
+                )
+            )
+
+            confidence = max(
+                0,
+                min(
+                    100,
+                    confidence
                 )
             )
 
@@ -693,11 +846,14 @@ def get_analytics():
             pass
 
 
-    if confidence_count:
+    # --------------------------------------------------------
+    # AVERAGE CONFIDENCE
+    # --------------------------------------------------------
+
+    if confidence_count > 0:
 
         average_confidence = (
-            confidence_total
-            /
+            confidence_total /
             confidence_count
         )
 
@@ -705,6 +861,10 @@ def get_analytics():
 
         average_confidence = 0
 
+
+    # --------------------------------------------------------
+    # DISEASED
+    # --------------------------------------------------------
 
     diseased = (
         bacterial_spot
@@ -715,41 +875,52 @@ def get_analytics():
     )
 
 
-    if total:
+    # --------------------------------------------------------
+    # PERCENTAGES
+    # --------------------------------------------------------
 
-        disease_percentage = (
-            diseased
-            /
+    if total > 0:
+
+        healthy_percentage = (
+            healthy /
             total
         ) * 100
 
-        healthy_percentage = (
-            healthy
-            /
+        disease_percentage = (
+            diseased /
             total
         ) * 100
 
     else:
 
-        disease_percentage = 0
-
         healthy_percentage = 0
 
+        disease_percentage = 0
+
+
+    # --------------------------------------------------------
+    # LATEST RESULT
+    # --------------------------------------------------------
 
     latest = get_latest_result()
 
 
     return {
 
-        "total": total,
+        "total":
+            total,
 
-        "healthy": healthy,
+        "healthy":
+            healthy,
 
-        "diseased": diseased,
+        "diseased":
+            diseased,
 
-        "unclear": unclear,
+        "unclear":
+            unclear,
 
-        "other": other,
+        "other":
+            other,
 
         "bacterial_spot":
             bacterial_spot,
@@ -858,12 +1029,17 @@ def dashboard():
     )
 
 
+# ============================================================
+# ANALYTICS PAGE
+# ============================================================
+
 @app.route("/analytics")
 def analytics():
 
     result = get_latest_result()
 
     return render_template(
+
         "analytics.html",
 
         result=result,
@@ -881,6 +1057,7 @@ def analytics():
         rover=rover_state,
 
         settings=rover_settings
+
     )
 
 
@@ -894,6 +1071,7 @@ def daily_data():
     result = get_latest_result()
 
     return render_template(
+
         "daily_data.html",
 
         result=result,
@@ -911,8 +1089,13 @@ def daily_data():
         rover=rover_state,
 
         settings=rover_settings
+
     )
 
+
+# ============================================================
+# DATASET
+# ============================================================
 
 @app.route("/dataset")
 def dataset():
@@ -920,6 +1103,7 @@ def dataset():
     result = get_latest_result()
 
     return render_template(
+
         "dataset.html",
 
         result=result,
@@ -937,8 +1121,13 @@ def dataset():
         rover=rover_state,
 
         settings=rover_settings
+
     )
 
+
+# ============================================================
+# ROVER
+# ============================================================
 
 @app.route("/rover")
 def rover():
@@ -946,6 +1135,7 @@ def rover():
     result = get_latest_result()
 
     return render_template(
+
         "rover.html",
 
         result=result,
@@ -963,8 +1153,13 @@ def rover():
         rover_state=rover_state,
 
         settings=rover_settings
+
     )
 
+
+# ============================================================
+# SETTINGS
+# ============================================================
 
 @app.route("/settings")
 def settings():
@@ -972,6 +1167,7 @@ def settings():
     result = get_latest_result()
 
     return render_template(
+
         "settings.html",
 
         result=result,
@@ -984,9 +1180,12 @@ def settings():
 
         history=get_history(),
 
+        daily_data=get_daily_data_list(),
+
         rover=rover_state,
 
         settings=rover_settings
+
     )
 
 
@@ -1007,6 +1206,7 @@ def pwa_icon(filename):
         ),
 
         filename
+
     )
 
 
@@ -1054,20 +1254,18 @@ def manifest():
         manifest_path,
         "r",
         encoding="utf-8"
-    ) as f:
+    ) as file:
 
-        data = f.read()
+        data = file.read()
 
 
     response = make_response(
         data
     )
 
-
     response.headers[
         "Content-Type"
     ] = "application/manifest+json"
-
 
     return response
 
@@ -1097,25 +1295,22 @@ def service_worker():
         path,
         "r",
         encoding="utf-8"
-    ) as f:
+    ) as file:
 
-        javascript = f.read()
+        javascript = file.read()
 
 
     response = make_response(
         javascript
     )
 
-
     response.headers[
         "Content-Type"
     ] = "application/javascript"
 
-
     response.headers[
         "Service-Worker-Allowed"
     ] = "/"
-
 
     return response
 
@@ -1175,7 +1370,7 @@ def api_result():
 )
 def api_dashboard_state():
 
-    response = jsonify({
+    return jsonify({
 
         "success":
             True,
@@ -1201,8 +1396,6 @@ def api_dashboard_state():
             )
 
     })
-
-    return response
 
 
 # ============================================================
@@ -1280,6 +1473,8 @@ def api_analytics():
 
 # ============================================================
 # CAMERA AI RESULT
+#
+# IMPORTANT:
 # DO NOT CHANGE THIS URL
 # ============================================================
 
@@ -1291,35 +1486,39 @@ def update_result():
 
     try:
 
+        # ----------------------------------------------------
+        # FORM DATA
+        # ----------------------------------------------------
+
         disease = request.form.get(
             "disease",
             "Unknown"
         )
-
 
         chemical = request.form.get(
             "chemical",
             "Not available"
         )
 
-
         fertilizer = request.form.get(
             "fertilizer",
             "Not available"
         )
-
 
         treatment = request.form.get(
             "treatment",
             "Not available"
         )
 
-
         confidence = request.form.get(
             "confidence",
             "0"
         )
 
+
+        # ----------------------------------------------------
+        # CONFIDENCE
+        # ----------------------------------------------------
 
         try:
 
@@ -1341,6 +1540,10 @@ def update_result():
         )
 
 
+        # ----------------------------------------------------
+        # IMAGE
+        # ----------------------------------------------------
+
         image = request.files.get(
             "image"
         )
@@ -1360,9 +1563,11 @@ def update_result():
 
 
         original_filename = os.path.basename(
+
             image.filename
             or
             "leaf.jpg"
+
         )
 
 
@@ -1376,34 +1581,39 @@ def update_result():
             extension = ".jpg"
 
 
+        # ----------------------------------------------------
+        # UNIQUE IMAGE NAME
+        # ----------------------------------------------------
+
         filename = (
 
             datetime.now().strftime(
                 "%Y%m%d_%H%M%S"
             )
 
-            +
+            + "_"
 
-            "_"
+            + uuid.uuid4().hex[:8]
 
-            +
+            + extension
 
-            uuid.uuid4().hex[:8]
+        )
 
-            +
 
-            extension
-
+        image_path = os.path.join(
+            IMAGE_FOLDER,
+            filename
         )
 
 
         image.save(
-            os.path.join(
-                IMAGE_FOLDER,
-                filename
-            )
+            image_path
         )
 
+
+        # ----------------------------------------------------
+        # CREATE RESULT
+        # ----------------------------------------------------
 
         result = {
 
@@ -1449,7 +1659,7 @@ def update_result():
 
 
         # ----------------------------------------------------
-        # SAVE NORMAL HISTORY
+        # SAVE HISTORY
         # ----------------------------------------------------
 
         add_history_record(
@@ -1466,16 +1676,48 @@ def update_result():
         )
 
 
+        # ----------------------------------------------------
+        # SERVER LOG
+        # ----------------------------------------------------
+
         print(
-            "AI RESULT:",
-            disease,
+            "=============================================="
+        )
+
+        print(
+            "AI RESULT RECEIVED"
+        )
+
+        print(
+            "Disease:",
+            disease
+        )
+
+        print(
+            "Confidence:",
             confidence_value
         )
 
+        print(
+            "Image:",
+            filename
+        )
 
         print(
-            "DAILY DATA SAVED FOR:",
+            "Date:",
             result["timestamp"][:10]
+        )
+
+        print(
+            "History: SAVED"
+        )
+
+        print(
+            "Daily Data: SAVED"
+        )
+
+        print(
+            "=============================================="
         )
 
 
@@ -1485,7 +1727,10 @@ def update_result():
                 True,
 
             "message":
-                "AI result, history and daily data updated successfully",
+                (
+                    "AI result, history and "
+                    "daily data updated successfully"
+                ),
 
             "result":
                 result
@@ -1493,13 +1738,12 @@ def update_result():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         print(
             "AI API ERROR:",
-            e
+            error
         )
-
 
         return jsonify({
 
@@ -1507,19 +1751,13 @@ def update_result():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
 
 # ============================================================
 # ROVER CONTROL
-#
-# forward
-# backward
-# left
-# right
-# stop
 # ============================================================
 
 @app.route(
@@ -1597,7 +1835,9 @@ def rover_control():
 
         rover_state[
             "direction"
-        ] = direction_names[command]
+        ] = direction_names[
+            command
+        ]
 
 
         rover_state[
@@ -1615,7 +1855,6 @@ def rover_control():
             rover_state[
                 "speed"
             ] = 0
-
 
         elif rover_state["speed"] == 0:
 
@@ -1654,11 +1893,11 @@ def rover_control():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         print(
             "ROVER CONTROL ERROR:",
-            e
+            error
         )
 
 
@@ -1668,15 +1907,13 @@ def rover_control():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
 
 # ============================================================
-# RASPBERRY PI COMMAND API
-#
-# Raspberry Pi will call this repeatedly.
+# RASPBERRY PI COMMAND
 # ============================================================
 
 @app.route(
@@ -1761,7 +1998,7 @@ def rover_heartbeat():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -1769,7 +2006,7 @@ def rover_heartbeat():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -1863,7 +2100,7 @@ def rover_speed():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -1871,7 +2108,7 @@ def rover_speed():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -1973,7 +2210,7 @@ def rover_pump():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -1981,7 +2218,7 @@ def rover_pump():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -2069,6 +2306,10 @@ def update_settings():
                 )
 
 
+        # ----------------------------------------------------
+        # CONFIDENCE THRESHOLD
+        # ----------------------------------------------------
+
         if "confidence_threshold" in data:
 
             try:
@@ -2080,9 +2321,7 @@ def update_settings():
                 )
 
 
-                rover_settings[
-                    "confidence_threshold"
-                ] = max(
+                threshold = max(
                     0,
                     min(
                         100,
@@ -2091,10 +2330,19 @@ def update_settings():
                 )
 
 
+                rover_settings[
+                    "confidence_threshold"
+                ] = threshold
+
+
             except Exception:
 
                 pass
 
+
+        # ----------------------------------------------------
+        # SPEED
+        # ----------------------------------------------------
 
         if "speed" in data:
 
@@ -2145,7 +2393,7 @@ def update_settings():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -2153,7 +2401,7 @@ def update_settings():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -2186,7 +2434,7 @@ def clear_history():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -2194,7 +2442,7 @@ def clear_history():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -2227,7 +2475,7 @@ def clear_daily_data():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -2235,13 +2483,13 @@ def clear_daily_data():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
 
 # ============================================================
-# CLEAR RESULT
+# CLEAR LATEST RESULT
 # ============================================================
 
 @app.route(
@@ -2268,7 +2516,7 @@ def clear_result():
         })
 
 
-    except Exception as e:
+    except Exception as error:
 
         return jsonify({
 
@@ -2276,7 +2524,7 @@ def clear_result():
                 False,
 
             "message":
-                str(e)
+                str(error)
 
         }), 500
 
@@ -2343,87 +2591,78 @@ if __name__ == "__main__":
         "=============================================="
     )
 
-
     print(
         "PRECISION AGRICULTURE SMART ROVER"
     )
 
-
     print(
         "FLASK SERVER STARTING..."
     )
-
 
     print(
         "PORT:",
         port
     )
 
-
     print(
         "CAMERA AI:"
     )
-
 
     print(
         "/api/update-result"
     )
 
+    print(
+        "ANALYTICS:"
+    )
+
+    print(
+        "/analytics"
+    )
 
     print(
         "DAILY DATA:"
     )
 
-
     print(
         "/daily-data"
     )
-
 
     print(
         "/api/daily-data"
     )
 
-
     print(
         "ROVER CONTROL:"
     )
-
 
     print(
         "/api/rover/control"
     )
 
-
     print(
         "RASPBERRY PI COMMAND:"
     )
-
 
     print(
         "/api/rover/command"
     )
 
-
     print(
         "RASPBERRY PI HEARTBEAT:"
     )
-
 
     print(
         "/api/rover/heartbeat"
     )
 
-
     print(
         "PWA:"
     )
 
-
     print(
         "/service-worker.js"
     )
-
 
     print(
         "=============================================="
