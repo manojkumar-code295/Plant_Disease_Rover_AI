@@ -8,9 +8,17 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
+    <meta name="theme-color"
+          content="#12372a">
+
     <title>Daily Data | Precision Agriculture</title>
 
+
     <style>
+
+        /* =====================================================
+           RESET
+        ===================================================== */
 
         * {
             box-sizing: border-box;
@@ -18,10 +26,28 @@
             padding: 0;
         }
 
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f5;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4f7f5 0%,
+                    #eef5f0 100%
+                );
+
             color: #1f2937;
+
+            min-height: 100vh;
         }
 
 
@@ -30,18 +56,44 @@
         ===================================================== */
 
         header {
-            background: #12372a;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #12372a,
+                    #1d5a40
+                );
+
             color: white;
+
             padding: 22px 40px;
+
+            box-shadow:
+                0 3px 12px
+                rgba(0,0,0,0.12);
+        }
+
+        .header-content {
+
+            max-width: 1350px;
+
+            margin: auto;
         }
 
         header h1 {
+
             font-size: 26px;
+
+            letter-spacing: 0.2px;
         }
 
         header p {
+
             margin-top: 6px;
+
             color: #cbded3;
+
+            font-size: 14px;
         }
 
 
@@ -50,26 +102,73 @@
         ===================================================== */
 
         nav {
+
             background: white;
-            padding: 15px 40px;
+
+            padding: 0 40px;
+
             display: flex;
-            gap: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+            justify-content: center;
+
+            gap: 8px;
+
+            box-shadow:
+                0 2px 10px
+                rgba(0,0,0,0.07);
+
             flex-wrap: wrap;
         }
 
         nav a {
+
+            position: relative;
+
             text-decoration: none;
-            color: #374151;
+
+            color: #4b5563;
+
             font-weight: bold;
+
+            font-size: 14px;
+
+            padding: 16px 14px;
+
+            transition:
+                color 0.2s ease,
+                background 0.2s ease;
         }
 
         nav a:hover {
-            color: #2f7d57;
+
+            color: #23613e;
+
+            background: #f3f8f5;
         }
 
         nav a.active {
+
             color: #23613e;
+        }
+
+        nav a.active::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 12px;
+
+            right: 12px;
+
+            bottom: 0;
+
+            height: 3px;
+
+            background: #23613e;
+
+            border-radius:
+                5px 5px 0 0;
         }
 
 
@@ -78,9 +177,12 @@
         ===================================================== */
 
         main {
+
             max-width: 1350px;
+
             margin: auto;
-            padding: 35px 40px;
+
+            padding: 35px 40px 50px;
         }
 
 
@@ -89,54 +191,137 @@
         ===================================================== */
 
         .page-title {
+
             margin-bottom: 25px;
         }
 
         .page-title h2 {
+
             color: #12372a;
-            font-size: 26px;
+
+            font-size: 28px;
+
+            font-weight: 700;
         }
 
         .page-title p {
+
             color: #6b7280;
+
             margin-top: 7px;
+
+            font-size: 14px;
         }
 
 
         /* =====================================================
-           TOP SUMMARY
+           SUMMARY
         ===================================================== */
 
         .summary {
+
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 28px;
         }
 
+
         .summary-card {
+
+            position: relative;
+
             background: white;
-            padding: 24px;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            padding: 23px;
+
+            border-radius: 15px;
+
+            border:
+                1px solid #e5ebe7;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,0,0,0.06);
+
+            overflow: hidden;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .summary-card:hover {
+
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+                0 8px 22px
+                rgba(0,0,0,0.09);
+        }
+
+        .summary-card::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+
+            top: 0;
+
+            bottom: 0;
+
+            width: 5px;
+
+            background: #23613e;
+        }
+
+        .summary-card:nth-child(2)::before {
+
+            background: #2f7d57;
+        }
+
+        .summary-card:nth-child(3)::before {
+
+            background: #16a34a;
+        }
+
+        .summary-card:nth-child(4)::before {
+
+            background: #dc2626;
         }
 
         .summary-card span {
+
             color: #6b7280;
+
             font-size: 13px;
+
+            font-weight: 600;
         }
 
         .summary-card h2 {
-            margin-top: 10px;
+
+            margin-top: 9px;
+
             color: #12372a;
-            font-size: 30px;
+
+            font-size: 31px;
         }
 
         .healthy {
+
             color: #16a34a !important;
         }
 
         .diseased {
+
             color: #dc2626 !important;
         }
 
@@ -146,41 +331,103 @@
         ===================================================== */
 
         .control-bar {
+
             background: white;
-            padding: 20px 25px;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            padding: 20px 23px;
+
+            border-radius: 15px;
+
+            border:
+                1px solid #e5ebe7;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,0,0,0.06);
+
             margin-bottom: 25px;
 
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             gap: 15px;
+
             flex-wrap: wrap;
         }
 
-        .control-bar h3 {
+        .control-info h3 {
+
             color: #12372a;
+
+            font-size: 17px;
         }
 
-        .control-bar p {
+        .control-info p {
+
             color: #6b7280;
-            font-size: 14px;
+
+            font-size: 13px;
+
             margin-top: 5px;
         }
 
-        .clear-button {
-            border: none;
-            background: #dc2626;
-            color: white;
-            padding: 11px 18px;
-            border-radius: 8px;
-            cursor: pointer;
+        .control-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .record-count {
+
+            background: #e8f5ed;
+
+            color: #23613e;
+
+            padding: 9px 13px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
             font-weight: bold;
         }
 
+        .clear-button {
+
+            border: none;
+
+            background: #dc2626;
+
+            color: white;
+
+            padding: 11px 18px;
+
+            border-radius: 9px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            transition:
+                background 0.2s ease,
+                transform 0.15s ease;
+        }
+
         .clear-button:hover {
+
             background: #b91c1c;
+        }
+
+        .clear-button:active {
+
+            transform:
+                scale(0.97);
         }
 
 
@@ -189,10 +436,20 @@
         ===================================================== */
 
         .daily-card {
+
             background: white;
-            border-radius: 15px;
+
+            border-radius: 16px;
+
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            border:
+                1px solid #e5ebe7;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,0,0,0.06);
+
             overflow: hidden;
         }
 
@@ -202,37 +459,90 @@
         ===================================================== */
 
         .daily-header {
+
             padding: 22px 25px;
-            background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #f8fbf9
+                );
+
+            border-bottom:
+                1px solid #e5e7eb;
 
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
             align-items: center;
+
             gap: 20px;
+
             flex-wrap: wrap;
         }
 
+        .date-section {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+        }
+
+        .calendar-icon {
+
+            width: 48px;
+
+            height: 48px;
+
+            border-radius: 12px;
+
+            background: #e8f5ed;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 23px;
+        }
+
         .date-section h3 {
+
             color: #12372a;
+
             font-size: 21px;
         }
 
         .date-section p {
+
             color: #6b7280;
+
             font-size: 13px;
+
             margin-top: 5px;
         }
 
         .date-badge {
+
             display: inline-block;
-            background: #e8f5ed;
-            color: #23613e;
+
+            background: #23613e;
+
+            color: white;
+
             padding: 7px 12px;
+
             border-radius: 20px;
+
             font-size: 12px;
+
             font-weight: bold;
-            margin-top: 8px;
         }
 
 
@@ -241,49 +551,85 @@
         ===================================================== */
 
         .daily-stats {
+
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+
+            grid-template-columns:
+                repeat(7, 1fr);
+
             gap: 12px;
+
             padding: 20px 25px;
+
             background: #fafcfb;
         }
 
         .stat-box {
+
             background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
+
+            border:
+                1px solid #e5e7eb;
+
+            border-radius: 11px;
+
             padding: 15px;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .stat-box:hover {
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 5px 12px
+                rgba(0,0,0,0.06);
         }
 
         .stat-box span {
+
             display: block;
+
             color: #6b7280;
+
             font-size: 12px;
+
             margin-bottom: 7px;
         }
 
         .stat-box strong {
-            font-size: 21px;
+
+            font-size: 22px;
+
             color: #12372a;
         }
 
         .stat-box.healthy-box strong {
+
             color: #16a34a;
         }
 
         .stat-box.diseased-box strong {
+
             color: #dc2626;
         }
 
         .stat-box.bacterial-box strong {
+
             color: #dc2626;
         }
 
         .stat-box.cercospora-box strong {
+
             color: #d97706;
         }
 
         .stat-box.curl-box strong {
+
             color: #7c3aed;
         }
 
@@ -293,31 +639,63 @@
         ===================================================== */
 
         .confidence-section {
-            padding: 0 25px 22px 25px;
+
+            padding:
+                3px 25px 23px;
         }
 
         .confidence-header {
+
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
             margin-bottom: 8px;
+
             font-size: 13px;
         }
 
+        .confidence-header span {
+
+            color: #6b7280;
+
+            font-weight: 600;
+        }
+
         .confidence-header strong {
+
             color: #12372a;
         }
 
         .confidence-background {
+
             height: 12px;
+
             background: #e5e7eb;
+
             border-radius: 20px;
+
             overflow: hidden;
         }
 
         .confidence-bar {
+
             height: 100%;
-            background: #23613e;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #2f7d57,
+                    #12372a
+                );
+
             border-radius: 20px;
+
+            transition:
+                width 0.5s ease;
         }
 
 
@@ -326,80 +704,104 @@
         ===================================================== */
 
         .records-section {
-            padding: 0 25px 25px 25px;
+
+            padding:
+                0 25px 25px;
+        }
+
+        .records-header {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 14px;
+
+            gap: 10px;
+
+            flex-wrap: wrap;
         }
 
         .records-section h4 {
+
             color: #12372a;
-            margin-bottom: 15px;
+
+            font-size: 16px;
         }
 
-        .record-table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-        }
+        .records-label {
 
-        .record-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 850px;
-        }
+            color: #6b7280;
 
-        .record-table th {
-            background: #f3f6f4;
-            color: #374151;
-            text-align: left;
-            padding: 12px;
-            font-size: 13px;
-        }
-
-        .record-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 13px;
-            vertical-align: middle;
-        }
-
-        .record-table tr:hover {
-            background: #fafafa;
+            font-size: 12px;
         }
 
 
         /* =====================================================
-           DISEASE BADGES
+           TABLE
         ===================================================== */
 
-        .disease-badge {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+        .record-table-wrapper {
+
+            width: 100%;
+
+            overflow-x: auto;
+
+            border:
+                1px solid #e5e7eb;
+
+            border-radius: 11px;
         }
 
-        .disease-healthy {
-            background: #dcfce7;
-            color: #15803d;
+        .record-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            min-width: 900px;
         }
 
-        .disease-bacterial {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+        .record-table th {
 
-        .disease-cercospora {
-            background: #fef3c7;
-            color: #b45309;
-        }
+            background: #f3f6f4;
 
-        .disease-curl {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .disease-other {
-            background: #e5e7eb;
             color: #374151;
+
+            text-align: left;
+
+            padding: 13px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .record-table td {
+
+            padding: 12px 13px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            font-size: 13px;
+
+            vertical-align: middle;
+        }
+
+        .record-table tbody tr:last-child td {
+
+            border-bottom: none;
+        }
+
+        .record-table tbody tr:hover {
+
+            background: #fafcfb;
         }
 
 
@@ -408,11 +810,97 @@
         ===================================================== */
 
         .leaf-image {
-            width: 60px;
-            height: 60px;
+
+            width: 58px;
+
+            height: 58px;
+
             object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+
+            border-radius: 9px;
+
+            border:
+                1px solid #dfe5e1;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.2s ease;
+        }
+
+        .leaf-image:hover {
+
+            transform:
+                scale(1.08);
+        }
+
+
+        /* =====================================================
+           DISEASE BADGES
+        ===================================================== */
+
+        .disease-badge {
+
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        .disease-healthy {
+
+            background: #dcfce7;
+
+            color: #15803d;
+        }
+
+        .disease-bacterial {
+
+            background: #fee2e2;
+
+            color: #b91c1c;
+        }
+
+        .disease-cercospora {
+
+            background: #fef3c7;
+
+            color: #b45309;
+        }
+
+        .disease-curl {
+
+            background: #ede9fe;
+
+            color: #6d28d9;
+        }
+
+        .disease-other {
+
+            background: #e5e7eb;
+
+            color: #374151;
+        }
+
+
+        /* =====================================================
+           CONFIDENCE BADGE
+        ===================================================== */
+
+        .confidence-value {
+
+            font-weight: bold;
+
+            color: #12372a;
+
+            white-space: nowrap;
         }
 
 
@@ -421,20 +909,196 @@
         ===================================================== */
 
         .no-data {
+
             background: white;
-            border-radius: 15px;
-            padding: 60px 25px;
+
+            border-radius: 16px;
+
+            padding: 70px 25px;
+
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            border:
+                1px solid #e5ebe7;
+
+            box-shadow:
+                0 5px 18px
+                rgba(0,0,0,0.06);
+        }
+
+        .no-data-icon {
+
+            width: 70px;
+
+            height: 70px;
+
+            margin:
+                0 auto 18px;
+
+            border-radius: 50%;
+
+            background: #e8f5ed;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 30px;
         }
 
         .no-data h3 {
+
             color: #12372a;
-            margin-bottom: 10px;
+
+            margin-bottom: 9px;
+
+            font-size: 19px;
         }
 
         .no-data p {
+
             color: #6b7280;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           IMAGE MODAL
+        ===================================================== */
+
+        .image-modal {
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0,0,0,0.78);
+
+            display: none;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 25px;
+
+            z-index: 9999;
+        }
+
+        .image-modal.show {
+
+            display: flex;
+        }
+
+        .modal-content {
+
+            position: relative;
+
+            max-width: 850px;
+
+            max-height: 90vh;
+
+            background: white;
+
+            padding: 10px;
+
+            border-radius: 14px;
+        }
+
+        .modal-content img {
+
+            display: block;
+
+            max-width: 100%;
+
+            max-height: 82vh;
+
+            object-fit: contain;
+
+            border-radius: 9px;
+        }
+
+        .modal-close {
+
+            position: absolute;
+
+            right: -12px;
+
+            top: -12px;
+
+            width: 35px;
+
+            height: 35px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #dc2626;
+
+            color: white;
+
+            font-size: 20px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+
+        /* =====================================================
+           TOAST
+        ===================================================== */
+
+        .toast {
+
+            position: fixed;
+
+            right: 25px;
+
+            bottom: 25px;
+
+            background: #12372a;
+
+            color: white;
+
+            padding: 14px 18px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,0,0,0.18);
+
+            font-size: 13px;
+
+            font-weight: bold;
+
+            transform:
+                translateY(100px);
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transition:
+                all 0.3s ease;
+
+            z-index: 10000;
+        }
+
+        .toast.show {
+
+            transform:
+                translateY(0);
+
+            opacity: 1;
         }
 
 
@@ -445,11 +1109,15 @@
         @media(max-width: 1100px) {
 
             .daily-stats {
-                grid-template-columns: repeat(4, 1fr);
+
+                grid-template-columns:
+                    repeat(4, 1fr);
             }
 
             .summary {
-                grid-template-columns: repeat(2, 1fr);
+
+                grid-template-columns:
+                    repeat(2, 1fr);
             }
 
         }
@@ -457,25 +1125,86 @@
 
         @media(max-width: 700px) {
 
-            main {
-                padding: 25px 20px;
-            }
-
             header {
+
                 padding: 20px;
             }
 
+            header h1 {
+
+                font-size: 20px;
+            }
+
             nav {
-                padding: 15px 20px;
-                gap: 18px;
+
+                padding: 0 10px;
+
+                gap: 0;
+            }
+
+            nav a {
+
+                padding:
+                    14px 9px;
+
+                font-size: 12px;
+            }
+
+            main {
+
+                padding:
+                    25px 15px 40px;
+            }
+
+            .page-title h2 {
+
+                font-size: 23px;
             }
 
             .summary {
+
                 grid-template-columns: 1fr;
             }
 
             .daily-stats {
-                grid-template-columns: repeat(2, 1fr);
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                padding:
+                    16px;
+            }
+
+            .daily-header {
+
+                padding:
+                    18px;
+            }
+
+            .records-section {
+
+                padding:
+                    0 16px 18px;
+            }
+
+            .confidence-section {
+
+                padding:
+                    3px 16px 20px;
+            }
+
+            .control-bar {
+
+                align-items:
+                    flex-start;
+            }
+
+            .control-actions {
+
+                width: 100%;
+
+                justify-content:
+                    space-between;
             }
 
         }
@@ -484,7 +1213,45 @@
         @media(max-width: 450px) {
 
             .daily-stats {
+
                 grid-template-columns: 1fr;
+            }
+
+            .control-actions {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    stretch;
+            }
+
+            .record-count,
+            .clear-button {
+
+                text-align: center;
+
+                width: 100%;
+            }
+
+            .date-section {
+
+                align-items:
+                    flex-start;
+            }
+
+            .calendar-icon {
+
+                width: 42px;
+
+                height: 42px;
+
+                font-size: 19px;
+            }
+
+            .date-section h3 {
+
+                font-size: 18px;
             }
 
         }
@@ -503,13 +1270,17 @@
 
 <header>
 
-    <h1>
-        🌱 Precision Agriculture Smart Rover
-    </h1>
+    <div class="header-content">
 
-    <p>
-        AI Detection Analytics
-    </p>
+        <h1>
+            🌱 Precision Agriculture Smart Rover
+        </h1>
+
+        <p>
+            AI Detection Analytics
+        </p>
+
+    </div>
 
 </header>
 
@@ -525,7 +1296,7 @@
     </a>
 
     <a href="/rover">
-        Rover Control
+        🚜 Rover Control
     </a>
 
     <a href="/dataset">
@@ -536,7 +1307,8 @@
         Analytics
     </a>
 
-    <a href="/daily-data" class="active">
+    <a href="/daily-data"
+       class="active">
         Daily Data
     </a>
 
@@ -554,12 +1326,14 @@
 <main>
 
 
-    <!-- PAGE TITLE -->
+    <!-- =====================================================
+         PAGE TITLE
+    ====================================================== -->
 
     <div class="page-title">
 
         <h2>
-            Daily Prediction Data
+            📊 Daily Prediction Data
         </h2>
 
         <p>
@@ -570,8 +1344,8 @@
 
 
     <!-- =====================================================
-         OVERALL SUMMARY
-    ===================================================== -->
+         SUMMARY
+    ====================================================== -->
 
     <div class="summary">
 
@@ -633,41 +1407,53 @@
 
     <!-- =====================================================
          CONTROL BAR
-    ===================================================== -->
+    ====================================================== -->
 
     <div class="control-bar">
 
-        <div>
+        <div class="control-info">
 
             <h3>
-                📊 Stored Daily Records
+                📁 Stored Daily Records
             </h3>
 
             <p>
-                Each day is stored independently in daily_data.json.
+                Each prediction is automatically organized by date.
             </p>
 
         </div>
 
 
-        {% if daily_data|length > 0 %}
+        <div class="control-actions">
 
-        <button
-            class="clear-button"
-            onclick="clearDailyData()">
+            <span class="record-count">
 
-            Clear Daily Data
+                {{ daily_data|length }}
+                day{% if daily_data|length != 1 %}s{% endif %}
 
-        </button>
+            </span>
 
-        {% endif %}
+
+            {% if daily_data|length > 0 %}
+
+            <button
+                class="clear-button"
+                onclick="clearDailyData()">
+
+                🗑 Clear Daily Data
+
+            </button>
+
+            {% endif %}
+
+        </div>
 
     </div>
 
 
     <!-- =====================================================
          DAILY DATA
-    ===================================================== -->
+    ====================================================== -->
 
     {% if daily_data|length > 0 %}
 
@@ -677,30 +1463,39 @@
         <div class="daily-card">
 
 
-            <!-- DAILY HEADER -->
+            <!-- =================================================
+                 DAILY HEADER
+            ================================================== -->
 
             <div class="daily-header">
 
                 <div class="date-section">
 
-                    <h3>
-                        📅 {{ day.date }}
-                    </h3>
+                    <div class="calendar-icon">
+                        📅
+                    </div>
 
-                    <p>
-                        Daily AI prediction summary
-                    </p>
+                    <div>
 
-                    <span class="date-badge">
+                        <h3>
+                            {{ day.date }}
+                        </h3>
 
-                        {{ day.total }} prediction
-                        {% if day.total != 1 %}
-                            s
-                        {% endif %}
+                        <p>
+                            Daily AI prediction summary
+                        </p>
 
-                    </span>
+                    </div>
 
                 </div>
+
+
+                <span class="date-badge">
+
+                    {{ day.total }}
+                    prediction{% if day.total != 1 %}s{% endif %}
+
+                </span>
 
             </div>
 
@@ -837,7 +1632,6 @@
                         {% else %}
                             {{ day.average_confidence }}
                         {% endif %}%;">
-
                     </div>
 
                 </div>
@@ -853,9 +1647,20 @@
 
             <div class="records-section">
 
-                <h4>
-                    Individual Predictions
-                </h4>
+                <div class="records-header">
+
+                    <h4>
+                        🔬 Individual Predictions
+                    </h4>
+
+                    <span class="records-label">
+
+                        {{ day.records|length }}
+                        record{% if day.records|length != 1 %}s{% endif %}
+
+                    </span>
+
+                </div>
 
 
                 <div class="record-table-wrapper">
@@ -916,7 +1721,8 @@
                                     <img
                                         class="leaf-image"
                                         src="/static/images/{{ record.image }}"
-                                        alt="Leaf">
+                                        alt="Leaf prediction image"
+                                        onclick="openImage(this.src)">
 
                                     {% else %}
 
@@ -1011,7 +1817,11 @@
 
                                 <td>
 
-                                    {{ record.confidence }}%
+                                    <span class="confidence-value">
+
+                                        {{ record.confidence }}%
+
+                                    </span>
 
                                 </td>
 
@@ -1073,8 +1883,12 @@
 
         <div class="no-data">
 
+            <div class="no-data-icon">
+                📊
+            </div>
+
             <h3>
-                📊 No Daily Data Available
+                No Daily Data Available
             </h3>
 
             <p>
@@ -1092,16 +1906,106 @@
 
 
 <!-- =========================================================
+     IMAGE MODAL
+========================================================= -->
+
+<div
+    id="image-modal"
+    class="image-modal"
+    onclick="closeImage(event)"
+>
+
+    <div class="modal-content">
+
+        <button
+            class="modal-close"
+            onclick="closeImage()">
+
+            ×
+
+        </button>
+
+        <img
+            id="modal-image"
+            src=""
+            alt="Leaf image">
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST
+========================================================= -->
+
+<div
+    id="toast"
+    class="toast">
+</div>
+
+
+<!-- =========================================================
      JAVASCRIPT
 ========================================================= -->
 
 <script>
 
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer = null;
+
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function() {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================================
+   CLEAR DAILY DATA
+========================================================= */
+
 async function clearDailyData() {
 
-    const confirmation = confirm(
-        "Are you sure you want to clear all daily prediction data?"
-    );
+    const confirmation =
+        confirm(
+            "Are you sure you want to clear ALL daily prediction data?"
+        );
 
 
     if (!confirmation) {
@@ -1113,24 +2017,37 @@ async function clearDailyData() {
 
     try {
 
-        const response = await fetch(
-            "/api/daily-data/clear",
-            {
-                method: "POST"
-            }
-        );
-
-
-        const data = await response.json();
-
-
-        if (data.success) {
-
-            alert(
-                "Daily prediction data cleared successfully."
+        const response =
+            await fetch(
+                "/api/daily-data/clear",
+                {
+                    method: "POST"
+                }
             );
 
-            location.reload();
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            showToast(
+                "Daily prediction data cleared."
+            );
+
+
+            setTimeout(
+                function() {
+
+                    location.reload();
+
+                },
+                800
+            );
 
         }
 
@@ -1143,7 +2060,6 @@ async function clearDailyData() {
 
         }
 
-
     }
 
     catch (error) {
@@ -1153,6 +2069,7 @@ async function clearDailyData() {
             error
         );
 
+
         alert(
             "Server error while clearing daily data."
         );
@@ -1160,6 +2077,104 @@ async function clearDailyData() {
     }
 
 }
+
+
+/* =========================================================
+   OPEN IMAGE
+========================================================= */
+
+function openImage(src) {
+
+    const modal =
+        document.getElementById(
+            "image-modal"
+        );
+
+    const image =
+        document.getElementById(
+            "modal-image"
+        );
+
+
+    image.src =
+        src;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================================
+   CLOSE IMAGE
+========================================================= */
+
+function closeImage(event) {
+
+    const modal =
+        document.getElementById(
+            "image-modal"
+        );
+
+
+    if (
+        event &&
+        event.target !== modal
+    ) {
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================================
+   ESCAPE KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            const modal =
+                document.getElementById(
+                    "image-modal"
+                );
+
+
+            modal.classList.remove(
+                "show"
+            );
+
+
+            document.body.style.overflow =
+                "";
+
+        }
+
+    }
+);
+
 
 </script>
 

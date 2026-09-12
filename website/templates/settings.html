@@ -12,6 +12,10 @@
 
     <style>
 
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,7 +26,13 @@
             font-family: Arial, sans-serif;
             background: #f4f7f5;
             color: #1f2937;
+            min-height: 100vh;
         }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
 
         header {
             background: #12372a;
@@ -32,56 +42,146 @@
 
         header h1 {
             font-size: 26px;
+            font-weight: 700;
         }
 
         header p {
             margin-top: 6px;
             color: #cbded3;
+            font-size: 14px;
         }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
 
         nav {
             background: white;
             padding: 15px 40px;
             display: flex;
+            align-items: center;
             gap: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
         }
 
         nav a {
             text-decoration: none;
             color: #374151;
             font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s ease;
         }
 
         nav a:hover {
             color: #2f7d57;
         }
 
-        main {
-            max-width: 1100px;
-            margin: auto;
-            padding: 35px 40px;
+        nav a.active {
+            color: #23613e;
         }
 
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px 40px 50px;
+        }
+
+
+        /* =====================================================
+           PAGE TITLE
+        ===================================================== */
+
         .page-title {
-            margin-bottom: 25px;
+            margin-bottom: 28px;
         }
 
         .page-title h2 {
             color: #12372a;
-            font-size: 24px;
+            font-size: 26px;
         }
 
         .page-title p {
             color: #6b7280;
-            margin-top: 6px;
+            margin-top: 7px;
+            font-size: 14px;
         }
+
+
+        /* =====================================================
+           SYSTEM STATUS
+        ===================================================== */
+
+        .system-overview {
+            background: white;
+            border-radius: 15px;
+            padding: 22px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .overview-text h3 {
+            color: #12372a;
+            margin-bottom: 6px;
+            font-size: 18px;
+        }
+
+        .overview-text p {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .online-indicator {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            padding: 9px 15px;
+
+            background: #dcfce7;
+            color: #166534;
+
+            border-radius: 20px;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            white-space: nowrap;
+        }
+
+        .online-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #16a34a;
+        }
+
+
+        /* =====================================================
+           SETTINGS GRID
+        ===================================================== */
 
         .settings-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 25px;
         }
+
+
+        /* =====================================================
+           CARD
+        ===================================================== */
 
         .card {
             background: white;
@@ -93,21 +193,34 @@
         .card h3 {
             color: #12372a;
             margin-bottom: 22px;
+            font-size: 19px;
         }
+
+
+        /* =====================================================
+           SETTING ROW
+        ===================================================== */
 
         .setting-row {
             padding: 17px 0;
             border-bottom: 1px solid #eeeeee;
         }
 
+        .setting-row:first-of-type {
+            padding-top: 0;
+        }
+
         .setting-row:last-child {
             border-bottom: none;
+            padding-bottom: 0;
         }
 
         .setting-row label {
             display: block;
             font-weight: bold;
+            color: #1f2937;
             margin-bottom: 7px;
+            font-size: 14px;
         }
 
         .setting-row p {
@@ -116,67 +229,230 @@
             line-height: 1.5;
         }
 
+
+        /* =====================================================
+           INPUTS
+        ===================================================== */
+
         .setting-row input,
         .setting-row select {
+
             width: 100%;
+
             margin-top: 10px;
-            padding: 11px;
+
+            padding: 11px 12px;
+
             border: 1px solid #d1d5db;
+
             border-radius: 8px;
+
             font-size: 14px;
+
+            background: #f9fafb;
+
+            color: #374151;
+
+            outline: none;
         }
+
+        .setting-row input:focus,
+        .setting-row select:focus {
+            border-color: #23613e;
+        }
+
+        .setting-row input[readonly] {
+            cursor: default;
+        }
+
+
+        /* =====================================================
+           STATUS BADGES
+        ===================================================== */
 
         .status {
-            display: inline-block;
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
             margin-top: 10px;
+
             padding: 7px 12px;
+
             border-radius: 20px;
+
             background: #dcfce7;
+
             color: #166534;
-            font-size: 13px;
+
+            font-size: 12px;
+
             font-weight: bold;
         }
 
-        .save-button {
-            margin-top: 25px;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 9px;
-            background: #23613e;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
         }
 
-        .save-button:hover {
-            background: #17452c;
+        .status.offline {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
-        .notice {
-            margin-top: 25px;
-            padding: 16px;
+        .status.warning {
             background: #fff7ed;
-            border-left: 4px solid #f97316;
-            border-radius: 8px;
-            color: #7c2d12;
+            color: #9a3412;
+        }
+
+
+        /* =====================================================
+           MODEL INFORMATION
+        ===================================================== */
+
+        .model-info {
+            margin-top: 10px;
+            padding: 13px;
+
+            background: #f0fdf4;
+
+            border: 1px solid #dcfce7;
+
+            border-radius: 9px;
+
+            color: #166534;
+
+            font-size: 13px;
+
             line-height: 1.5;
         }
 
-        @media(max-width: 800px) {
 
-            main {
-                padding: 25px 20px;
-            }
+        /* =====================================================
+           NOTICE
+        ===================================================== */
+
+        .notice {
+            margin-top: 25px;
+
+            padding: 18px 20px;
+
+            background: #fff7ed;
+
+            border-left: 4px solid #f97316;
+
+            border-radius: 8px;
+
+            color: #7c2d12;
+
+            line-height: 1.6;
+
+            font-size: 13px;
+        }
+
+        .notice strong {
+            color: #9a3412;
+        }
+
+
+        /* =====================================================
+           FOOTER INFORMATION
+        ===================================================== */
+
+        .system-info {
+            margin-top: 25px;
+
+            background: white;
+
+            border-radius: 15px;
+
+            padding: 22px 25px;
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .system-info h3 {
+            color: #12372a;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .info-item {
+            background: #f8faf9;
+            padding: 14px;
+            border-radius: 9px;
+        }
+
+        .info-item span {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .info-item strong {
+            color: #12372a;
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media(max-width: 900px) {
 
             .settings-grid {
                 grid-template-columns: 1fr;
             }
 
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+
+        @media(max-width: 600px) {
+
+            header {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 22px;
+            }
+
             nav {
                 padding: 15px 20px;
-                flex-wrap: wrap;
+                gap: 18px;
+            }
+
+            main {
+                padding: 25px 20px 40px;
+            }
+
+            .system-overview {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .card {
+                padding: 22px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
             }
 
         }
@@ -188,6 +464,10 @@
 
 <body>
 
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
 <header>
 
@@ -201,6 +481,10 @@
 
 </header>
 
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
 
 <nav>
 
@@ -220,15 +504,23 @@
         Analytics
     </a>
 
-    <a href="/settings">
+    <a href="/settings" class="active">
         Settings
     </a>
 
 </nav>
 
 
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
 <main>
 
+
+    <!-- =================================================
+         PAGE TITLE
+    ================================================== -->
 
     <div class="page-title">
 
@@ -237,16 +529,54 @@
         </h2>
 
         <p>
-            Configure and monitor the application
+            Configure and monitor the Precision Agriculture
+            Smart Rover system
         </p>
 
     </div>
 
 
+    <!-- =================================================
+         SYSTEM OVERVIEW
+    ================================================== -->
+
+    <div class="system-overview">
+
+        <div class="overview-text">
+
+            <h3>
+                System Overview
+            </h3>
+
+            <p>
+                AI detection and local website services
+                are currently available.
+            </p>
+
+        </div>
+
+
+        <div class="online-indicator">
+
+            <span class="online-dot"></span>
+
+            SYSTEM ONLINE
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         SETTINGS GRID
+    ================================================= -->
+
     <div class="settings-grid">
 
 
-        <!-- AI SETTINGS -->
+        <!-- =============================================
+             AI DETECTION
+        ============================================== -->
 
         <div class="card">
 
@@ -255,14 +585,17 @@
             </h3>
 
 
+            <!-- MODEL -->
+
             <div class="setting-row">
 
                 <label>
-                    Model
+                    AI Model
                 </label>
 
                 <p>
-                    Currently loaded AI model
+                    Currently loaded model used for
+                    chili leaf disease detection.
                 </p>
 
                 <input
@@ -274,6 +607,8 @@
             </div>
 
 
+            <!-- IMAGE SIZE -->
+
             <div class="setting-row">
 
                 <label>
@@ -281,17 +616,20 @@
                 </label>
 
                 <p>
-                    Input size used by the AI model
+                    Input image dimensions expected
+                    by the AI model.
                 </p>
 
                 <input
                     type="text"
-                    value="224 × 224"
+                    value="224 × 224 pixels"
                     readonly
                 >
 
             </div>
 
+
+            <!-- CONFIDENCE -->
 
             <div class="setting-row">
 
@@ -300,7 +638,8 @@
                 </label>
 
                 <p>
-                    Minimum confidence required for a valid detection
+                    Minimum confidence required for
+                    a valid AI prediction.
                 </p>
 
                 <input
@@ -312,22 +651,46 @@
             </div>
 
 
+            <!-- AI STATUS -->
+
             <div class="setting-row">
 
                 <label>
-                    AI Status
+                    AI Model Status
                 </label>
 
                 <span class="status">
+
+                    <span class="status-dot"></span>
+
                     ONLINE
+
                 </span>
+
+            </div>
+
+
+            <!-- MODEL INFORMATION -->
+
+            <div class="model-info">
+
+                <strong>
+                    Model Ready
+                </strong>
+
+                <br>
+
+                The AI model is configured for
+                chili leaf disease classification.
 
             </div>
 
         </div>
 
 
-        <!-- SYSTEM SETTINGS -->
+        <!-- =============================================
+             SYSTEM
+        ============================================== -->
 
         <div class="card">
 
@@ -336,6 +699,8 @@
             </h3>
 
 
+            <!-- SERVER -->
+
             <div class="setting-row">
 
                 <label>
@@ -343,15 +708,21 @@
                 </label>
 
                 <p>
-                    Current Flask server status
+                    Current Flask application server status.
                 </p>
 
                 <span class="status">
+
+                    <span class="status-dot"></span>
+
                     RUNNING
+
                 </span>
 
             </div>
 
+
+            <!-- DATABASE -->
 
             <div class="setting-row">
 
@@ -360,7 +731,8 @@
                 </label>
 
                 <p>
-                    Prediction history database
+                    Local database used to store
+                    prediction history.
                 </p>
 
                 <input
@@ -372,15 +744,22 @@
             </div>
 
 
+            <!-- ROVER -->
+
             <div class="setting-row">
 
                 <label>
                     Rover Connection
                 </label>
 
-                <span
-                    class="status"
-                    style="background:#fee2e2;color:#991b1b;">
+                <p>
+                    Connection status of the physical
+                    smart rover.
+                </p>
+
+                <span class="status offline">
+
+                    <span class="status-dot"></span>
 
                     NOT CONNECTED
 
@@ -389,15 +768,22 @@
             </div>
 
 
+            <!-- BLYNK -->
+
             <div class="setting-row">
 
                 <label>
-                    Blynk Connection
+                    Blynk IoT Connection
                 </label>
 
-                <span
-                    class="status"
-                    style="background:#fee2e2;color:#991b1b;">
+                <p>
+                    Connection status of the Blynk
+                    IoT control system.
+                </p>
+
+                <span class="status offline">
+
+                    <span class="status-dot"></span>
 
                     NOT CONNECTED
 
@@ -410,6 +796,107 @@
 
     </div>
 
+
+    <!-- =================================================
+         SYSTEM INFORMATION
+    ================================================== -->
+
+    <div class="system-info">
+
+        <h3>
+            📋 System Information
+        </h3>
+
+
+        <div class="info-grid">
+
+
+            <div class="info-item">
+
+                <span>
+                    Application
+                </span>
+
+                <strong>
+                    Precision Agriculture
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Detection Type
+                </span>
+
+                <strong>
+                    Chili Leaf Disease
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Detection Classes
+                </span>
+
+                <strong>
+                    4 Classes
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Database
+                </span>
+
+                <strong>
+                    SQLite
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Web Framework
+                </span>
+
+                <strong>
+                    Flask
+                </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>
+                    Current Phase
+                </span>
+
+                <strong>
+                    Phase 1
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         DEVELOPMENT NOTICE
+    ================================================== -->
 
     <div class="notice">
 

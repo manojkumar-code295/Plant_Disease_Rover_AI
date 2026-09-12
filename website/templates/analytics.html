@@ -24,12 +24,21 @@
             color: #1f2937;
         }
 
-        /* ================= HEADER ================= */
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
 
         header {
             background: #12372a;
             color: white;
             padding: 22px 40px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
         header h1 {
@@ -41,14 +50,71 @@
             color: #cbded3;
         }
 
-        /* ================= NAVIGATION ================= */
+
+        /* SYSTEM STATUS */
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            background: rgba(255,255,255,0.10);
+            padding: 10px 15px;
+            border-radius: 25px;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+
+            background: #22c55e;
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 0 0 4px rgba(34,197,94,0.15);
+
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0% {
+                box-shadow:
+                    0 0 0 0 rgba(34,197,94,0.5);
+            }
+
+            70% {
+                box-shadow:
+                    0 0 0 7px rgba(34,197,94,0);
+            }
+
+            100% {
+                box-shadow:
+                    0 0 0 0 rgba(34,197,94,0);
+            }
+
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
 
         nav {
             background: white;
+
             padding: 15px 40px;
+
             display: flex;
             gap: 28px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.08);
+
             flex-wrap: wrap;
         }
 
@@ -56,6 +122,8 @@
             text-decoration: none;
             color: #374151;
             font-weight: bold;
+
+            transition: 0.2s;
         }
 
         nav a:hover {
@@ -66,13 +134,22 @@
             color: #23613e;
         }
 
-        /* ================= MAIN ================= */
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
 
         main {
             max-width: 1400px;
             margin: auto;
+
             padding: 35px 40px;
         }
+
+
+        /* =====================================================
+           PAGE TITLE
+        ===================================================== */
 
         .page-title {
             margin-bottom: 25px;
@@ -80,28 +157,57 @@
 
         .page-title h2 {
             color: #12372a;
-            font-size: 24px;
+            font-size: 26px;
         }
 
         .page-title p {
             color: #6b7280;
-            margin-top: 6px;
+            margin-top: 7px;
         }
 
-        /* ================= SUMMARY ================= */
+
+        /* =====================================================
+           SUMMARY
+        ===================================================== */
 
         .summary {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
             gap: 20px;
+
             margin-bottom: 30px;
         }
 
         .summary-card {
             background: white;
+
             padding: 25px;
+
             border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.06);
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            top: 0;
+
+            width: 5px;
+            height: 100%;
+
+            background: #23613e;
         }
 
         .summary-card span {
@@ -111,7 +217,9 @@
 
         .summary-card h2 {
             margin-top: 10px;
+
             color: #12372a;
+
             font-size: 30px;
         }
 
@@ -123,36 +231,74 @@
             color: #dc2626 !important;
         }
 
-        /* ================= ANALYTICS GRID ================= */
+        .summary-card small {
+            display: block;
+
+            margin-top: 7px;
+
+            color: #9ca3af;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           ANALYTICS GRID
+        ===================================================== */
 
         .analytics-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+
+            grid-template-columns:
+                1fr 1fr;
+
             gap: 25px;
         }
 
+
+        /* =====================================================
+           CARD
+        ===================================================== */
+
         .card {
             background: white;
+
             padding: 30px;
+
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            box-shadow:
+                0 4px 15px rgba(0,0,0,0.06);
         }
 
         .card h3 {
             color: #12372a;
+
             margin-bottom: 25px;
+
+            font-size: 19px;
         }
 
-        /* ================= BAR CHART ================= */
+
+        /* =====================================================
+           DISEASE COUNT
+        ===================================================== */
 
         .chart-row {
-            margin-bottom: 22px;
+            margin-bottom: 23px;
+        }
+
+        .chart-row:last-child {
+            margin-bottom: 0;
         }
 
         .chart-label {
             display: flex;
+
             justify-content: space-between;
+
             margin-bottom: 8px;
+
             font-size: 14px;
         }
 
@@ -162,16 +308,23 @@
 
         .bar-background {
             height: 24px;
+
             background: #e5e7eb;
+
             border-radius: 20px;
+
             overflow: hidden;
         }
 
         .bar {
             height: 100%;
+
             background: #23613e;
+
             border-radius: 20px;
-            transition: width 0.5s ease;
+
+            transition:
+                width 0.6s ease;
         }
 
         .bar.bacterial {
@@ -190,18 +343,24 @@
             background: #16a34a;
         }
 
-        /* ================= DONUT ================= */
+
+        /* =====================================================
+           HEALTHY VS DISEASED
+        ===================================================== */
 
         .distribution {
             display: flex;
+
             justify-content: center;
             align-items: center;
+
             min-height: 280px;
         }
 
         .circle {
             width: 220px;
             height: 220px;
+
             border-radius: 50%;
 
             background:
@@ -213,20 +372,30 @@
                 );
 
             display: flex;
+
             align-items: center;
             justify-content: center;
+
+            position: relative;
         }
 
         .circle-inner {
             width: 130px;
             height: 130px;
+
             background: white;
+
             border-radius: 50%;
 
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
             justify-content: center;
+
+            box-shadow:
+                0 2px 10px rgba(0,0,0,0.08);
         }
 
         .circle-inner strong {
@@ -237,25 +406,34 @@
         .circle-inner span {
             color: #6b7280;
             font-size: 12px;
+            margin-top: 4px;
         }
 
-        /* ================= LEGEND ================= */
+
+        /* =====================================================
+           LEGEND
+        ===================================================== */
 
         .legend {
-            margin-top: 25px;
+            margin-top: 20px;
         }
 
         .legend-item {
             display: flex;
+
             align-items: center;
+
             margin: 10px 0;
+
             font-size: 14px;
         }
 
         .legend-box {
             width: 14px;
             height: 14px;
+
             border-radius: 3px;
+
             margin-right: 10px;
         }
 
@@ -267,7 +445,147 @@
             background: #dc2626;
         }
 
-        /* ================= HISTORY ================= */
+
+        /* =====================================================
+           EXTRA DISEASE SUMMARY
+        ===================================================== */
+
+        .disease-summary {
+            margin-top: 25px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+        }
+
+        .disease-mini {
+            border: 1px solid #e5e7eb;
+
+            border-radius: 10px;
+
+            padding: 14px;
+
+            background: #fafcfb;
+        }
+
+        .disease-mini span {
+            display: block;
+
+            color: #6b7280;
+
+            font-size: 12px;
+
+            margin-bottom: 7px;
+        }
+
+        .disease-mini strong {
+            font-size: 21px;
+
+            color: #12372a;
+        }
+
+        .mini-bacterial strong {
+            color: #dc2626;
+        }
+
+        .mini-cercospora strong {
+            color: #d97706;
+        }
+
+        .mini-curl strong {
+            color: #7c3aed;
+        }
+
+
+        /* =====================================================
+           CONFIDENCE CARD
+        ===================================================== */
+
+        .confidence-card {
+            margin-top: 25px;
+        }
+
+        .confidence-info {
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+
+            font-size: 14px;
+        }
+
+        .confidence-info strong {
+            color: #12372a;
+        }
+
+        .confidence-background {
+            height: 14px;
+
+            background: #e5e7eb;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+
+            width:
+                {% if statistics.total > 0 %}
+                    {{ statistics.average_confidence|default(0) }}%
+                {% else %}
+                    0%
+                {% endif %};
+
+            max-width: 100%;
+
+            background: #23613e;
+
+            border-radius: 20px;
+        }
+
+
+        /* =====================================================
+           DAILY DATA BUTTON
+        ===================================================== */
+
+        .daily-data-container {
+            margin-top: 25px;
+        }
+
+        .daily-data-link {
+            display: inline-block;
+
+            padding: 12px 20px;
+
+            background: #23613e;
+
+            color: white;
+
+            text-decoration: none;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            transition: 0.2s;
+        }
+
+        .daily-data-link:hover {
+            background: #12372a;
+
+            transform: translateY(-1px);
+        }
+
+
+        /* =====================================================
+           HISTORY
+        ===================================================== */
 
         .history-card {
             margin-top: 30px;
@@ -275,9 +593,13 @@
 
         .history-header {
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             margin-bottom: 20px;
+
             gap: 15px;
         }
 
@@ -287,12 +609,20 @@
 
         .refresh-button {
             border: none;
+
             background: #12372a;
+
             color: white;
+
             padding: 10px 18px;
+
             border-radius: 8px;
+
             cursor: pointer;
+
             font-weight: bold;
+
+            transition: 0.2s;
         }
 
         .refresh-button:hover {
@@ -301,31 +631,40 @@
 
         .history-status {
             color: #6b7280;
+
             font-size: 14px;
+
             margin-bottom: 15px;
         }
 
         .table-container {
             width: 100%;
+
             overflow-x: auto;
         }
 
         table {
             width: 100%;
+
             border-collapse: collapse;
-            min-width: 850px;
+
+            min-width: 900px;
         }
 
         thead {
             background: #12372a;
+
             color: white;
         }
 
         th,
         td {
             padding: 14px 12px;
+
             text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+
+            border-bottom:
+                1px solid #e5e7eb;
         }
 
         th {
@@ -336,17 +675,23 @@
             font-size: 14px;
         }
 
+        tbody tr {
+            transition: 0.15s;
+        }
+
         tbody tr:hover {
             background: #f8faf9;
         }
 
         .healthy-text {
             color: #16a34a;
+
             font-weight: bold;
         }
 
         .disease-text {
             color: #dc2626;
+
             font-weight: bold;
         }
 
@@ -354,63 +699,76 @@
             font-weight: bold;
         }
 
+
+        /* =====================================================
+           IMAGE BUTTON
+        ===================================================== */
+
         .view-image {
             display: inline-block;
+
             padding: 6px 12px;
+
             background: #23613e;
+
             color: white;
+
             text-decoration: none;
+
             border-radius: 6px;
+
             font-size: 12px;
+
+            transition: 0.2s;
         }
 
         .view-image:hover {
             background: #12372a;
         }
 
+
+        /* =====================================================
+           NO HISTORY
+        ===================================================== */
+
         .no-history {
             text-align: center;
+
             padding: 35px;
+
             color: #6b7280;
         }
 
         .loading {
             text-align: center;
+
             padding: 35px;
+
             color: #6b7280;
         }
 
         .error-message {
             text-align: center;
+
             padding: 25px;
+
             color: #dc2626;
+
             background: #fef2f2;
+
             border-radius: 8px;
         }
 
-        /* ================= DAILY DATA BUTTON ================= */
 
-        .daily-data-link {
-            display: inline-block;
-            margin-top: 25px;
-            padding: 12px 20px;
-            background: #23613e;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-        }
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
 
-        .daily-data-link:hover {
-            background: #12372a;
-        }
-
-        /* ================= RESPONSIVE ================= */
-
-        @media(max-width: 900px) {
+        @media(max-width: 1100px) {
 
             .summary {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns:
+                    repeat(2, 1fr);
             }
 
             .analytics-grid {
@@ -419,27 +777,34 @@
 
         }
 
-        @media(max-width: 600px) {
+
+        @media(max-width: 700px) {
 
             main {
                 padding: 25px 20px;
-            }
-
-            .summary {
-                grid-template-columns: 1fr;
-            }
-
-            nav {
-                padding: 15px 20px;
-                gap: 18px;
             }
 
             header {
                 padding: 20px;
             }
 
+            nav {
+                padding: 15px 20px;
+
+                gap: 18px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .disease-summary {
+                grid-template-columns: 1fr;
+            }
+
             .history-header {
                 flex-direction: column;
+
                 align-items: flex-start;
             }
 
@@ -459,13 +824,30 @@
 
 <header>
 
-    <h1>
-        🌱 Precision Agriculture Smart Rover
-    </h1>
+    <div>
 
-    <p>
-        AI Detection Analytics
-    </p>
+        <h1>
+            🌱 Precision Agriculture Smart Rover
+        </h1>
+
+        <p>
+            AI Detection Analytics
+        </p>
+
+    </div>
+
+
+    <!-- SYSTEM STATUS -->
+
+    <div class="system-status">
+
+        <span class="status-dot"></span>
+
+        <span>
+            AI System Online
+        </span>
+
+    </div>
 
 </header>
 
@@ -492,8 +874,6 @@
         Analytics
     </a>
 
-    <!-- NEW DAILY DATA PAGE -->
-
     <a href="/daily-data">
         Daily Data
     </a>
@@ -512,7 +892,9 @@
 <main>
 
 
-    <!-- PAGE TITLE -->
+    <!-- =================================================
+         PAGE TITLE
+    ================================================== -->
 
     <div class="page-title">
 
@@ -521,7 +903,8 @@
         </h2>
 
         <p>
-            AI prediction statistics and disease distribution
+            Monitor AI-based plant disease detection,
+            prediction confidence and detection history.
         </p>
 
     </div>
@@ -546,6 +929,10 @@
                 {{ statistics.total }}
             </h2>
 
+            <small>
+                All recorded AI predictions
+            </small>
+
         </div>
 
 
@@ -560,6 +947,10 @@
             <h2 class="healthy">
                 {{ statistics.healthy }}
             </h2>
+
+            <small>
+                Healthy plant samples
+            </small>
 
         </div>
 
@@ -576,6 +967,10 @@
                 {{ statistics.diseased }}
             </h2>
 
+            <small>
+                Detected disease samples
+            </small>
+
         </div>
 
 
@@ -591,6 +986,10 @@
                 3
             </h2>
 
+            <small>
+                Bacterial, Cercospora & Curl Virus
+            </small>
+
         </div>
 
 
@@ -604,14 +1003,14 @@
     <div class="analytics-grid">
 
 
-        <!-- =============================================
+        <!-- =================================================
              DISEASE COUNTS
-        ============================================== -->
+        ================================================= -->
 
         <div class="card">
 
             <h3>
-                Disease Detection Count
+                📊 Disease Detection Count
             </h3>
 
 
@@ -641,6 +1040,7 @@
                         {% else %}
                             0%
                         {% endif %};">
+
                     </div>
 
                 </div>
@@ -648,7 +1048,7 @@
             </div>
 
 
-            <!-- BACTERIAL SPOT -->
+            <!-- BACTERIAL -->
 
             <div class="chart-row">
 
@@ -674,6 +1074,7 @@
                         {% else %}
                             0%
                         {% endif %};">
+
                     </div>
 
                 </div>
@@ -707,6 +1108,7 @@
                         {% else %}
                             0%
                         {% endif %};">
+
                     </div>
 
                 </div>
@@ -714,7 +1116,7 @@
             </div>
 
 
-            <!-- CURL VIRUS -->
+            <!-- CURL -->
 
             <div class="chart-row">
 
@@ -740,6 +1142,7 @@
                         {% else %}
                             0%
                         {% endif %};">
+
                     </div>
 
                 </div>
@@ -747,17 +1150,63 @@
             </div>
 
 
+            <!-- MINI SUMMARY -->
+
+            <div class="disease-summary">
+
+
+                <div class="disease-mini mini-bacterial">
+
+                    <span>
+                        Bacterial Spot
+                    </span>
+
+                    <strong>
+                        {{ statistics.bacterial_spot }}
+                    </strong>
+
+                </div>
+
+
+                <div class="disease-mini mini-cercospora">
+
+                    <span>
+                        Cercospora
+                    </span>
+
+                    <strong>
+                        {{ statistics.cercospora }}
+                    </strong>
+
+                </div>
+
+
+                <div class="disease-mini mini-curl">
+
+                    <span>
+                        Curl Virus
+                    </span>
+
+                    <strong>
+                        {{ statistics.curl_virus }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
         </div>
 
 
-        <!-- =============================================
+        <!-- =================================================
              HEALTHY VS DISEASED
-        ============================================== -->
+        ================================================= -->
 
         <div class="card">
 
             <h3>
-                Healthy vs Diseased
+                🥬 Healthy vs Diseased
             </h3>
 
 
@@ -771,6 +1220,7 @@
                     {% else %}
                         0deg
                     {% endif %};">
+
 
                     <div class="circle-inner">
 
@@ -789,26 +1239,67 @@
             </div>
 
 
+            <!-- LEGEND -->
+
             <div class="legend">
+
 
                 <div class="legend-item">
 
-                    <div class="legend-box legend-healthy">
+                    <div
+                        class="legend-box legend-healthy">
                     </div>
 
-                    Healthy:
-                    {{ statistics.healthy }}
+                    <span>
+                        Healthy:
+                        <strong>
+                            {{ statistics.healthy }}
+                        </strong>
+                    </span>
 
                 </div>
 
 
                 <div class="legend-item">
 
-                    <div class="legend-box legend-diseased">
+                    <div
+                        class="legend-box legend-diseased">
                     </div>
 
-                    Diseased:
-                    {{ statistics.diseased }}
+                    <span>
+                        Diseased:
+                        <strong>
+                            {{ statistics.diseased }}
+                        </strong>
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- CONFIDENCE -->
+
+            <div class="confidence-card">
+
+                <div class="confidence-info">
+
+                    <span>
+                        Average AI Confidence
+                    </span>
+
+                    <strong>
+                        {{ statistics.average_confidence|default(0) }}%
+                    </strong>
+
+                </div>
+
+
+                <div class="confidence-background">
+
+                    <div class="confidence-fill">
+                    </div>
 
                 </div>
 
@@ -821,16 +1312,16 @@
 
 
     <!-- =================================================
-         DAILY DATA LINK
+         DAILY DATA
     ================================================= -->
 
-    <div>
+    <div class="daily-data-container">
 
         <a
             href="/daily-data"
             class="daily-data-link">
 
-            📊 View Daily Prediction Data →
+            📅 View Daily Prediction Data →
 
         </a>
 
@@ -847,7 +1338,7 @@
         <div class="history-header">
 
             <h3>
-                Prediction History
+                📋 Prediction History
             </h3>
 
 
@@ -1047,7 +1538,7 @@ async function loadHistory() {
                         colspan="8"
                         class="no-history">
 
-                        No prediction history available yet.
+                        📊 No prediction history available yet.
 
                     </td>
 
