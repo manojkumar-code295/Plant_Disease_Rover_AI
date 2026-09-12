@@ -18,11 +18,11 @@
   "monochromeIconUrl": "https://precision-agriculture-smart-rover.onrender.com/static/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "smart-rover.keystore",
+    "path": "smart-rover-new.keystore",
     "alias": "smartrover"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": "7",
+  "appVersionCode": 7,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://precision-agriculture-smart-rover.onrender.com/static/manifest.json",
@@ -34,7 +34,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://precision-agriculture-smart-rover.onrender.com/static/",
+  "fullScopeUrl": "https://precision-agriculture-smart-rover.onrender.com/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],
@@ -44,5 +44,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1"
+  "appVersion": "7"
 }

@@ -1,17 +1,66 @@
-# Training dataset
-dataset/
-
-# AI model files
-*.keras
-
-# Training graphs
-accuracy_graph.png
-loss_graph.png
-
-# Python cache
+# ============================================================
+# Python
+# ============================================================
 __pycache__/
 *.pyc
-
-# Virtual environments
+*.pyo
+*.pyd
+.venv/
 venv/
-.env/
+env/
+
+# ============================================================
+# VS Code
+# ============================================================
+.vscode/
+
+# ============================================================
+# Android / Gradle build files
+# ============================================================
+.gradle/
+build/
+app/build/
+
+*.apk
+*.aab
+*.idsig
+
+app/src/main/res/drawable-hdpi/
+app/src/main/res/drawable-mdpi/
+app/src/main/res/drawable-xhdpi/
+app/src/main/res/drawable-xxhdpi/
+app/src/main/res/drawable-xxxhdpi/
+
+app/src/main/res/mipmap-hdpi/
+app/src/main/res/mipmap-mdpi/
+app/src/main/res/mipmap-xhdpi/
+app/src/main/res/mipmap-xxhdpi/
+app/src/main/res/mipmap-xxxhdpi/
+
+# ============================================================
+# Training dataset - DO NOT PUSH
+# ============================================================
+dataset/
+
+# ============================================================
+# Generated/runtime camera data
+# ============================================================
+captured_leaves/
+cropped_leaves/
+camera_predictions/
+
+# ============================================================
+# Temporary files
+# ============================================================
+*.log
+*.tmp
+*.temp
+
+# ============================================================
+# OS
+# ============================================================
+.DS_Store
+Thumbs.db
+# Android signing keys - NEVER PUSH
+*.keystore
+*.jks
