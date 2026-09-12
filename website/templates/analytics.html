@@ -37,6 +37,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             gap: 20px;
             flex-wrap: wrap;
         }
@@ -48,6 +49,7 @@
         header p {
             margin-top: 6px;
             color: #cbded3;
+            font-size: 14px;
         }
 
 
@@ -59,7 +61,9 @@
             gap: 9px;
 
             background: rgba(255,255,255,0.10);
+
             padding: 10px 15px;
+
             border-radius: 25px;
 
             font-size: 13px;
@@ -110,6 +114,7 @@
             padding: 15px 40px;
 
             display: flex;
+
             gap: 28px;
 
             box-shadow:
@@ -120,7 +125,9 @@
 
         nav a {
             text-decoration: none;
+
             color: #374151;
+
             font-weight: bold;
 
             transition: 0.2s;
@@ -141,6 +148,7 @@
 
         main {
             max-width: 1400px;
+
             margin: auto;
 
             padding: 35px 40px;
@@ -157,17 +165,21 @@
 
         .page-title h2 {
             color: #12372a;
-            font-size: 26px;
+
+            font-size: 28px;
         }
 
         .page-title p {
             color: #6b7280;
+
             margin-top: 7px;
+
+            line-height: 1.5;
         }
 
 
         /* =====================================================
-           SUMMARY
+           SUMMARY CARDS
         ===================================================== */
 
         .summary {
@@ -194,6 +206,15 @@
             position: relative;
 
             overflow: hidden;
+
+            transition: 0.25s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 7px 20px rgba(0,0,0,0.09);
         }
 
         .summary-card::before {
@@ -212,6 +233,7 @@
 
         .summary-card span {
             color: #6b7280;
+
             font-size: 13px;
         }
 
@@ -223,14 +245,6 @@
             font-size: 30px;
         }
 
-        .healthy {
-            color: #16a34a !important;
-        }
-
-        .diseased {
-            color: #dc2626 !important;
-        }
-
         .summary-card small {
             display: block;
 
@@ -239,6 +253,14 @@
             color: #9ca3af;
 
             font-size: 12px;
+        }
+
+        .healthy {
+            color: #16a34a !important;
+        }
+
+        .diseased {
+            color: #dc2626 !important;
         }
 
 
@@ -257,7 +279,7 @@
 
 
         /* =====================================================
-           CARD
+           GENERAL CARD
         ===================================================== */
 
         .card {
@@ -281,7 +303,7 @@
 
 
         /* =====================================================
-           DISEASE COUNT
+           DISEASE BAR CHART
         ===================================================== */
 
         .chart-row {
@@ -296,6 +318,8 @@
             display: flex;
 
             justify-content: space-between;
+
+            align-items: center;
 
             margin-bottom: 8px;
 
@@ -319,12 +343,16 @@
         .bar {
             height: 100%;
 
-            background: #23613e;
+            min-width: 0;
 
             border-radius: 20px;
 
             transition:
-                width 0.6s ease;
+                width 0.7s ease;
+        }
+
+        .healthy-bar {
+            background: #16a34a;
         }
 
         .bar.bacterial {
@@ -339,115 +367,9 @@
             background: #7c3aed;
         }
 
-        .bar.healthy-bar {
-            background: #16a34a;
-        }
-
 
         /* =====================================================
-           HEALTHY VS DISEASED
-        ===================================================== */
-
-        .distribution {
-            display: flex;
-
-            justify-content: center;
-            align-items: center;
-
-            min-height: 280px;
-        }
-
-        .circle {
-            width: 220px;
-            height: 220px;
-
-            border-radius: 50%;
-
-            background:
-                conic-gradient(
-                    #16a34a 0deg,
-                    #16a34a var(--healthy-angle),
-                    #dc2626 var(--healthy-angle),
-                    #dc2626 360deg
-                );
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            position: relative;
-        }
-
-        .circle-inner {
-            width: 130px;
-            height: 130px;
-
-            background: white;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-            justify-content: center;
-
-            box-shadow:
-                0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        .circle-inner strong {
-            font-size: 28px;
-            color: #12372a;
-        }
-
-        .circle-inner span {
-            color: #6b7280;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-
-        /* =====================================================
-           LEGEND
-        ===================================================== */
-
-        .legend {
-            margin-top: 20px;
-        }
-
-        .legend-item {
-            display: flex;
-
-            align-items: center;
-
-            margin: 10px 0;
-
-            font-size: 14px;
-        }
-
-        .legend-box {
-            width: 14px;
-            height: 14px;
-
-            border-radius: 3px;
-
-            margin-right: 10px;
-        }
-
-        .legend-healthy {
-            background: #16a34a;
-        }
-
-        .legend-diseased {
-            background: #dc2626;
-        }
-
-
-        /* =====================================================
-           EXTRA DISEASE SUMMARY
+           MINI DISEASE CARDS
         ===================================================== */
 
         .disease-summary {
@@ -469,6 +391,15 @@
             padding: 14px;
 
             background: #fafcfb;
+
+            transition: 0.2s;
+        }
+
+        .disease-mini:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 3px 10px rgba(0,0,0,0.05);
         }
 
         .disease-mini span {
@@ -501,17 +432,152 @@
 
 
         /* =====================================================
-           CONFIDENCE CARD
+           HEALTHY VS DISEASED
+        ===================================================== */
+
+        .distribution {
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 260px;
+        }
+
+        .circle {
+            width: 220px;
+
+            height: 220px;
+
+            border-radius: 50%;
+
+            background:
+                conic-gradient(
+                    #16a34a 0deg,
+                    #16a34a var(--healthy-angle),
+                    #dc2626 var(--healthy-angle),
+                    #dc2626 360deg
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            position: relative;
+        }
+
+        .circle::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            border-radius: 50%;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .circle-inner {
+            width: 130px;
+
+            height: 130px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            position: relative;
+
+            z-index: 2;
+
+            box-shadow:
+                0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .circle-inner strong {
+            font-size: 28px;
+
+            color: #12372a;
+        }
+
+        .circle-inner span {
+            color: #6b7280;
+
+            font-size: 12px;
+
+            margin-top: 4px;
+        }
+
+
+        /* =====================================================
+           LEGEND
+        ===================================================== */
+
+        .legend {
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+
+            align-items: center;
+
+            margin: 10px 0;
+
+            font-size: 14px;
+        }
+
+        .legend-box {
+            width: 14px;
+
+            height: 14px;
+
+            border-radius: 3px;
+
+            margin-right: 10px;
+        }
+
+        .legend-healthy {
+            background: #16a34a;
+        }
+
+        .legend-diseased {
+            background: #dc2626;
+        }
+
+
+        /* =====================================================
+           CONFIDENCE
         ===================================================== */
 
         .confidence-card {
             margin-top: 25px;
+
+            padding-top: 20px;
+
+            border-top:
+                1px solid #e5e7eb;
         }
 
         .confidence-info {
             display: flex;
 
             justify-content: space-between;
+
+            align-items: center;
 
             margin-bottom: 10px;
 
@@ -547,6 +613,9 @@
             background: #23613e;
 
             border-radius: 20px;
+
+            transition:
+                width 0.7s ease;
         }
 
 
@@ -584,7 +653,7 @@
 
 
         /* =====================================================
-           HISTORY
+           HISTORY CARD
         ===================================================== */
 
         .history-card {
@@ -598,9 +667,11 @@
 
             align-items: center;
 
-            margin-bottom: 20px;
+            margin-bottom: 12px;
 
             gap: 15px;
+
+            flex-wrap: wrap;
         }
 
         .history-header h3 {
@@ -627,6 +698,12 @@
 
         .refresh-button:hover {
             background: #23613e;
+
+            transform: translateY(-1px);
+        }
+
+        .refresh-button:active {
+            transform: translateY(0);
         }
 
         .history-status {
@@ -637,10 +714,20 @@
             margin-bottom: 15px;
         }
 
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
         .table-container {
             width: 100%;
 
             overflow-x: auto;
+
+            border-radius: 10px;
+
+            border:
+                1px solid #e5e7eb;
         }
 
         table {
@@ -648,7 +735,7 @@
 
             border-collapse: collapse;
 
-            min-width: 900px;
+            min-width: 950px;
         }
 
         thead {
@@ -657,7 +744,16 @@
             color: white;
         }
 
-        th,
+        th {
+            padding: 14px 12px;
+
+            text-align: left;
+
+            font-size: 13px;
+
+            white-space: nowrap;
+        }
+
         td {
             padding: 14px 12px;
 
@@ -665,14 +761,10 @@
 
             border-bottom:
                 1px solid #e5e7eb;
-        }
 
-        th {
             font-size: 13px;
-        }
 
-        td {
-            font-size: 14px;
+            vertical-align: middle;
         }
 
         tbody tr {
@@ -682,6 +774,15 @@
         tbody tr:hover {
             background: #f8faf9;
         }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+
+        /* =====================================================
+           TABLE TEXT
+        ===================================================== */
 
         .healthy-text {
             color: #16a34a;
@@ -697,11 +798,13 @@
 
         .confidence {
             font-weight: bold;
+
+            color: #12372a;
         }
 
 
         /* =====================================================
-           IMAGE BUTTON
+           VIEW IMAGE BUTTON
         ===================================================== */
 
         .view-image {
@@ -719,11 +822,26 @@
 
             font-size: 12px;
 
+            font-weight: bold;
+
             transition: 0.2s;
         }
 
         .view-image:hover {
             background: #12372a;
+        }
+
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        .loading {
+            text-align: center;
+
+            padding: 35px !important;
+
+            color: #6b7280;
         }
 
 
@@ -734,23 +852,20 @@
         .no-history {
             text-align: center;
 
-            padding: 35px;
+            padding: 35px !important;
 
             color: #6b7280;
         }
 
-        .loading {
-            text-align: center;
 
-            padding: 35px;
-
-            color: #6b7280;
-        }
+        /* =====================================================
+           ERROR
+        ===================================================== */
 
         .error-message {
             text-align: center;
 
-            padding: 25px;
+            padding: 25px !important;
 
             color: #dc2626;
 
@@ -761,7 +876,24 @@
 
 
         /* =====================================================
-           RESPONSIVE
+           FOOTER
+        ===================================================== */
+
+        .page-footer {
+            margin-top: 30px;
+
+            padding: 18px;
+
+            text-align: center;
+
+            color: #6b7280;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE 1100px
         ===================================================== */
 
         @media(max-width: 1100px) {
@@ -778,14 +910,18 @@
         }
 
 
-        @media(max-width: 700px) {
+        /* =====================================================
+           RESPONSIVE 700px
+        ===================================================== */
 
-            main {
-                padding: 25px 20px;
-            }
+        @media(max-width: 700px) {
 
             header {
                 padding: 20px;
+            }
+
+            header h1 {
+                font-size: 22px;
             }
 
             nav {
@@ -794,8 +930,20 @@
                 gap: 18px;
             }
 
+            main {
+                padding: 25px 18px;
+            }
+
             .summary {
                 grid-template-columns: 1fr;
+            }
+
+            .page-title h2 {
+                font-size: 23px;
+            }
+
+            .card {
+                padding: 22px;
             }
 
             .disease-summary {
@@ -806,6 +954,41 @@
                 flex-direction: column;
 
                 align-items: flex-start;
+            }
+
+            .refresh-button {
+                width: 100%;
+            }
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE 450px
+        ===================================================== */
+
+        @media(max-width: 450px) {
+
+            .system-status {
+                width: 100%;
+
+                justify-content: center;
+            }
+
+            .circle {
+                width: 190px;
+
+                height: 190px;
+            }
+
+            .circle-inner {
+                width: 115px;
+
+                height: 115px;
+            }
+
+            .circle-inner strong {
+                font-size: 24px;
             }
 
         }
@@ -912,7 +1095,7 @@
 
     <!-- =================================================
          SUMMARY
-    ================================================= -->
+    ================================================== -->
 
     <div class="summary">
 
@@ -926,7 +1109,7 @@
             </span>
 
             <h2>
-                {{ statistics.total }}
+                {{ statistics.total|default(0) }}
             </h2>
 
             <small>
@@ -945,7 +1128,7 @@
             </span>
 
             <h2 class="healthy">
-                {{ statistics.healthy }}
+                {{ statistics.healthy|default(0) }}
             </h2>
 
             <small>
@@ -964,7 +1147,7 @@
             </span>
 
             <h2 class="diseased">
-                {{ statistics.diseased }}
+                {{ statistics.diseased|default(0) }}
             </h2>
 
             <small>
@@ -998,13 +1181,13 @@
 
     <!-- =================================================
          ANALYTICS GRID
-    ================================================= -->
+    ================================================== -->
 
     <div class="analytics-grid">
 
 
         <!-- =================================================
-             DISEASE COUNTS
+             DISEASE DETECTION COUNT
         ================================================= -->
 
         <div class="card">
@@ -1025,7 +1208,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.healthy }}
+                        {{ statistics.healthy|default(0) }}
                     </strong>
 
                 </div>
@@ -1040,7 +1223,6 @@
                         {% else %}
                             0%
                         {% endif %};">
-
                     </div>
 
                 </div>
@@ -1059,7 +1241,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.bacterial_spot }}
+                        {{ statistics.bacterial_spot|default(0) }}
                     </strong>
 
                 </div>
@@ -1074,7 +1256,6 @@
                         {% else %}
                             0%
                         {% endif %};">
-
                     </div>
 
                 </div>
@@ -1093,7 +1274,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.cercospora }}
+                        {{ statistics.cercospora|default(0) }}
                     </strong>
 
                 </div>
@@ -1108,7 +1289,6 @@
                         {% else %}
                             0%
                         {% endif %};">
-
                     </div>
 
                 </div>
@@ -1116,7 +1296,7 @@
             </div>
 
 
-            <!-- CURL -->
+            <!-- CURL VIRUS -->
 
             <div class="chart-row">
 
@@ -1127,7 +1307,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.curl_virus }}
+                        {{ statistics.curl_virus|default(0) }}
                     </strong>
 
                 </div>
@@ -1142,7 +1322,6 @@
                         {% else %}
                             0%
                         {% endif %};">
-
                     </div>
 
                 </div>
@@ -1162,7 +1341,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.bacterial_spot }}
+                        {{ statistics.bacterial_spot|default(0) }}
                     </strong>
 
                 </div>
@@ -1175,7 +1354,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.cercospora }}
+                        {{ statistics.cercospora|default(0) }}
                     </strong>
 
                 </div>
@@ -1188,7 +1367,7 @@
                     </span>
 
                     <strong>
-                        {{ statistics.curl_virus }}
+                        {{ statistics.curl_virus|default(0) }}
                     </strong>
 
                 </div>
@@ -1201,7 +1380,7 @@
 
         <!-- =================================================
              HEALTHY VS DISEASED
-        ================================================= -->
+        ================================================== -->
 
         <div class="card">
 
@@ -1214,6 +1393,7 @@
 
                 <div
                     class="circle"
+
                     style="--healthy-angle:
                     {% if statistics.total > 0 %}
                         {{ (statistics.healthy / statistics.total) * 360 }}deg
@@ -1225,7 +1405,7 @@
                     <div class="circle-inner">
 
                         <strong>
-                            {{ statistics.total }}
+                            {{ statistics.total|default(0) }}
                         </strong>
 
                         <span>
@@ -1251,10 +1431,13 @@
                     </div>
 
                     <span>
+
                         Healthy:
+
                         <strong>
-                            {{ statistics.healthy }}
+                            {{ statistics.healthy|default(0) }}
                         </strong>
+
                     </span>
 
                 </div>
@@ -1267,10 +1450,13 @@
                     </div>
 
                     <span>
+
                         Diseased:
+
                         <strong>
-                            {{ statistics.diseased }}
+                            {{ statistics.diseased|default(0) }}
                         </strong>
+
                     </span>
 
                 </div>
@@ -1305,6 +1491,7 @@
 
             </div>
 
+
         </div>
 
 
@@ -1313,7 +1500,7 @@
 
     <!-- =================================================
          DAILY DATA
-    ================================================= -->
+    ================================================== -->
 
     <div class="daily-data-container">
 
@@ -1330,7 +1517,7 @@
 
     <!-- =================================================
          PREDICTION HISTORY
-    ================================================= -->
+    ================================================== -->
 
     <div class="card history-card">
 
@@ -1343,6 +1530,7 @@
 
 
             <button
+                type="button"
                 class="refresh-button"
                 onclick="loadHistory()">
 
@@ -1415,7 +1603,7 @@
                             colspan="8"
                             class="loading">
 
-                            Loading...
+                            Loading prediction history...
 
                         </td>
 
@@ -1426,6 +1614,19 @@
             </table>
 
         </div>
+
+    </div>
+
+
+    <!-- =================================================
+         FOOTER
+    ================================================== -->
+
+    <div class="page-footer">
+
+        🌱 Precision Agriculture Smart Rover
+        &nbsp; | &nbsp;
+        AI Detection Analytics
 
     </div>
 
@@ -1459,6 +1660,8 @@ async function loadHistory() {
         );
 
 
+    /* SHOW LOADING */
+
     tableBody.innerHTML = `
 
         <tr>
@@ -1483,15 +1686,29 @@ async function loadHistory() {
     try {
 
 
+        /* =========================================
+           API REQUEST
+        ========================================= */
+
         const response =
             await fetch(
                 "/api/history",
                 {
                     method: "GET",
-                    cache: "no-store"
+
+                    cache: "no-store",
+
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
                 }
             );
 
+
+        /* =========================================
+           CHECK RESPONSE
+        ========================================= */
 
         if (!response.ok) {
 
@@ -1503,11 +1720,16 @@ async function loadHistory() {
         }
 
 
+        /* =========================================
+           JSON DATA
+        ========================================= */
+
         const data =
             await response.json();
 
 
         if (
+            !data ||
             !data.success ||
             !Array.isArray(data.history)
         ) {
@@ -1538,7 +1760,8 @@ async function loadHistory() {
                         colspan="8"
                         class="no-history">
 
-                        📊 No prediction history available yet.
+                        📊 No prediction history
+                        available yet.
 
                     </td>
 
@@ -1557,11 +1780,15 @@ async function loadHistory() {
 
 
         /* =========================================
-           DISPLAY HISTORY
+           CLEAR TABLE
         ========================================= */
 
         tableBody.innerHTML = "";
 
+
+        /* =========================================
+           CREATE ROWS
+        ========================================= */
 
         history.forEach(
             (record, index) => {
@@ -1572,6 +1799,10 @@ async function loadHistory() {
                         "tr"
                     );
 
+
+                /* =====================================
+                   GET VALUES
+                ===================================== */
 
                 const disease =
                     record.disease ||
@@ -1609,10 +1840,18 @@ async function loadHistory() {
                     "";
 
 
+                /* =====================================
+                   DISEASE TYPE
+                ===================================== */
+
+                const diseaseLower =
+                    disease.toLowerCase();
+
+
                 const isHealthy =
-                    disease
-                        .toLowerCase()
-                        .includes("healthy");
+                    diseaseLower.includes(
+                        "healthy"
+                    );
 
 
                 const diseaseClass =
@@ -1620,6 +1859,37 @@ async function loadHistory() {
                         ? "healthy-text"
                         : "disease-text";
 
+
+                /* =====================================
+                   CONFIDENCE SAFETY
+                ===================================== */
+
+                let safeConfidence =
+                    confidence;
+
+
+                if (
+                    isNaN(safeConfidence)
+                ) {
+
+                    safeConfidence = 0;
+
+                }
+
+
+                safeConfidence =
+                    Math.max(
+                        0,
+                        Math.min(
+                            100,
+                            safeConfidence
+                        )
+                    );
+
+
+                /* =====================================
+                   IMAGE
+                ===================================== */
 
                 let imageHTML =
                     "No image";
@@ -1632,8 +1902,12 @@ async function loadHistory() {
 
                         <a
                             class="view-image"
+
                             href="/static/images/${encodeURIComponent(image)}"
-                            target="_blank">
+
+                            target="_blank"
+
+                            rel="noopener noreferrer">
 
                             View
 
@@ -1643,6 +1917,10 @@ async function loadHistory() {
 
                 }
 
+
+                /* =====================================
+                   CREATE ROW
+                ===================================== */
 
                 row.innerHTML = `
 
@@ -1659,7 +1937,7 @@ async function loadHistory() {
                     </td>
 
                     <td class="confidence">
-                        ${confidence.toFixed(2)}%
+                        ${safeConfidence.toFixed(2)}%
                     </td>
 
                     <td>
@@ -1689,6 +1967,10 @@ async function loadHistory() {
         );
 
 
+        /* =========================================
+           STATUS
+        ========================================= */
+
         status.textContent =
             history.length +
             " prediction" +
@@ -1706,11 +1988,19 @@ async function loadHistory() {
     catch (error) {
 
 
+        /* =========================================
+           CONSOLE ERROR
+        ========================================= */
+
         console.error(
             "HISTORY ERROR:",
             error
         );
 
+
+        /* =========================================
+           ERROR TABLE
+        ========================================= */
 
         tableBody.innerHTML = `
 
@@ -1720,8 +2010,12 @@ async function loadHistory() {
                     colspan="8"
                     class="error-message">
 
-                    Unable to load prediction history.
-                    Please check the server connection.
+                    ⚠️ Unable to load prediction history.
+
+                    <br><br>
+
+                    Please check the server connection
+                    and try again.
 
                 </td>
 
@@ -1731,7 +2025,7 @@ async function loadHistory() {
 
 
         status.textContent =
-            "Error loading history.";
+            "Error loading prediction history.";
 
     }
 

@@ -2461,6 +2461,3498 @@ async function pumpControl(
 
         console.error(
             "Pump error:",
+            <!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B3D2E">
+
+<meta name="description"
+      content="Precision Agriculture Smart Rover Control System">
+
+<title>Smart Rover Control | Precision Agriculture</title>
+
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    min-height: 100vh;
+
+    color: #17251e;
+
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(47,125,87,0.13),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 15%,
+            rgba(34,197,94,0.10),
+            transparent 25%
+        ),
+        linear-gradient(
+            135deg,
+            #f4f8f5,
+            #eaf3ed
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   BACKGROUND DECORATION
+========================================================= */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    width: 420px;
+    height: 420px;
+
+    right: -180px;
+    bottom: -170px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.07);
+
+    filter: blur(5px);
+
+    pointer-events: none;
+
+    animation:
+        floatingBackground 8s ease-in-out infinite;
+}
+
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    width: 280px;
+    height: 280px;
+
+    left: -130px;
+    top: 45%;
+
+    border-radius: 50%;
+
+    background:
+        rgba(22,163,74,0.05);
+
+    pointer-events: none;
+
+    animation:
+        floatingBackground 10s ease-in-out infinite reverse;
+}
+
+@keyframes floatingBackground {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-25px);
+    }
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+
+    position: relative;
+
+    padding:
+        25px 30px;
+
+    text-align: center;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #12372a,
+            #0b3d2e,
+            #174f36
+        );
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,0.18);
+
+    overflow: hidden;
+
+    animation:
+        headerAppear 0.7s ease;
+}
+
+header::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    border-radius: 50%;
+
+    right: 8%;
+
+    top: -100px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    animation:
+        headerFloat 6s ease-in-out infinite;
+}
+
+header::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 120px;
+    height: 120px;
+
+    border-radius: 50%;
+
+    left: 8%;
+
+    bottom: -70px;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    animation:
+        headerFloat 7s ease-in-out infinite reverse;
+}
+
+@keyframes headerAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes headerFloat {
+
+    0%,100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(18px) rotate(10deg);
+    }
+}
+
+header h1 {
+
+    position: relative;
+
+    z-index: 2;
+
+    font-size: 26px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+}
+
+header p {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 7px;
+
+    color: #cfe5d9;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   HEADER STATUS
+========================================================= */
+
+.header-status {
+
+    position: absolute;
+
+    right: 25px;
+    top: 24px;
+
+    z-index: 5;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding:
+        8px 13px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.15);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255,255,255,0.10);
+
+    backdrop-filter:
+        blur(10px);
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background: #ef4444;
+
+    transition: 0.3s;
+}
+
+.status-dot.online {
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(34,197,94,0.12),
+        0 0 14px
+        rgba(34,197,94,0.9);
+
+    animation:
+        onlinePulse 1.8s infinite;
+}
+
+@keyframes onlinePulse {
+
+    0%,100% {
+        box-shadow:
+            0 0 0 4px rgba(34,197,94,0.12),
+            0 0 10px rgba(34,197,94,0.6);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 7px rgba(34,197,94,0.05),
+            0 0 20px rgba(34,197,94,1);
+    }
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+nav {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    padding:
+        11px 15px;
+
+    background:
+        rgba(255,255,255,0.88);
+
+    backdrop-filter:
+        blur(16px);
+
+    border-bottom:
+        1px solid
+        rgba(18,55,42,0.08);
+
+    box-shadow:
+        0 4px 18px
+        rgba(0,0,0,0.06);
+}
+
+nav a {
+
+    position: relative;
+
+    text-decoration: none;
+
+    color: #52615a;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    padding:
+        9px 14px;
+
+    border-radius: 10px;
+
+    transition:
+        0.25s ease;
+}
+
+nav a:hover {
+
+    color: #23613e;
+
+    background:
+        #edf7f0;
+
+    transform:
+        translateY(-1px);
+}
+
+nav a.active {
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #23613e,
+            #2f7d57
+        );
+
+    box-shadow:
+        0 5px 12px
+        rgba(35,97,62,0.20);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main {
+
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 1250px;
+
+    margin:
+        auto;
+
+    padding:
+        35px 22px 45px;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+========================================================= */
+
+.page-title {
+
+    margin-bottom: 27px;
+
+    animation:
+        contentAppear 0.7s ease;
+}
+
+.page-title h2 {
+
+    color: #12372a;
+
+    font-size: 30px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.5px;
+}
+
+.page-title p {
+
+    margin-top: 7px;
+
+    color: #69756f;
+
+    font-size: 14px;
+}
+
+@keyframes contentAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   SYSTEM PANEL
+========================================================= */
+
+.system-panel {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+.system-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+        19px;
+
+    border:
+        1px solid
+        rgba(18,55,42,0.07);
+
+    border-radius: 17px;
+
+    background:
+        rgba(255,255,255,0.84);
+
+    backdrop-filter:
+        blur(12px);
+
+    box-shadow:
+        0 7px 25px
+        rgba(31,41,55,0.07);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+
+    animation:
+        cardAppear 0.6s ease both;
+}
+
+.system-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.system-card:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+.system-card:nth-child(3) {
+    animation-delay: 0.19s;
+}
+
+.system-card:nth-child(4) {
+    animation-delay: 0.26s;
+}
+
+.system-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 70px;
+    height: 70px;
+
+    right: -25px;
+    bottom: -25px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.07);
+}
+
+.system-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 14px 30px
+        rgba(31,41,55,0.11);
+}
+
+.system-card span {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #7a857f;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+.system-card strong {
+
+    color: #12372a;
+
+    font-size: 18px;
+
+    font-weight: 800;
+}
+
+.online-text {
+    color: #16a34a !important;
+}
+
+.offline-text {
+    color: #dc2626 !important;
+}
+
+@keyframes cardAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+========================================================= */
+
+.control-layout {
+
+    display: grid;
+
+    grid-template-columns:
+        1.12fr 0.88fr;
+
+    gap: 23px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+        27px;
+
+    border:
+        1px solid
+        rgba(18,55,42,0.07);
+
+    border-radius: 22px;
+
+    background:
+        rgba(255,255,255,0.91);
+
+    backdrop-filter:
+        blur(14px);
+
+    box-shadow:
+        0 10px 35px
+        rgba(31,41,55,0.08);
+
+    animation:
+        cardAppear 0.7s ease both;
+
+    transition:
+        box-shadow 0.3s ease,
+        transform 0.3s ease;
+}
+
+.card:hover {
+
+    box-shadow:
+        0 16px 40px
+        rgba(31,41,55,0.12);
+}
+
+.card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    right: -75px;
+    top: -75px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.06);
+}
+
+.card h3 {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-bottom: 20px;
+
+    color: #12372a;
+
+    font-size: 19px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   ROVER STATUS
+========================================================= */
+
+.rover-status {
+
+    position: relative;
+
+    padding:
+        18px;
+
+    margin-bottom: 20px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #dcebe1;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0f9f3,
+            #e8f5ec
+        );
+
+    overflow: hidden;
+}
+
+.rover-status::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 90px;
+    height: 90px;
+
+    left: -45px;
+    bottom: -45px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.08);
+}
+
+.rover-status > span {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    color: #718078;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+.rover-status h2 {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 7px;
+
+    font-size: 20px;
+
+    font-weight: 800;
+
+    transition:
+        color 0.3s ease,
+        transform 0.3s ease;
+}
+
+.connected {
+
+    color: #16a34a !important;
+
+    text-shadow:
+        0 0 12px
+        rgba(22,163,74,0.16);
+}
+
+.disconnected {
+
+    color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   CONNECTION DETAILS
+========================================================= */
+
+.connection-details {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 15px;
+}
+
+.connection-item {
+
+    padding:
+        11px;
+
+    text-align: left;
+
+    border:
+        1px solid
+        #e1e9e4;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255,255,255,0.85);
+
+    transition:
+        transform 0.2s,
+        background 0.2s;
+}
+
+.connection-item:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        white;
+}
+
+.connection-item span {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #89938e;
+
+    font-size: 10px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+}
+
+.connection-item strong {
+
+    display: block;
+
+    color: #37433d;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   STEERING AREA
+========================================================= */
+
+.steering-area {
+
+    text-align: center;
+
+    padding:
+        4px 0 16px;
+}
+
+.steering-title {
+
+    margin-bottom: 16px;
+
+    color: #7a857f;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STEERING WHEEL
+========================================================= */
+
+.steering-wheel {
+
+    width: 220px;
+    height: 220px;
+
+    position: relative;
+
+    margin: auto;
+
+    border:
+        17px solid
+        #12372a;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #26332d 0,
+            #26332d 17%,
+            transparent 18%
+        );
+
+    box-shadow:
+        inset 0 0 0 5px #3d9467,
+        inset 0 0 30px
+        rgba(0,0,0,0.25),
+        0 13px 30px
+        rgba(18,55,42,0.20);
+
+    cursor: grab;
+
+    touch-action: none;
+
+    user-select: none;
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.25s ease;
+}
+
+.steering-wheel:hover {
+
+    box-shadow:
+        inset 0 0 0 5px #3d9467,
+        inset 0 0 30px rgba(0,0,0,0.25),
+        0 17px 35px
+        rgba(18,55,42,0.24);
+}
+
+.steering-wheel:active {
+
+    cursor: grabbing;
+
+    box-shadow:
+        inset 0 0 0 5px #54b77e,
+        inset 0 0 35px rgba(0,0,0,0.30),
+        0 8px 18px
+        rgba(18,55,42,0.20);
+}
+
+
+/* =========================================================
+   SPOKES
+========================================================= */
+
+.spoke {
+
+    position: absolute;
+
+    background:
+        linear-gradient(
+            90deg,
+            #12372a,
+            #1e543a
+        );
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 2px 5px
+        rgba(0,0,0,0.18);
+}
+
+.spoke-vertical {
+
+    width: 18px;
+    height: 78px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+}
+
+.spoke-left {
+
+    width: 75px;
+    height: 18px;
+
+    left: 6px;
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        rotate(-18deg);
+
+    transform-origin:
+        right center;
+}
+
+.spoke-right {
+
+    width: 75px;
+    height: 18px;
+
+    right: 6px;
+    top: 50%;
+
+    transform:
+        translateY(-50%)
+        rotate(18deg);
+
+    transform-origin:
+        left center;
+}
+
+
+/* =========================================================
+   STEERING CENTER
+========================================================= */
+
+.steering-center {
+
+    position: absolute;
+
+    width: 62px;
+    height: 62px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border:
+        5px solid
+        white;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2f7d57,
+            #17452c
+        );
+
+    font-size: 25px;
+
+    box-shadow:
+        0 5px 12px
+        rgba(0,0,0,0.25);
+
+    animation:
+        steeringCenterPulse 2.5s infinite;
+}
+
+@keyframes steeringCenterPulse {
+
+    0%,100% {
+        box-shadow:
+            0 5px 12px rgba(0,0,0,0.25);
+    }
+
+    50% {
+        box-shadow:
+            0 5px 18px rgba(47,125,87,0.45);
+    }
+}
+
+
+/* =========================================================
+   STEERING INDICATOR
+========================================================= */
+
+.steering-indicator {
+
+    display: inline-block;
+
+    margin-top: 14px;
+
+    padding:
+        7px 14px;
+
+    border-radius: 20px;
+
+    background:
+        #edf7f0;
+
+    color: #23613e;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    transition:
+        0.25s ease;
+}
+
+
+/* =========================================================
+   MOVEMENT BUTTONS
+========================================================= */
+
+.movement-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 11px;
+
+    max-width: 360px;
+
+    margin:
+        20px auto 0;
+}
+
+.move-button {
+
+    position: relative;
+
+    min-height: 66px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #23613e,
+            #2f7d57
+        );
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 6px 14px
+        rgba(35,97,62,0.18);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.move-button::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 0;
+    height: 0;
+
+    left: 50%;
+    top: 50%;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.16);
+
+    transform:
+        translate(-50%,-50%);
+
+    transition:
+        width 0.4s,
+        height 0.4s;
+}
+
+.move-button:hover::before {
+
+    width: 180px;
+    height: 180px;
+}
+
+.move-button:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 10px 20px
+        rgba(35,97,62,0.24);
+}
+
+.move-button:active,
+.move-button.active {
+
+    transform:
+        scale(0.94);
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f3823,
+            #17452c
+        );
+
+    box-shadow:
+        0 3px 8px
+        rgba(0,0,0,0.20);
+}
+
+.move-button.forward {
+    grid-column: 2;
+}
+
+.move-button.left {
+    grid-column: 1;
+}
+
+.move-button.stop {
+
+    grid-column: 2;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dc2626,
+            #b91c1c
+        );
+
+    box-shadow:
+        0 6px 15px
+        rgba(220,38,38,0.20);
+}
+
+.move-button.stop:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #b91c1c
+        );
+}
+
+.move-button.right {
+    grid-column: 3;
+}
+
+.move-button.backward {
+    grid-column: 2;
+}
+
+
+/* =========================================================
+   COMMAND BOX
+========================================================= */
+
+.command-box {
+
+    position: relative;
+
+    margin-top: 20px;
+
+    padding:
+        18px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #e2ebe5;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5f8f6,
+            #edf5ef
+        );
+
+    overflow: hidden;
+}
+
+.command-box::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 100px;
+    height: 100px;
+
+    right: -50px;
+    top: -50px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.08);
+}
+
+.command-box span {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    color: #7a857f;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.command-box h2 {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 7px;
+
+    color: #12372a;
+
+    font-size: 22px;
+
+    font-weight: 900;
+
+    transition:
+        0.25s ease;
+}
+
+.speed-display {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    margin-top: 9px;
+
+    color: #7a857f;
+
+    font-size: 12px;
+}
+
+.speed-display strong {
+
+    color: #12372a;
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.message-box {
+
+    display: none;
+
+    margin-top: 15px;
+
+    padding:
+        12px 15px;
+
+    border-radius: 11px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    animation:
+        messageIn 0.3s ease;
+}
+
+.message-success {
+
+    background:
+        #dcfce7;
+
+    color:
+        #166534;
+
+    border:
+        1px solid
+        #bbf7d0;
+}
+
+.message-error {
+
+    background:
+        #fee2e2;
+
+    color:
+        #991b1b;
+
+    border:
+        1px solid
+        #fecaca;
+}
+
+.message-info {
+
+    background:
+        #dbeafe;
+
+    color:
+        #1e40af;
+
+    border:
+        1px solid
+        #bfdbfe;
+}
+
+@keyframes messageIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   KEYBOARD INFO
+========================================================= */
+
+.keyboard-info {
+
+    margin-top: 17px;
+
+    color: #89938e;
+
+    text-align: center;
+
+    font-size: 11px;
+
+    line-height: 2;
+}
+
+.keyboard-info strong {
+
+    display: inline-block;
+
+    min-width: 25px;
+
+    padding:
+        2px 6px;
+
+    margin:
+        0 2px;
+
+    border:
+        1px solid
+        #d9e2dc;
+
+    border-radius: 5px;
+
+    background:
+        #f1f5f2;
+
+    color: #315744;
+
+    box-shadow:
+        0 2px 4px
+        rgba(0,0,0,0.06);
+}
+
+
+/* =========================================================
+   EMERGENCY
+========================================================= */
+
+.emergency-button {
+
+    position: relative;
+
+    width: 100%;
+
+    margin-top: 18px;
+
+    padding:
+        17px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #b91c1c,
+            #dc2626
+        );
+
+    font-size: 14px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 17px
+        rgba(220,38,38,0.22);
+
+    overflow: hidden;
+
+    transition:
+        0.2s ease;
+}
+
+.emergency-button::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: inherit;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.25);
+}
+
+.emergency-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 11px 23px
+        rgba(220,38,38,0.30);
+}
+
+.emergency-button:active {
+
+    transform:
+        scale(0.98);
+}
+
+
+/* =========================================================
+   PUMP SECTION
+========================================================= */
+
+.pump-card {
+
+    min-height: 100%;
+}
+
+
+/* =========================================================
+   PUMP VISUAL
+========================================================= */
+
+.pump-visual {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    margin:
+        10px auto 22px;
+
+    height: 150px;
+
+    position: relative;
+}
+
+.pump-machine {
+
+    position: relative;
+
+    width: 115px;
+    height: 90px;
+
+    border-radius: 22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #12372a,
+            #23613e
+        );
+
+    box-shadow:
+        0 12px 25px
+        rgba(18,55,42,0.20);
+
+    animation:
+        pumpFloat 3s ease-in-out infinite;
+}
+
+@keyframes pumpFloat {
+
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+.pump-machine::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 42px;
+    height: 42px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    border:
+        5px solid
+        rgba(255,255,255,0.7);
+
+    border-radius: 50%;
+}
+
+.pump-machine::after {
+
+    content: "💧";
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    font-size: 20px;
+}
+
+
+/* =========================================================
+   WATER DROPS
+========================================================= */
+
+.water-drop {
+
+    position: absolute;
+
+    width: 10px;
+    height: 14px;
+
+    border-radius:
+        70% 30% 65% 35%;
+
+    background:
+        #3b82f6;
+
+    opacity: 0;
+
+    animation:
+        waterDrop 2.2s infinite;
+}
+
+.water-drop:nth-child(1) {
+
+    left: 35%;
+
+    animation-delay:
+        0s;
+}
+
+.water-drop:nth-child(2) {
+
+    left: 50%;
+
+    animation-delay:
+        0.7s;
+}
+
+.water-drop:nth-child(3) {
+
+    left: 65%;
+
+    animation-delay:
+        1.4s;
+}
+
+@keyframes waterDrop {
+
+    0% {
+        opacity: 0;
+        transform:
+            translateY(-20px)
+            scale(0.6);
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform:
+            translateY(80px)
+            scale(1);
+    }
+}
+
+
+/* =========================================================
+   PUMP BUTTONS
+========================================================= */
+
+.pump-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 12px;
+}
+
+.pump-button {
+
+    padding:
+        17px 12px;
+
+    border: none;
+
+    border-radius: 13px;
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    transition:
+        0.2s ease;
+
+    box-shadow:
+        0 6px 14px
+        rgba(0,0,0,0.12);
+}
+
+.pump-button:hover {
+
+    transform:
+        translateY(-3px);
+}
+
+.pump-button:active {
+
+    transform:
+        scale(0.97);
+}
+
+.pump-on {
+
+    background:
+        linear-gradient(
+            135deg,
+            #16a34a,
+            #15803d
+        );
+}
+
+.pump-off {
+
+    background:
+        linear-gradient(
+            135deg,
+            #dc2626,
+            #b91c1c
+        );
+}
+
+
+/* =========================================================
+   PUMP STATUS
+========================================================= */
+
+.pump-status {
+
+    position: relative;
+
+    margin-top: 19px;
+
+    padding:
+        21px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #e1e9e4;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f7faf8,
+            #edf5ef
+        );
+
+    overflow: hidden;
+}
+
+.pump-status::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 110px;
+    height: 110px;
+
+    right: -55px;
+    bottom: -55px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(59,130,246,0.05);
+}
+
+.pump-status > span {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    color: #7a857f;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+}
+
+.pump-status strong {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    margin-top: 7px;
+
+    color: #dc2626;
+
+    font-size: 28px;
+
+    font-weight: 900;
+
+    transition:
+        color 0.3s,
+        transform 0.3s;
+}
+
+.pump-indicator {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 13px;
+
+    color: #7a857f;
+
+    font-size: 12px;
+}
+
+.pump-light {
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background:
+        #dc2626;
+}
+
+.pump-light.on {
+
+    background:
+        #16a34a;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(22,163,74,0.10),
+        0 0 13px
+        rgba(22,163,74,0.8);
+
+    animation:
+        pumpPulse 1.5s infinite;
+}
+
+@keyframes pumpPulse {
+
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.25);
+    }
+}
+
+
+/* =========================================================
+   NOTICE
+========================================================= */
+
+.notice {
+
+    margin-top: 19px;
+
+    padding:
+        17px;
+
+    border-left:
+        4px solid
+        #f97316;
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff7ed,
+            #fffaf5
+        );
+
+    color:
+        #7c2d12;
+
+    font-size: 12px;
+
+    line-height: 1.65;
+
+    box-shadow:
+        0 4px 12px
+        rgba(249,115,22,0.06);
+}
+
+.notice strong {
+
+    color:
+        #9a3412;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+
+    position: relative;
+
+    z-index: 2;
+
+    padding:
+        22px;
+
+    text-align: center;
+
+    color: #75817b;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width: 950px) {
+
+    .system-panel {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .control-layout {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media(max-width: 650px) {
+
+    header {
+
+        padding:
+            55px 18px 22px;
+    }
+
+    header h1 {
+
+        font-size: 21px;
+    }
+
+    header p {
+
+        font-size: 12px;
+    }
+
+    .header-status {
+
+        top: 12px;
+
+        right: 50%;
+
+        transform:
+            translateX(50%);
+    }
+
+    nav {
+
+        gap: 4px;
+
+        padding:
+            9px;
+    }
+
+    nav a {
+
+        padding:
+            8px 9px;
+
+        font-size: 11px;
+    }
+
+    main {
+
+        padding:
+            25px 12px 35px;
+    }
+
+    .page-title h2 {
+
+        font-size: 25px;
+    }
+
+    .system-panel {
+
+        gap: 10px;
+    }
+
+    .system-card {
+
+        padding:
+            15px;
+    }
+
+    .system-card strong {
+
+        font-size: 15px;
+    }
+
+    .card {
+
+        padding:
+            19px;
+
+        border-radius:
+            18px;
+    }
+
+    .steering-wheel {
+
+        width: 195px;
+        height: 195px;
+
+        border-width:
+            15px;
+    }
+
+}
+
+
+@media(max-width: 430px) {
+
+    .system-panel {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .system-card {
+
+        min-height:
+            76px;
+    }
+
+    .movement-buttons {
+
+        max-width:
+            300px;
+    }
+
+    .move-button {
+
+        min-height:
+            59px;
+
+        font-size:
+            10px;
+    }
+
+    .pump-buttons {
+
+        grid-template-columns:
+            1fr;
+    }
+
+    .connection-details {
+
+        grid-template-columns:
+            1fr;
+    }
+
+    .keyboard-info {
+
+        font-size:
+            10px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media(prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        scroll-behavior:
+            auto !important;
+
+        transition-duration:
+            0.01ms !important;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+    <div
+        class="header-status"
+        id="header-status"
+    >
+
+        <span
+            class="status-dot"
+            id="header-status-dot"
+        ></span>
+
+        <span id="header-status-text">
+            Rover Offline
+        </span>
+
+    </div>
+
+
+    <h1>
+        🌱 Precision Agriculture Smart Rover
+    </h1>
+
+    <p>
+        Intelligent Rover Control & Agricultural Automation
+    </p>
+
+</header>
+
+
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
+
+<nav>
+
+    <a href="/">
+        🏠 Dashboard
+    </a>
+
+    <a
+        href="/rover"
+        class="active"
+    >
+        🚜 Rover
+    </a>
+
+    <a href="/dataset">
+        🗂 Dataset
+    </a>
+
+    <a href="/analytics">
+        📊 Analytics
+    </a>
+
+    <a href="/settings">
+        ⚙️ Settings
+    </a>
+
+</nav>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main>
+
+
+    <!-- PAGE TITLE -->
+
+    <div class="page-title">
+
+        <h2>
+            🚜 Rover Control Center
+        </h2>
+
+        <p>
+            Control rover movement, steering and agricultural
+            spraying from one intelligent interface.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         SYSTEM STATUS
+    ====================================================== -->
+
+    <section class="system-panel">
+
+
+        <div class="system-card">
+
+            <span>
+                Rover Connection
+            </span>
+
+            <strong
+                id="system-connection"
+                class="offline-text"
+            >
+                OFFLINE
+            </strong>
+
+        </div>
+
+
+        <div class="system-card">
+
+            <span>
+                Movement
+            </span>
+
+            <strong id="system-direction">
+                STOPPED
+            </strong>
+
+        </div>
+
+
+        <div class="system-card">
+
+            <span>
+                Speed
+            </span>
+
+            <strong>
+
+                <span
+                    id="system-speed"
+                    style="display:inline;"
+                >
+                    0
+                </span>
+
+                %
+
+            </strong>
+
+        </div>
+
+
+        <div class="system-card">
+
+            <span>
+                Spray Pump
+            </span>
+
+            <strong id="system-pump">
+                OFF
+            </strong>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- =====================================================
+         CONTROL LAYOUT
+    ====================================================== -->
+
+    <div class="control-layout">
+
+
+        <!-- =================================================
+             MOVEMENT CARD
+        ================================================== -->
+
+        <div class="card">
+
+            <h3>
+                🎡 Steering & Movement
+            </h3>
+
+
+            <!-- CONNECTION -->
+
+            <div class="rover-status">
+
+                <span>
+                    Raspberry Pi / Rover Connection
+                </span>
+
+                <h2
+                    id="rover-status"
+                    class="disconnected"
+                >
+                    NOT CONNECTED
+                </h2>
+
+
+                <div class="connection-details">
+
+
+                    <div class="connection-item">
+
+                        <span>
+                            Last Seen
+                        </span>
+
+                        <strong id="last-seen">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="connection-item">
+
+                        <span>
+                            Mode
+                        </span>
+
+                        <strong id="rover-mode">
+                            Manual
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- STEERING -->
+
+            <div class="steering-area">
+
+                <div class="steering-title">
+
+                    Drag the steering wheel
+                    left or right
+
+                </div>
+
+
+                <div
+                    id="steering-wheel"
+                    class="steering-wheel"
+                >
+
+                    <div
+                        class="spoke spoke-vertical"
+                    ></div>
+
+                    <div
+                        class="spoke spoke-left"
+                    ></div>
+
+                    <div
+                        class="spoke spoke-right"
+                    ></div>
+
+                    <div class="steering-center">
+                        🚜
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="steering-indicator"
+                    class="steering-indicator"
+                >
+                    Steering: CENTER
+                </div>
+
+            </div>
+
+
+            <!-- MOVEMENT -->
+
+            <div class="movement-buttons">
+
+
+                <button
+                    id="forward-btn"
+                    class="move-button forward"
+                    type="button"
+                >
+
+                    ▲<br>
+                    FORWARD
+
+                </button>
+
+
+                <button
+                    id="left-btn"
+                    class="move-button left"
+                    type="button"
+                >
+
+                    ◀<br>
+                    LEFT
+
+                </button>
+
+
+                <button
+                    id="stop-btn"
+                    class="move-button stop"
+                    type="button"
+                >
+
+                    ■<br>
+                    STOP
+
+                </button>
+
+
+                <button
+                    id="right-btn"
+                    class="move-button right"
+                    type="button"
+                >
+
+                    ▶<br>
+                    RIGHT
+
+                </button>
+
+
+                <button
+                    id="backward-btn"
+                    class="move-button backward"
+                    type="button"
+                >
+
+                    ▼<br>
+                    REVERSE
+
+                </button>
+
+
+            </div>
+
+
+            <!-- COMMAND -->
+
+            <div class="command-box">
+
+                <span>
+                    Current Command
+                </span>
+
+                <h2 id="current-command">
+                    STOP
+                </h2>
+
+
+                <div class="speed-display">
+
+                    Speed:
+
+                    <strong>
+
+                        <span id="current-speed">
+                            0
+                        </span>
+
+                        %
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="message-box"
+                class="message-box"
+            >
+            </div>
+
+
+            <!-- KEYBOARD -->
+
+            <div class="keyboard-info">
+
+                <strong>W</strong>
+                Forward
+
+                <strong>A</strong>
+                Left
+
+                <strong>S</strong>
+                Reverse
+
+                <strong>D</strong>
+                Right
+
+                <strong>Space</strong>
+                Stop
+
+            </div>
+
+
+            <!-- EMERGENCY -->
+
+            <button
+                id="emergency-button"
+                class="emergency-button"
+                type="button"
+            >
+
+                🛑 EMERGENCY STOP
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             PUMP CARD
+        ================================================== -->
+
+        <div class="card pump-card">
+
+            <h3>
+                💧 Smart Spray Pump
+            </h3>
+
+
+            <!-- PUMP ANIMATION -->
+
+            <div class="pump-visual">
+
+                <div class="water-drop"></div>
+                <div class="water-drop"></div>
+                <div class="water-drop"></div>
+
+                <div class="pump-machine"></div>
+
+            </div>
+
+
+            <!-- PUMP STATUS -->
+
+            <div class="rover-status">
+
+                <span>
+                    Current Pump Status
+                </span>
+
+                <h2
+                    id="pump-status"
+                    class="disconnected"
+                    style="color:#dc2626;"
+                >
+                    OFF
+                </h2>
+
+            </div>
+
+
+            <!-- PUMP BUTTONS -->
+
+            <div class="pump-buttons">
+
+                <button
+                    id="pump-on-button"
+                    class="pump-button pump-on"
+                    type="button"
+                >
+
+                    💧 PUMP ON
+
+                </button>
+
+
+                <button
+                    id="pump-off-button"
+                    class="pump-button pump-off"
+                    type="button"
+                >
+
+                    ⛔ PUMP OFF
+
+                </button>
+
+            </div>
+
+
+            <!-- PUMP COMMAND -->
+
+            <div class="pump-status">
+
+                <span>
+                    Current Pump Command
+                </span>
+
+                <strong id="pump-command">
+                    OFF
+                </strong>
+
+
+                <div class="pump-indicator">
+
+                    <span
+                        id="pump-light"
+                        class="pump-light"
+                    ></span>
+
+                    <span id="pump-indicator-text">
+                        Pump is OFF
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- NOTICE -->
+
+            <div class="notice">
+
+                <strong>
+                    ⚠️ Control System
+                </strong>
+
+                <br><br>
+
+                Movement buttons and the steering
+                wheel send commands to the Flask
+                server.
+
+                <br><br>
+
+                The Raspberry Pi retrieves the latest
+                rover command and controls the motor
+                driver.
+
+                <br><br>
+
+                The spray pump is controlled through
+                the rover pump API.
+
+                <br><br>
+
+                <strong>
+                    Safety:
+                </strong>
+
+                Press the emergency stop immediately
+                whenever required.
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</main>
+
+
+<footer>
+
+    🌱 Precision Agriculture Smart Rover
+    &nbsp; • &nbsp;
+    AI Plant Disease Detection
+    &nbsp; • &nbsp;
+    Intelligent Rover Control
+
+</footer>
+
+
+<script>
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let currentMovement = "stop";
+
+let movementActive = false;
+
+let steeringAngle = 0;
+
+let steeringDragging = false;
+
+let steeringStartX = 0;
+
+let steeringStartAngle = 0;
+
+let messageTimer = null;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const steeringWheel =
+    document.getElementById(
+        "steering-wheel"
+    );
+
+const steeringIndicator =
+    document.getElementById(
+        "steering-indicator"
+    );
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(
+    message,
+    type = "info"
+) {
+
+    const box =
+        document.getElementById(
+            "message-box"
+        );
+
+    box.textContent =
+        message;
+
+    box.className =
+        "message-box message-" +
+        type;
+
+    box.style.display =
+        "block";
+
+    clearTimeout(
+        messageTimer
+    );
+
+    messageTimer =
+        setTimeout(
+            function() {
+
+                box.style.display =
+                    "none";
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================================
+   COMMAND DISPLAY
+========================================================= */
+
+function updateCommandDisplay(
+    command
+) {
+
+    const element =
+        document.getElementById(
+            "current-command"
+        );
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        String(command).toUpperCase();
+
+    element.style.transform =
+        "scale(1.08)";
+
+    setTimeout(
+        function() {
+
+            element.style.transform =
+                "scale(1)";
+
+        },
+        160
+    );
+
+}
+
+
+/* =========================================================
+   ACTIVE BUTTON
+========================================================= */
+
+function setActiveButton(
+    command
+) {
+
+    removeActiveButtons();
+
+    const button =
+        document.getElementById(
+            command + "-btn"
+        );
+
+    if (button) {
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   REMOVE ACTIVE BUTTONS
+========================================================= */
+
+function removeActiveButtons() {
+
+    document
+        .querySelectorAll(
+            ".move-button"
+        )
+        .forEach(
+            function(button) {
+
+                button.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   START MOVEMENT
+========================================================= */
+
+function startMove(
+    command,
+    event
+) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+    if (
+        movementActive &&
+        currentMovement === command
+    ) {
+
+        return;
+
+    }
+
+    movementActive =
+        true;
+
+    currentMovement =
+        command;
+
+    setActiveButton(
+        command
+    );
+
+    updateCommandDisplay(
+        command
+    );
+
+    const direction =
+        document.getElementById(
+            "system-direction"
+        );
+
+    direction.textContent =
+        command.toUpperCase();
+
+    sendCommand(
+        command
+    );
+
+}
+
+
+/* =========================================================
+   STOP
+========================================================= */
+
+function stopMove(
+    event
+) {
+
+    if (event) {
+
+        event.preventDefault();
+
+    }
+
+    if (!movementActive) {
+
+        return;
+
+    }
+
+    movementActive =
+        false;
+
+    currentMovement =
+        "stop";
+
+    removeActiveButtons();
+
+    updateCommandDisplay(
+        "stop"
+    );
+
+    sendCommand(
+        "stop"
+    );
+
+}
+
+
+/* =========================================================
+   EMERGENCY STOP
+========================================================= */
+
+function emergencyStop() {
+
+    movementActive =
+        false;
+
+    currentMovement =
+        "stop";
+
+    removeActiveButtons();
+
+    updateCommandDisplay(
+        "stop"
+    );
+
+    sendCommand(
+        "stop"
+    );
+
+    showMessage(
+        "🛑 EMERGENCY STOP SENT",
+        "error"
+    );
+
+}
+
+
+/* =========================================================
+   SEND COMMAND
+========================================================= */
+
+async function sendCommand(
+    command
+) {
+
+    updateCommandDisplay(
+        command
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/rover/control",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            command:
+                                command
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            updateRoverStatus(
+                data.rover
+            );
+
+            if (
+                command !== "stop"
+            ) {
+
+                showMessage(
+                    "✓ " +
+                    command.toUpperCase() +
+                    " command sent",
+                    "success"
+                );
+
+            }
+
+        }
+
+        else {
+
+            showMessage(
+                data.message ||
+                "Command failed",
+                "error"
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Command error:",
+            error
+        );
+
+        showMessage(
+            "Flask server not connected",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   STEERING
+========================================================= */
+
+function updateSteering(
+    angle
+) {
+
+    steeringAngle =
+        Math.max(
+            -70,
+            Math.min(
+                70,
+                angle
+            )
+        );
+
+
+    steeringWheel.style.transform =
+        "rotate(" +
+        steeringAngle +
+        "deg)";
+
+
+    if (
+        steeringAngle < -10
+    ) {
+
+        steeringIndicator.textContent =
+            "↙ Steering: LEFT";
+
+        steeringIndicator.style.background =
+            "#e8f5ec";
+
+        if (!movementActive) {
+
+            sendCommand(
+                "left"
+            );
+
+        }
+
+    }
+
+    else if (
+        steeringAngle > 10
+    ) {
+
+        steeringIndicator.textContent =
+            "↘ Steering: RIGHT";
+
+        steeringIndicator.style.background =
+            "#e8f5ec";
+
+        if (!movementActive) {
+
+            sendCommand(
+                "right"
+            );
+
+        }
+
+    }
+
+    else {
+
+        steeringIndicator.textContent =
+            "↔ Steering: CENTER";
+
+        steeringIndicator.style.background =
+            "#edf7f0";
+
+    }
+
+}
+
+
+/* =========================================================
+   STEERING POINTER DOWN
+========================================================= */
+
+steeringWheel.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        steeringDragging =
+            true;
+
+        steeringStartX =
+            event.clientX;
+
+        steeringStartAngle =
+            steeringAngle;
+
+        steeringWheel.setPointerCapture(
+            event.pointerId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   STEERING POINTER MOVE
+========================================================= */
+
+steeringWheel.addEventListener(
+    "pointermove",
+    function(event) {
+
+        if (
+            !steeringDragging
+        ) {
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+        const movement =
+            event.clientX -
+            steeringStartX;
+
+        updateSteering(
+
+            steeringStartAngle +
+            movement * 0.7
+
+        );
+
+    }
+);
+
+
+/* =========================================================
+   STEERING RELEASE
+========================================================= */
+
+function releaseSteering() {
+
+    if (
+        !steeringDragging
+    ) {
+
+        return;
+
+    }
+
+    steeringDragging =
+        false;
+
+    steeringAngle =
+        0;
+
+    steeringWheel.style.transform =
+        "rotate(0deg)";
+
+    steeringIndicator.textContent =
+        "↔ Steering: CENTER";
+
+}
+
+
+steeringWheel.addEventListener(
+    "pointerup",
+    releaseSteering
+);
+
+steeringWheel.addEventListener(
+    "pointercancel",
+    releaseSteering
+);
+
+steeringWheel.addEventListener(
+    "lostpointercapture",
+    releaseSteering
+);
+
+
+/* =========================================================
+   PUMP CONTROL
+========================================================= */
+
+async function pumpControl(
+    state
+) {
+
+    updatePumpUI(
+        state
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/rover/pump",
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            state:
+                                state
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.success
+        ) {
+
+            updateRoverStatus(
+                data.rover
+            );
+
+            showMessage(
+                state
+                    ? "💧 Pump turned ON"
+                    : "⛔ Pump turned OFF",
+                "success"
+            );
+
+        }
+
+        else {
+
+            showMessage(
+                data.message ||
+                "Pump command failed",
+                "error"
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Pump error:",
             error
         );
 
@@ -2522,25 +6014,44 @@ function updatePumpUI(
             ? "ON"
             : "OFF";
 
+
     status.style.color =
         isOn
             ? "#16a34a"
             : "#dc2626";
+
+
+    status.style.transform =
+        "scale(1.08)";
+
+    setTimeout(
+        function() {
+
+            status.style.transform =
+                "scale(1)";
+
+        },
+        150
+    );
+
 
     light.classList.toggle(
         "on",
         isOn
     );
 
+
     indicatorText.textContent =
         isOn
             ? "Pump is ON"
             : "Pump is OFF";
 
+
     systemPump.textContent =
         isOn
             ? "ON"
             : "OFF";
+
 
     systemPump.style.color =
         isOn
@@ -2611,9 +6122,7 @@ function updateRoverStatus(
         );
 
 
-    /* -------------------------------------------------------
-       CONNECTION
-    ------------------------------------------------------- */
+    /* CONNECTION */
 
     if (
         rover.connected
@@ -2664,9 +6173,7 @@ function updateRoverStatus(
     }
 
 
-    /* -------------------------------------------------------
-       DIRECTION
-    ------------------------------------------------------- */
+    /* DIRECTION */
 
     if (
         rover.direction
@@ -2680,9 +6187,7 @@ function updateRoverStatus(
     }
 
 
-    /* -------------------------------------------------------
-       SPEED
-    ------------------------------------------------------- */
+    /* SPEED */
 
     if (
         rover.speed !== undefined
@@ -2697,9 +6202,7 @@ function updateRoverStatus(
     }
 
 
-    /* -------------------------------------------------------
-       PUMP
-    ------------------------------------------------------- */
+    /* PUMP */
 
     if (
         rover.pump !== undefined
@@ -2712,9 +6215,7 @@ function updateRoverStatus(
     }
 
 
-    /* -------------------------------------------------------
-       MODE
-    ------------------------------------------------------- */
+    /* MODE */
 
     if (
         rover.mode
@@ -2726,9 +6227,7 @@ function updateRoverStatus(
     }
 
 
-    /* -------------------------------------------------------
-       LAST SEEN
-    ------------------------------------------------------- */
+    /* LAST SEEN */
 
     if (
         rover.last_seen
@@ -2792,6 +6291,7 @@ async function getRoverStatus() {
             "Rover status unavailable"
         );
 
+
         const connection =
             document.getElementById(
                 "system-connection"
@@ -2803,13 +6303,32 @@ async function getRoverStatus() {
         connection.className =
             "offline-text";
 
+
+        const headerText =
+            document.getElementById(
+                "header-status-text"
+            );
+
+        headerText.textContent =
+            "Server Offline";
+
+
+        const headerDot =
+            document.getElementById(
+                "header-status-dot"
+            );
+
+        headerDot.classList.remove(
+            "online"
+        );
+
     }
 
 }
 
 
 /* =========================================================
-   BUTTON EVENTS
+   BUTTON REFERENCES
 ========================================================= */
 
 const forwardButton =
@@ -2839,7 +6358,7 @@ const stopButton =
 
 
 /* =========================================================
-   HELPER FOR PRESS / RELEASE
+   MOVEMENT EVENTS
 ========================================================= */
 
 function attachMovementEvents(
@@ -2914,7 +6433,7 @@ function attachMovementEvents(
 
 
 /* =========================================================
-   ATTACH MOVEMENT EVENTS
+   ATTACH
 ========================================================= */
 
 attachMovementEvents(

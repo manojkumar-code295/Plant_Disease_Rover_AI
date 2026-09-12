@@ -8,451 +8,2073 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Settings | Precision Agriculture</title>
+    <meta name="theme-color"
+          content="#0b3d2e">
+
+    <title>Settings | Precision Agriculture Smart Rover</title>
+
+
+    <!-- =====================================================
+         FONT
+    ====================================================== -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+
+    <!-- =====================================================
+         ICONS
+    ====================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 
     <style>
 
         /* =====================================================
-           GLOBAL
+           ROOT
+        ===================================================== */
+
+        :root {
+
+            --green-950: #06281d;
+            --green-900: #083b2a;
+            --green-800: #0b5139;
+            --green-700: #126344;
+            --green-600: #198754;
+            --green-500: #22a06b;
+            --green-400: #42c98b;
+
+            --lime: #9be15d;
+
+            --bg: #eef5f1;
+            --card: rgba(255,255,255,0.88);
+            --white: #ffffff;
+
+            --text: #17231e;
+            --muted: #708078;
+
+            --border: rgba(19,55,42,0.09);
+
+            --shadow:
+                0 12px 35px rgba(10,55,39,0.08);
+
+            --shadow-hover:
+                0 20px 50px rgba(10,75,50,0.16);
+
+        }
+
+
+        /* =====================================================
+           RESET
         ===================================================== */
 
         * {
-            box-sizing: border-box;
+
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+
         }
 
+
+        html {
+
+            scroll-behavior: smooth;
+
+        }
+
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f5;
-            color: #1f2937;
+
+            font-family: "Inter", Arial, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 10% 10%,
+                    rgba(54,180,120,0.10),
+                    transparent 30%
+                ),
+
+                radial-gradient(
+                    circle at 90% 20%,
+                    rgba(155,225,93,0.08),
+                    transparent 30%
+                ),
+
+                linear-gradient(
+                    135deg,
+                    #f3f8f5,
+                    #eaf3ee
+                );
+
+            color: var(--text);
+
             min-height: 100vh;
+
+            overflow-x: hidden;
+
+        }
+
+
+        /* =====================================================
+           ANIMATED BACKGROUND
+        ====================================================== */
+
+        .background-glow {
+
+            position: fixed;
+
+            width: 450px;
+            height: 450px;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(34,160,107,0.12),
+                    transparent 70%
+                );
+
+            pointer-events: none;
+
+            z-index: -1;
+
+            animation: floatGlow 9s ease-in-out infinite;
+
+        }
+
+
+        .glow-one {
+
+            top: -180px;
+            left: -150px;
+
+        }
+
+
+        .glow-two {
+
+            right: -180px;
+            bottom: -150px;
+
+            animation-delay: -4s;
+
+        }
+
+
+        @keyframes floatGlow {
+
+            0%,
+            100% {
+
+                transform: translate(
+                    0,
+                    0
+                );
+
+            }
+
+            50% {
+
+                transform: translate(
+                    30px,
+                    25px
+                );
+
+            }
+
         }
 
 
         /* =====================================================
            HEADER
-        ===================================================== */
+        ====================================================== */
 
         header {
-            background: #12372a;
+
+            position: relative;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #062c20,
+                    #0b5139 55%,
+                    #126344
+                );
+
             color: white;
-            padding: 22px 40px;
+
+            padding: 28px 6% 32px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.14);
+
         }
 
-        header h1 {
-            font-size: 26px;
+
+        header::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 260px;
+            height: 260px;
+
+            border-radius: 50%;
+
+            right: 5%;
+
+            top: -170px;
+
+            background:
+                rgba(255,255,255,0.07);
+
+        }
+
+
+        header::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 170px;
+            height: 170px;
+
+            border-radius: 50%;
+
+            right: 20%;
+
+            bottom: -120px;
+
+            background:
+                rgba(155,225,93,0.08);
+
+        }
+
+
+        .header-content {
+
+            position: relative;
+
+            z-index: 2;
+
+            max-width: 1350px;
+
+            margin: auto;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 25px;
+
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 16px;
+
+        }
+
+
+        .brand-icon {
+
+            width: 56px;
+            height: 56px;
+
+            border-radius: 17px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                rgba(255,255,255,0.12);
+
+            border:
+                1px solid rgba(255,255,255,0.15);
+
+            backdrop-filter: blur(10px);
+
+            font-size: 25px;
+
+            box-shadow:
+                inset 0 1px rgba(255,255,255,0.15);
+
+            animation:
+                iconPulse 3s ease-in-out infinite;
+
+        }
+
+
+        @keyframes iconPulse {
+
+            0%,
+            100% {
+
+                transform: scale(1);
+
+            }
+
+            50% {
+
+                transform: scale(1.05);
+
+            }
+
+        }
+
+
+        .brand-text h1 {
+
+            font-size: clamp(
+                20px,
+                3vw,
+                28px
+            );
+
+            font-weight: 800;
+
+            letter-spacing: -0.5px;
+
+        }
+
+
+        .brand-text p {
+
+            margin-top: 5px;
+
+            color: #b9d7ca;
+
+            font-size: 13px;
+
+        }
+
+
+        .header-badge {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            padding: 11px 17px;
+
+            border-radius: 30px;
+
+            background:
+                rgba(255,255,255,0.10);
+
+            border:
+                1px solid rgba(255,255,255,0.12);
+
+            backdrop-filter: blur(10px);
+
+            font-size: 12px;
+
             font-weight: 700;
+
         }
 
-        header p {
-            margin-top: 6px;
-            color: #cbded3;
-            font-size: 14px;
+
+        .header-badge-dot {
+
+            width: 9px;
+            height: 9px;
+
+            border-radius: 50%;
+
+            background: #55e6a3;
+
+            box-shadow:
+                0 0 0 5px rgba(85,230,163,0.12),
+                0 0 15px rgba(85,230,163,0.7);
+
+            animation:
+                onlinePulse 2s infinite;
+
+        }
+
+
+        @keyframes onlinePulse {
+
+            0% {
+
+                box-shadow:
+                    0 0 0 0 rgba(85,230,163,0.4);
+
+            }
+
+            70% {
+
+                box-shadow:
+                    0 0 0 8px rgba(85,230,163,0);
+
+            }
+
+            100% {
+
+                box-shadow:
+                    0 0 0 0 rgba(85,230,163,0);
+
+            }
+
         }
 
 
         /* =====================================================
            NAVIGATION
-        ===================================================== */
+        ====================================================== */
 
         nav {
-            background: white;
-            padding: 15px 40px;
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            flex-wrap: wrap;
+
+            position: sticky;
+
+            top: 0;
+
+            z-index: 100;
+
+            background:
+                rgba(255,255,255,0.92);
+
+            backdrop-filter: blur(18px);
+
+            border-bottom:
+                1px solid var(--border);
+
+            padding:
+                12px 6%;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,0.05);
+
         }
+
+
+        .nav-inner {
+
+            max-width: 1350px;
+
+            margin: auto;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            overflow-x: auto;
+
+            scrollbar-width: none;
+
+        }
+
+
+        .nav-inner::-webkit-scrollbar {
+
+            display: none;
+
+        }
+
 
         nav a {
+
+            position: relative;
+
             text-decoration: none;
-            color: #374151;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.2s ease;
+
+            color: #607068;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            padding:
+                11px 15px;
+
+            border-radius: 11px;
+
+            white-space: nowrap;
+
+            transition:
+                0.25s ease;
+
         }
+
+
+        nav a i {
+
+            margin-right: 7px;
+
+        }
+
 
         nav a:hover {
-            color: #2f7d57;
+
+            color: var(--green-700);
+
+            background:
+                #edf7f1;
+
+            transform:
+                translateY(-1px);
+
         }
 
+
         nav a.active {
-            color: #23613e;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--green-800),
+                    var(--green-600)
+                );
+
+            box-shadow:
+                0 7px 18px rgba(18,99,68,0.22);
+
         }
 
 
         /* =====================================================
            MAIN
-        ===================================================== */
+        ====================================================== */
 
         main {
-            max-width: 1200px;
+
+            max-width: 1350px;
+
             margin: auto;
-            padding: 35px 40px 50px;
+
+            padding:
+                38px 6% 60px;
+
         }
 
 
         /* =====================================================
-           PAGE TITLE
-        ===================================================== */
+           PAGE HERO
+        ====================================================== */
 
-        .page-title {
+        .page-hero {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-end;
+
+            gap: 25px;
+
             margin-bottom: 28px;
+
+            animation:
+                fadeUp 0.7s ease both;
+
         }
 
-        .page-title h2 {
-            color: #12372a;
-            font-size: 26px;
+
+        .hero-title {
+
+            display: flex;
+
+            gap: 14px;
+
+            align-items: flex-start;
+
         }
 
-        .page-title p {
-            color: #6b7280;
-            margin-top: 7px;
-            font-size: 14px;
+
+        .hero-icon {
+
+            width: 50px;
+            height: 50px;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #dff6e9,
+                    #c8edd9
+                );
+
+            color: var(--green-700);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 21px;
+
+            box-shadow:
+                inset 0 1px white;
+
+        }
+
+
+        .page-hero h2 {
+
+            font-size:
+                clamp(26px, 4vw, 34px);
+
+            color: var(--green-950);
+
+            letter-spacing: -1px;
+
+        }
+
+
+        .page-hero p {
+
+            color: var(--muted);
+
+            margin-top: 6px;
+
+            font-size: 13px;
+
+            line-height: 1.6;
+
+        }
+
+
+        .last-update {
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            padding: 9px 13px;
+
+            border-radius: 10px;
+
         }
 
 
         /* =====================================================
-           SYSTEM STATUS
-        ===================================================== */
+           OVERVIEW CARD
+        ====================================================== */
 
         .system-overview {
-            background: white;
-            border-radius: 15px;
-            padding: 22px 25px;
+
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns:
+                1fr auto;
+
+            align-items: center;
+
+            gap: 25px;
+
+            padding: 25px 28px;
+
             margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255,255,255,0.96),
+                    rgba(245,251,248,0.92)
+                );
+
+            border:
+                1px solid rgba(18,99,68,0.08);
+
+            box-shadow:
+                var(--shadow);
+
+            overflow: hidden;
+
+            animation:
+                fadeUp 0.7s 0.1s ease both;
+
+        }
+
+
+        .system-overview::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            right: -70px;
+            top: -70px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(34,160,107,0.07);
+
+        }
+
+
+        .overview-left {
 
             display: flex;
-            justify-content: space-between;
+
+            gap: 16px;
+
             align-items: center;
-            gap: 20px;
+
+            position: relative;
+
+            z-index: 2;
+
         }
+
+
+        .overview-icon {
+
+            width: 52px;
+            height: 52px;
+
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #dff8e9,
+                    #bfead2
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: var(--green-700);
+
+            font-size: 22px;
+
+        }
+
 
         .overview-text h3 {
-            color: #12372a;
-            margin-bottom: 6px;
-            font-size: 18px;
+
+            font-size: 17px;
+
+            color: var(--green-950);
+
         }
+
 
         .overview-text p {
-            color: #6b7280;
-            font-size: 13px;
+
+            margin-top: 5px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+
         }
 
-        .online-indicator {
+
+        .system-status {
+
+            position: relative;
+
+            z-index: 2;
+
             display: flex;
+
             align-items: center;
-            gap: 9px;
 
-            padding: 9px 15px;
+            gap: 10px;
 
-            background: #dcfce7;
-            color: #166534;
+            padding: 12px 17px;
 
-            border-radius: 20px;
+            border-radius: 30px;
 
-            font-size: 13px;
-            font-weight: bold;
+            background:
+                #e6f9ee;
 
-            white-space: nowrap;
+            color:
+                #14733f;
+
+            font-size: 12px;
+
+            font-weight: 800;
+
         }
 
-        .online-dot {
+
+        .system-status-dot {
+
             width: 9px;
             height: 9px;
+
+            background: #19a65b;
+
             border-radius: 50%;
-            background: #16a34a;
+
+            box-shadow:
+                0 0 12px rgba(25,166,91,0.6);
+
+            animation:
+                onlinePulse 2s infinite;
+
+        }
+
+
+        /* =====================================================
+           STATUS MINI CARDS
+        ====================================================== */
+
+        .status-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 28px;
+
+        }
+
+
+        .status-card {
+
+            position: relative;
+
+            background:
+                rgba(255,255,255,0.88);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 19px;
+
+            padding: 20px;
+
+            box-shadow:
+                var(--shadow);
+
+            overflow: hidden;
+
+            transition:
+                0.3s ease;
+
+            animation:
+                fadeUp 0.7s ease both;
+
+        }
+
+
+        .status-card:nth-child(1) {
+            animation-delay: 0.15s;
+        }
+
+        .status-card:nth-child(2) {
+            animation-delay: 0.20s;
+        }
+
+        .status-card:nth-child(3) {
+            animation-delay: 0.25s;
+        }
+
+        .status-card:nth-child(4) {
+            animation-delay: 0.30s;
+        }
+
+
+        .status-card:hover {
+
+            transform:
+                translateY(-7px);
+
+            box-shadow:
+                var(--shadow-hover);
+
+        }
+
+
+        .status-card::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 100px;
+            height: 100px;
+
+            border-radius: 50%;
+
+            right: -50px;
+            top: -50px;
+
+            background:
+                rgba(34,160,107,0.07);
+
+        }
+
+
+        .status-card-top {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+
+        .status-card-icon {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                #edf8f2;
+
+            color:
+                var(--green-700);
+
+        }
+
+
+        .status-live {
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #18a957;
+
+            box-shadow:
+                0 0 10px rgba(24,169,87,0.7);
+
+        }
+
+
+        .status-card h4 {
+
+            margin-top: 15px;
+
+            font-size: 12px;
+
+            color: var(--muted);
+
+            font-weight: 600;
+
+        }
+
+
+        .status-value {
+
+            margin-top: 5px;
+
+            font-size: 17px;
+
+            font-weight: 800;
+
+            color: var(--green-950);
+
+        }
+
+
+        .status-description {
+
+            margin-top: 5px;
+
+            font-size: 10px;
+
+            color: var(--muted);
+
         }
 
 
         /* =====================================================
            SETTINGS GRID
-        ===================================================== */
+        ====================================================== */
 
         .settings-grid {
+
             display: grid;
-            grid-template-columns: 1fr 1fr;
+
+            grid-template-columns:
+                1fr 1fr;
+
             gap: 25px;
+
         }
 
 
         /* =====================================================
            CARD
-        ===================================================== */
+        ====================================================== */
 
         .card {
-            background: white;
+
+            position: relative;
+
+            background:
+                rgba(255,255,255,0.92);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 22px;
+
             padding: 28px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+
+            box-shadow:
+                var(--shadow);
+
+            overflow: hidden;
+
+            animation:
+                fadeUp 0.8s 0.2s ease both;
+
+            transition:
+                0.3s ease;
+
         }
 
-        .card h3 {
-            color: #12372a;
-            margin-bottom: 22px;
-            font-size: 19px;
+
+        .card:hover {
+
+            box-shadow:
+                var(--shadow-hover);
+
+        }
+
+
+        .card::before {
+
+            content: "";
+
+            position: absolute;
+
+            left: 0;
+            top: 0;
+
+            width: 100%;
+            height: 3px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--green-700),
+                    var(--green-400),
+                    var(--lime)
+                );
+
+        }
+
+
+        .card-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 13px;
+
+            margin-bottom: 23px;
+
+        }
+
+
+        .card-header-icon {
+
+            width: 46px;
+            height: 46px;
+
+            border-radius: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e5f7ed,
+                    #d5f1e1
+                );
+
+            color:
+                var(--green-700);
+
+            font-size: 18px;
+
+        }
+
+
+        .card-header h3 {
+
+            color:
+                var(--green-950);
+
+            font-size: 18px;
+
+        }
+
+
+        .card-header p {
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            margin-top: 4px;
+
         }
 
 
         /* =====================================================
            SETTING ROW
-        ===================================================== */
+        ====================================================== */
 
         .setting-row {
-            padding: 17px 0;
-            border-bottom: 1px solid #eeeeee;
+
+            padding: 18px 0;
+
+            border-bottom:
+                1px solid #edf1ef;
+
         }
 
-        .setting-row:first-of-type {
-            padding-top: 0;
-        }
 
         .setting-row:last-child {
+
             border-bottom: none;
+
             padding-bottom: 0;
+
         }
 
-        .setting-row label {
-            display: block;
-            font-weight: bold;
-            color: #1f2937;
-            margin-bottom: 7px;
-            font-size: 14px;
+
+        .setting-title {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
         }
+
+
+        .setting-title label {
+
+            color:
+                #25342d;
+
+            font-weight: 700;
+
+            font-size: 13px;
+
+        }
+
 
         .setting-row p {
-            color: #6b7280;
-            font-size: 13px;
-            line-height: 1.5;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            line-height: 1.55;
+
+            margin-top: 5px;
+
         }
 
 
         /* =====================================================
-           INPUTS
-        ===================================================== */
+           MODERN INPUT
+        ====================================================== */
 
-        .setting-row input,
-        .setting-row select {
+        .modern-input {
 
             width: 100%;
 
-            margin-top: 10px;
+            margin-top: 11px;
 
-            padding: 11px 12px;
+            padding: 13px 14px;
 
-            border: 1px solid #d1d5db;
+            border:
+                1px solid #dce6e0;
 
-            border-radius: 8px;
+            border-radius: 11px;
 
-            font-size: 14px;
+            background:
+                #f7faf8;
 
-            background: #f9fafb;
+            color:
+                #385046;
 
-            color: #374151;
+            font-size: 12px;
+
+            font-weight: 600;
 
             outline: none;
+
+            transition:
+                0.25s ease;
+
         }
 
-        .setting-row input:focus,
-        .setting-row select:focus {
-            border-color: #23613e;
-        }
 
-        .setting-row input[readonly] {
-            cursor: default;
+        .modern-input:focus {
+
+            border-color:
+                var(--green-500);
+
+            box-shadow:
+                0 0 0 4px rgba(34,160,107,0.08);
+
         }
 
 
         /* =====================================================
-           STATUS BADGES
-        ===================================================== */
+           STATUS BADGE
+        ====================================================== */
 
         .status {
+
             display: inline-flex;
 
             align-items: center;
 
-            gap: 7px;
+            gap: 8px;
 
-            margin-top: 10px;
+            margin-top: 11px;
 
-            padding: 7px 12px;
+            padding:
+                8px 12px;
 
-            border-radius: 20px;
+            border-radius: 30px;
 
-            background: #dcfce7;
+            background:
+                #e6f9ee;
 
-            color: #166534;
+            color:
+                #14733f;
 
-            font-size: 12px;
+            font-size: 10px;
 
-            font-weight: bold;
+            font-weight: 800;
+
+            letter-spacing:
+                0.4px;
+
         }
+
 
         .status-dot {
+
             width: 7px;
             height: 7px;
+
             border-radius: 50%;
-            background: currentColor;
+
+            background:
+                currentColor;
+
         }
+
 
         .status.offline {
-            background: #fee2e2;
-            color: #991b1b;
+
+            background:
+                #fff0f0;
+
+            color:
+                #b33a3a;
+
         }
 
+
         .status.warning {
-            background: #fff7ed;
-            color: #9a3412;
+
+            background:
+                #fff7e8;
+
+            color:
+                #a96505;
+
         }
 
 
         /* =====================================================
-           MODEL INFORMATION
-        ===================================================== */
+           AI MODEL VISUAL
+        ====================================================== */
 
-        .model-info {
-            margin-top: 10px;
-            padding: 13px;
+        .model-panel {
 
-            background: #f0fdf4;
+            margin-top: 15px;
 
-            border: 1px solid #dcfce7;
+            padding: 17px;
+
+            border-radius: 15px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #effaf4,
+                    #e8f7ef
+                );
+
+            border:
+                1px solid #d9eee2;
+
+        }
+
+
+        .model-top {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .model-name {
+
+            font-size: 12px;
+
+            font-weight: 800;
+
+            color:
+                var(--green-900);
+
+        }
+
+
+        .model-ready {
+
+            font-size: 9px;
+
+            padding:
+                5px 8px;
+
+            border-radius: 20px;
+
+            background:
+                #d8f4e4;
+
+            color:
+                #16733f;
+
+            font-weight: 800;
+
+        }
+
+
+        .model-progress {
+
+            height: 7px;
+
+            border-radius: 10px;
+
+            background:
+                #d8e9df;
+
+            overflow: hidden;
+
+        }
+
+
+        .model-progress span {
+
+            display: block;
+
+            width: 100%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--green-600),
+                    var(--green-400),
+                    var(--lime)
+                );
+
+            animation:
+                progressLoad 1.5s ease;
+
+        }
+
+
+        @keyframes progressLoad {
+
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+
+        }
+
+
+        .model-details {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3,1fr);
+
+            gap: 8px;
+
+            margin-top: 13px;
+
+        }
+
+
+        .model-detail {
+
+            padding: 9px;
+
+            background:
+                rgba(255,255,255,0.65);
 
             border-radius: 9px;
 
-            color: #166534;
+        }
+
+
+        .model-detail span {
+
+            display: block;
+
+            font-size: 8px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        .model-detail strong {
+
+            display: block;
+
+            margin-top: 3px;
+
+            font-size: 10px;
+
+            color:
+                var(--green-900);
+
+        }
+
+
+        /* =====================================================
+           RANGE VISUAL
+        ====================================================== */
+
+        .confidence-box {
+
+            margin-top: 12px;
+
+            padding: 15px;
+
+            border-radius: 13px;
+
+            background:
+                #f7faf8;
+
+            border:
+                1px solid #e2ebe6;
+
+        }
+
+
+        .confidence-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 9px;
+
+        }
+
+
+        .confidence-header span {
+
+            font-size: 10px;
+
+            color:
+                var(--muted);
+
+        }
+
+
+        .confidence-value {
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            color:
+                var(--green-700);
+
+        }
+
+
+        .confidence-track {
+
+            height: 7px;
+
+            background:
+                #dce9e1;
+
+            border-radius: 20px;
+
+            overflow: hidden;
+
+        }
+
+
+        .confidence-fill {
+
+            height: 100%;
+
+            width: 60%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #e7b84b,
+                    #45bd79
+                );
+
+            transition:
+                width 0.8s ease;
+
+        }
+
+
+        /* =====================================================
+           INFO GRID
+        ====================================================== */
+
+        .system-info {
+
+            margin-top: 25px;
+
+            background:
+                rgba(255,255,255,0.92);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 22px;
+
+            padding: 28px;
+
+            box-shadow:
+                var(--shadow);
+
+            animation:
+                fadeUp 0.8s 0.35s ease both;
+
+        }
+
+
+        .system-info-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .system-info-header-icon {
+
+            width: 43px;
+            height: 43px;
+
+            border-radius: 13px;
+
+            background:
+                #eaf7ef;
+
+            color:
+                var(--green-700);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        .system-info h3 {
+
+            color:
+                var(--green-950);
+
+            font-size: 18px;
+
+        }
+
+
+        .system-info-header p {
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            margin-top: 3px;
+
+        }
+
+
+        .info-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3,1fr);
+
+            gap: 13px;
+
+        }
+
+
+        .info-item {
+
+            position: relative;
+
+            padding: 17px;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f7faf8,
+                    #f1f7f4
+                );
+
+            border:
+                1px solid #e5ece8;
+
+            transition:
+                0.25s ease;
+
+            overflow: hidden;
+
+        }
+
+
+        .info-item:hover {
+
+            transform:
+                translateY(-4px);
+
+            border-color:
+                #cde5d7;
+
+        }
+
+
+        .info-item i {
+
+            color:
+                var(--green-500);
 
             font-size: 13px;
 
-            line-height: 1.5;
+            margin-bottom: 9px;
+
+        }
+
+
+        .info-item span {
+
+            display: block;
+
+            color:
+                var(--muted);
+
+            font-size: 9px;
+
+        }
+
+
+        .info-item strong {
+
+            display: block;
+
+            margin-top: 5px;
+
+            color:
+                var(--green-950);
+
+            font-size: 12px;
+
         }
 
 
         /* =====================================================
            NOTICE
-        ===================================================== */
+        ====================================================== */
 
         .notice {
+
+            position: relative;
+
             margin-top: 25px;
 
-            padding: 18px 20px;
+            padding: 20px 22px;
 
-            background: #fff7ed;
+            border-radius: 17px;
 
-            border-left: 4px solid #f97316;
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff9ed,
+                    #fff5e1
+                );
 
-            border-radius: 8px;
+            border:
+                1px solid #f6e4bd;
 
-            color: #7c2d12;
+            color:
+                #755521;
 
-            line-height: 1.6;
+            font-size: 11px;
 
-            font-size: 13px;
+            line-height: 1.7;
+
+            overflow: hidden;
+
+            animation:
+                fadeUp 0.8s 0.4s ease both;
+
         }
 
+
+        .notice::before {
+
+            content: "⚡";
+
+            position: absolute;
+
+            right: 25px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            font-size: 35px;
+
+            opacity: 0.08;
+
+        }
+
+
         .notice strong {
-            color: #9a3412;
+
+            color:
+                #9a680d;
+
         }
 
 
         /* =====================================================
-           FOOTER INFORMATION
-        ===================================================== */
+           FOOTER
+        ====================================================== */
 
-        .system-info {
-            margin-top: 25px;
+        footer {
 
-            background: white;
+            text-align: center;
 
-            border-radius: 15px;
+            padding:
+                5px 20px 35px;
 
-            padding: 22px 25px;
+            color:
+                #8b9892;
 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            font-size: 10px;
+
         }
 
-        .system-info h3 {
-            color: #12372a;
-            margin-bottom: 15px;
-            font-size: 18px;
+
+        footer span {
+
+            color:
+                var(--green-600);
+
+            font-weight: 700;
+
         }
 
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
 
-        .info-item {
-            background: #f8faf9;
-            padding: 14px;
-            border-radius: 9px;
-        }
+        /* =====================================================
+           ANIMATION
+        ====================================================== */
 
-        .info-item span {
-            display: block;
-            color: #6b7280;
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
+        @keyframes fadeUp {
 
-        .info-item strong {
-            color: #12372a;
-            font-size: 14px;
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(18px);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+
+            }
+
         }
 
 
         /* =====================================================
            RESPONSIVE
-        ===================================================== */
+        ====================================================== */
 
-        @media(max-width: 900px) {
+        @media(max-width:1050px) {
 
-            .settings-grid {
-                grid-template-columns: 1fr;
+            .status-grid {
+
+                grid-template-columns:
+                    repeat(2,1fr);
+
             }
 
             .info-grid {
-                grid-template-columns: 1fr 1fr;
+
+                grid-template-columns:
+                    repeat(2,1fr);
+
             }
 
         }
 
 
-        @media(max-width: 600px) {
+        @media(max-width:850px) {
 
-            header {
-                padding: 20px;
+            .settings-grid {
+
+                grid-template-columns:
+                    1fr;
+
             }
 
-            header h1 {
-                font-size: 22px;
+            .page-hero {
+
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+
+            }
+
+        }
+
+
+        @media(max-width:650px) {
+
+            header {
+
+                padding:
+                    22px 20px 25px;
+
+            }
+
+            .header-content {
+
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+
+            }
+
+            .header-badge {
+
+                align-self:
+                    flex-start;
+
             }
 
             nav {
-                padding: 15px 20px;
-                gap: 18px;
+
+                padding:
+                    10px 15px;
+
             }
 
             main {
-                padding: 25px 20px 40px;
+
+                padding:
+                    25px 15px 45px;
+
             }
 
             .system-overview {
-                flex-direction: column;
-                align-items: flex-start;
+
+                grid-template-columns:
+                    1fr;
+
+                padding:
+                    20px;
+
+            }
+
+            .status-grid {
+
+                grid-template-columns:
+                    1fr 1fr;
+
+                gap: 11px;
+
+            }
+
+            .status-card {
+
+                padding:
+                    15px;
+
             }
 
             .card {
-                padding: 22px;
+
+                padding:
+                    21px;
+
             }
 
             .info-grid {
-                grid-template-columns: 1fr;
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+            .model-details {
+
+                grid-template-columns:
+                    1fr 1fr 1fr;
+
+            }
+
+        }
+
+
+        @media(max-width:430px) {
+
+            .status-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+            .hero-title {
+
+                gap: 10px;
+
+            }
+
+            .hero-icon {
+
+                width: 43px;
+                height: 43px;
+
+            }
+
+            .page-hero h2 {
+
+                font-size: 26px;
+
             }
 
         }
@@ -465,113 +2087,323 @@
 <body>
 
 
+<div class="background-glow glow-one"></div>
+
+<div class="background-glow glow-two"></div>
+
+
 <!-- =====================================================
      HEADER
-===================================================== -->
+====================================================== -->
 
 <header>
 
-    <h1>
-        🌱 Precision Agriculture Smart Rover
-    </h1>
+    <div class="header-content">
 
-    <p>
-        System Settings
-    </p>
+        <div class="brand">
+
+            <div class="brand-icon">
+
+                🌱
+
+            </div>
+
+            <div class="brand-text">
+
+                <h1>
+                    Precision Agriculture Smart Rover
+                </h1>
+
+                <p>
+                    Intelligent crop monitoring & autonomous agriculture
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="header-badge">
+
+            <span class="header-badge-dot"></span>
+
+            SMART SYSTEM ONLINE
+
+        </div>
+
+    </div>
 
 </header>
 
 
 <!-- =====================================================
      NAVIGATION
-===================================================== -->
+====================================================== -->
 
 <nav>
 
-    <a href="/">
-        Dashboard
-    </a>
+    <div class="nav-inner">
 
-    <a href="/rover">
-        Rover Control
-    </a>
+        <a href="/">
+            <i class="fa-solid fa-chart-line"></i>
+            Dashboard
+        </a>
 
-    <a href="/dataset">
-        Dataset
-    </a>
+        <a href="/rover">
+            <i class="fa-solid fa-robot"></i>
+            Rover Control
+        </a>
 
-    <a href="/analytics">
-        Analytics
-    </a>
+        <a href="/dataset">
+            <i class="fa-solid fa-database"></i>
+            Dataset
+        </a>
 
-    <a href="/settings" class="active">
-        Settings
-    </a>
+        <a href="/analytics">
+            <i class="fa-solid fa-chart-pie"></i>
+            Analytics
+        </a>
+
+        <a href="/settings"
+           class="active">
+
+            <i class="fa-solid fa-sliders"></i>
+            Settings
+
+        </a>
+
+    </div>
 
 </nav>
 
 
 <!-- =====================================================
      MAIN
-===================================================== -->
+====================================================== -->
 
 <main>
 
 
     <!-- =================================================
-         PAGE TITLE
+         PAGE HERO
     ================================================== -->
 
-    <div class="page-title">
+    <section class="page-hero">
 
-        <h2>
-            Settings
-        </h2>
+        <div class="hero-title">
 
-        <p>
-            Configure and monitor the Precision Agriculture
-            Smart Rover system
-        </p>
+            <div class="hero-icon">
 
-    </div>
+                <i class="fa-solid fa-gear"></i>
+
+            </div>
+
+            <div>
+
+                <h2>
+                    System Settings
+                </h2>
+
+                <p>
+                    Configure, monitor and manage your
+                    intelligent agriculture rover platform.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="last-update">
+
+            <i class="fa-regular fa-clock"></i>
+
+            Last checked:
+            <span id="lastUpdate">
+                Just now
+            </span>
+
+        </div>
+
+    </section>
 
 
     <!-- =================================================
          SYSTEM OVERVIEW
     ================================================== -->
 
-    <div class="system-overview">
+    <section class="system-overview">
 
-        <div class="overview-text">
+        <div class="overview-left">
 
-            <h3>
-                System Overview
-            </h3>
+            <div class="overview-icon">
 
-            <p>
-                AI detection and local website services
-                are currently available.
-            </p>
+                <i class="fa-solid fa-shield-halved"></i>
+
+            </div>
+
+            <div class="overview-text">
+
+                <h3>
+                    System Overview
+                </h3>
+
+                <p>
+                    AI detection, web services and system
+                    monitoring are available.
+                </p>
+
+            </div>
 
         </div>
 
 
-        <div class="online-indicator">
+        <div class="system-status">
 
-            <span class="online-dot"></span>
+            <span class="system-status-dot"></span>
 
-            SYSTEM ONLINE
+            ALL CORE SERVICES AVAILABLE
 
         </div>
 
-    </div>
+    </section>
+
+
+    <!-- =================================================
+         QUICK STATUS
+    ================================================== -->
+
+    <section class="status-grid">
+
+
+        <div class="status-card">
+
+            <div class="status-card-top">
+
+                <div class="status-card-icon">
+
+                    <i class="fa-solid fa-brain"></i>
+
+                </div>
+
+                <span class="status-live"></span>
+
+            </div>
+
+            <h4>
+                AI ENGINE
+            </h4>
+
+            <div class="status-value">
+                READY
+            </div>
+
+            <div class="status-description">
+                Disease classification model
+            </div>
+
+        </div>
+
+
+        <div class="status-card">
+
+            <div class="status-card-top">
+
+                <div class="status-card-icon">
+
+                    <i class="fa-solid fa-server"></i>
+
+                </div>
+
+                <span class="status-live"></span>
+
+            </div>
+
+            <h4>
+                FLASK SERVER
+            </h4>
+
+            <div class="status-value">
+                RUNNING
+            </div>
+
+            <div class="status-description">
+                Local web application
+            </div>
+
+        </div>
+
+
+        <div class="status-card">
+
+            <div class="status-card-top">
+
+                <div class="status-card-icon">
+
+                    <i class="fa-solid fa-database"></i>
+
+                </div>
+
+                <span class="status-live"></span>
+
+            </div>
+
+            <h4>
+                DATA STORAGE
+            </h4>
+
+            <div class="status-value">
+                ACTIVE
+            </div>
+
+            <div class="status-description">
+                Prediction records available
+            </div>
+
+        </div>
+
+
+        <div class="status-card">
+
+            <div class="status-card-top">
+
+                <div class="status-card-icon">
+
+                    <i class="fa-solid fa-wifi"></i>
+
+                </div>
+
+                <span id="roverLive"
+                      class="status-live"></span>
+
+            </div>
+
+            <h4>
+                SMART ROVER
+            </h4>
+
+            <div id="roverStatusValue"
+                 class="status-value">
+
+                CHECKING
+
+            </div>
+
+            <div class="status-description">
+                Raspberry Pi connection
+            </div>
+
+        </div>
+
+
+    </section>
 
 
     <!-- =================================================
          SETTINGS GRID
-    ================================================= -->
+    ================================================== -->
 
-    <div class="settings-grid">
+    <section class="settings-grid">
 
 
         <!-- =============================================
@@ -580,18 +2412,45 @@
 
         <div class="card">
 
-            <h3>
-                🤖 AI Detection
-            </h3>
+
+            <div class="card-header">
+
+                <div class="card-header-icon">
+
+                    <i class="fa-solid fa-brain"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        AI Detection
+                    </h3>
+
+                    <p>
+                        Artificial intelligence configuration
+                    </p>
+
+                </div>
+
+            </div>
 
 
             <!-- MODEL -->
 
             <div class="setting-row">
 
-                <label>
-                    AI Model
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        AI Model
+                    </label>
+
+                    <i class="fa-solid fa-microchip"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
                     Currently loaded model used for
@@ -599,10 +2458,78 @@
                 </p>
 
                 <input
+                    class="modern-input"
                     type="text"
                     value="chili_disease_model.keras"
                     readonly
                 >
+
+
+                <div class="model-panel">
+
+                    <div class="model-top">
+
+                        <span class="model-name">
+                            Model Runtime
+                        </span>
+
+                        <span class="model-ready">
+                            READY
+                        </span>
+
+                    </div>
+
+
+                    <div class="model-progress">
+
+                        <span></span>
+
+                    </div>
+
+
+                    <div class="model-details">
+
+                        <div class="model-detail">
+
+                            <span>
+                                Framework
+                            </span>
+
+                            <strong>
+                                Keras
+                            </strong>
+
+                        </div>
+
+
+                        <div class="model-detail">
+
+                            <span>
+                                Input
+                            </span>
+
+                            <strong>
+                                224×224
+                            </strong>
+
+                        </div>
+
+
+                        <div class="model-detail">
+
+                            <span>
+                                Task
+                            </span>
+
+                            <strong>
+                                Classification
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -611,16 +2538,25 @@
 
             <div class="setting-row">
 
-                <label>
-                    Image Size
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Image Size
+                    </label>
+
+                    <i class="fa-solid fa-image"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
-                    Input image dimensions expected
-                    by the AI model.
+                    Input image dimensions expected by
+                    the AI model.
                 </p>
 
                 <input
+                    class="modern-input"
                     type="text"
                     value="224 × 224 pixels"
                     readonly
@@ -633,20 +2569,52 @@
 
             <div class="setting-row">
 
-                <label>
-                    Confidence Threshold
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Confidence Threshold
+                    </label>
+
+                    <span id="confidenceValue"
+                          class="confidence-value">
+
+                        60%
+
+                    </span>
+
+                </div>
 
                 <p>
                     Minimum confidence required for
                     a valid AI prediction.
                 </p>
 
-                <input
-                    type="text"
-                    value="60%"
-                    readonly
-                >
+
+                <div class="confidence-box">
+
+                    <div class="confidence-header">
+
+                        <span>
+                            Prediction acceptance level
+                        </span>
+
+                        <span id="confidenceSmall">
+                            60%
+                        </span>
+
+                    </div>
+
+
+                    <div class="confidence-track">
+
+                        <div id="confidenceFill"
+                             class="confidence-fill">
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -655,9 +2623,13 @@
 
             <div class="setting-row">
 
-                <label>
-                    AI Model Status
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        AI Model Status
+                    </label>
+
+                </div>
 
                 <span class="status">
 
@@ -666,22 +2638,6 @@
                     ONLINE
 
                 </span>
-
-            </div>
-
-
-            <!-- MODEL INFORMATION -->
-
-            <div class="model-info">
-
-                <strong>
-                    Model Ready
-                </strong>
-
-                <br>
-
-                The AI model is configured for
-                chili leaf disease classification.
 
             </div>
 
@@ -694,18 +2650,45 @@
 
         <div class="card">
 
-            <h3>
-                ⚙️ System
-            </h3>
+
+            <div class="card-header">
+
+                <div class="card-header-icon">
+
+                    <i class="fa-solid fa-gears"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        System
+                    </h3>
+
+                    <p>
+                        Services, rover and IoT connectivity
+                    </p>
+
+                </div>
+
+            </div>
 
 
             <!-- SERVER -->
 
             <div class="setting-row">
 
-                <label>
-                    Website Server
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Website Server
+                    </label>
+
+                    <i class="fa-solid fa-globe"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
                     Current Flask application server status.
@@ -726,16 +2709,25 @@
 
             <div class="setting-row">
 
-                <label>
-                    Database
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Database
+                    </label>
+
+                    <i class="fa-solid fa-hard-drive"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
-                    Local database used to store
+                    Local storage used to maintain
                     prediction history.
                 </p>
 
                 <input
+                    class="modern-input"
                     type="text"
                     value="rover.db"
                     readonly
@@ -748,20 +2740,29 @@
 
             <div class="setting-row">
 
-                <label>
-                    Rover Connection
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Rover Connection
+                    </label>
+
+                    <i class="fa-solid fa-robot"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
-                    Connection status of the physical
+                    Live connection status of the physical
                     smart rover.
                 </p>
 
-                <span class="status offline">
+                <span id="roverConnectionBadge"
+                      class="status offline">
 
                     <span class="status-dot"></span>
 
-                    NOT CONNECTED
+                    CHECKING...
 
                 </span>
 
@@ -772,46 +2773,76 @@
 
             <div class="setting-row">
 
-                <label>
-                    Blynk IoT Connection
-                </label>
+                <div class="setting-title">
+
+                    <label>
+                        Blynk IoT Connection
+                    </label>
+
+                    <i class="fa-solid fa-cloud"
+                       style="color:#22a06b;">
+                    </i>
+
+                </div>
 
                 <p>
-                    Connection status of the Blynk
-                    IoT control system.
+                    Connection status of the Blynk IoT
+                    control system.
                 </p>
 
-                <span class="status offline">
+                <span class="status warning">
 
                     <span class="status-dot"></span>
 
-                    NOT CONNECTED
+                    PHASE 2
 
                 </span>
 
             </div>
 
+
         </div>
 
 
-    </div>
+    </section>
 
 
     <!-- =================================================
          SYSTEM INFORMATION
     ================================================== -->
 
-    <div class="system-info">
+    <section class="system-info">
 
-        <h3>
-            📋 System Information
-        </h3>
+
+        <div class="system-info-header">
+
+            <div class="system-info-header-icon">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    System Information
+                </h3>
+
+                <p>
+                    Current platform configuration
+                </p>
+
+            </div>
+
+        </div>
 
 
         <div class="info-grid">
 
 
             <div class="info-item">
+
+                <i class="fa-solid fa-leaf"></i>
 
                 <span>
                     Application
@@ -826,6 +2857,8 @@
 
             <div class="info-item">
 
+                <i class="fa-solid fa-seedling"></i>
+
                 <span>
                     Detection Type
                 </span>
@@ -838,6 +2871,8 @@
 
 
             <div class="info-item">
+
+                <i class="fa-solid fa-layer-group"></i>
 
                 <span>
                     Detection Classes
@@ -852,6 +2887,8 @@
 
             <div class="info-item">
 
+                <i class="fa-solid fa-database"></i>
+
                 <span>
                     Database
                 </span>
@@ -864,6 +2901,8 @@
 
 
             <div class="info-item">
+
+                <i class="fa-solid fa-code"></i>
 
                 <span>
                     Web Framework
@@ -878,6 +2917,8 @@
 
             <div class="info-item">
 
+                <i class="fa-solid fa-rocket"></i>
+
                 <span>
                     Current Phase
                 </span>
@@ -891,7 +2932,7 @@
 
         </div>
 
-    </div>
+    </section>
 
 
     <!-- =================================================
@@ -901,6 +2942,7 @@
     <div class="notice">
 
         <strong>
+            <i class="fa-solid fa-flask"></i>
             Phase 1:
         </strong>
 
@@ -911,6 +2953,7 @@
         <br><br>
 
         <strong>
+            <i class="fa-solid fa-rocket"></i>
             Phase 2:
         </strong>
 
@@ -922,6 +2965,326 @@
 
 
 </main>
+
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
+<footer>
+
+    Precision Agriculture Smart Rover
+
+    <span>•</span>
+
+    Intelligent Farming Technology
+
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+
+    /* =====================================================
+       UPDATE TIME
+    ====================================================== */
+
+    function updateTime() {
+
+        const now = new Date();
+
+        const time =
+            now.toLocaleTimeString(
+                [],
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            );
+
+        document.getElementById(
+            "lastUpdate"
+        ).textContent = time;
+
+    }
+
+
+    /* =====================================================
+       LOAD SETTINGS
+    ====================================================== */
+
+    async function loadSettings() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/settings"
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Settings API unavailable"
+                );
+
+            }
+
+            const data =
+                await response.json();
+
+            if (
+                data.success &&
+                data.settings
+            ) {
+
+                const threshold =
+                    Number(
+                        data.settings
+                            .confidence_threshold
+                    );
+
+                if (
+                    !isNaN(threshold)
+                ) {
+
+                    updateConfidence(
+                        threshold
+                    );
+
+                }
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.log(
+                "Settings load error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CONFIDENCE DISPLAY
+    ====================================================== */
+
+    function updateConfidence(
+        value
+    ) {
+
+        const threshold =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    value
+                )
+            );
+
+
+        document.getElementById(
+            "confidenceValue"
+        ).textContent =
+            threshold + "%";
+
+
+        document.getElementById(
+            "confidenceSmall"
+        ).textContent =
+            threshold + "%";
+
+
+        document.getElementById(
+            "confidenceFill"
+        ).style.width =
+            threshold + "%";
+
+    }
+
+
+    /* =====================================================
+       ROVER STATUS
+    ====================================================== */
+
+    async function loadRoverStatus() {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/rover/status"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Rover API unavailable"
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                data.success &&
+                data.rover
+            ) {
+
+                updateRoverStatus(
+                    data.rover.connected
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            console.log(
+                "Rover status error:",
+                error
+            );
+
+            updateRoverStatus(
+                false
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       UPDATE ROVER UI
+    ====================================================== */
+
+    function updateRoverStatus(
+        connected
+    ) {
+
+        const badge =
+            document.getElementById(
+                "roverConnectionBadge"
+            );
+
+        const value =
+            document.getElementById(
+                "roverStatusValue"
+            );
+
+        const live =
+            document.getElementById(
+                "roverLive"
+            );
+
+
+        if (connected) {
+
+            badge.className =
+                "status";
+
+            badge.innerHTML =
+                `
+                    <span class="status-dot"></span>
+                    CONNECTED
+                `;
+
+
+            value.textContent =
+                "CONNECTED";
+
+
+            live.style.background =
+                "#18a957";
+
+            live.style.boxShadow =
+                "0 0 10px rgba(24,169,87,0.7)";
+
+        }
+
+        else {
+
+            badge.className =
+                "status offline";
+
+            badge.innerHTML =
+                `
+                    <span class="status-dot"></span>
+                    NOT CONNECTED
+                `;
+
+
+            value.textContent =
+                "OFFLINE";
+
+
+            live.style.background =
+                "#d34c4c";
+
+            live.style.boxShadow =
+                "0 0 10px rgba(211,76,76,0.5)";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       INITIAL LOAD
+    ====================================================== */
+
+    async function initializePage() {
+
+        updateTime();
+
+        await loadSettings();
+
+        await loadRoverStatus();
+
+    }
+
+
+    initializePage();
+
+
+    /* =====================================================
+       LIVE REFRESH
+    ====================================================== */
+
+    setInterval(
+        loadRoverStatus,
+        5000
+    );
+
+
+    setInterval(
+        loadSettings,
+        10000
+    );
+
+
+    setInterval(
+        updateTime,
+        1000
+    );
+
+
+</script>
 
 
 </body>

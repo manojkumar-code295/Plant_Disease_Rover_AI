@@ -16,1241 +16,692 @@
 
     <style>
 
-        /* =====================================================
-           RESET
-        ===================================================== */
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-
-        /* =====================================================
-           BODY
-        ===================================================== */
-
         body {
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #f4f7f5 0%,
-                    #eef5f0 100%
-                );
-
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f4f7f5 0%, #eef5f0 100%);
             color: #1f2937;
-
             min-height: 100vh;
         }
 
-
-        /* =====================================================
-           HEADER
-        ===================================================== */
-
         header {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #12372a,
-                    #1d5a40
-                );
-
+            background: linear-gradient(135deg, #12372a, #1d5a40);
             color: white;
-
             padding: 22px 40px;
-
-            box-shadow:
-                0 3px 12px
-                rgba(0,0,0,0.12);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.12);
         }
 
         .header-content {
-
             max-width: 1350px;
-
             margin: auto;
         }
 
         header h1 {
-
             font-size: 26px;
-
             letter-spacing: 0.2px;
         }
 
         header p {
-
             margin-top: 6px;
-
             color: #cbded3;
-
             font-size: 14px;
         }
 
-
-        /* =====================================================
-           NAVIGATION
-        ===================================================== */
-
         nav {
-
             background: white;
-
             padding: 0 40px;
-
             display: flex;
-
             justify-content: center;
-
             gap: 8px;
-
-            box-shadow:
-                0 2px 10px
-                rgba(0,0,0,0.07);
-
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
             flex-wrap: wrap;
         }
 
         nav a {
-
             position: relative;
-
             text-decoration: none;
-
             color: #4b5563;
-
             font-weight: bold;
-
             font-size: 14px;
-
             padding: 16px 14px;
-
-            transition:
-                color 0.2s ease,
-                background 0.2s ease;
+            transition: color 0.2s ease, background 0.2s ease;
         }
 
         nav a:hover {
-
             color: #23613e;
-
             background: #f3f8f5;
         }
 
         nav a.active {
-
             color: #23613e;
         }
 
         nav a.active::after {
-
             content: "";
-
             position: absolute;
-
             left: 12px;
-
             right: 12px;
-
             bottom: 0;
-
             height: 3px;
-
             background: #23613e;
-
-            border-radius:
-                5px 5px 0 0;
+            border-radius: 5px 5px 0 0;
         }
 
-
-        /* =====================================================
-           MAIN
-        ===================================================== */
-
         main {
-
             max-width: 1350px;
-
             margin: auto;
-
             padding: 35px 40px 50px;
         }
 
-
-        /* =====================================================
-           PAGE TITLE
-        ===================================================== */
-
         .page-title {
-
             margin-bottom: 25px;
         }
 
         .page-title h2 {
-
             color: #12372a;
-
             font-size: 28px;
-
             font-weight: 700;
         }
 
         .page-title p {
-
             color: #6b7280;
-
             margin-top: 7px;
-
             font-size: 14px;
         }
 
-
-        /* =====================================================
-           SUMMARY
-        ===================================================== */
-
         .summary {
-
             display: grid;
-
-            grid-template-columns:
-                repeat(4, 1fr);
-
+            grid-template-columns: repeat(4, 1fr);
             gap: 18px;
-
             margin-bottom: 28px;
         }
 
-
         .summary-card {
-
             position: relative;
-
             background: white;
-
             padding: 23px;
-
             border-radius: 15px;
-
-            border:
-                1px solid #e5ebe7;
-
-            box-shadow:
-                0 5px 18px
-                rgba(0,0,0,0.06);
-
+            border: 1px solid #e5ebe7;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
             overflow: hidden;
-
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .summary-card:hover {
-
-            transform:
-                translateY(-3px);
-
-            box-shadow:
-                0 8px 22px
-                rgba(0,0,0,0.09);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.09);
         }
 
         .summary-card::before {
-
             content: "";
-
             position: absolute;
-
             left: 0;
-
             top: 0;
-
             bottom: 0;
-
             width: 5px;
-
             background: #23613e;
         }
 
         .summary-card:nth-child(2)::before {
-
             background: #2f7d57;
         }
 
         .summary-card:nth-child(3)::before {
-
             background: #16a34a;
         }
 
         .summary-card:nth-child(4)::before {
-
             background: #dc2626;
         }
 
         .summary-card span {
-
             color: #6b7280;
-
             font-size: 13px;
-
             font-weight: 600;
         }
 
         .summary-card h2 {
-
             margin-top: 9px;
-
             color: #12372a;
-
             font-size: 31px;
         }
 
         .healthy {
-
             color: #16a34a !important;
         }
 
         .diseased {
-
             color: #dc2626 !important;
         }
 
-
-        /* =====================================================
-           CONTROL BAR
-        ===================================================== */
-
         .control-bar {
-
             background: white;
-
             padding: 20px 23px;
-
             border-radius: 15px;
-
-            border:
-                1px solid #e5ebe7;
-
-            box-shadow:
-                0 5px 18px
-                rgba(0,0,0,0.06);
-
+            border: 1px solid #e5ebe7;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
             margin-bottom: 25px;
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             gap: 15px;
-
             flex-wrap: wrap;
         }
 
         .control-info h3 {
-
             color: #12372a;
-
             font-size: 17px;
         }
 
         .control-info p {
-
             color: #6b7280;
-
             font-size: 13px;
-
             margin-top: 5px;
         }
 
         .control-actions {
-
             display: flex;
-
             align-items: center;
-
             gap: 10px;
         }
 
         .record-count {
-
             background: #e8f5ed;
-
             color: #23613e;
-
             padding: 9px 13px;
-
             border-radius: 20px;
-
             font-size: 12px;
-
             font-weight: bold;
         }
 
         .clear-button {
-
             border: none;
-
             background: #dc2626;
-
             color: white;
-
             padding: 11px 18px;
-
             border-radius: 9px;
-
             cursor: pointer;
-
             font-weight: bold;
-
-            transition:
-                background 0.2s ease,
-                transform 0.15s ease;
+            transition: background 0.2s ease, transform 0.15s ease;
         }
 
         .clear-button:hover {
-
             background: #b91c1c;
         }
 
         .clear-button:active {
-
-            transform:
-                scale(0.97);
+            transform: scale(0.97);
         }
 
-
-        /* =====================================================
-           DAILY CARD
-        ===================================================== */
-
         .daily-card {
-
             background: white;
-
             border-radius: 16px;
-
             margin-bottom: 25px;
-
-            border:
-                1px solid #e5ebe7;
-
-            box-shadow:
-                0 5px 18px
-                rgba(0,0,0,0.06);
-
+            border: 1px solid #e5ebe7;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
             overflow: hidden;
         }
 
-
-        /* =====================================================
-           DAILY HEADER
-        ===================================================== */
-
         .daily-header {
-
             padding: 22px 25px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffffff,
-                    #f8fbf9
-                );
-
-            border-bottom:
-                1px solid #e5e7eb;
-
+            background: linear-gradient(135deg, #ffffff, #f8fbf9);
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
-
-            justify-content:
-                space-between;
-
+            justify-content: space-between;
             align-items: center;
-
             gap: 20px;
-
             flex-wrap: wrap;
         }
 
         .date-section {
-
             display: flex;
-
             align-items: center;
-
             gap: 13px;
         }
 
         .calendar-icon {
-
             width: 48px;
-
             height: 48px;
-
             border-radius: 12px;
-
             background: #e8f5ed;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             font-size: 23px;
         }
 
         .date-section h3 {
-
             color: #12372a;
-
             font-size: 21px;
         }
 
         .date-section p {
-
             color: #6b7280;
-
             font-size: 13px;
-
             margin-top: 5px;
         }
 
         .date-badge {
-
             display: inline-block;
-
             background: #23613e;
-
             color: white;
-
             padding: 7px 12px;
-
             border-radius: 20px;
-
             font-size: 12px;
-
             font-weight: bold;
         }
 
-
-        /* =====================================================
-           DAILY STATISTICS
-        ===================================================== */
-
         .daily-stats {
-
             display: grid;
-
-            grid-template-columns:
-                repeat(7, 1fr);
-
+            grid-template-columns: repeat(7, 1fr);
             gap: 12px;
-
             padding: 20px 25px;
-
             background: #fafcfb;
         }
 
         .stat-box {
-
             background: white;
-
-            border:
-                1px solid #e5e7eb;
-
+            border: 1px solid #e5e7eb;
             border-radius: 11px;
-
             padding: 15px;
-
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .stat-box:hover {
-
-            transform:
-                translateY(-2px);
-
-            box-shadow:
-                0 5px 12px
-                rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.06);
         }
 
         .stat-box span {
-
             display: block;
-
             color: #6b7280;
-
             font-size: 12px;
-
             margin-bottom: 7px;
         }
 
         .stat-box strong {
-
             font-size: 22px;
-
             color: #12372a;
         }
 
         .stat-box.healthy-box strong {
-
             color: #16a34a;
         }
 
         .stat-box.diseased-box strong {
-
             color: #dc2626;
         }
 
         .stat-box.bacterial-box strong {
-
             color: #dc2626;
         }
 
         .stat-box.cercospora-box strong {
-
             color: #d97706;
         }
 
         .stat-box.curl-box strong {
-
             color: #7c3aed;
         }
 
-
-        /* =====================================================
-           CONFIDENCE
-        ===================================================== */
-
         .confidence-section {
-
-            padding:
-                3px 25px 23px;
+            padding: 3px 25px 23px;
         }
 
         .confidence-header {
-
             display: flex;
-
-            justify-content:
-                space-between;
-
+            justify-content: space-between;
             align-items: center;
-
             margin-bottom: 8px;
-
             font-size: 13px;
         }
 
         .confidence-header span {
-
             color: #6b7280;
-
             font-weight: 600;
         }
 
         .confidence-header strong {
-
             color: #12372a;
         }
 
         .confidence-background {
-
             height: 12px;
-
             background: #e5e7eb;
-
             border-radius: 20px;
-
             overflow: hidden;
         }
 
         .confidence-bar {
-
             height: 100%;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #2f7d57,
-                    #12372a
-                );
-
+            background: linear-gradient(90deg, #2f7d57, #12372a);
             border-radius: 20px;
-
-            transition:
-                width 0.5s ease;
+            transition: width 0.5s ease;
         }
 
-
-        /* =====================================================
-           RECORDS
-        ===================================================== */
-
         .records-section {
-
-            padding:
-                0 25px 25px;
+            padding: 0 25px 25px;
         }
 
         .records-header {
-
             display: flex;
-
-            justify-content:
-                space-between;
-
+            justify-content: space-between;
             align-items: center;
-
             margin-bottom: 14px;
-
             gap: 10px;
-
             flex-wrap: wrap;
         }
 
         .records-section h4 {
-
             color: #12372a;
-
             font-size: 16px;
         }
 
         .records-label {
-
             color: #6b7280;
-
             font-size: 12px;
         }
 
-
-        /* =====================================================
-           TABLE
-        ===================================================== */
-
         .record-table-wrapper {
-
             width: 100%;
-
             overflow-x: auto;
-
-            border:
-                1px solid #e5e7eb;
-
+            border: 1px solid #e5e7eb;
             border-radius: 11px;
         }
 
         .record-table {
-
             width: 100%;
-
             border-collapse: collapse;
-
             min-width: 900px;
         }
 
         .record-table th {
-
             background: #f3f6f4;
-
             color: #374151;
-
             text-align: left;
-
             padding: 13px;
-
             font-size: 12px;
-
             font-weight: 700;
-
             white-space: nowrap;
         }
 
         .record-table td {
-
             padding: 12px 13px;
-
-            border-bottom:
-                1px solid #e5e7eb;
-
+            border-bottom: 1px solid #e5e7eb;
             font-size: 13px;
-
             vertical-align: middle;
         }
 
         .record-table tbody tr:last-child td {
-
             border-bottom: none;
         }
 
         .record-table tbody tr:hover {
-
             background: #fafcfb;
         }
 
-
-        /* =====================================================
-           IMAGE
-        ===================================================== */
-
         .leaf-image {
-
             width: 58px;
-
             height: 58px;
-
             object-fit: cover;
-
             border-radius: 9px;
-
-            border:
-                1px solid #dfe5e1;
-
+            border: 1px solid #dfe5e1;
             cursor: pointer;
-
-            transition:
-                transform 0.2s ease;
+            transition: transform 0.2s ease;
         }
 
         .leaf-image:hover {
-
-            transform:
-                scale(1.08);
+            transform: scale(1.08);
         }
 
-
-        /* =====================================================
-           DISEASE BADGES
-        ===================================================== */
-
         .disease-badge {
-
             display: inline-block;
-
             padding: 6px 10px;
-
             border-radius: 20px;
-
             font-size: 12px;
-
             font-weight: bold;
-
             white-space: nowrap;
         }
 
         .disease-healthy {
-
             background: #dcfce7;
-
             color: #15803d;
         }
 
         .disease-bacterial {
-
             background: #fee2e2;
-
             color: #b91c1c;
         }
 
         .disease-cercospora {
-
             background: #fef3c7;
-
             color: #b45309;
         }
 
         .disease-curl {
-
             background: #ede9fe;
-
             color: #6d28d9;
         }
 
         .disease-other {
-
             background: #e5e7eb;
-
             color: #374151;
         }
 
-
-        /* =====================================================
-           CONFIDENCE BADGE
-        ===================================================== */
-
         .confidence-value {
-
             font-weight: bold;
-
             color: #12372a;
-
             white-space: nowrap;
         }
 
-
-        /* =====================================================
-           NO DATA
-        ===================================================== */
-
         .no-data {
-
             background: white;
-
             border-radius: 16px;
-
             padding: 70px 25px;
-
             text-align: center;
-
-            border:
-                1px solid #e5ebe7;
-
-            box-shadow:
-                0 5px 18px
-                rgba(0,0,0,0.06);
+            border: 1px solid #e5ebe7;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
         }
 
         .no-data-icon {
-
             width: 70px;
-
             height: 70px;
-
-            margin:
-                0 auto 18px;
-
+            margin: 0 auto 18px;
             border-radius: 50%;
-
             background: #e8f5ed;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             font-size: 30px;
         }
 
         .no-data h3 {
-
             color: #12372a;
-
             margin-bottom: 9px;
-
             font-size: 19px;
         }
 
         .no-data p {
-
             color: #6b7280;
-
             font-size: 14px;
-
             line-height: 1.6;
         }
 
-
-        /* =====================================================
-           IMAGE MODAL
-        ===================================================== */
-
         .image-modal {
-
             position: fixed;
-
             inset: 0;
-
-            background:
-                rgba(0,0,0,0.78);
-
+            background: rgba(0,0,0,0.78);
             display: none;
-
             align-items: center;
-
             justify-content: center;
-
             padding: 25px;
-
             z-index: 9999;
         }
 
         .image-modal.show {
-
             display: flex;
         }
 
         .modal-content {
-
             position: relative;
-
             max-width: 850px;
-
             max-height: 90vh;
-
             background: white;
-
             padding: 10px;
-
             border-radius: 14px;
         }
 
         .modal-content img {
-
             display: block;
-
             max-width: 100%;
-
             max-height: 82vh;
-
             object-fit: contain;
-
             border-radius: 9px;
         }
 
         .modal-close {
-
             position: absolute;
-
             right: -12px;
-
             top: -12px;
-
             width: 35px;
-
             height: 35px;
-
             border: none;
-
             border-radius: 50%;
-
             background: #dc2626;
-
             color: white;
-
             font-size: 20px;
-
             cursor: pointer;
-
             font-weight: bold;
         }
 
-
-        /* =====================================================
-           TOAST
-        ===================================================== */
-
         .toast {
-
             position: fixed;
-
             right: 25px;
-
             bottom: 25px;
-
             background: #12372a;
-
             color: white;
-
             padding: 14px 18px;
-
             border-radius: 10px;
-
-            box-shadow:
-                0 8px 25px
-                rgba(0,0,0,0.18);
-
+            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
             font-size: 13px;
-
             font-weight: bold;
-
-            transform:
-                translateY(100px);
-
+            transform: translateY(100px);
             opacity: 0;
-
             pointer-events: none;
-
-            transition:
-                all 0.3s ease;
-
+            transition: all 0.3s ease;
             z-index: 10000;
         }
 
         .toast.show {
-
-            transform:
-                translateY(0);
-
+            transform: translateY(0);
             opacity: 1;
         }
-
-
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
 
         @media(max-width: 1100px) {
 
             .daily-stats {
-
-                grid-template-columns:
-                    repeat(4, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
 
             .summary {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
+                grid-template-columns: repeat(2, 1fr);
             }
 
         }
-
 
         @media(max-width: 700px) {
 
             header {
-
                 padding: 20px;
             }
 
             header h1 {
-
                 font-size: 20px;
             }
 
             nav {
-
                 padding: 0 10px;
-
                 gap: 0;
             }
 
             nav a {
-
-                padding:
-                    14px 9px;
-
+                padding: 14px 9px;
                 font-size: 12px;
             }
 
             main {
-
-                padding:
-                    25px 15px 40px;
+                padding: 25px 15px 40px;
             }
 
             .page-title h2 {
-
                 font-size: 23px;
             }
 
             .summary {
-
                 grid-template-columns: 1fr;
             }
 
             .daily-stats {
-
-                grid-template-columns:
-                    repeat(2, 1fr);
-
-                padding:
-                    16px;
+                grid-template-columns: repeat(2, 1fr);
+                padding: 16px;
             }
 
             .daily-header {
-
-                padding:
-                    18px;
+                padding: 18px;
             }
 
             .records-section {
-
-                padding:
-                    0 16px 18px;
+                padding: 0 16px 18px;
             }
 
             .confidence-section {
-
-                padding:
-                    3px 16px 20px;
+                padding: 3px 16px 20px;
             }
 
             .control-bar {
-
-                align-items:
-                    flex-start;
+                align-items: flex-start;
             }
 
             .control-actions {
-
                 width: 100%;
-
-                justify-content:
-                    space-between;
+                justify-content: space-between;
             }
 
         }
 
-
         @media(max-width: 450px) {
 
             .daily-stats {
-
                 grid-template-columns: 1fr;
             }
 
             .control-actions {
-
-                flex-direction:
-                    column;
-
-                align-items:
-                    stretch;
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .record-count,
             .clear-button {
-
                 text-align: center;
-
                 width: 100%;
             }
 
             .date-section {
-
-                align-items:
-                    flex-start;
+                align-items: flex-start;
             }
 
             .calendar-icon {
-
                 width: 42px;
-
                 height: 42px;
-
                 font-size: 19px;
             }
 
             .date-section h3 {
-
                 font-size: 18px;
             }
 
@@ -1263,10 +714,6 @@
 
 <body>
 
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
 
 <header>
 
@@ -1284,10 +731,6 @@
 
 </header>
 
-
-<!-- =========================================================
-     NAVIGATION
-========================================================= -->
 
 <nav>
 
@@ -1319,16 +762,8 @@
 </nav>
 
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
-
 <main>
 
-
-    <!-- =====================================================
-         PAGE TITLE
-    ====================================================== -->
 
     <div class="page-title">
 
@@ -1342,10 +777,6 @@
 
     </div>
 
-
-    <!-- =====================================================
-         SUMMARY
-    ====================================================== -->
 
     <div class="summary">
 
@@ -1405,10 +836,6 @@
     </div>
 
 
-    <!-- =====================================================
-         CONTROL BAR
-    ====================================================== -->
-
     <div class="control-bar">
 
         <div class="control-info">
@@ -1451,10 +878,6 @@
     </div>
 
 
-    <!-- =====================================================
-         DAILY DATA
-    ====================================================== -->
-
     {% if daily_data|length > 0 %}
 
 
@@ -1462,10 +885,6 @@
 
         <div class="daily-card">
 
-
-            <!-- =================================================
-                 DAILY HEADER
-            ================================================== -->
 
             <div class="daily-header">
 
@@ -1499,10 +918,6 @@
 
             </div>
 
-
-            <!-- =================================================
-                 DAILY STATISTICS
-            ================================================== -->
 
             <div class="daily-stats">
 
@@ -1601,10 +1016,6 @@
             </div>
 
 
-            <!-- =================================================
-                 AVERAGE CONFIDENCE
-            ================================================== -->
-
             <div class="confidence-section">
 
                 <div class="confidence-header">
@@ -1639,10 +1050,6 @@
             </div>
 
 
-            <!-- =================================================
-                 INDIVIDUAL RECORDS
-            ================================================== -->
-
             {% if day.records|length > 0 %}
 
             <div class="records-section">
@@ -1671,33 +1078,13 @@
 
                             <tr>
 
-                                <th>
-                                    Image
-                                </th>
-
-                                <th>
-                                    Time
-                                </th>
-
-                                <th>
-                                    Disease
-                                </th>
-
-                                <th>
-                                    Confidence
-                                </th>
-
-                                <th>
-                                    Chemical
-                                </th>
-
-                                <th>
-                                    Fertilizer
-                                </th>
-
-                                <th>
-                                    Treatment
-                                </th>
+                                <th>Image</th>
+                                <th>Time</th>
+                                <th>Disease</th>
+                                <th>Confidence</th>
+                                <th>Chemical</th>
+                                <th>Fertilizer</th>
+                                <th>Treatment</th>
 
                             </tr>
 
@@ -1711,8 +1098,6 @@
 
                             <tr>
 
-
-                                <!-- IMAGE -->
 
                                 <td>
 
@@ -1733,8 +1118,6 @@
                                 </td>
 
 
-                                <!-- TIME -->
-
                                 <td>
 
                                     {% if record.timestamp|length >= 19 %}
@@ -1749,8 +1132,6 @@
 
                                 </td>
 
-
-                                <!-- DISEASE -->
 
                                 <td>
 
@@ -1813,8 +1194,6 @@
                                 </td>
 
 
-                                <!-- CONFIDENCE -->
-
                                 <td>
 
                                     <span class="confidence-value">
@@ -1826,30 +1205,18 @@
                                 </td>
 
 
-                                <!-- CHEMICAL -->
-
                                 <td>
-
                                     {{ record.chemical }}
-
                                 </td>
 
 
-                                <!-- FERTILIZER -->
-
                                 <td>
-
                                     {{ record.fertilizer }}
-
                                 </td>
 
 
-                                <!-- TREATMENT -->
-
                                 <td>
-
                                     {{ record.treatment }}
-
                                 </td>
 
 
@@ -1877,10 +1244,6 @@
     {% else %}
 
 
-        <!-- =================================================
-             NO DATA
-        ================================================== -->
-
         <div class="no-data">
 
             <div class="no-data-icon">
@@ -1904,10 +1267,6 @@
 
 </main>
 
-
-<!-- =========================================================
-     IMAGE MODAL
-========================================================= -->
 
 <div
     id="image-modal"
@@ -1935,26 +1294,13 @@
 </div>
 
 
-<!-- =========================================================
-     TOAST
-========================================================= -->
-
 <div
     id="toast"
     class="toast">
 </div>
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
-
 <script>
-
-
-/* =========================================================
-   TOAST
-========================================================= */
 
 let toastTimer = null;
 
@@ -1962,32 +1308,19 @@ let toastTimer = null;
 function showToast(message) {
 
     const toast =
-        document.getElementById(
-            "toast"
-        );
+        document.getElementById("toast");
 
+    toast.textContent = message;
 
-    toast.textContent =
-        message;
+    toast.classList.add("show");
 
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
+    clearTimeout(toastTimer);
 
     toastTimer =
         setTimeout(
             function() {
 
-                toast.classList.remove(
-                    "show"
-                );
+                toast.classList.remove("show");
 
             },
             2500
@@ -1995,10 +1328,6 @@ function showToast(message) {
 
 }
 
-
-/* =========================================================
-   CLEAR DAILY DATA
-========================================================= */
 
 async function clearDailyData() {
 
@@ -2009,9 +1338,7 @@ async function clearDailyData() {
 
 
     if (!confirmation) {
-
         return;
-
     }
 
 
@@ -2079,10 +1406,6 @@ async function clearDailyData() {
 }
 
 
-/* =========================================================
-   OPEN IMAGE
-========================================================= */
-
 function openImage(src) {
 
     const modal =
@@ -2096,24 +1419,14 @@ function openImage(src) {
         );
 
 
-    image.src =
-        src;
+    image.src = src;
 
+    modal.classList.add("show");
 
-    modal.classList.add(
-        "show"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
+    document.body.style.overflow = "hidden";
 
 }
 
-
-/* =========================================================
-   CLOSE IMAGE
-========================================================= */
 
 function closeImage(event) {
 
@@ -2133,48 +1446,32 @@ function closeImage(event) {
     }
 
 
-    modal.classList.remove(
-        "show"
-    );
+    modal.classList.remove("show");
 
-
-    document.body.style.overflow =
-        "";
+    document.body.style.overflow = "";
 
 }
 
-
-/* =========================================================
-   ESCAPE KEY
-========================================================= */
 
 document.addEventListener(
     "keydown",
     function(event) {
 
-        if (
-            event.key === "Escape"
-        ) {
+        if (event.key === "Escape") {
 
             const modal =
                 document.getElementById(
                     "image-modal"
                 );
 
+            modal.classList.remove("show");
 
-            modal.classList.remove(
-                "show"
-            );
-
-
-            document.body.style.overflow =
-                "";
+            document.body.style.overflow = "";
 
         }
 
     }
 );
-
 
 </script>
 

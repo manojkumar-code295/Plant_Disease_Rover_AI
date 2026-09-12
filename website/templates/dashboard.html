@@ -1998,6 +1998,1940 @@ button {
     transform:
         translateX(-50%);
 
+  <!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color"
+      content="#0b3d2e">
+
+<meta name="description"
+      content="Precision Agriculture Smart Rover - AI Plant Disease Detection">
+
+<link rel="manifest"
+      href="{{ url_for('static', filename='manifest.json') }}">
+
+<meta name="mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-capable"
+      content="yes">
+
+<meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent">
+
+<meta name="apple-mobile-web-app-title"
+      content="Smart Rover">
+
+<title>Precision Agriculture Smart Rover</title>
+
+
+<style>
+
+:root {
+
+    --primary: #176b45;
+    --primary-dark: #0b3d2e;
+    --primary-light: #eaf7ef;
+
+    --accent: #39b86f;
+    --accent-light: #dff6e8;
+
+    --danger: #dc3545;
+    --danger-light: #fff0f1;
+
+    --warning: #e9a23b;
+    --warning-light: #fff7e8;
+
+    --text: #17221d;
+    --text-soft: #64736b;
+    --text-light: #91a098;
+
+    --background: #f4f8f5;
+    --white: #ffffff;
+
+    --border: #e3ebe6;
+
+    --shadow-sm:
+        0 4px 15px rgba(15, 55, 35, 0.05);
+
+    --shadow-md:
+        0 10px 30px rgba(15, 55, 35, 0.08);
+
+    --shadow-lg:
+        0 18px 45px rgba(15, 55, 35, 0.12);
+
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+
+}
+
+
+/* RESET */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(57,184,111,0.07),
+            transparent 30%
+        ),
+        var(--background);
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b9c9c0;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8fa79a;
+}
+
+
+/* APP */
+
+.app {
+    min-height: 100vh;
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0b3d2e 0%,
+            #0a3025 100%
+        );
+
+    color: white;
+
+    padding: 24px 15px;
+
+    z-index: 1000;
+
+    overflow-y: auto;
+
+    border-right:
+        1px solid rgba(255,255,255,0.04);
+
+}
+
+
+/* LOGO */
+
+.logo {
+
+    padding:
+        8px 13px 24px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
+
+}
+
+.logo-icon {
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(69,210,128,0.22),
+            rgba(69,210,128,0.08)
+        );
+
+    border:
+        1px solid rgba(111,239,159,0.15);
+
+    font-size: 27px;
+
+    margin-bottom: 13px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.12);
+
+}
+
+.logo h1 {
+
+    font-size: 17px;
+
+    line-height: 1.35;
+
+    font-weight: 750;
+
+    letter-spacing: -0.2px;
+
+}
+
+.logo p {
+
+    color: #a7c3b7;
+
+    font-size: 11px;
+
+    margin-top: 7px;
+
+    line-height: 1.5;
+
+}
+
+
+/* MENU */
+
+.menu-title {
+
+    color: #72998a;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    margin:
+        27px 12px 11px;
+
+    text-transform: uppercase;
+
+}
+
+.menu a {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    color: #c1d3ca;
+
+    padding: 13px 14px;
+
+    border-radius: 12px;
+
+    margin-bottom: 5px;
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        color 0.2s ease;
+
+}
+
+.menu a:hover {
+
+    background:
+        rgba(255,255,255,0.08);
+
+    color: white;
+
+    transform:
+        translateX(2px);
+
+}
+
+.menu a.active {
+
+    background:
+        linear-gradient(
+            135deg,
+            #2d8b5c,
+            #226e49
+        );
+
+    color: white;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.18);
+
+}
+
+.menu-icon {
+
+    width: 23px;
+
+    text-align: center;
+
+    font-size: 18px;
+
+}
+
+
+/* SIDEBAR CONNECTION */
+
+.sidebar-bottom {
+
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+
+    bottom: 23px;
+
+}
+
+.connection-box {
+
+    background:
+        rgba(255,255,255,0.065);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 13px;
+
+    padding: 14px;
+
+    backdrop-filter:
+        blur(8px);
+
+}
+
+.connection-title {
+
+    color: #82a696;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 9px;
+
+}
+
+.connection-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #e0eee7;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+.green-dot {
+
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 8px;
+
+    background: #35d47a;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 4px rgba(53,212,122,0.10),
+        0 0 10px rgba(53,212,122,0.75);
+
+}
+
+
+/* MAIN */
+
+.main {
+
+    margin-left: 260px;
+
+    width:
+        calc(100% - 260px);
+
+    min-height: 100vh;
+
+}
+
+
+/* TOPBAR */
+
+.topbar {
+
+    min-height: 82px;
+
+    background:
+        rgba(255,255,255,0.92);
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        15px 40px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    backdrop-filter:
+        blur(15px);
+
+}
+
+.topbar-title h2 {
+
+    font-size: 19px;
+
+    color: var(--primary-dark);
+
+    font-weight: 750;
+
+    letter-spacing: -0.3px;
+
+}
+
+.topbar-title p {
+
+    color: var(--text-light);
+
+    font-size: 11px;
+
+    margin-top: 5px;
+
+}
+
+
+/* SYSTEM BADGE */
+
+.system-badge {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    background:
+        var(--primary-light);
+
+    color:
+        #13713f;
+
+    border:
+        1px solid #ccebd8;
+
+    padding:
+        9px 15px;
+
+    border-radius: 30px;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    box-shadow:
+        0 4px 12px rgba(23,107,69,0.05);
+
+}
+
+.online-mode {
+
+    background:
+        #edf9f1 !important;
+
+    color:
+        #168044 !important;
+
+}
+
+.offline-mode {
+
+    background:
+        #8b1e2b !important;
+
+    color:
+        white !important;
+
+    border-color:
+        #8b1e2b !important;
+
+}
+
+
+/* CONTENT */
+
+.content {
+
+    padding:
+        34px 40px 25px;
+
+    max-width:
+        1550px;
+
+    margin:
+        auto;
+
+}
+
+
+/* WELCOME */
+
+.welcome {
+
+    margin-bottom: 25px;
+
+}
+
+.welcome h1 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        27px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -0.6px;
+
+}
+
+.welcome p {
+
+    color:
+        var(--text-soft);
+
+    margin-top:
+        7px;
+
+    font-size:
+        12px;
+
+}
+
+
+/* STATISTICS */
+
+.statistics-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+    margin-bottom:
+        32px;
+
+}
+
+.stat-card {
+
+    background:
+        rgba(255,255,255,0.96);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        21px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+.stat-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        var(--shadow-md);
+
+}
+
+.stat-card::before {
+
+    content: "";
+
+    position:
+        absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 4px;
+
+    background:
+        var(--accent);
+
+    opacity: 0.8;
+
+}
+
+.stat-card::after {
+
+    content: "";
+
+    position:
+        absolute;
+
+    right:
+        -35px;
+
+    top:
+        -35px;
+
+    width:
+        110px;
+
+    height:
+        110px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--primary-light);
+
+}
+
+.stat-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+}
+
+.stat-label {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.6px;
+
+}
+
+.stat-icon {
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    border-radius:
+        12px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    background:
+        var(--primary-light);
+
+    font-size:
+        19px;
+
+    position:
+        relative;
+
+    z-index:
+        1;
+
+}
+
+.stat-number {
+
+    margin-top:
+        14px;
+
+    font-size:
+        32px;
+
+    color:
+        var(--primary-dark);
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -1px;
+
+}
+
+.stat-subtitle {
+
+    margin-top:
+        5px;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+}
+
+.healthy-number {
+
+    color:
+        #159447;
+
+}
+
+.diseased-number {
+
+    color:
+        #d92d3d;
+
+}
+
+
+/* SECTION HEADINGS */
+
+.section-heading {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        15px;
+
+}
+
+.section-heading h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        16px;
+
+    font-weight:
+        750;
+
+}
+
+.section-heading span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* DETECTION */
+
+.detection-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.05fr 1fr;
+
+    gap:
+        22px;
+
+}
+
+.card {
+
+    background:
+        rgba(255,255,255,0.97);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+
+}
+
+.card:hover {
+
+    box-shadow:
+        var(--shadow-md);
+
+}
+
+
+/* IMAGE CARD */
+
+.image-card {
+
+    padding:
+        21px;
+
+}
+
+.image-card-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        15px;
+
+}
+
+.image-card-header h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        14px;
+
+    font-weight:
+        750;
+
+}
+
+.image-label {
+
+    background:
+        #eef8f1;
+
+    color:
+        #28764d;
+
+    border:
+        1px solid #d8ebdf;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+}
+
+.image-box {
+
+    width:
+        100%;
+
+    height:
+        365px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eaf3ed,
+            #f5f9f6
+        );
+
+    border-radius:
+        15px;
+
+    overflow:
+        hidden;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    border:
+        1px solid #dce8e0;
+
+    position:
+        relative;
+
+}
+
+.image-box::before {
+
+    content:
+        "AI CAMERA INPUT";
+
+    position:
+        absolute;
+
+    top:
+        12px;
+
+    left:
+        12px;
+
+    z-index:
+        2;
+
+    background:
+        rgba(11,61,46,0.78);
+
+    color:
+        white;
+
+    padding:
+        5px 9px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.6px;
+
+    backdrop-filter:
+        blur(5px);
+
+}
+
+.image-box img {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        contain;
+
+    display:
+        block;
+
+}
+
+.image-placeholder {
+
+    font-size:
+        58px;
+
+    opacity:
+        0.45;
+
+}
+
+.image-name {
+
+    margin-top:
+        11px;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    text-align:
+        center;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* RESULT CARD */
+
+.result-card {
+
+    padding:
+        21px;
+
+}
+
+.result-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        18px;
+
+}
+
+.result-header h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        14px;
+
+    font-weight:
+        750;
+
+}
+
+.ai-badge {
+
+    background:
+        linear-gradient(
+            135deg,
+            #e9f9ef,
+            #dff5e7
+        );
+
+    color:
+        #137b43;
+
+    border:
+        1px solid #ccebd7;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* DETECTION RESULT */
+
+.detection-result {
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf8ef 0%,
+            #f8fcf9 100%
+        );
+
+    border:
+        1px solid #d6eadc;
+
+    border-radius:
+        15px;
+
+    padding:
+        21px;
+
+    margin-bottom:
+        17px;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+.detection-result::after {
+
+    content:
+        "🤖";
+
+    position:
+        absolute;
+
+    right:
+        18px;
+
+    bottom:
+        8px;
+
+    font-size:
+        46px;
+
+    opacity:
+        0.08;
+
+}
+
+.detection-result small {
+
+    color:
+        var(--text-soft);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.7px;
+
+}
+
+.detection-result h1 {
+
+    color:
+        #1e6741;
+
+    font-size:
+        25px;
+
+    margin-top:
+        7px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+
+    word-break:
+        break-word;
+
+}
+
+.result-status {
+
+    display:
+        inline-block;
+
+    margin-top:
+        10px;
+
+    background:
+        #dff5e6;
+
+    color:
+        #187441;
+
+    border:
+        1px solid #c9e9d3;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* INFORMATION */
+
+.info-box {
+
+    display:
+        flex;
+
+    gap:
+        14px;
+
+    align-items:
+        flex-start;
+
+    padding:
+        14px 0;
+
+    border-bottom:
+        1px solid #edf1ee;
+
+}
+
+.info-icon {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    min-width:
+        38px;
+
+    border-radius:
+        10px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #f0f7f2;
+
+    border:
+        1px solid #e0ebe3;
+
+    font-size:
+        17px;
+
+}
+
+.info-content span {
+
+    display:
+        block;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.4px;
+
+    margin-bottom:
+        5px;
+
+}
+
+.info-content strong {
+
+    color:
+        #334139;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.55;
+
+    word-break:
+        break-word;
+
+}
+
+.treatment-box {
+
+    margin-top:
+        5px;
+
+    padding-top:
+        14px;
+
+}
+
+.treatment-box span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.4px;
+
+}
+
+.treatment-box p {
+
+    margin-top:
+        7px;
+
+    color:
+        #4c5a52;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.65;
+
+}
+
+
+/* CONFIDENCE */
+
+.confidence-box {
+
+    margin-top:
+        18px;
+
+}
+
+.confidence-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+}
+
+.confidence-header span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+#confidence-value {
+
+    color:
+        #28734e;
+
+}
+
+.progress {
+
+    width:
+        100%;
+
+    height:
+        9px;
+
+    background:
+        #e7efe9;
+
+    border-radius:
+        20px;
+
+    overflow:
+        hidden;
+
+}
+
+.progress-bar {
+
+    width:
+        0%;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2b8055,
+            #42c477
+        );
+
+    border-radius:
+        20px;
+
+    transition:
+        width 0.6s ease;
+
+    box-shadow:
+        0 0 10px rgba(66,196,119,0.25);
+
+}
+
+
+/* STATUS */
+
+.status-section {
+
+    margin-top:
+        31px;
+
+}
+
+.status-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+}
+
+.status-card {
+
+    background:
+        white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        19px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+.status-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        var(--shadow-md);
+
+}
+
+.status-icon {
+
+    width:
+        47px;
+
+    height:
+        47px;
+
+    border-radius:
+        13px;
+
+    background:
+        #edf7ef;
+
+    border:
+        1px solid #deebe2;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    font-size:
+        21px;
+
+}
+
+.status-info span {
+
+    display:
+        block;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+    margin-bottom:
+        5px;
+
+}
+
+.status-info strong {
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+}
+
+.status-online {
+
+    color:
+        #159447;
+
+}
+
+.status-offline {
+
+    color:
+        #dc3545;
+
+}
+
+
+/* QUICK ACCESS */
+
+.quick-section {
+
+    margin-top:
+        31px;
+
+}
+
+.quick-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+}
+
+.quick-card {
+
+    background:
+        white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        19px;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
+}
+
+.quick-card:hover {
+
+    transform:
+        translateY(-4px);
+
+    box-shadow:
+        var(--shadow-md);
+
+    border-color:
+        #cfe3d7;
+
+}
+
+.quick-icon {
+
+    width:
+        43px;
+
+    height:
+        43px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        12px;
+
+    background:
+        #edf7ef;
+
+    font-size:
+        21px;
+
+    margin-bottom:
+        11px;
+
+}
+
+.quick-card h4 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        13px;
+
+    font-weight:
+        750;
+
+}
+
+.quick-card p {
+
+    color:
+        var(--text-soft);
+
+    font-size:
+        10px;
+
+    margin-top:
+        6px;
+
+    line-height:
+        1.6;
+
+}
+
+.quick-card a {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    margin-top:
+        13px;
+
+    color:
+        #28734e;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+}
+
+.quick-card a:hover {
+
+    color:
+        #125b38;
+
+}
+
+
+/* LIVE INDICATOR */
+
+.live-update {
+
+    position:
+        fixed;
+
+    right:
+        20px;
+
+    bottom:
+        20px;
+
+    background:
+        rgba(11,61,46,0.96);
+
+    color:
+        white;
+
+    padding:
+        10px 15px;
+
+    border-radius:
+        25px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        750;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.16);
+
+    z-index:
+        9999;
+
+    transition:
+        0.2s;
+
+    backdrop-filter:
+        blur(8px);
+
+}
+
+.live-update-dot {
+
+    display:
+        inline-block;
+
+    width:
+        7px;
+
+    height:
+        7px;
+
+    background:
+        #36d477;
+
+    border-radius:
+        50%;
+
+    margin-right:
+        7px;
+
+    box-shadow:
+        0 0 8px rgba(54,212,119,0.9);
+
+}
+
+.live-flash {
+
+    animation:
+        liveFlash 0.7s ease-in-out 2;
+
+}
+
+@keyframes liveFlash {
+
+    50% {
+
+        transform:
+            scale(1.05);
+
+    }
+
+}
+
+
+/* UPDATE EFFECT */
+
+.updated {
+
+    animation:
+        updateGlow 0.8s ease;
+
+}
+
+@keyframes updateGlow {
+
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.015);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+}
+
+
+/* INSTALL */
+
+.install-app-button {
+
+    display:
+        none;
+
+    position:
+        fixed;
+
+    left:
+        50%;
+
+    bottom:
+        82px;
+
+    transform:
+        translateX(-50%);
+
     background:
         linear-gradient(
             135deg,
@@ -2050,9 +3984,7 @@ button {
 }
 
 
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
+/* MOBILE NAV */
 
 .mobile-nav {
 
@@ -2062,9 +3994,7 @@ button {
 }
 
 
-/* =========================================================
-   FOOTER
-========================================================= */
+/* FOOTER */
 
 footer {
 
@@ -2083,39 +4013,26 @@ footer {
 }
 
 
-/* =========================================================
-   RESPONSIVE - TABLET
-========================================================= */
+/* TABLET */
 
 @media(max-width:1100px) {
 
     .content {
-
-        padding:
-            30px 28px;
-
+        padding: 30px 28px;
     }
 
     .detection-grid {
-
-        grid-template-columns:
-            1fr;
-
+        grid-template-columns: 1fr;
     }
 
     .image-box {
-
-        height:
-            390px;
-
+        height: 390px;
     }
 
 }
 
 
-/* =========================================================
-   RESPONSIVE - SMALL TABLET
-========================================================= */
+/* SMALL TABLET */
 
 @media(max-width:800px) {
 
@@ -2209,9 +4126,7 @@ footer {
 }
 
 
-/* =========================================================
-   RESPONSIVE - MOBILE
-========================================================= */
+/* MOBILE */
 
 @media(max-width:550px) {
 
@@ -2468,49 +4383,31 @@ footer {
 }
 
 
-/* =========================================================
-   EXTRA SMALL DEVICES
-========================================================= */
+/* EXTRA SMALL */
 
 @media(max-width:380px) {
 
     .topbar-title h2 {
-
-        font-size:
-            12px;
-
+        font-size: 12px;
     }
 
     .system-badge {
-
-        padding:
-            6px 8px;
-
-        font-size:
-            8px;
-
+        padding: 6px 8px;
+        font-size: 8px;
     }
 
     .welcome h1 {
-
-        font-size:
-            19px;
-
+        font-size: 19px;
     }
 
     .image-box {
-
-        height:
-            240px;
-
+        height: 240px;
     }
 
 }
 
 
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
+/* ACCESSIBILITY */
 
 @media(prefers-reduced-motion: reduce) {
 
@@ -2544,9 +4441,7 @@ footer {
 <div class="app">
 
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!-- SIDEBAR -->
 
 <aside class="sidebar">
 
@@ -2576,47 +4471,28 @@ footer {
     <div class="menu">
 
         <a href="/" class="active">
-
             <span class="menu-icon">🏠</span>
-
             <span>Dashboard</span>
-
         </a>
-
 
         <a href="/rover">
-
             <span class="menu-icon">🚜</span>
-
             <span>Rover Control</span>
-
         </a>
-
 
         <a href="/dataset">
-
             <span class="menu-icon">📁</span>
-
             <span>Dataset</span>
-
         </a>
-
 
         <a href="/analytics">
-
             <span class="menu-icon">📊</span>
-
             <span>Analytics</span>
-
         </a>
 
-
         <a href="/settings">
-
             <span class="menu-icon">⚙️</span>
-
             <span>Settings</span>
-
         </a>
 
     </div>
@@ -2645,9 +4521,7 @@ footer {
 </aside>
 
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
+<!-- MAIN -->
 
 <div class="main">
 
@@ -2667,7 +4541,7 @@ footer {
     </div>
 
 
-    <div class="system-badge"
+    <div class="system-badge online-mode"
          id="system-badge">
 
         <span class="green-dot"></span>
@@ -2684,9 +4558,7 @@ footer {
 <main class="content">
 
 
-<!-- =========================================================
-     WELCOME
-========================================================= -->
+<!-- WELCOME -->
 
 <section class="welcome">
 
@@ -2702,9 +4574,7 @@ footer {
 </section>
 
 
-<!-- =========================================================
-     STATISTICS
-========================================================= -->
+<!-- STATISTICS -->
 
 <section class="statistics-grid">
 
@@ -2824,9 +4694,7 @@ footer {
 </section>
 
 
-<!-- =========================================================
-     AI DETECTION
-========================================================= -->
+<!-- AI DETECTION -->
 
 <div class="section-heading">
 
@@ -2844,9 +4712,7 @@ footer {
 <section class="detection-grid">
 
 
-<!-- =========================================================
-     IMAGE
-========================================================= -->
+<!-- IMAGE -->
 
 <div class="card image-card">
 
@@ -2900,9 +4766,7 @@ footer {
 </div>
 
 
-<!-- =========================================================
-     RESULT
-========================================================= -->
+<!-- RESULT -->
 
 <div class="card result-card">
 
@@ -2927,7 +4791,7 @@ footer {
 
         <h1 id="disease-result">
 
-            {{ detection.disease }}
+            {{ detection.disease or "No prediction yet" }}
 
         </h1>
 
@@ -2955,7 +4819,7 @@ footer {
 
             <strong id="chemical-result">
 
-                {{ detection.chemical }}
+                {{ detection.chemical or "Not available" }}
 
             </strong>
 
@@ -2978,7 +4842,7 @@ footer {
 
             <strong id="fertilizer-result">
 
-                {{ detection.fertilizer }}
+                {{ detection.fertilizer or "Not available" }}
 
             </strong>
 
@@ -2995,7 +4859,8 @@ footer {
 
         <p id="treatment-result">
 
-            {{ detection.treatment }}
+            {{ detection.treatment or
+               "No prediction has been processed yet." }}
 
         </p>
 
@@ -3037,9 +4902,7 @@ footer {
 </section>
 
 
-<!-- =========================================================
-     SYSTEM STATUS
-========================================================= -->
+<!-- SYSTEM STATUS -->
 
 <section class="status-section">
 
@@ -3136,9 +4999,7 @@ footer {
 </section>
 
 
-<!-- =========================================================
-     QUICK ACCESS
-========================================================= -->
+<!-- QUICK ACCESS -->
 
 <section class="quick-section">
 
@@ -3246,9 +5107,7 @@ AI-Based Plant Leaf Disease Detection System
 </div>
 
 
-<!-- =========================================================
-     MOBILE NAVIGATION
-========================================================= -->
+<!-- MOBILE NAV -->
 
 <nav class="mobile-nav">
 
@@ -3299,9 +5158,7 @@ AI-Based Plant Leaf Disease Detection System
 </nav>
 
 
-<!-- =========================================================
-     INSTALL APP BUTTON
-========================================================= -->
+<!-- INSTALL APP -->
 
 <button
     id="install-app-button"
@@ -3312,9 +5169,7 @@ AI-Based Plant Leaf Disease Detection System
 </button>
 
 
-<!-- =========================================================
-     LIVE INDICATOR
-========================================================= -->
+<!-- LIVE INDICATOR -->
 
 <div class="live-update"
      id="live-indicator">
@@ -3328,21 +5183,25 @@ AI-Based Plant Leaf Disease Detection System
 </div>
 
 
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
-
 <script>
+
+/* =========================================================
+   DASHBOARD STATE
+========================================================= */
 
 let lastResultKey = "";
 
 let firstLoad = true;
 
-let requestInProgress = false;
+let dashboardRequestInProgress = false;
+
+let roverRequestInProgress = false;
 
 let consecutiveErrors = 0;
 
 let deferredInstallPrompt = null;
+
+let resultMessageTimer = null;
 
 
 /* =========================================================
@@ -3365,6 +5224,22 @@ function setText(id, value) {
 
 
 /* =========================================================
+   SAFE NUMBER
+========================================================= */
+
+function safeNumber(value, fallback = 0) {
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : fallback;
+
+}
+
+
+/* =========================================================
    RESULT KEY
 ========================================================= */
 
@@ -3376,14 +5251,14 @@ function makeResultKey(result) {
 
     return [
 
-        result.result_id || "",
-        result.timestamp || "",
-        result.image || "",
-        result.disease || "",
-        result.confidence || "",
-        result.chemical || "",
-        result.fertilizer || "",
-        result.treatment || ""
+        result.result_id ?? "",
+        result.timestamp ?? "",
+        result.image ?? "",
+        result.disease ?? "",
+        result.confidence ?? "",
+        result.chemical ?? "",
+        result.fertilizer ?? "",
+        result.treatment ?? ""
 
     ].join("|");
 
@@ -3391,7 +5266,7 @@ function makeResultKey(result) {
 
 
 /* =========================================================
-   STATISTICS
+   UPDATE STATISTICS
 ========================================================= */
 
 function updateStatistics(statistics) {
@@ -3400,14 +5275,23 @@ function updateStatistics(statistics) {
         return;
     }
 
+
     const total =
-        Number(statistics.total || 0);
+        safeNumber(
+            statistics.total
+        );
+
 
     const healthy =
-        Number(statistics.healthy || 0);
+        safeNumber(
+            statistics.healthy
+        );
+
 
     const diseased =
-        Number(statistics.diseased || 0);
+        safeNumber(
+            statistics.diseased
+        );
 
 
     setText(
@@ -3415,10 +5299,12 @@ function updateStatistics(statistics) {
         total
     );
 
+
     setText(
         "healthy-predictions",
         healthy
     );
+
 
     setText(
         "diseased-predictions",
@@ -3458,19 +5344,74 @@ function updateStatistics(statistics) {
    UPDATE IMAGE
 ========================================================= */
 
-function updateImage(filename) {
+function updateImage(filename, timestamp = "") {
 
     const imageBox =
         document.getElementById(
             "image-box"
         );
 
+
     if (!imageBox) {
         return;
     }
 
+
     if (!filename) {
+
+        const existingImage =
+            document.getElementById(
+                "latest-leaf-image"
+            );
+
+        if (existingImage) {
+
+            existingImage.remove();
+
+        }
+
+
+        if (!document.getElementById("image-placeholder")) {
+
+            const placeholder =
+                document.createElement("div");
+
+            placeholder.id =
+                "image-placeholder";
+
+            placeholder.className =
+                "image-placeholder";
+
+            placeholder.textContent =
+                "🌿";
+
+            imageBox.appendChild(
+                placeholder
+            );
+
+        }
+
+
+        setText(
+            "image-name",
+            "No image available"
+        );
+
         return;
+
+    }
+
+
+    const placeholder =
+        document.getElementById(
+            "image-placeholder"
+        );
+
+
+    if (placeholder) {
+
+        placeholder.remove();
+
     }
 
 
@@ -3482,10 +5423,10 @@ function updateImage(filename) {
 
     if (!image) {
 
-        imageBox.innerHTML = "";
-
         image =
-            document.createElement("img");
+            document.createElement(
+                "img"
+            );
 
         image.id =
             "latest-leaf-image";
@@ -3493,43 +5434,59 @@ function updateImage(filename) {
         image.alt =
             "Latest Plant Leaf";
 
-        image.style.width =
-            "100%";
-
-        image.style.height =
-            "100%";
-
-        image.style.objectFit =
-            "contain";
-
-        imageBox.appendChild(image);
+        imageBox.appendChild(
+            image
+        );
 
     }
+
+
+    const cacheValue =
+        timestamp ||
+        Date.now();
 
 
     const imageURL =
 
         "/static/images/" +
 
-        encodeURIComponent(filename) +
+        encodeURIComponent(
+            filename
+        ) +
 
         "?v=" +
 
-        Date.now() +
-
-        "&r=" +
-
-        Math.random();
+        encodeURIComponent(
+            cacheValue
+        );
 
 
-    image.src =
-        imageURL;
+    if (
+        image.getAttribute("src") !==
+        imageURL
+    ) {
+
+        image.src =
+            imageURL;
+
+    }
 
 
     setText(
         "image-name",
         filename
     );
+
+
+    image.onerror =
+        function() {
+
+            console.warn(
+                "Unable to load image:",
+                filename
+            );
+
+        };
 
 }
 
@@ -3545,43 +5502,66 @@ function updateResult(result) {
     }
 
 
+    const disease =
+        result.disease ||
+        "No prediction yet";
+
+
+    const chemical =
+        result.chemical ||
+        "Not available";
+
+
+    const fertilizer =
+        result.fertilizer ||
+        "Not available";
+
+
+    const treatment =
+        result.treatment ||
+        "No prediction has been processed yet.";
+
+
+    const confidence =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                safeNumber(
+                    result.confidence
+                )
+            )
+        );
+
+
     setText(
         "disease-result",
-        result.disease ||
-        "No prediction yet"
+        disease
     );
 
 
     setText(
         "chemical-result",
-        result.chemical ||
-        "Not available"
+        chemical
     );
 
 
     setText(
         "fertilizer-result",
-        result.fertilizer ||
-        "Not available"
+        fertilizer
     );
 
 
     setText(
         "treatment-result",
-        result.treatment ||
-        "No prediction has been processed yet."
+        treatment
     );
-
-
-    const confidence =
-        Number(
-            result.confidence || 0
-        );
 
 
     setText(
         "confidence-value",
-        confidence.toFixed(2) + "%"
+        confidence.toFixed(2) +
+        "%"
     );
 
 
@@ -3594,20 +5574,14 @@ function updateResult(result) {
     if (confidenceBar) {
 
         confidenceBar.style.width =
-
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    confidence
-                )
-            ) + "%";
+            confidence + "%";
 
     }
 
 
     updateImage(
-        result.image
+        result.image,
+        result.timestamp
     );
 
 
@@ -3617,19 +5591,21 @@ function updateResult(result) {
         );
 
 
-    cards.forEach(function(card) {
+    cards.forEach(
+        function(card) {
 
-        card.classList.remove(
-            "updated"
-        );
+            card.classList.remove(
+                "updated"
+            );
 
-        void card.offsetWidth;
+            void card.offsetWidth;
 
-        card.classList.add(
-            "updated"
-        );
+            card.classList.add(
+                "updated"
+            );
 
-    });
+        }
+    );
 
 
     setText(
@@ -3671,28 +5647,50 @@ function updateResult(result) {
     }
 
 
-    setTimeout(function() {
+    if (resultMessageTimer) {
 
-        setText(
-            "analysis-status",
-            "Live Monitoring"
+        clearTimeout(
+            resultMessageTimer
         );
 
-        setText(
-            "live-update-text",
-            "Live Monitoring"
-        );
+    }
 
-    }, 3000);
+
+    resultMessageTimer =
+        setTimeout(
+            function() {
+
+                setText(
+                    "analysis-status",
+                    "Live Monitoring"
+                );
+
+                setText(
+                    "live-update-text",
+                    "Live Monitoring"
+                );
+
+            },
+            3000
+        );
 
 }
 
 
 /* =========================================================
-   ROVER STATUS
+   UPDATE ROVER STATUS
 ========================================================= */
 
 async function updateRoverStatus() {
+
+    if (roverRequestInProgress) {
+        return;
+    }
+
+
+    roverRequestInProgress =
+        true;
+
 
     try {
 
@@ -3702,11 +5700,7 @@ async function updateRoverStatus() {
 
             "?v=" +
 
-            Date.now() +
-
-            "&r=" +
-
-            Math.random();
+            Date.now();
 
 
         const response =
@@ -3728,18 +5722,22 @@ async function updateRoverStatus() {
                         "Pragma":
                             "no-cache",
 
-                        "Expires":
-                            "0",
-
                         "Accept":
                             "application/json"
+
                     }
+
                 }
             );
 
 
         if (!response.ok) {
-            return;
+
+            throw new Error(
+                "Rover status HTTP " +
+                response.status
+            );
+
         }
 
 
@@ -3749,10 +5747,14 @@ async function updateRoverStatus() {
 
         if (
             !data ||
-            !data.success ||
+            data.success !== true ||
             !data.rover
         ) {
-            return;
+
+            throw new Error(
+                "Invalid rover response"
+            );
+
         }
 
 
@@ -3768,7 +5770,7 @@ async function updateRoverStatus() {
 
         if (roverStatus) {
 
-            if (rover.connected) {
+            if (Boolean(rover.connected)) {
 
                 roverStatus.textContent =
                     "CONNECTED";
@@ -3799,7 +5801,7 @@ async function updateRoverStatus() {
 
         if (pumpStatus) {
 
-            if (rover.pump) {
+            if (Boolean(rover.pump)) {
 
                 pumpStatus.textContent =
                     "ON";
@@ -3830,23 +5832,65 @@ async function updateRoverStatus() {
             error
         );
 
+
+        const roverStatus =
+            document.getElementById(
+                "rover-status"
+            );
+
+
+        if (roverStatus) {
+
+            roverStatus.textContent =
+                "NOT CONNECTED";
+
+            roverStatus.className =
+                "status-offline";
+
+        }
+
+
+        const pumpStatus =
+            document.getElementById(
+                "pump-status"
+            );
+
+
+        if (pumpStatus) {
+
+            pumpStatus.textContent =
+                "OFF";
+
+            pumpStatus.className =
+                "status-offline";
+
+        }
+
+    }
+
+    finally {
+
+        roverRequestInProgress =
+            false;
+
     }
 
 }
 
 
 /* =========================================================
-   MAIN LIVE DASHBOARD
+   DASHBOARD API
 ========================================================= */
 
 async function checkDashboard() {
 
-    if (requestInProgress) {
+    if (dashboardRequestInProgress) {
         return;
     }
 
 
-    requestInProgress = true;
+    dashboardRequestInProgress =
+        true;
 
 
     try {
@@ -3857,18 +5901,12 @@ async function checkDashboard() {
 
             "?_=" +
 
-            Date.now() +
-
-            "&r=" +
-
-            Math.random();
+            Date.now();
 
 
         const response =
             await fetch(
-
                 url,
-
                 {
                     method: "GET",
 
@@ -3885,14 +5923,12 @@ async function checkDashboard() {
                         "Pragma":
                             "no-cache",
 
-                        "Expires":
-                            "0",
-
                         "Accept":
                             "application/json"
-                    }
-                }
 
+                    }
+
+                }
             );
 
 
@@ -3916,24 +5952,21 @@ async function checkDashboard() {
         ) {
 
             throw new Error(
-                "Invalid API response"
+                "Invalid dashboard response"
             );
 
         }
 
 
-        consecutiveErrors = 0;
+        consecutiveErrors =
+            0;
 
+
+        /* SYSTEM ONLINE */
 
         setText(
             "system-status-text",
             "AI System Online"
-        );
-
-
-        setText(
-            "live-update-text",
-            "Live Monitoring"
         );
 
 
@@ -3956,10 +5989,20 @@ async function checkDashboard() {
         }
 
 
+        setText(
+            "live-update-text",
+            "Live Monitoring"
+        );
+
+
+        /* STATISTICS */
+
         updateStatistics(
             data.statistics
         );
 
+
+        /* SERVER TIME */
 
         if (data.server_time) {
 
@@ -3972,12 +6015,16 @@ async function checkDashboard() {
         }
 
 
+        /* RESULT */
+
         const result =
             data.result || {};
 
 
         const currentKey =
-            makeResultKey(result);
+            makeResultKey(
+                result
+            );
 
 
         if (firstLoad) {
@@ -3999,7 +6046,6 @@ async function checkDashboard() {
             );
 
         }
-
 
         else if (
             currentKey !==
@@ -4036,7 +6082,9 @@ async function checkDashboard() {
 
         setText(
             "system-status-text",
-            "Connecting..."
+            consecutiveErrors >= 3
+                ? "Server Offline"
+                : "Connecting..."
         );
 
 
@@ -4074,7 +6122,7 @@ async function checkDashboard() {
 
     finally {
 
-        requestInProgress =
+        dashboardRequestInProgress =
             false;
 
     }
@@ -4150,14 +6198,27 @@ document.addEventListener(
                 deferredInstallPrompt.prompt();
 
 
-                const choice =
-                    await deferredInstallPrompt.userChoice;
+                try {
+
+                    const choice =
+                        await deferredInstallPrompt.userChoice;
 
 
-                console.log(
-                    "Install result:",
-                    choice.outcome
-                );
+                    console.log(
+                        "Install result:",
+                        choice.outcome
+                    );
+
+                }
+
+                catch(error) {
+
+                    console.log(
+                        "Install prompt error:",
+                        error
+                    );
+
+                }
 
 
                 deferredInstallPrompt =
@@ -4208,7 +6269,9 @@ window.addEventListener(
    SERVICE WORKER
 ========================================================= */
 
-if ("serviceWorker" in navigator) {
+if (
+    "serviceWorker" in navigator
+) {
 
     window.addEventListener(
         "load",
@@ -4225,20 +6288,12 @@ if ("serviceWorker" in navigator) {
                 function(registration) {
 
                     console.log(
-                        "=========================================="
-                    );
-
-                    console.log(
                         "SMART ROVER SERVICE WORKER REGISTERED"
                     );
 
                     console.log(
                         "Scope:",
                         registration.scope
-                    );
-
-                    console.log(
-                        "=========================================="
                     );
 
                 }
@@ -4287,19 +6342,15 @@ checkDashboard();
 updateRoverStatus();
 
 
-/*
-   Check AI dashboard every 1 second.
-*/
+/* =========================================================
+   LIVE REFRESH
+========================================================= */
 
 setInterval(
     checkDashboard,
     1000
 );
 
-
-/*
-   Check rover every 1 second.
-*/
 
 setInterval(
     updateRoverStatus,
@@ -4324,6 +6375,7 @@ document.addEventListener(
                 "App became visible. Updating data..."
             );
 
+
             checkDashboard();
 
             updateRoverStatus();
@@ -4345,6 +6397,10 @@ window.addEventListener(
         console.log(
             "Internet connection restored."
         );
+
+
+        consecutiveErrors =
+            0;
 
 
         checkDashboard();
