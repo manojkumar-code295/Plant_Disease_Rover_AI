@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Daily Data | Precision Agriculture</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7f5;
+            color: #1f2937;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        header {
+            background: #12372a;
+            color: white;
+            padding: 22px 40px;
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header p {
+            margin-top: 6px;
+            color: #cbded3;
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+        ===================================================== */
+
+        nav {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #374151;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #2f7d57;
+        }
+
+        nav a.active {
+            color: #23613e;
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        main {
+            max-width: 1350px;
+            margin: auto;
+            padding: 35px 40px;
+        }
+
+
+        /* =====================================================
+           PAGE TITLE
+        ===================================================== */
+
+        .page-title {
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            color: #12372a;
+            font-size: 26px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+            margin-top: 7px;
+        }
+
+
+        /* =====================================================
+           TOP SUMMARY
+        ===================================================== */
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .summary-card span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .summary-card h2 {
+            margin-top: 10px;
+            color: #12372a;
+            font-size: 30px;
+        }
+
+        .healthy {
+            color: #16a34a !important;
+        }
+
+        .diseased {
+            color: #dc2626 !important;
+        }
+
+
+        /* =====================================================
+           CONTROL BAR
+        ===================================================== */
+
+        .control-bar {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-bar h3 {
+            color: #12372a;
+        }
+
+        .control-bar p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .clear-button {
+            border: none;
+            background: #dc2626;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .clear-button:hover {
+            background: #b91c1c;
+        }
+
+
+        /* =====================================================
+           DAILY CARD
+        ===================================================== */
+
+        .daily-card {
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+
+
+        /* =====================================================
+           DAILY HEADER
+        ===================================================== */
+
+        .daily-header {
+            padding: 22px 25px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .date-section h3 {
+            color: #12372a;
+            font-size: 21px;
+        }
+
+        .date-section p {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .date-badge {
+            display: inline-block;
+            background: #e8f5ed;
+            color: #23613e;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+
+        /* =====================================================
+           DAILY STATISTICS
+        ===================================================== */
+
+        .daily-stats {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            padding: 20px 25px;
+            background: #fafcfb;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stat-box span {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .stat-box strong {
+            font-size: 21px;
+            color: #12372a;
+        }
+
+        .stat-box.healthy-box strong {
+            color: #16a34a;
+        }
+
+        .stat-box.diseased-box strong {
+            color: #dc2626;
+        }
+
+        .stat-box.bacterial-box strong {
+            color: #dc2626;
+        }
+
+        .stat-box.cercospora-box strong {
+            color: #d97706;
+        }
+
+        .stat-box.curl-box strong {
+            color: #7c3aed;
+        }
+
+
+        /* =====================================================
+           CONFIDENCE
+        ===================================================== */
+
+        .confidence-section {
+            padding: 0 25px 22px 25px;
+        }
+
+        .confidence-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .confidence-header strong {
+            color: #12372a;
+        }
+
+        .confidence-background {
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background: #23613e;
+            border-radius: 20px;
+        }
+
+
+        /* =====================================================
+           RECORDS
+        ===================================================== */
+
+        .records-section {
+            padding: 0 25px 25px 25px;
+        }
+
+        .records-section h4 {
+            color: #12372a;
+            margin-bottom: 15px;
+        }
+
+        .record-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .record-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        .record-table th {
+            background: #f3f6f4;
+            color: #374151;
+            text-align: left;
+            padding: 12px;
+            font-size: 13px;
+        }
+
+        .record-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .record-table tr:hover {
+            background: #fafafa;
+        }
+
+
+        /* =====================================================
+           DISEASE BADGES
+        ===================================================== */
+
+        .disease-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .disease-healthy {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .disease-bacterial {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .disease-cercospora {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .disease-curl {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .disease-other {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+
+        /* =====================================================
+           IMAGE
+        ===================================================== */
+
+        .leaf-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+
+        /* =====================================================
+           NO DATA
+        ===================================================== */
+
+        .no-data {
+            background: white;
+            border-radius: 15px;
+            padding: 60px 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .no-data h3 {
+            color: #12372a;
+            margin-bottom: 10px;
+        }
+
+        .no-data p {
+            color: #6b7280;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media(max-width: 1100px) {
+
+            .daily-stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+
+        @media(max-width: 700px) {
+
+            main {
+                padding: 25px 20px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            nav {
+                padding: 15px 20px;
+                gap: 18px;
+            }
+
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            .daily-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+
+        @media(max-width: 450px) {
+
+            .daily-stats {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+    <h1>
+        🌱 Precision Agriculture Smart Rover
+    </h1>
+
+    <p>
+        AI Detection Analytics
+    </p>
+
+</header>
+
+
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
+
+<nav>
+
+    <a href="/">
+        Dashboard
+    </a>
+
+    <a href="/rover">
+        Rover Control
+    </a>
+
+    <a href="/dataset">
+        Dataset
+    </a>
+
+    <a href="/analytics">
+        Analytics
+    </a>
+
+    <a href="/daily-data" class="active">
+        Daily Data
+    </a>
+
+    <a href="/settings">
+        Settings
+    </a>
+
+</nav>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main>
+
+
+    <!-- PAGE TITLE -->
+
+    <div class="page-title">
+
+        <h2>
+            Daily Prediction Data
+        </h2>
+
+        <p>
+            View AI prediction statistics separately for each day.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         OVERALL SUMMARY
+    ===================================================== -->
+
+    <div class="summary">
+
+
+        <div class="summary-card">
+
+            <span>
+                Days Recorded
+            </span>
+
+            <h2>
+                {{ daily_data|length }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Total Predictions
+            </span>
+
+            <h2>
+                {{ statistics.total }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Healthy Leaves
+            </span>
+
+            <h2 class="healthy">
+                {{ statistics.healthy }}
+            </h2>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <span>
+                Diseased Leaves
+            </span>
+
+            <h2 class="diseased">
+                {{ statistics.diseased }}
+            </h2>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         CONTROL BAR
+    ===================================================== -->
+
+    <div class="control-bar">
+
+        <div>
+
+            <h3>
+                📊 Stored Daily Records
+            </h3>
+
+            <p>
+                Each day is stored independently in daily_data.json.
+            </p>
+
+        </div>
+
+
+        {% if daily_data|length > 0 %}
+
+        <button
+            class="clear-button"
+            onclick="clearDailyData()">
+
+            Clear Daily Data
+
+        </button>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         DAILY DATA
+    ===================================================== -->
+
+    {% if daily_data|length > 0 %}
+
+
+        {% for day in daily_data %}
+
+        <div class="daily-card">
+
+
+            <!-- DAILY HEADER -->
+
+            <div class="daily-header">
+
+                <div class="date-section">
+
+                    <h3>
+                        📅 {{ day.date }}
+                    </h3>
+
+                    <p>
+                        Daily AI prediction summary
+                    </p>
+
+                    <span class="date-badge">
+
+                        {{ day.total }} prediction
+                        {% if day.total != 1 %}
+                            s
+                        {% endif %}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DAILY STATISTICS
+            ================================================== -->
+
+            <div class="daily-stats">
+
+
+                <div class="stat-box">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        {{ day.total }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box healthy-box">
+
+                    <span>
+                        Healthy
+                    </span>
+
+                    <strong>
+                        {{ day.healthy }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box diseased-box">
+
+                    <span>
+                        Diseased
+                    </span>
+
+                    <strong>
+                        {{ day.diseased }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box bacterial-box">
+
+                    <span>
+                        Bacterial Spot
+                    </span>
+
+                    <strong>
+                        {{ day.bacterial_spot }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box cercospora-box">
+
+                    <span>
+                        Cercospora
+                    </span>
+
+                    <strong>
+                        {{ day.cercospora }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box curl-box">
+
+                    <span>
+                        Curl Virus
+                    </span>
+
+                    <strong>
+                        {{ day.curl_virus }}
+                    </strong>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <span>
+                        Unclear / Other
+                    </span>
+
+                    <strong>
+                        {{ day.unclear + day.other }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 AVERAGE CONFIDENCE
+            ================================================== -->
+
+            <div class="confidence-section">
+
+                <div class="confidence-header">
+
+                    <span>
+                        Average AI Confidence
+                    </span>
+
+                    <strong>
+                        {{ day.average_confidence }}%
+                    </strong>
+
+                </div>
+
+
+                <div class="confidence-background">
+
+                    <div
+                        class="confidence-bar"
+                        style="width:
+                        {% if day.average_confidence > 100 %}
+                            100
+                        {% elif day.average_confidence < 0 %}
+                            0
+                        {% else %}
+                            {{ day.average_confidence }}
+                        {% endif %}%;">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INDIVIDUAL RECORDS
+            ================================================== -->
+
+            {% if day.records|length > 0 %}
+
+            <div class="records-section">
+
+                <h4>
+                    Individual Predictions
+                </h4>
+
+
+                <div class="record-table-wrapper">
+
+                    <table class="record-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Image
+                                </th>
+
+                                <th>
+                                    Time
+                                </th>
+
+                                <th>
+                                    Disease
+                                </th>
+
+                                <th>
+                                    Confidence
+                                </th>
+
+                                <th>
+                                    Chemical
+                                </th>
+
+                                <th>
+                                    Fertilizer
+                                </th>
+
+                                <th>
+                                    Treatment
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for record in day.records %}
+
+                            <tr>
+
+
+                                <!-- IMAGE -->
+
+                                <td>
+
+                                    {% if record.image %}
+
+                                    <img
+                                        class="leaf-image"
+                                        src="/static/images/{{ record.image }}"
+                                        alt="Leaf">
+
+                                    {% else %}
+
+                                    N/A
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- TIME -->
+
+                                <td>
+
+                                    {% if record.timestamp|length >= 19 %}
+
+                                        {{ record.timestamp[11:19] }}
+
+                                    {% else %}
+
+                                        {{ record.timestamp }}
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- DISEASE -->
+
+                                <td>
+
+                                    {% set disease_lower =
+                                        record.disease|lower
+                                    %}
+
+
+                                    {% if "healthy" in disease_lower %}
+
+                                    <span
+                                        class="disease-badge disease-healthy">
+
+                                        Healthy
+
+                                    </span>
+
+
+                                    {% elif "bacterial" in disease_lower %}
+
+                                    <span
+                                        class="disease-badge disease-bacterial">
+
+                                        Bacterial Spot
+
+                                    </span>
+
+
+                                    {% elif "cercospora" in disease_lower %}
+
+                                    <span
+                                        class="disease-badge disease-cercospora">
+
+                                        Cercospora Leaf Spot
+
+                                    </span>
+
+
+                                    {% elif "curl" in disease_lower %}
+
+                                    <span
+                                        class="disease-badge disease-curl">
+
+                                        Curl Virus
+
+                                    </span>
+
+
+                                    {% else %}
+
+                                    <span
+                                        class="disease-badge disease-other">
+
+                                        {{ record.disease }}
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- CONFIDENCE -->
+
+                                <td>
+
+                                    {{ record.confidence }}%
+
+                                </td>
+
+
+                                <!-- CHEMICAL -->
+
+                                <td>
+
+                                    {{ record.chemical }}
+
+                                </td>
+
+
+                                <!-- FERTILIZER -->
+
+                                <td>
+
+                                    {{ record.fertilizer }}
+
+                                </td>
+
+
+                                <!-- TREATMENT -->
+
+                                <td>
+
+                                    {{ record.treatment }}
+
+                                </td>
+
+
+                            </tr>
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+
+        </div>
+
+        {% endfor %}
+
+
+    {% else %}
+
+
+        <!-- =================================================
+             NO DATA
+        ================================================== -->
+
+        <div class="no-data">
+
+            <h3>
+                📊 No Daily Data Available
+            </h3>
+
+            <p>
+                AI prediction data will appear here automatically
+                after the first leaf prediction is processed.
+            </p>
+
+        </div>
+
+
+    {% endif %}
+
+
+</main>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+async function clearDailyData() {
+
+    const confirmation = confirm(
+        "Are you sure you want to clear all daily prediction data?"
+    );
+
+
+    if (!confirmation) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response = await fetch(
+            "/api/daily-data/clear",
+            {
+                method: "POST"
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (data.success) {
+
+            alert(
+                "Daily prediction data cleared successfully."
+            );
+
+            location.reload();
+
+        }
+
+        else {
+
+            alert(
+                data.message ||
+                "Unable to clear daily data."
+            );
+
+        }
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "CLEAR DAILY DATA ERROR:",
+            error
+        );
+
+        alert(
+            "Server error while clearing daily data."
+        );
+
+    }
+
+}
+
+</script>
+
+
+</body>
+
+</html>

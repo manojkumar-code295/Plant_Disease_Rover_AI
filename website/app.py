@@ -33,17 +33,44 @@ app.config["JSON_SORT_KEYS"] = False
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TEMPLATE_FOLDER = os.path.join(BASE_DIR, "templates")
-STATIC_FOLDER = os.path.join(BASE_DIR, "static")
-IMAGE_FOLDER = os.path.join(STATIC_FOLDER, "images")
+TEMPLATE_FOLDER = os.path.join(
+    BASE_DIR,
+    "templates"
+)
 
-RESULT_FILE = os.path.join(BASE_DIR, "result.json")
-HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+STATIC_FOLDER = os.path.join(
+    BASE_DIR,
+    "static"
+)
+
+IMAGE_FOLDER = os.path.join(
+    STATIC_FOLDER,
+    "images"
+)
+
+RESULT_FILE = os.path.join(
+    BASE_DIR,
+    "result.json"
+)
+
+HISTORY_FILE = os.path.join(
+    BASE_DIR,
+    "history.json"
+)
+
+# NEW: DAILY DATA FILE
+DAILY_DATA_FILE = os.path.join(
+    BASE_DIR,
+    "daily_data.json"
+)
 
 app.template_folder = TEMPLATE_FOLDER
 app.static_folder = STATIC_FOLDER
 
-os.makedirs(IMAGE_FOLDER, exist_ok=True)
+os.makedirs(
+    IMAGE_FOLDER,
+    exist_ok=True
+)
 
 
 # ============================================================
@@ -59,6 +86,7 @@ def add_no_cache_headers(response):
     )
 
     response.headers["Pragma"] = "no-cache"
+
     response.headers["Expires"] = "0"
 
     return response
@@ -69,14 +97,24 @@ def add_no_cache_headers(response):
 # ============================================================
 
 DEFAULT_RESULT = {
+
     "result_id": "",
+
     "image": "",
+
     "disease": "No prediction yet",
+
     "chemical": "Not available",
+
     "fertilizer": "Not available",
-    "treatment": "No prediction has been processed yet.",
+
+    "treatment":
+        "No prediction has been processed yet.",
+
     "confidence": 0.0,
+
     "timestamp": ""
+
 }
 
 
@@ -101,6 +139,7 @@ rover_state = {
     "command_id": 0,
 
     "last_seen": None
+
 }
 
 
@@ -119,6 +158,7 @@ rover_settings = {
     "confidence_threshold": 80,
 
     "speed": 50
+
 }
 
 
@@ -126,11 +166,15 @@ rover_settings = {
 # JSON HELPERS
 # ============================================================
 
-def load_json_file(file_path, default_value):
+def load_json_file(
+    file_path,
+    default_value
+):
 
     try:
 
         if not os.path.exists(file_path):
+
             return default_value
 
         with open(
@@ -143,12 +187,18 @@ def load_json_file(file_path, default_value):
 
     except Exception as e:
 
-        print("JSON READ ERROR:", e)
+        print(
+            "JSON READ ERROR:",
+            e
+        )
 
         return default_value
 
 
-def save_json_file(file_path, data):
+def save_json_file(
+    file_path,
+    data
+):
 
     try:
 
@@ -168,7 +218,10 @@ def save_json_file(file_path, data):
 
     except Exception as e:
 
-        print("JSON WRITE ERROR:", e)
+        print(
+            "JSON WRITE ERROR:",
+            e
+        )
 
         return False
 
@@ -184,12 +237,17 @@ def get_latest_result():
         DEFAULT_RESULT.copy()
     )
 
-    if not isinstance(result, dict):
+    if not isinstance(
+        result,
+        dict
+    ):
+
         result = DEFAULT_RESULT.copy()
 
     for key, value in DEFAULT_RESULT.items():
 
         if key not in result:
+
             result[key] = value
 
     return result
@@ -214,7 +272,11 @@ def get_history():
         []
     )
 
-    if not isinstance(history, list):
+    if not isinstance(
+        history,
+        list
+    ):
+
         history = []
 
     return history
@@ -237,11 +299,313 @@ def add_history_record(result):
         result
     )
 
+    # Keep existing history behaviour
     history = history[:100]
 
     save_history(history)
 
     return history
+
+
+# ============================================================
+# DAILY DATA
+# ============================================================
+
+def get_daily_data():
+
+    daily_data = load_json_file(
+        DAILY_DATA_FILE,
+        {}
+    )
+
+    if not isinstance(
+        daily_data,
+        dict
+    ):
+
+        daily_data = {}
+
+    return daily_data
+
+
+def save_daily_data(daily_data):
+
+    return save_json_file(
+        DAILY_DATA_FILE,
+        daily_data
+    )
+
+
+def add_daily_record(result):
+
+    daily_data = get_daily_data()
+
+    timestamp = str(
+        result.get(
+            "timestamp",
+            ""
+        )
+    )
+
+    # Extract date from:
+    # YYYY-MM-DD HH:MM:SS
+
+    if len(timestamp) >= 10:
+
+        date = timestamp[:10]
+
+    else:
+
+        date = datetime.now().strftime(
+            "%Y-%m-%d"
+        )
+
+
+    # Create date if it doesn't exist
+
+    if date not in daily_data:
+
+        daily_data[date] = {
+
+            "date": date,
+
+            "total": 0,
+
+            "healthy": 0,
+
+            "diseased": 0,
+
+            "bacterial_spot": 0,
+
+            "cercospora": 0,
+
+            "curl_virus": 0,
+
+            "unclear": 0,
+
+            "other": 0,
+
+            "confidence_total": 0.0,
+
+            "confidence_count": 0,
+
+            "records": []
+
+        }
+
+
+    day = daily_data[date]
+
+
+    # --------------------------------------------------------
+    # TOTAL
+    # --------------------------------------------------------
+
+    day["total"] += 1
+
+
+    # --------------------------------------------------------
+    # DISEASE
+    # --------------------------------------------------------
+
+    disease = str(
+        result.get(
+            "disease",
+            ""
+        )
+    ).lower()
+
+
+    if "healthy" in disease:
+
+        day["healthy"] += 1
+
+
+    elif "bacterial" in disease:
+
+        day["bacterial_spot"] += 1
+
+        day["diseased"] += 1
+
+
+    elif "cercospora" in disease:
+
+        day["cercospora"] += 1
+
+        day["diseased"] += 1
+
+
+    elif "curl" in disease:
+
+        day["curl_virus"] += 1
+
+        day["diseased"] += 1
+
+
+    elif "unclear" in disease:
+
+        day["unclear"] += 1
+
+
+    else:
+
+        day["other"] += 1
+
+
+    # --------------------------------------------------------
+    # CONFIDENCE
+    # --------------------------------------------------------
+
+    try:
+
+        confidence = float(
+            result.get(
+                "confidence",
+                0
+            )
+        )
+
+        day["confidence_total"] += confidence
+
+        day["confidence_count"] += 1
+
+    except Exception:
+
+        pass
+
+
+    # --------------------------------------------------------
+    # COMPLETE RECORD
+    # --------------------------------------------------------
+
+    day["records"].insert(
+        0,
+        result
+    )
+
+
+    # --------------------------------------------------------
+    # SAVE
+    # --------------------------------------------------------
+
+    save_daily_data(
+        daily_data
+    )
+
+    return daily_data
+
+
+def get_daily_data_list():
+
+    daily_data = get_daily_data()
+
+    result = []
+
+
+    for date, day in daily_data.items():
+
+        confidence_count = day.get(
+            "confidence_count",
+            0
+        )
+
+        confidence_total = day.get(
+            "confidence_total",
+            0
+        )
+
+
+        if confidence_count:
+
+            average_confidence = round(
+                confidence_total
+                /
+                confidence_count,
+                2
+            )
+
+        else:
+
+            average_confidence = 0
+
+
+        result.append({
+
+            "date":
+                day.get(
+                    "date",
+                    date
+                ),
+
+            "total":
+                day.get(
+                    "total",
+                    0
+                ),
+
+            "healthy":
+                day.get(
+                    "healthy",
+                    0
+                ),
+
+            "diseased":
+                day.get(
+                    "diseased",
+                    0
+                ),
+
+            "bacterial_spot":
+                day.get(
+                    "bacterial_spot",
+                    0
+                ),
+
+            "cercospora":
+                day.get(
+                    "cercospora",
+                    0
+                ),
+
+            "curl_virus":
+                day.get(
+                    "curl_virus",
+                    0
+                ),
+
+            "unclear":
+                day.get(
+                    "unclear",
+                    0
+                ),
+
+            "other":
+                day.get(
+                    "other",
+                    0
+                ),
+
+            "average_confidence":
+                average_confidence,
+
+            "records":
+                day.get(
+                    "records",
+                    []
+                )
+
+        })
+
+
+    # Newest date first
+
+    result.sort(
+        key=lambda x: x["date"],
+        reverse=True
+    )
+
+
+    return result
 
 
 # ============================================================
@@ -255,13 +619,19 @@ def get_analytics():
     total = len(history)
 
     healthy = 0
+
     bacterial_spot = 0
+
     cercospora = 0
+
     curl_virus = 0
+
     unclear = 0
+
     other = 0
 
     confidence_total = 0.0
+
     confidence_count = 0
 
 
@@ -279,21 +649,26 @@ def get_analytics():
 
             healthy += 1
 
+
         elif "bacterial" in disease:
 
             bacterial_spot += 1
+
 
         elif "cercospora" in disease:
 
             cercospora += 1
 
+
         elif "curl" in disease:
 
             curl_virus += 1
 
+
         elif "unclear" in disease:
 
             unclear += 1
+
 
         else:
 
@@ -310,6 +685,7 @@ def get_analytics():
             )
 
             confidence_total += confidence
+
             confidence_count += 1
 
         except Exception:
@@ -320,7 +696,8 @@ def get_analytics():
     if confidence_count:
 
         average_confidence = (
-            confidence_total /
+            confidence_total
+            /
             confidence_count
         )
 
@@ -331,24 +708,31 @@ def get_analytics():
 
     diseased = (
         bacterial_spot
-        + cercospora
-        + curl_virus
+        +
+        cercospora
+        +
+        curl_virus
     )
 
 
     if total:
 
         disease_percentage = (
-            diseased / total
+            diseased
+            /
+            total
         ) * 100
 
         healthy_percentage = (
-            healthy / total
+            healthy
+            /
+            total
         ) * 100
 
     else:
 
         disease_percentage = 0
+
         healthy_percentage = 0
 
 
@@ -367,22 +751,35 @@ def get_analytics():
 
         "other": other,
 
-        "bacterial_spot": bacterial_spot,
+        "bacterial_spot":
+            bacterial_spot,
 
-        "cercospora": cercospora,
+        "cercospora":
+            cercospora,
 
-        "cercospora_leaf_spot": cercospora,
+        "cercospora_leaf_spot":
+            cercospora,
 
-        "curl_virus": curl_virus,
+        "curl_virus":
+            curl_virus,
 
         "healthy_percentage":
-            round(healthy_percentage, 2),
+            round(
+                healthy_percentage,
+                2
+            ),
 
         "disease_percentage":
-            round(disease_percentage, 2),
+            round(
+                disease_percentage,
+                2
+            ),
 
         "average_confidence":
-            round(average_confidence, 2),
+            round(
+                average_confidence,
+                2
+            ),
 
         "last_prediction":
             latest.get(
@@ -407,6 +804,7 @@ def get_analytics():
                 "timestamp",
                 ""
             )
+
     }
 
 
@@ -420,19 +818,29 @@ def get_dashboard_data():
 
     return {
 
-        "result": result,
+        "result":
+            result,
 
-        "detection": result,
+        "detection":
+            result,
 
-        "latest_result": result,
+        "latest_result":
+            result,
 
-        "statistics": get_analytics(),
+        "statistics":
+            get_analytics(),
 
-        "history": get_history(),
+        "history":
+            get_history(),
 
-        "rover": rover_state,
+        "daily_data":
+            get_daily_data_list(),
 
-        "settings": rover_settings
+        "rover":
+            rover_state,
+
+        "settings":
+            rover_settings
 
     }
 
@@ -457,12 +865,51 @@ def analytics():
 
     return render_template(
         "analytics.html",
+
         result=result,
+
         detection=result,
+
         latest_result=result,
+
         statistics=get_analytics(),
+
         history=get_history(),
+
+        daily_data=get_daily_data_list(),
+
         rover=rover_state,
+
+        settings=rover_settings
+    )
+
+
+# ============================================================
+# DAILY DATA PAGE
+# ============================================================
+
+@app.route("/daily-data")
+def daily_data():
+
+    result = get_latest_result()
+
+    return render_template(
+        "daily_data.html",
+
+        result=result,
+
+        detection=result,
+
+        latest_result=result,
+
+        statistics=get_analytics(),
+
+        history=get_history(),
+
+        daily_data=get_daily_data_list(),
+
+        rover=rover_state,
+
         settings=rover_settings
     )
 
@@ -474,12 +921,21 @@ def dataset():
 
     return render_template(
         "dataset.html",
+
         result=result,
+
         detection=result,
+
         latest_result=result,
+
         statistics=get_analytics(),
+
         history=get_history(),
+
+        daily_data=get_daily_data_list(),
+
         rover=rover_state,
+
         settings=rover_settings
     )
 
@@ -491,12 +947,21 @@ def rover():
 
     return render_template(
         "rover.html",
+
         result=result,
+
         detection=result,
+
         latest_result=result,
+
         statistics=get_analytics(),
+
+        history=get_history(),
+
         rover=rover_state,
+
         rover_state=rover_state,
+
         settings=rover_settings
     )
 
@@ -508,11 +973,19 @@ def settings():
 
     return render_template(
         "settings.html",
+
         result=result,
+
         detection=result,
+
         latest_result=result,
+
         statistics=get_analytics(),
+
+        history=get_history(),
+
         rover=rover_state,
+
         settings=rover_settings
     )
 
@@ -521,14 +994,18 @@ def settings():
 # PWA ICON
 # ============================================================
 
-@app.route("/static/icons/<path:filename>")
+@app.route(
+    "/static/icons/<path:filename>"
+)
 def pwa_icon(filename):
 
     return send_from_directory(
+
         os.path.join(
             STATIC_FOLDER,
             "icons"
         ),
+
         filename
     )
 
@@ -545,7 +1022,10 @@ def manifest():
         "manifest.json"
     )
 
-    if not os.path.exists(manifest_path):
+
+    if not os.path.exists(
+        manifest_path
+    ):
 
         return jsonify({
 
@@ -579,11 +1059,15 @@ def manifest():
         data = f.read()
 
 
-    response = make_response(data)
+    response = make_response(
+        data
+    )
+
 
     response.headers[
         "Content-Type"
     ] = "application/manifest+json"
+
 
     return response
 
@@ -599,6 +1083,7 @@ def service_worker():
         STATIC_FOLDER,
         "service-worker.js"
     )
+
 
     if not os.path.exists(path):
 
@@ -621,13 +1106,16 @@ def service_worker():
         javascript
     )
 
+
     response.headers[
         "Content-Type"
     ] = "application/javascript"
 
+
     response.headers[
         "Service-Worker-Allowed"
     ] = "/"
+
 
     return response
 
@@ -636,17 +1124,22 @@ def service_worker():
 # HEALTH
 # ============================================================
 
-@app.route("/api/health", methods=["GET"])
+@app.route(
+    "/api/health",
+    methods=["GET"]
+)
 def health():
 
     return jsonify({
 
-        "api": "working",
+        "api":
+            "working",
 
         "service":
             "Precision Agriculture Smart Rover",
 
-        "status": "online"
+        "status":
+            "online"
 
     })
 
@@ -655,12 +1148,16 @@ def health():
 # RESULT API
 # ============================================================
 
-@app.route("/api/result", methods=["GET"])
+@app.route(
+    "/api/result",
+    methods=["GET"]
+)
 def api_result():
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "result":
             get_latest_result()
@@ -680,13 +1177,17 @@ def api_dashboard_state():
 
     response = jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "result":
             get_latest_result(),
 
         "statistics":
             get_analytics(),
+
+        "daily_data":
+            get_daily_data_list(),
 
         "rover":
             rover_state,
@@ -708,14 +1209,18 @@ def api_dashboard_state():
 # HISTORY API
 # ============================================================
 
-@app.route("/api/history", methods=["GET"])
+@app.route(
+    "/api/history",
+    methods=["GET"]
+)
 def api_history():
 
     history = get_history()
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "count":
             len(history),
@@ -727,15 +1232,45 @@ def api_history():
 
 
 # ============================================================
+# DAILY DATA API
+# ============================================================
+
+@app.route(
+    "/api/daily-data",
+    methods=["GET"]
+)
+def api_daily_data():
+
+    daily_data = get_daily_data_list()
+
+    return jsonify({
+
+        "success":
+            True,
+
+        "count":
+            len(daily_data),
+
+        "daily_data":
+            daily_data
+
+    })
+
+
+# ============================================================
 # ANALYTICS API
 # ============================================================
 
-@app.route("/api/analytics", methods=["GET"])
+@app.route(
+    "/api/analytics",
+    methods=["GET"]
+)
 def api_analytics():
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "statistics":
             get_analytics()
@@ -761,20 +1296,24 @@ def update_result():
             "Unknown"
         )
 
+
         chemical = request.form.get(
             "chemical",
             "Not available"
         )
+
 
         fertilizer = request.form.get(
             "fertilizer",
             "Not available"
         )
 
+
         treatment = request.form.get(
             "treatment",
             "Not available"
         )
+
 
         confidence = request.form.get(
             "confidence",
@@ -811,7 +1350,8 @@ def update_result():
 
             return jsonify({
 
-                "success": False,
+                "success":
+                    False,
 
                 "message":
                     "No image received"
@@ -820,7 +1360,9 @@ def update_result():
 
 
         original_filename = os.path.basename(
-            image.filename or "leaf.jpg"
+            image.filename
+            or
+            "leaf.jpg"
         )
 
 
@@ -830,16 +1372,28 @@ def update_result():
 
 
         if not extension:
+
             extension = ".jpg"
 
 
         filename = (
+
             datetime.now().strftime(
                 "%Y%m%d_%H%M%S"
             )
-            + "_"
-            + uuid.uuid4().hex[:8]
-            + extension
+
+            +
+
+            "_"
+
+            +
+
+            uuid.uuid4().hex[:8]
+
+            +
+
+            extension
+
         )
 
 
@@ -885,9 +1439,31 @@ def update_result():
         }
 
 
-        save_latest_result(result)
+        # ----------------------------------------------------
+        # SAVE LATEST RESULT
+        # ----------------------------------------------------
 
-        add_history_record(result)
+        save_latest_result(
+            result
+        )
+
+
+        # ----------------------------------------------------
+        # SAVE NORMAL HISTORY
+        # ----------------------------------------------------
+
+        add_history_record(
+            result
+        )
+
+
+        # ----------------------------------------------------
+        # SAVE DAILY DATA
+        # ----------------------------------------------------
+
+        add_daily_record(
+            result
+        )
 
 
         print(
@@ -897,12 +1473,19 @@ def update_result():
         )
 
 
+        print(
+            "DAILY DATA SAVED FOR:",
+            result["timestamp"][:10]
+        )
+
+
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
-                "AI result and image updated successfully",
+                "AI result, history and daily data updated successfully",
 
             "result":
                 result
@@ -917,9 +1500,11 @@ def update_result():
             e
         )
 
+
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -951,6 +1536,7 @@ def rover_control():
 
 
         if data is None:
+
             data = request.form
 
 
@@ -977,7 +1563,8 @@ def rover_control():
 
             return jsonify({
 
-                "success": False,
+                "success":
+                    False,
 
                 "message":
                     "Invalid rover command",
@@ -990,15 +1577,20 @@ def rover_control():
 
         direction_names = {
 
-            "forward": "Forward",
+            "forward":
+                "Forward",
 
-            "backward": "Backward",
+            "backward":
+                "Backward",
 
-            "left": "Left",
+            "left":
+                "Left",
 
-            "right": "Right",
+            "right":
+                "Right",
 
-            "stop": "Stopped"
+            "stop":
+                "Stopped"
 
         }
 
@@ -1020,12 +1612,18 @@ def rover_control():
 
         if command == "stop":
 
-            rover_state["speed"] = 0
+            rover_state[
+                "speed"
+            ] = 0
+
 
         elif rover_state["speed"] == 0:
 
-            rover_state["speed"] = \
-                rover_settings["speed"]
+            rover_state[
+                "speed"
+            ] = rover_settings[
+                "speed"
+            ]
 
 
         print(
@@ -1036,7 +1634,8 @@ def rover_control():
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Rover command received",
@@ -1045,7 +1644,9 @@ def rover_control():
                 command,
 
             "command_id":
-                rover_state["command_id"],
+                rover_state[
+                    "command_id"
+                ],
 
             "rover":
                 rover_state
@@ -1060,9 +1661,11 @@ def rover_control():
             e
         )
 
+
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1084,25 +1687,38 @@ def rover_command():
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "command":
-            rover_state["last_command"],
+            rover_state[
+                "last_command"
+            ],
 
         "command_id":
-            rover_state["command_id"],
+            rover_state[
+                "command_id"
+            ],
 
         "direction":
-            rover_state["direction"],
+            rover_state[
+                "direction"
+            ],
 
         "speed":
-            rover_state["speed"],
+            rover_state[
+                "speed"
+            ],
 
         "pump":
-            rover_state["pump"],
+            rover_state[
+                "pump"
+            ],
 
         "mode":
-            rover_state["mode"]
+            rover_state[
+                "mode"
+            ]
 
     })
 
@@ -1119,17 +1735,22 @@ def rover_heartbeat():
 
     try:
 
-        rover_state["connected"] = True
+        rover_state[
+            "connected"
+        ] = True
 
-        rover_state["last_seen"] = \
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+
+        rover_state[
+            "last_seen"
+        ] = datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Raspberry Pi connected",
@@ -1144,7 +1765,8 @@ def rover_heartbeat():
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1164,7 +1786,8 @@ def rover_status():
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "rover":
             rover_state,
@@ -1195,6 +1818,7 @@ def rover_speed():
 
 
         if data is None:
+
             data = request.form
 
 
@@ -1215,14 +1839,20 @@ def rover_speed():
         )
 
 
-        rover_state["speed"] = speed
+        rover_state[
+            "speed"
+        ] = speed
 
-        rover_settings["speed"] = speed
+
+        rover_settings[
+            "speed"
+        ] = speed
 
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "speed":
                 speed,
@@ -1237,7 +1867,8 @@ def rover_speed():
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1263,6 +1894,7 @@ def rover_pump():
 
 
         if data is None:
+
             data = request.form
 
 
@@ -1272,7 +1904,10 @@ def rover_pump():
         )
 
 
-        if isinstance(state, str):
+        if isinstance(
+            state,
+            str
+        ):
 
             state = state.lower() in [
 
@@ -1284,28 +1919,40 @@ def rover_pump():
             ]
 
 
-        state = bool(state)
+        state = bool(
+            state
+        )
 
 
-        rover_state["pump"] = state
+        rover_state[
+            "pump"
+        ] = state
 
 
-        rover_state["last_command"] = (
+        rover_state[
+            "last_command"
+        ] = (
 
             "pump_on"
+
             if state
+
             else
+
             "pump_off"
 
         )
 
 
-        rover_state["command_id"] += 1
+        rover_state[
+            "command_id"
+        ] += 1
 
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Pump command received",
@@ -1314,10 +1961,14 @@ def rover_pump():
                 state,
 
             "command":
-                rover_state["last_command"],
+                rover_state[
+                    "last_command"
+                ],
 
             "command_id":
-                rover_state["command_id"]
+                rover_state[
+                    "command_id"
+                ]
 
         })
 
@@ -1326,7 +1977,8 @@ def rover_pump():
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1346,7 +1998,8 @@ def get_settings():
 
     return jsonify({
 
-        "success": True,
+        "success":
+            True,
 
         "settings":
             rover_settings
@@ -1372,6 +2025,7 @@ def update_settings():
 
 
         if data is None:
+
             data = request.form
 
 
@@ -1388,7 +2042,9 @@ def update_settings():
 
             if field in data:
 
-                value = data.get(field)
+                value = data.get(
+                    field
+                )
 
 
                 if isinstance(
@@ -1406,7 +2062,9 @@ def update_settings():
                     ]
 
 
-                rover_settings[field] = bool(
+                rover_settings[
+                    field
+                ] = bool(
                     value
                 )
 
@@ -1421,6 +2079,7 @@ def update_settings():
                     )
                 )
 
+
                 rover_settings[
                     "confidence_threshold"
                 ] = max(
@@ -1430,6 +2089,7 @@ def update_settings():
                         threshold
                     )
                 )
+
 
             except Exception:
 
@@ -1446,6 +2106,7 @@ def update_settings():
                     )
                 )
 
+
                 speed = max(
                     0,
                     min(
@@ -1454,8 +2115,16 @@ def update_settings():
                     )
                 )
 
-                rover_settings["speed"] = speed
-                rover_state["speed"] = speed
+
+                rover_settings[
+                    "speed"
+                ] = speed
+
+
+                rover_state[
+                    "speed"
+                ] = speed
+
 
             except Exception:
 
@@ -1464,7 +2133,8 @@ def update_settings():
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Settings updated",
@@ -1479,7 +2149,8 @@ def update_settings():
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1499,22 +2170,69 @@ def clear_history():
 
     try:
 
-        save_history([])
+        save_history(
+            []
+        )
+
 
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Prediction history cleared"
 
         })
 
+
     except Exception as e:
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
+
+            "message":
+                str(e)
+
+        }), 500
+
+
+# ============================================================
+# CLEAR DAILY DATA
+# ============================================================
+
+@app.route(
+    "/api/daily-data/clear",
+    methods=["POST"]
+)
+def clear_daily_data():
+
+    try:
+
+        save_daily_data(
+            {}
+        )
+
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Daily prediction data cleared"
+
+        })
+
+
+    except Exception as e:
+
+        return jsonify({
+
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1538,20 +2256,24 @@ def clear_result():
             DEFAULT_RESULT.copy()
         )
 
+
         return jsonify({
 
-            "success": True,
+            "success":
+                True,
 
             "message":
                 "Latest result cleared"
 
         })
 
+
     except Exception as e:
 
         return jsonify({
 
-            "success": False,
+            "success":
+                False,
 
             "message":
                 str(e)
@@ -1563,7 +2285,9 @@ def clear_result():
 # FAVICON
 # ============================================================
 
-@app.route("/favicon.ico")
+@app.route(
+    "/favicon.ico"
+)
 def favicon():
 
     return "", 204
@@ -1578,7 +2302,8 @@ def page_not_found(error):
 
     return jsonify({
 
-        "success": False,
+        "success":
+            False,
 
         "error":
             "Page not found"
@@ -1591,7 +2316,8 @@ def internal_server_error(error):
 
     return jsonify({
 
-        "success": False,
+        "success":
+            False,
 
         "error":
             "Internal server error"
@@ -1617,58 +2343,87 @@ if __name__ == "__main__":
         "=============================================="
     )
 
+
     print(
         "PRECISION AGRICULTURE SMART ROVER"
     )
 
+
     print(
         "FLASK SERVER STARTING..."
     )
+
 
     print(
         "PORT:",
         port
     )
 
+
     print(
         "CAMERA AI:"
     )
+
 
     print(
         "/api/update-result"
     )
 
+
+    print(
+        "DAILY DATA:"
+    )
+
+
+    print(
+        "/daily-data"
+    )
+
+
+    print(
+        "/api/daily-data"
+    )
+
+
     print(
         "ROVER CONTROL:"
     )
+
 
     print(
         "/api/rover/control"
     )
 
+
     print(
         "RASPBERRY PI COMMAND:"
     )
+
 
     print(
         "/api/rover/command"
     )
 
+
     print(
         "RASPBERRY PI HEARTBEAT:"
     )
+
 
     print(
         "/api/rover/heartbeat"
     )
 
+
     print(
         "PWA:"
     )
 
+
     print(
         "/service-worker.js"
     )
+
 
     print(
         "=============================================="
