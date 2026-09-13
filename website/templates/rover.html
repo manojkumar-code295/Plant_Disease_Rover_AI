@@ -4255,6 +4255,2068 @@ main {
    PUMP BUTTONS
 ========================================================= */
 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Precision Agriculture Smart Rover</title>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --green-dark: #12372a;
+    --green: #23613e;
+    --green-light: #2f7d57;
+    --green-soft: #edf7f0;
+
+    --white: #ffffff;
+    --text: #26332d;
+    --muted: #718078;
+
+    --red: #dc2626;
+    --red-dark: #991b1b;
+
+    --blue: #2563eb;
+
+    --shadow:
+        0 12px 35px rgba(18,55,42,0.09);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    min-height: 100vh;
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: var(--text);
+
+    background:
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(47,125,87,0.08),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 80%,
+            rgba(59,130,246,0.05),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #f4f8f5,
+            #eef4f0
+        );
+
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   BACKGROUND DECORATION
+========================================================= */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    width: 350px;
+    height: 350px;
+
+    top: -160px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.07);
+
+    filter: blur(3px);
+
+    animation:
+        backgroundFloat 8s ease-in-out infinite;
+
+    pointer-events: none;
+}
+
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    width: 280px;
+    height: 280px;
+
+    bottom: -130px;
+    left: -80px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(59,130,246,0.04);
+
+    animation:
+        backgroundFloat 10s ease-in-out infinite reverse;
+
+    pointer-events: none;
+}
+
+@keyframes backgroundFloat {
+
+    0%, 100% {
+        transform: translate(0,0);
+    }
+
+    50% {
+        transform: translate(20px,-20px);
+    }
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+
+    position: relative;
+
+    padding:
+        42px 25px 38px;
+
+    color: white;
+
+    text-align: center;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #12372a,
+            #0b3d2e,
+            #174f36
+        );
+
+    box-shadow:
+        0 10px 35px
+        rgba(18,55,42,0.25);
+
+    animation:
+        headerIn 0.7s ease;
+}
+
+header::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 240px;
+    height: 240px;
+
+    top: -130px;
+    right: 7%;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    animation:
+        headerBubble 7s ease-in-out infinite;
+}
+
+header::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    bottom: -90px;
+    left: 8%;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.04);
+
+    animation:
+        headerBubble 8s ease-in-out infinite reverse;
+}
+
+@keyframes headerIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes headerBubble {
+
+    0%,100% {
+        transform:
+            translateY(0)
+            rotate(0deg);
+    }
+
+    50% {
+        transform:
+            translateY(20px)
+            rotate(12deg);
+    }
+}
+
+.header-content {
+
+    position: relative;
+
+    z-index: 3;
+}
+
+header h1 {
+
+    font-size: 30px;
+
+    font-weight: 900;
+
+    letter-spacing: -0.5px;
+
+    text-shadow:
+        0 3px 12px
+        rgba(0,0,0,0.18);
+}
+
+header p {
+
+    margin-top: 8px;
+
+    color: #cfe5d9;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CONNECTION STATUS
+========================================================= */
+
+.header-status {
+
+    position: absolute;
+
+    right: 25px;
+    top: 23px;
+
+    z-index: 5;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        9px 14px;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.16);
+
+    border-radius: 30px;
+
+    background:
+        rgba(255,255,255,0.10);
+
+    backdrop-filter:
+        blur(12px);
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+.status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background:
+        #ef4444;
+
+    transition: 0.3s;
+}
+
+.status-dot.online {
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(34,197,94,0.12),
+        0 0 18px
+        rgba(34,197,94,0.9);
+
+    animation:
+        onlinePulse 1.6s infinite;
+}
+
+@keyframes onlinePulse {
+
+    0%,100% {
+        transform: scale(1);
+
+        box-shadow:
+            0 0 0 4px
+            rgba(34,197,94,0.12),
+            0 0 10px
+            rgba(34,197,94,0.65);
+    }
+
+    50% {
+        transform: scale(1.15);
+
+        box-shadow:
+            0 0 0 7px
+            rgba(34,197,94,0.05),
+            0 0 22px
+            rgba(34,197,94,1);
+    }
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+nav {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    padding: 11px 15px;
+
+    background:
+        rgba(255,255,255,0.90);
+
+    backdrop-filter:
+        blur(18px);
+
+    border-bottom:
+        1px solid
+        rgba(18,55,42,0.08);
+
+    box-shadow:
+        0 5px 20px
+        rgba(0,0,0,0.05);
+}
+
+nav a {
+
+    position: relative;
+
+    padding:
+        9px 14px;
+
+    border-radius: 10px;
+
+    color:
+        #52615a;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    transition:
+        0.25s ease;
+}
+
+nav a:hover {
+
+    color: var(--green);
+
+    background:
+        var(--green-soft);
+
+    transform:
+        translateY(-2px);
+}
+
+nav a.active {
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #23613e,
+            #2f7d57
+        );
+
+    box-shadow:
+        0 6px 15px
+        rgba(35,97,62,0.22);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main {
+
+    position: relative;
+
+    z-index: 2;
+
+    width: min(1250px, 100%);
+
+    margin: auto;
+
+    padding:
+        35px 22px 45px;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+========================================================= */
+
+.page-title {
+
+    margin-bottom: 26px;
+
+    animation:
+        contentIn 0.7s ease;
+}
+
+.page-title h2 {
+
+    color:
+        var(--green-dark);
+
+    font-size: 30px;
+
+    font-weight: 900;
+}
+
+.page-title p {
+
+    margin-top: 7px;
+
+    color:
+        var(--muted);
+
+    font-size: 14px;
+}
+
+@keyframes contentIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   SYSTEM STATUS
+========================================================= */
+
+.system-panel {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 15px;
+
+    margin-bottom: 25px;
+}
+
+.system-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 20px;
+
+    border:
+        1px solid
+        rgba(18,55,42,0.07);
+
+    border-radius: 17px;
+
+    background:
+        rgba(255,255,255,0.88);
+
+    backdrop-filter:
+        blur(14px);
+
+    box-shadow:
+        var(--shadow);
+
+    animation:
+        cardIn 0.6s ease both;
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.system-card:nth-child(1) {
+    animation-delay: .05s;
+}
+
+.system-card:nth-child(2) {
+    animation-delay: .12s;
+}
+
+.system-card:nth-child(3) {
+    animation-delay: .19s;
+}
+
+.system-card:nth-child(4) {
+    animation-delay: .26s;
+}
+
+.system-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        0 18px 40px
+        rgba(31,41,55,0.12);
+}
+
+.system-card::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 75px;
+    height: 75px;
+
+    right: -28px;
+    bottom: -28px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.07);
+}
+
+.system-card span {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+    color:
+        #7a857f;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .6px;
+}
+
+.system-card strong {
+
+    position: relative;
+
+    z-index: 2;
+
+    color:
+        var(--green-dark);
+
+    font-size: 19px;
+
+    font-weight: 900;
+}
+
+.online-text {
+    color: #16a34a !important;
+}
+
+.offline-text {
+    color: #dc2626 !important;
+}
+
+@keyframes cardIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   MAIN GRID
+========================================================= */
+
+.control-layout {
+
+    display: grid;
+
+    grid-template-columns:
+        1.15fr .85fr;
+
+    gap: 23px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 27px;
+
+    border:
+        1px solid
+        rgba(18,55,42,0.07);
+
+    border-radius: 22px;
+
+    background:
+        rgba(255,255,255,0.93);
+
+    backdrop-filter:
+        blur(15px);
+
+    box-shadow:
+        0 12px 38px
+        rgba(31,41,55,0.08);
+
+    animation:
+        cardIn .7s ease both;
+}
+
+.card h3 {
+
+    position: relative;
+
+    z-index: 3;
+
+    margin-bottom: 22px;
+
+    color:
+        var(--green-dark);
+
+    font-size: 20px;
+
+    font-weight: 900;
+}
+
+.card::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 170px;
+    height: 170px;
+
+    top: -90px;
+    right: -90px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.06);
+}
+
+
+/* =========================================================
+   ROVER CONNECTION
+========================================================= */
+
+.rover-status {
+
+    position: relative;
+
+    overflow: hidden;
+
+    margin-bottom: 23px;
+
+    padding: 20px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #dcebe1;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0f9f3,
+            #e8f5ec
+        );
+}
+
+.rover-status::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 100px;
+    height: 100px;
+
+    left: -50px;
+    bottom: -50px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(47,125,87,0.08);
+
+    animation:
+        statusBubble 5s ease-in-out infinite;
+}
+
+@keyframes statusBubble {
+
+    50% {
+        transform:
+            translateY(-12px);
+    }
+}
+
+.rover-status > span {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    color:
+        #718078;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .5px;
+}
+
+.rover-status h2 {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 8px;
+
+    color:
+        #dc2626;
+
+    font-size: 22px;
+
+    font-weight: 900;
+
+    transition:
+        .3s ease;
+}
+
+.connected {
+    color: #16a34a !important;
+
+    text-shadow:
+        0 0 15px
+        rgba(22,163,74,.18);
+}
+
+.disconnected {
+    color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   CONNECTION DETAILS
+========================================================= */
+
+.connection-details {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 17px;
+}
+
+.connection-item {
+
+    padding: 12px;
+
+    text-align: left;
+
+    border:
+        1px solid
+        #e1e9e4;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,.82);
+
+    transition:
+        .2s ease;
+}
+
+.connection-item:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        white;
+}
+
+.connection-item span {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color:
+        #89938e;
+
+    font-size: 9px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .5px;
+}
+
+.connection-item strong {
+
+    color:
+        #37433d;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ROVER VISUAL
+========================================================= */
+
+.rover-display {
+
+    position: relative;
+
+    height: 220px;
+
+    margin:
+        10px auto 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #eef8f1,
+            #e2f1e7
+        );
+
+    border:
+        1px solid
+        #d8e8dc;
+}
+
+.rover-ground {
+
+    position: absolute;
+
+    bottom: 26px;
+
+    width: 85%;
+
+    height: 4px;
+
+    border-radius: 10px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #75a886 0,
+            #75a886 15px,
+            transparent 15px,
+            transparent 28px
+        );
+
+    opacity: .35;
+}
+
+
+/* =========================================================
+   ROVER
+========================================================= */
+
+.rover {
+
+    position: relative;
+
+    z-index: 4;
+
+    width: 210px;
+
+    height: 95px;
+
+    border-radius:
+        28px 28px 20px 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #17452c,
+            #2f7d57
+        );
+
+    box-shadow:
+        0 18px 30px
+        rgba(18,55,42,.25);
+
+    transition:
+        transform .3s ease;
+}
+
+.rover::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 32px;
+    top: 18px;
+
+    width: 100px;
+    height: 45px;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #315b47,
+            #193b2c
+        );
+
+    border:
+        2px solid
+        rgba(255,255,255,.12);
+}
+
+.rover::after {
+
+    content: "🌱";
+
+    position: absolute;
+
+    top: 25px;
+    right: 28px;
+
+    font-size: 28px;
+}
+
+
+/* =========================================================
+   ROVER WHEELS
+========================================================= */
+
+.rover-wheel {
+
+    position: absolute;
+
+    bottom: -18px;
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    border:
+        7px solid
+        #17221d;
+
+    background:
+        radial-gradient(
+            circle,
+            #59665f 0 25%,
+            #222d27 26% 100%
+        );
+
+    box-shadow:
+        0 6px 10px
+        rgba(0,0,0,.25);
+
+    transition:
+        .2s ease;
+}
+
+.rover-wheel.left {
+    left: 25px;
+}
+
+.rover-wheel.right {
+    right: 25px;
+}
+
+.rover.moving .rover-wheel {
+
+    animation:
+        wheelSpin .35s linear infinite;
+}
+
+@keyframes wheelSpin {
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   ROVER LIGHT
+========================================================= */
+
+.rover-light {
+
+    position: absolute;
+
+    top: 12px;
+    right: 14px;
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background:
+        #ef4444;
+}
+
+.rover.connected .rover-light {
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 15px
+        rgba(34,197,94,.9);
+
+    animation:
+        roverLightPulse 1.4s infinite;
+}
+
+@keyframes roverLightPulse {
+
+    50% {
+        transform: scale(1.35);
+    }
+}
+
+
+/* =========================================================
+   MOVEMENT LABEL
+========================================================= */
+
+.movement-state {
+
+    text-align: center;
+
+    margin-bottom: 16px;
+}
+
+.movement-state span {
+
+    color:
+        #7a857f;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    text-transform:
+        uppercase;
+}
+
+.movement-state strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    color:
+        var(--green-dark);
+
+    font-size: 21px;
+
+    font-weight: 900;
+
+    transition:
+        .2s ease;
+}
+
+
+/* =========================================================
+   MOVEMENT BUTTONS
+========================================================= */
+
+.movement-buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 12px;
+
+    width: min(390px,100%);
+
+    margin:
+        0 auto;
+}
+
+.move-button {
+
+    position: relative;
+
+    min-height: 72px;
+
+    border: none;
+
+    border-radius: 16px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #23613e,
+            #2f7d57
+        );
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 17px
+        rgba(35,97,62,.19);
+
+    transition:
+        transform .15s ease,
+        box-shadow .2s ease;
+}
+
+.move-button::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 0;
+    height: 0;
+
+    left: 50%;
+    top: 50%;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.17);
+
+    transform:
+        translate(-50%,-50%);
+
+    transition:
+        width .4s ease,
+        height .4s ease;
+}
+
+.move-button:hover::before {
+
+    width: 200px;
+    height: 200px;
+}
+
+.move-button:hover {
+
+    transform:
+        translateY(-4px);
+
+    box-shadow:
+        0 13px 25px
+        rgba(35,97,62,.27);
+}
+
+.move-button:active,
+.move-button.active {
+
+    transform:
+        scale(.94);
+
+    box-shadow:
+        0 3px 8px
+        rgba(0,0,0,.20);
+}
+
+.move-button.forward {
+    grid-column: 2;
+}
+
+.move-button.left {
+    grid-column: 1;
+}
+
+.move-button.stop {
+
+    grid-column: 2;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dc2626,
+            #b91c1c
+        );
+
+    box-shadow:
+        0 8px 18px
+        rgba(220,38,38,.22);
+}
+
+.move-button.right {
+    grid-column: 3;
+}
+
+.move-button.backward {
+    grid-column: 2;
+}
+
+
+/* =========================================================
+   COMMAND TRANSMISSION
+========================================================= */
+
+.command-box {
+
+    position: relative;
+
+    overflow: hidden;
+
+    margin-top: 22px;
+
+    padding: 19px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #dfe9e3;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f5f8f6,
+            #edf5ef
+        );
+}
+
+.command-box span {
+
+    color:
+        #7a857f;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform:
+        uppercase;
+}
+
+.command-box h2 {
+
+    margin-top: 7px;
+
+    color:
+        var(--green-dark);
+
+    font-size: 24px;
+
+    font-weight: 950;
+
+    transition:
+        transform .2s ease;
+}
+
+.command-box.sending::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: -30%;
+
+    bottom: 0;
+
+    width: 30%;
+
+    height: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #22c55e,
+            transparent
+        );
+
+    animation:
+        transmission 1s linear;
+}
+
+@keyframes transmission {
+
+    to {
+        left: 100%;
+    }
+}
+
+.speed-display {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    margin-top: 8px;
+
+    color:
+        #7a857f;
+
+    font-size: 12px;
+}
+
+.speed-display strong {
+
+    color:
+        var(--green-dark);
+}
+
+
+/* =========================================================
+   SPEED BAR
+========================================================= */
+
+.speed-bar {
+
+    width: min(330px,100%);
+
+    height: 7px;
+
+    margin:
+        13px auto 0;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background:
+        #dce8df;
+}
+
+.speed-progress {
+
+    width: 0%;
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            #23613e,
+            #22c55e
+        );
+
+    transition:
+        width .35s ease;
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.message-box {
+
+    display: none;
+
+    margin-top: 15px;
+
+    padding:
+        12px 15px;
+
+    border-radius: 11px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    animation:
+        messageIn .3s ease;
+}
+
+.message-success {
+
+    background:
+        #dcfce7;
+
+    color:
+        #166534;
+
+    border:
+        1px solid
+        #bbf7d0;
+}
+
+.message-error {
+
+    background:
+        #fee2e2;
+
+    color:
+        #991b1b;
+
+    border:
+        1px solid
+        #fecaca;
+}
+
+.message-info {
+
+    background:
+        #dbeafe;
+
+    color:
+        #1e40af;
+
+    border:
+        1px solid
+        #bfdbfe;
+}
+
+@keyframes messageIn {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+.keyboard-info {
+
+    margin-top: 17px;
+
+    color:
+        #89938e;
+
+    text-align: center;
+
+    font-size: 11px;
+
+    line-height: 2;
+}
+
+.keyboard-info strong {
+
+    display: inline-block;
+
+    min-width: 25px;
+
+    padding:
+        2px 6px;
+
+    margin:
+        0 2px;
+
+    border:
+        1px solid
+        #d9e2dc;
+
+    border-radius: 5px;
+
+    background:
+        #f1f5f2;
+
+    color:
+        #315744;
+
+    box-shadow:
+        0 2px 4px
+        rgba(0,0,0,.06);
+}
+
+
+/* =========================================================
+   EMERGENCY
+========================================================= */
+
+.emergency-button {
+
+    position: relative;
+
+    width: 100%;
+
+    margin-top: 18px;
+
+    padding: 17px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #991b1b,
+            #dc2626
+        );
+
+    font-size: 14px;
+
+    font-weight: 950;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px
+        rgba(220,38,38,.24);
+
+    transition:
+        .2s ease;
+}
+
+.emergency-button:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 13px 27px
+        rgba(220,38,38,.32);
+}
+
+.emergency-button:active {
+
+    transform:
+        scale(.97);
+}
+
+.emergency-button.flash {
+
+    animation:
+        emergencyFlash .5s ease;
+}
+
+@keyframes emergencyFlash {
+
+    25%,
+    75% {
+        transform:
+            scale(1.03);
+    }
+}
+
+
+/* =========================================================
+   PUMP
+========================================================= */
+
+.pump-card {
+    min-height: 100%;
+}
+
+
+/* =========================================================
+   PUMP VISUAL
+========================================================= */
+
+.pump-visual {
+
+    position: relative;
+
+    height: 200px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 20px;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #eff8ff,
+            #e9f5ef
+        );
+
+    border:
+        1px solid
+        #dce9e3;
+}
+
+
+/* =========================================================
+   PUMP MACHINE
+========================================================= */
+
+.pump-machine {
+
+    position: relative;
+
+    width: 125px;
+    height: 95px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #12372a,
+            #23613e
+        );
+
+    box-shadow:
+        0 14px 28px
+        rgba(18,55,42,.22);
+
+    animation:
+        pumpFloat 3s ease-in-out infinite;
+}
+
+@keyframes pumpFloat {
+
+    0%,100% {
+        transform:
+            translateY(0);
+    }
+
+    50% {
+        transform:
+            translateY(-8px);
+    }
+}
+
+.pump-machine::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 47px;
+    height: 47px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    border:
+        5px solid
+        rgba(255,255,255,.72);
+
+    border-radius: 50%;
+}
+
+.pump-machine::after {
+
+    content: "💧";
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   WATER
+========================================================= */
+
+.water-stream {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: 35px;
+
+    width: 5px;
+
+    height: 0;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #60a5fa,
+            #2563eb
+        );
+
+    transform:
+        translateX(-50%);
+
+    opacity: 0;
+
+    transition:
+        .4s ease;
+}
+
+.pump-visual.active .water-stream {
+
+    height: 105px;
+
+    opacity: 1;
+
+    animation:
+        waterFlow .8s linear infinite;
+}
+
+@keyframes waterFlow {
+
+    0% {
+        transform:
+            translateX(-50%)
+            scaleY(.8);
+    }
+
+    50% {
+        transform:
+            translateX(-50%)
+            scaleY(1);
+    }
+
+    100% {
+        transform:
+            translateX(-50%)
+            scaleY(.8);
+    }
+}
+
+.water-drop {
+
+    position: absolute;
+
+    width: 9px;
+    height: 13px;
+
+    border-radius:
+        70% 30% 65% 35%;
+
+    background:
+        #3b82f6;
+
+    opacity: 0;
+}
+
+.pump-visual.active .water-drop {
+
+    opacity: 1;
+
+    animation:
+        dropFall 1.5s linear infinite;
+}
+
+.water-drop:nth-child(1) {
+    left: 38%;
+    animation-delay: 0s;
+}
+
+.water-drop:nth-child(2) {
+    left: 50%;
+    animation-delay: .5s;
+}
+
+.water-drop:nth-child(3) {
+    left: 62%;
+    animation-delay: 1s;
+}
+
+@keyframes dropFall {
+
+    from {
+        transform:
+            translateY(-20px);
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 1;
+    }
+
+    to {
+        transform:
+            translateY(130px);
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   PUMP STATUS
+========================================================= */
+
+.pump-status {
+
+    position: relative;
+
+    padding: 21px;
+
+    text-align: center;
+
+    border:
+        1px solid
+        #e1e9e4;
+
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f7faf8,
+            #edf5ef
+        );
+}
+
+.pump-status > span {
+
+    color:
+        #7a857f;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform:
+        uppercase;
+}
+
+.pump-status strong {
+
+    display: block;
+
+    margin-top: 7px;
+
+    color:
+        #dc2626;
+
+    font-size: 28px;
+
+    font-weight: 950;
+
+    transition:
+        .3s ease;
+}
+
+.pump-indicator {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 13px;
+
+    color:
+        #7a857f;
+
+    font-size: 12px;
+}
+
+.pump-light {
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background:
+        #dc2626;
+}
+
+.pump-light.on {
+
+    background:
+        #16a34a;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(22,163,74,.10),
+        0 0 15px
+        rgba(22,163,74,.8);
+
+    animation:
+        pumpPulse 1.2s infinite;
+}
+
+@keyframes pumpPulse {
+
+    50% {
+        transform:
+            scale(1.3);
+    }
+}
+
+
+/* =========================================================
+   PUMP BUTTONS
+========================================================= */
+
 .pump-buttons {
 
     display: grid;
@@ -4263,6 +6325,8 @@ main {
         1fr 1fr;
 
     gap: 12px;
+
+    margin-top: 17px;
 }
 
 .pump-button {
@@ -4272,22 +6336,22 @@ main {
 
     border: none;
 
-    border-radius: 13px;
+    border-radius: 14px;
 
     color: white;
 
     font-size: 13px;
 
-    font-weight: 900;
+    font-weight: 950;
 
     cursor: pointer;
 
     transition:
-        0.2s ease;
+        .2s ease;
 
     box-shadow:
-        0 6px 14px
-        rgba(0,0,0,0.12);
+        0 7px 15px
+        rgba(0,0,0,.12);
 }
 
 .pump-button:hover {
@@ -4299,7 +6363,7 @@ main {
 .pump-button:active {
 
     transform:
-        scale(0.97);
+        scale(.97);
 }
 
 .pump-on {
@@ -4324,152 +6388,6 @@ main {
 
 
 /* =========================================================
-   PUMP STATUS
-========================================================= */
-
-.pump-status {
-
-    position: relative;
-
-    margin-top: 19px;
-
-    padding:
-        21px;
-
-    text-align: center;
-
-    border:
-        1px solid
-        #e1e9e4;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f7faf8,
-            #edf5ef
-        );
-
-    overflow: hidden;
-}
-
-.pump-status::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 110px;
-    height: 110px;
-
-    right: -55px;
-    bottom: -55px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(59,130,246,0.05);
-}
-
-.pump-status > span {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: block;
-
-    color: #7a857f;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-    text-transform: uppercase;
-}
-
-.pump-status strong {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: block;
-
-    margin-top: 7px;
-
-    color: #dc2626;
-
-    font-size: 28px;
-
-    font-weight: 900;
-
-    transition:
-        color 0.3s,
-        transform 0.3s;
-}
-
-.pump-indicator {
-
-    position: relative;
-
-    z-index: 2;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 8px;
-
-    margin-top: 13px;
-
-    color: #7a857f;
-
-    font-size: 12px;
-}
-
-.pump-light {
-
-    width: 10px;
-    height: 10px;
-
-    border-radius: 50%;
-
-    background:
-        #dc2626;
-}
-
-.pump-light.on {
-
-    background:
-        #16a34a;
-
-    box-shadow:
-        0 0 0 4px
-        rgba(22,163,74,0.10),
-        0 0 13px
-        rgba(22,163,74,0.8);
-
-    animation:
-        pumpPulse 1.5s infinite;
-}
-
-@keyframes pumpPulse {
-
-    0%,100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.25);
-    }
-}
-
-
-/* =========================================================
    NOTICE
 ========================================================= */
 
@@ -4477,15 +6395,13 @@ main {
 
     margin-top: 19px;
 
-    padding:
-        17px;
+    padding: 17px;
 
     border-left:
         4px solid
         #f97316;
 
-    border-radius:
-        10px;
+    border-radius: 10px;
 
     background:
         linear-gradient(
@@ -4500,14 +6416,9 @@ main {
     font-size: 12px;
 
     line-height: 1.65;
-
-    box-shadow:
-        0 4px 12px
-        rgba(249,115,22,0.06);
 }
 
 .notice strong {
-
     color:
         #9a3412;
 }
@@ -4528,7 +6439,8 @@ footer {
 
     text-align: center;
 
-    color: #75817b;
+    color:
+        #75817b;
 
     font-size: 11px;
 }
@@ -4538,45 +6450,38 @@ footer {
    RESPONSIVE
 ========================================================= */
 
-@media(max-width: 950px) {
+@media(max-width:950px) {
 
     .system-panel {
-
         grid-template-columns:
-            repeat(2, 1fr);
+            repeat(2,1fr);
     }
 
     .control-layout {
-
         grid-template-columns:
             1fr;
     }
-
 }
 
 
-@media(max-width: 650px) {
+@media(max-width:650px) {
 
     header {
-
         padding:
-            55px 18px 22px;
+            55px 18px 25px;
     }
 
     header h1 {
-
-        font-size: 21px;
+        font-size: 22px;
     }
 
     header p {
-
         font-size: 12px;
     }
 
     .header-status {
 
         top: 12px;
-
         right: 50%;
 
         transform:
@@ -4584,116 +6489,80 @@ footer {
     }
 
     nav {
-
         gap: 4px;
-
-        padding:
-            9px;
+        padding: 9px;
     }
 
     nav a {
-
         padding:
             8px 9px;
-
         font-size: 11px;
     }
 
     main {
-
         padding:
             25px 12px 35px;
     }
 
     .page-title h2 {
-
         font-size: 25px;
     }
 
-    .system-panel {
+    .card {
+        padding: 19px;
+        border-radius: 18px;
+    }
 
+    .rover {
+        transform:
+            scale(.88);
+    }
+
+    .pump-buttons {
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
+@media(max-width:430px) {
+
+    .system-panel {
         gap: 10px;
     }
 
     .system-card {
-
-        padding:
-            15px;
+        padding: 15px;
+        min-height: 75px;
     }
 
     .system-card strong {
-
         font-size: 15px;
     }
 
-    .card {
-
-        padding:
-            19px;
-
-        border-radius:
-            18px;
-    }
-
-    .steering-wheel {
-
-        width: 195px;
-        height: 195px;
-
-        border-width:
-            15px;
-    }
-
-}
-
-
-@media(max-width: 430px) {
-
-    .system-panel {
-
-        grid-template-columns:
-            1fr 1fr;
-    }
-
-    .system-card {
-
-        min-height:
-            76px;
-    }
-
     .movement-buttons {
-
-        max-width:
-            300px;
+        max-width: 300px;
+        gap: 8px;
     }
 
     .move-button {
-
-        min-height:
-            59px;
-
-        font-size:
-            10px;
-    }
-
-    .pump-buttons {
-
-        grid-template-columns:
-            1fr;
+        min-height: 62px;
+        font-size: 10px;
     }
 
     .connection-details {
-
         grid-template-columns:
             1fr;
     }
 
-    .keyboard-info {
-
-        font-size:
-            10px;
+    .rover {
+        transform:
+            scale(.72);
     }
 
+    .keyboard-info {
+        font-size: 10px;
+    }
 }
 
 
@@ -4701,25 +6570,21 @@ footer {
    REDUCED MOTION
 ========================================================= */
 
-@media(prefers-reduced-motion: reduce) {
+@media(prefers-reduced-motion:reduce) {
 
     *,
     *::before,
     *::after {
 
         animation-duration:
-            0.01ms !important;
+            .01ms !important;
 
         animation-iteration-count:
             1 !important;
 
-        scroll-behavior:
-            auto !important;
-
         transition-duration:
-            0.01ms !important;
+            .01ms !important;
     }
-
 }
 
 </style>
@@ -4736,30 +6601,30 @@ footer {
 
 <header>
 
-    <div
-        class="header-status"
-        id="header-status"
-    >
+    <div class="header-status">
 
         <span
-            class="status-dot"
             id="header-status-dot"
-        ></span>
+            class="status-dot">
+        </span>
 
         <span id="header-status-text">
-            Rover Offline
+            Raspberry Pi Offline
         </span>
 
     </div>
 
+    <div class="header-content">
 
-    <h1>
-        🌱 Precision Agriculture Smart Rover
-    </h1>
+        <h1>
+            🌱 Precision Agriculture Smart Rover
+        </h1>
 
-    <p>
-        Intelligent Rover Control & Agricultural Automation
-    </p>
+        <p>
+            Intelligent Rover Control & Agricultural Automation
+        </p>
+
+    </div>
 
 </header>
 
@@ -4774,10 +6639,7 @@ footer {
         🏠 Dashboard
     </a>
 
-    <a
-        href="/rover"
-        class="active"
-    >
+    <a href="/rover" class="active">
         🚜 Rover
     </a>
 
@@ -4803,8 +6665,6 @@ footer {
 <main>
 
 
-    <!-- PAGE TITLE -->
-
     <div class="page-title">
 
         <h2>
@@ -4812,15 +6672,15 @@ footer {
         </h2>
 
         <p>
-            Control rover movement, steering and agricultural
-            spraying from one intelligent interface.
+            Control rover movement and agricultural spraying
+            from one intelligent interface.
         </p>
 
     </div>
 
 
     <!-- =====================================================
-         SYSTEM STATUS
+         SYSTEM PANEL
     ====================================================== -->
 
     <section class="system-panel">
@@ -4829,13 +6689,12 @@ footer {
         <div class="system-card">
 
             <span>
-                Rover Connection
+                Raspberry Pi
             </span>
 
             <strong
                 id="system-connection"
-                class="offline-text"
-            >
+                class="offline-text">
                 OFFLINE
             </strong>
 
@@ -4865,8 +6724,7 @@ footer {
 
                 <span
                     id="system-speed"
-                    style="display:inline;"
-                >
+                    style="display:inline">
                     0
                 </span>
 
@@ -4907,7 +6765,7 @@ footer {
         <div class="card">
 
             <h3>
-                🎡 Steering & Movement
+                🚜 Rover Movement Control
             </h3>
 
 
@@ -4916,14 +6774,15 @@ footer {
             <div class="rover-status">
 
                 <span>
-                    Raspberry Pi / Rover Connection
+                    Raspberry Pi Connection
                 </span>
 
                 <h2
                     id="rover-status"
-                    class="disconnected"
-                >
+                    class="disconnected">
+
                     NOT CONNECTED
+
                 </h2>
 
 
@@ -4946,7 +6805,7 @@ footer {
                     <div class="connection-item">
 
                         <span>
-                            Mode
+                            Control Mode
                         </span>
 
                         <strong id="rover-mode">
@@ -4961,53 +6820,47 @@ footer {
             </div>
 
 
-            <!-- STEERING -->
+            <!-- ROVER VISUAL -->
 
-            <div class="steering-area">
+            <div class="rover-display">
 
-                <div class="steering-title">
-
-                    Drag the steering wheel
-                    left or right
-
-                </div>
-
+                <div class="rover-ground"></div>
 
                 <div
-                    id="steering-wheel"
-                    class="steering-wheel"
-                >
+                    id="rover"
+                    class="rover">
+
+                    <div class="rover-light"></div>
 
                     <div
-                        class="spoke spoke-vertical"
-                    ></div>
-
-                    <div
-                        class="spoke spoke-left"
-                    ></div>
-
-                    <div
-                        class="spoke spoke-right"
-                    ></div>
-
-                    <div class="steering-center">
-                        🚜
+                        class="rover-wheel left">
                     </div>
 
-                </div>
+                    <div
+                        class="rover-wheel right">
+                    </div>
 
-
-                <div
-                    id="steering-indicator"
-                    class="steering-indicator"
-                >
-                    Steering: CENTER
                 </div>
 
             </div>
 
 
-            <!-- MOVEMENT -->
+            <!-- MOVEMENT STATE -->
+
+            <div class="movement-state">
+
+                <span>
+                    Current Movement
+                </span>
+
+                <strong id="movement-state">
+                    STOPPED
+                </strong>
+
+            </div>
+
+
+            <!-- MOVEMENT BUTTONS -->
 
             <div class="movement-buttons">
 
@@ -5015,10 +6868,10 @@ footer {
                 <button
                     id="forward-btn"
                     class="move-button forward"
-                    type="button"
-                >
+                    type="button">
 
-                    ▲<br>
+                    ▲
+                    <br>
                     FORWARD
 
                 </button>
@@ -5027,10 +6880,10 @@ footer {
                 <button
                     id="left-btn"
                     class="move-button left"
-                    type="button"
-                >
+                    type="button">
 
-                    ◀<br>
+                    ◀
+                    <br>
                     LEFT
 
                 </button>
@@ -5039,10 +6892,10 @@ footer {
                 <button
                     id="stop-btn"
                     class="move-button stop"
-                    type="button"
-                >
+                    type="button">
 
-                    ■<br>
+                    ■
+                    <br>
                     STOP
 
                 </button>
@@ -5051,10 +6904,10 @@ footer {
                 <button
                     id="right-btn"
                     class="move-button right"
-                    type="button"
-                >
+                    type="button">
 
-                    ▶<br>
+                    ▶
+                    <br>
                     RIGHT
 
                 </button>
@@ -5063,10 +6916,10 @@ footer {
                 <button
                     id="backward-btn"
                     class="move-button backward"
-                    type="button"
-                >
+                    type="button">
 
-                    ▼<br>
+                    ▼
+                    <br>
                     REVERSE
 
                 </button>
@@ -5077,16 +6930,17 @@ footer {
 
             <!-- COMMAND -->
 
-            <div class="command-box">
+            <div
+                id="command-box"
+                class="command-box">
 
                 <span>
-                    Current Command
+                    Command Transmitted
                 </span>
 
                 <h2 id="current-command">
                     STOP
                 </h2>
-
 
                 <div class="speed-display">
 
@@ -5104,6 +6958,15 @@ footer {
 
                 </div>
 
+                <div class="speed-bar">
+
+                    <div
+                        id="speed-progress"
+                        class="speed-progress">
+                    </div>
+
+                </div>
+
             </div>
 
 
@@ -5111,8 +6974,7 @@ footer {
 
             <div
                 id="message-box"
-                class="message-box"
-            >
+                class="message-box">
             </div>
 
 
@@ -5143,8 +7005,7 @@ footer {
             <button
                 id="emergency-button"
                 class="emergency-button"
-                type="button"
-            >
+                type="button">
 
                 🛑 EMERGENCY STOP
 
@@ -5164,9 +7025,13 @@ footer {
             </h3>
 
 
-            <!-- PUMP ANIMATION -->
+            <!-- PUMP VISUAL -->
 
-            <div class="pump-visual">
+            <div
+                id="pump-visual"
+                class="pump-visual">
+
+                <div class="water-stream"></div>
 
                 <div class="water-drop"></div>
                 <div class="water-drop"></div>
@@ -5179,70 +7044,22 @@ footer {
 
             <!-- PUMP STATUS -->
 
-            <div class="rover-status">
+            <div class="pump-status">
 
                 <span>
                     Current Pump Status
                 </span>
 
-                <h2
-                    id="pump-status"
-                    class="disconnected"
-                    style="color:#dc2626;"
-                >
-                    OFF
-                </h2>
-
-            </div>
-
-
-            <!-- PUMP BUTTONS -->
-
-            <div class="pump-buttons">
-
-                <button
-                    id="pump-on-button"
-                    class="pump-button pump-on"
-                    type="button"
-                >
-
-                    💧 PUMP ON
-
-                </button>
-
-
-                <button
-                    id="pump-off-button"
-                    class="pump-button pump-off"
-                    type="button"
-                >
-
-                    ⛔ PUMP OFF
-
-                </button>
-
-            </div>
-
-
-            <!-- PUMP COMMAND -->
-
-            <div class="pump-status">
-
-                <span>
-                    Current Pump Command
-                </span>
-
-                <strong id="pump-command">
+                <strong id="pump-status">
                     OFF
                 </strong>
-
 
                 <div class="pump-indicator">
 
                     <span
                         id="pump-light"
-                        class="pump-light"
-                    ></span>
+                        class="pump-light">
+                    </span>
 
                     <span id="pump-indicator-text">
                         Pump is OFF
@@ -5253,25 +7070,65 @@ footer {
             </div>
 
 
+            <!-- BUTTONS -->
+
+            <div class="pump-buttons">
+
+                <button
+                    id="pump-on-button"
+                    class="pump-button pump-on"
+                    type="button">
+
+                    💧 PUMP ON
+
+                </button>
+
+
+                <button
+                    id="pump-off-button"
+                    class="pump-button pump-off"
+                    type="button">
+
+                    ⛔ PUMP OFF
+
+                </button>
+
+            </div>
+
+
+            <!-- PUMP COMMAND -->
+
+            <div class="command-box">
+
+                <span>
+                    Current Pump Command
+                </span>
+
+                <h2 id="pump-command">
+                    OFF
+                </h2>
+
+            </div>
+
+
             <!-- NOTICE -->
 
             <div class="notice">
 
                 <strong>
-                    ⚠️ Control System
+                    ⚠️ Rover Control System
                 </strong>
 
                 <br><br>
 
-                Movement buttons and the steering
-                wheel send commands to the Flask
-                server.
+                Movement commands are sent to the
+                Flask server and made available to
+                the Raspberry Pi.
 
                 <br><br>
 
-                The Raspberry Pi retrieves the latest
-                rover command and controls the motor
-                driver.
+                The Raspberry Pi receives the latest
+                command and controls the motor driver.
 
                 <br><br>
 
@@ -5284,13 +7141,12 @@ footer {
                     Safety:
                 </strong>
 
-                Press the emergency stop immediately
+                Use the emergency stop immediately
                 whenever required.
 
             </div>
 
         </div>
-
 
     </div>
 
@@ -5311,36 +7167,45 @@ footer {
 <script>
 
 /* =========================================================
-   GLOBAL VARIABLES
+   GLOBAL STATE
 ========================================================= */
 
 let currentMovement = "stop";
 
 let movementActive = false;
 
-let steeringAngle = 0;
-
-let steeringDragging = false;
-
-let steeringStartX = 0;
-
-let steeringStartAngle = 0;
-
 let messageTimer = null;
+
+let commandRequestInProgress = false;
 
 
 /* =========================================================
    DOM
 ========================================================= */
 
-const steeringWheel =
+const rover =
     document.getElementById(
-        "steering-wheel"
+        "rover"
     );
 
-const steeringIndicator =
+const commandBox =
     document.getElementById(
-        "steering-indicator"
+        "command-box"
+    );
+
+const movementState =
+    document.getElementById(
+        "movement-state"
+    );
+
+const speedProgress =
+    document.getElementById(
+        "speed-progress"
+    );
+
+const pumpVisual =
+    document.getElementById(
+        "pump-visual"
     );
 
 
@@ -5374,7 +7239,7 @@ function showMessage(
 
     messageTimer =
         setTimeout(
-            function() {
+            () => {
 
                 box.style.display =
                     "none";
@@ -5382,7 +7247,6 @@ function showMessage(
             },
             2500
         );
-
 }
 
 
@@ -5399,26 +7263,63 @@ function updateCommandDisplay(
             "current-command"
         );
 
-    if (!element) {
-        return;
-    }
-
     element.textContent =
         String(command).toUpperCase();
 
     element.style.transform =
-        "scale(1.08)";
+        "scale(1.10)";
+
+    commandBox.classList.remove(
+        "sending"
+    );
+
+    void commandBox.offsetWidth;
+
+    commandBox.classList.add(
+        "sending"
+    );
 
     setTimeout(
-        function() {
+        () => {
 
             element.style.transform =
                 "scale(1)";
 
         },
-        160
+        180
     );
+}
 
+
+/* =========================================================
+   SPEED
+========================================================= */
+
+function setSpeed(
+    speed
+) {
+
+    const value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(speed) || 0
+            )
+        );
+
+    document.getElementById(
+        "system-speed"
+    ).textContent =
+        value;
+
+    document.getElementById(
+        "current-speed"
+    ).textContent =
+        value;
+
+    speedProgress.style.width =
+        value + "%";
 }
 
 
@@ -5444,7 +7345,6 @@ function setActiveButton(
         );
 
     }
-
 }
 
 
@@ -5459,7 +7359,7 @@ function removeActiveButtons() {
             ".move-button"
         )
         .forEach(
-            function(button) {
+            button => {
 
                 button.classList.remove(
                     "active"
@@ -5467,6 +7367,81 @@ function removeActiveButtons() {
 
             }
         );
+}
+
+
+/* =========================================================
+   MOVEMENT VISUAL
+========================================================= */
+
+function updateMovementVisual(
+    command
+) {
+
+    movementState.textContent =
+        String(command).toUpperCase();
+
+    document.getElementById(
+        "system-direction"
+    ).textContent =
+        String(command).toUpperCase();
+
+
+    rover.classList.remove(
+        "moving"
+    );
+
+
+    if (
+        command !== "stop"
+    ) {
+
+        rover.classList.add(
+            "moving"
+        );
+
+    }
+
+
+    rover.style.transform =
+        "translateX(0)";
+
+
+    if (
+        command === "left"
+    ) {
+
+        rover.style.transform =
+            "translateX(-10px)";
+
+    }
+
+    else if (
+        command === "right"
+    ) {
+
+        rover.style.transform =
+            "translateX(10px)";
+
+    }
+
+    else if (
+        command === "forward"
+    ) {
+
+        rover.style.transform =
+            "translateY(-4px)";
+
+    }
+
+    else if (
+        command === "backward"
+    ) {
+
+        rover.style.transform =
+            "translateY(4px)";
+
+    }
 
 }
 
@@ -5481,19 +7456,17 @@ function startMove(
 ) {
 
     if (event) {
-
         event.preventDefault();
-
     }
+
 
     if (
         movementActive &&
         currentMovement === command
     ) {
-
         return;
-
     }
+
 
     movementActive =
         true;
@@ -5501,7 +7474,12 @@ function startMove(
     currentMovement =
         command;
 
+
     setActiveButton(
+        command
+    );
+
+    updateMovementVisual(
         command
     );
 
@@ -5509,18 +7487,19 @@ function startMove(
         command
     );
 
-    const direction =
-        document.getElementById(
-            "system-direction"
-        );
 
-    direction.textContent =
-        command.toUpperCase();
+    /*
+       Default manual speed.
+       You can later replace this
+       with a speed slider.
+    */
+
+    setSpeed(70);
+
 
     sendCommand(
         command
     );
-
 }
 
 
@@ -5533,16 +7512,9 @@ function stopMove(
 ) {
 
     if (event) {
-
         event.preventDefault();
-
     }
 
-    if (!movementActive) {
-
-        return;
-
-    }
 
     movementActive =
         false;
@@ -5550,16 +7522,22 @@ function stopMove(
     currentMovement =
         "stop";
 
+
     removeActiveButtons();
+
+    updateMovementVisual(
+        "stop"
+    );
 
     updateCommandDisplay(
         "stop"
     );
 
+    setSpeed(0);
+
     sendCommand(
         "stop"
     );
-
 }
 
 
@@ -5575,35 +7553,55 @@ function emergencyStop() {
     currentMovement =
         "stop";
 
+
     removeActiveButtons();
+
+    updateMovementVisual(
+        "stop"
+    );
 
     updateCommandDisplay(
         "stop"
     );
+
+    setSpeed(0);
+
+
+    const button =
+        document.getElementById(
+            "emergency-button"
+        );
+
+    button.classList.remove(
+        "flash"
+    );
+
+    void button.offsetWidth;
+
+    button.classList.add(
+        "flash"
+    );
+
 
     sendCommand(
         "stop"
     );
 
+
     showMessage(
         "🛑 EMERGENCY STOP SENT",
         "error"
     );
-
 }
 
 
 /* =========================================================
-   SEND COMMAND
+   SEND COMMAND TO FLASK
 ========================================================= */
 
 async function sendCommand(
     command
 ) {
-
-    updateCommandDisplay(
-        command
-    );
 
     try {
 
@@ -5612,22 +7610,17 @@ async function sendCommand(
                 "/api/rover/control",
                 {
 
-                    method:
-                        "POST",
+                    method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body:
                         JSON.stringify({
-
                             command:
                                 command
-
                         })
 
                 }
@@ -5643,9 +7636,14 @@ async function sendCommand(
             data.success
         ) {
 
-            updateRoverStatus(
-                data.rover
-            );
+            if (data.rover) {
+
+                updateRoverStatus(
+                    data.rover
+                );
+
+            }
+
 
             if (
                 command !== "stop"
@@ -5654,7 +7652,7 @@ async function sendCommand(
                 showMessage(
                     "✓ " +
                     command.toUpperCase() +
-                    " command sent",
+                    " command transmitted",
                     "success"
                 );
 
@@ -5682,195 +7680,13 @@ async function sendCommand(
         );
 
         showMessage(
-            "Flask server not connected",
+            "❌ Flask server not connected",
             "error"
         );
 
     }
 
 }
-
-
-/* =========================================================
-   STEERING
-========================================================= */
-
-function updateSteering(
-    angle
-) {
-
-    steeringAngle =
-        Math.max(
-            -70,
-            Math.min(
-                70,
-                angle
-            )
-        );
-
-
-    steeringWheel.style.transform =
-        "rotate(" +
-        steeringAngle +
-        "deg)";
-
-
-    if (
-        steeringAngle < -10
-    ) {
-
-        steeringIndicator.textContent =
-            "↙ Steering: LEFT";
-
-        steeringIndicator.style.background =
-            "#e8f5ec";
-
-        if (!movementActive) {
-
-            sendCommand(
-                "left"
-            );
-
-        }
-
-    }
-
-    else if (
-        steeringAngle > 10
-    ) {
-
-        steeringIndicator.textContent =
-            "↘ Steering: RIGHT";
-
-        steeringIndicator.style.background =
-            "#e8f5ec";
-
-        if (!movementActive) {
-
-            sendCommand(
-                "right"
-            );
-
-        }
-
-    }
-
-    else {
-
-        steeringIndicator.textContent =
-            "↔ Steering: CENTER";
-
-        steeringIndicator.style.background =
-            "#edf7f0";
-
-    }
-
-}
-
-
-/* =========================================================
-   STEERING POINTER DOWN
-========================================================= */
-
-steeringWheel.addEventListener(
-    "pointerdown",
-    function(event) {
-
-        event.preventDefault();
-
-        steeringDragging =
-            true;
-
-        steeringStartX =
-            event.clientX;
-
-        steeringStartAngle =
-            steeringAngle;
-
-        steeringWheel.setPointerCapture(
-            event.pointerId
-        );
-
-    }
-);
-
-
-/* =========================================================
-   STEERING POINTER MOVE
-========================================================= */
-
-steeringWheel.addEventListener(
-    "pointermove",
-    function(event) {
-
-        if (
-            !steeringDragging
-        ) {
-
-            return;
-
-        }
-
-        event.preventDefault();
-
-        const movement =
-            event.clientX -
-            steeringStartX;
-
-        updateSteering(
-
-            steeringStartAngle +
-            movement * 0.7
-
-        );
-
-    }
-);
-
-
-/* =========================================================
-   STEERING RELEASE
-========================================================= */
-
-function releaseSteering() {
-
-    if (
-        !steeringDragging
-    ) {
-
-        return;
-
-    }
-
-    steeringDragging =
-        false;
-
-    steeringAngle =
-        0;
-
-    steeringWheel.style.transform =
-        "rotate(0deg)";
-
-    steeringIndicator.textContent =
-        "↔ Steering: CENTER";
-
-}
-
-
-steeringWheel.addEventListener(
-    "pointerup",
-    releaseSteering
-);
-
-steeringWheel.addEventListener(
-    "pointercancel",
-    releaseSteering
-);
-
-steeringWheel.addEventListener(
-    "lostpointercapture",
-    releaseSteering
-);
 
 
 /* =========================================================
@@ -5893,22 +7709,17 @@ async function pumpControl(
                 "/api/rover/pump",
                 {
 
-                    method:
-                        "POST",
+                    method: "POST",
 
                     headers: {
-
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body:
                         JSON.stringify({
-
                             state:
                                 state
-
                         })
 
                 }
@@ -5924,14 +7735,19 @@ async function pumpControl(
             data.success
         ) {
 
-            updateRoverStatus(
-                data.rover
-            );
+            if (data.rover) {
+
+                updateRoverStatus(
+                    data.rover
+                );
+
+            }
+
 
             showMessage(
                 state
-                    ? "💧 Pump turned ON"
-                    : "⛔ Pump turned OFF",
+                    ? "💧 Spray pump ON"
+                    : "⛔ Spray pump OFF",
                 "success"
             );
 
@@ -5957,7 +7773,7 @@ async function pumpControl(
         );
 
         showMessage(
-            "Flask server not connected",
+            "❌ Flask server not connected",
             "error"
         );
 
@@ -5993,7 +7809,7 @@ function updatePumpUI(
             "pump-light"
         );
 
-    const indicatorText =
+    const indicator =
         document.getElementById(
             "pump-indicator-text"
         );
@@ -6009,6 +7825,7 @@ function updatePumpUI(
             ? "ON"
             : "OFF";
 
+
     command.textContent =
         isOn
             ? "ON"
@@ -6019,32 +7836,6 @@ function updatePumpUI(
         isOn
             ? "#16a34a"
             : "#dc2626";
-
-
-    status.style.transform =
-        "scale(1.08)";
-
-    setTimeout(
-        function() {
-
-            status.style.transform =
-                "scale(1)";
-
-        },
-        150
-    );
-
-
-    light.classList.toggle(
-        "on",
-        isOn
-    );
-
-
-    indicatorText.textContent =
-        isOn
-            ? "Pump is ON"
-            : "Pump is OFF";
 
 
     systemPump.textContent =
@@ -6058,21 +7849,37 @@ function updatePumpUI(
             ? "#16a34a"
             : "#dc2626";
 
+
+    light.classList.toggle(
+        "on",
+        isOn
+    );
+
+
+    indicator.textContent =
+        isOn
+            ? "Pump is ON"
+            : "Pump is OFF";
+
+
+    pumpVisual.classList.toggle(
+        "active",
+        isOn
+    );
+
 }
 
 
 /* =========================================================
-   UPDATE ROVER STATUS
+   ROVER STATUS
 ========================================================= */
 
 function updateRoverStatus(
-    rover
+    roverData
 ) {
 
-    if (!rover) {
-
+    if (!roverData) {
         return;
-
     }
 
 
@@ -6101,16 +7908,6 @@ function updateRoverStatus(
             "system-direction"
         );
 
-    const speed =
-        document.getElementById(
-            "system-speed"
-        );
-
-    const currentSpeed =
-        document.getElementById(
-            "current-speed"
-        );
-
     const lastSeen =
         document.getElementById(
             "last-seen"
@@ -6125,7 +7922,7 @@ function updateRoverStatus(
     /* CONNECTION */
 
     if (
-        rover.connected
+        roverData.connected
     ) {
 
         status.textContent =
@@ -6141,10 +7938,14 @@ function updateRoverStatus(
             "online-text";
 
         headerText.textContent =
-            "Rover Online";
+            "Raspberry Pi Online";
 
         headerDot.classList.add(
             "online"
+        );
+
+        rover.classList.add(
+            "connected"
         );
 
     }
@@ -6164,10 +7965,14 @@ function updateRoverStatus(
             "offline-text";
 
         headerText.textContent =
-            "Rover Offline";
+            "Raspberry Pi Offline";
 
         headerDot.classList.remove(
             "online"
+        );
+
+        rover.classList.remove(
+            "connected"
         );
 
     }
@@ -6176,12 +7981,12 @@ function updateRoverStatus(
     /* DIRECTION */
 
     if (
-        rover.direction
+        roverData.direction
     ) {
 
         direction.textContent =
             String(
-                rover.direction
+                roverData.direction
             ).toUpperCase();
 
     }
@@ -6190,14 +7995,12 @@ function updateRoverStatus(
     /* SPEED */
 
     if (
-        rover.speed !== undefined
+        roverData.speed !== undefined
     ) {
 
-        speed.textContent =
-            rover.speed;
-
-        currentSpeed.textContent =
-            rover.speed;
+        setSpeed(
+            roverData.speed
+        );
 
     }
 
@@ -6205,11 +8008,11 @@ function updateRoverStatus(
     /* PUMP */
 
     if (
-        rover.pump !== undefined
+        roverData.pump !== undefined
     ) {
 
         updatePumpUI(
-            rover.pump
+            roverData.pump
         );
 
     }
@@ -6218,11 +8021,11 @@ function updateRoverStatus(
     /* MODE */
 
     if (
-        rover.mode
+        roverData.mode
     ) {
 
         mode.textContent =
-            rover.mode;
+            roverData.mode;
 
     }
 
@@ -6230,11 +8033,11 @@ function updateRoverStatus(
     /* LAST SEEN */
 
     if (
-        rover.last_seen
+        roverData.last_seen
     ) {
 
         lastSeen.textContent =
-            rover.last_seen;
+            roverData.last_seen;
 
     }
 
@@ -6242,7 +8045,7 @@ function updateRoverStatus(
 
 
 /* =========================================================
-   GET ROVER STATUS
+   GET STATUS
 ========================================================= */
 
 async function getRoverStatus() {
@@ -6262,7 +8065,7 @@ async function getRoverStatus() {
         if (!response.ok) {
 
             throw new Error(
-                "Status request failed"
+                "Status failed"
             );
 
         }
@@ -6292,34 +8095,33 @@ async function getRoverStatus() {
         );
 
 
-        const connection =
-            document.getElementById(
-                "system-connection"
-            );
-
-        connection.textContent =
+        document.getElementById(
+            "system-connection"
+        ).textContent =
             "SERVER OFFLINE";
 
-        connection.className =
+
+        document.getElementById(
+            "system-connection"
+        ).className =
             "offline-text";
 
 
-        const headerText =
-            document.getElementById(
-                "header-status-text"
-            );
-
-        headerText.textContent =
+        document.getElementById(
+            "header-status-text"
+        ).textContent =
             "Server Offline";
 
 
-        const headerDot =
-            document.getElementById(
-                "header-status-dot"
-            );
-
-        headerDot.classList.remove(
+        document.getElementById(
+            "header-status-dot"
+        ).classList.remove(
             "online"
+        );
+
+
+        rover.classList.remove(
+            "connected"
         );
 
     }
@@ -6368,7 +8170,7 @@ function attachMovementEvents(
 
     button.addEventListener(
         "pointerdown",
-        function(event) {
+        event => {
 
             event.preventDefault();
 
@@ -6387,7 +8189,7 @@ function attachMovementEvents(
 
     button.addEventListener(
         "pointerup",
-        function(event) {
+        event => {
 
             event.preventDefault();
 
@@ -6401,7 +8203,7 @@ function attachMovementEvents(
 
     button.addEventListener(
         "pointercancel",
-        function(event) {
+        event => {
 
             stopMove(
                 event
@@ -6410,30 +8212,11 @@ function attachMovementEvents(
         }
     );
 
-
-    button.addEventListener(
-        "pointerleave",
-        function(event) {
-
-            if (
-                movementActive &&
-                currentMovement === command
-            ) {
-
-                stopMove(
-                    event
-                );
-
-            }
-
-        }
-    );
-
 }
 
 
 /* =========================================================
-   ATTACH
+   ATTACH MOVEMENT
 ========================================================= */
 
 attachMovementEvents(
@@ -6472,7 +8255,7 @@ stopButton.addEventListener(
 
 
 /* =========================================================
-   EMERGENCY BUTTON
+   EMERGENCY
 ========================================================= */
 
 document
@@ -6481,11 +8264,7 @@ document
     )
     .addEventListener(
         "click",
-        function() {
-
-            emergencyStop();
-
-        }
+        emergencyStop
     );
 
 
@@ -6499,7 +8278,7 @@ document
     )
     .addEventListener(
         "click",
-        function() {
+        () => {
 
             pumpControl(
                 true
@@ -6515,7 +8294,7 @@ document
     )
     .addEventListener(
         "click",
-        function() {
+        () => {
 
             pumpControl(
                 false
@@ -6531,23 +8310,18 @@ document
 
 document.addEventListener(
     "keydown",
-    function(event) {
+    event => {
 
-        const activeElement =
+        const active =
             document.activeElement;
 
 
         if (
-            activeElement &&
+            active &&
             (
-                activeElement.tagName ===
-                "INPUT"
-                ||
-                activeElement.tagName ===
-                "TEXTAREA"
-                ||
-                activeElement.tagName ===
-                "SELECT"
+                active.tagName === "INPUT" ||
+                active.tagName === "TEXTAREA" ||
+                active.tagName === "SELECT"
             )
         ) {
 
@@ -6556,12 +8330,8 @@ document.addEventListener(
         }
 
 
-        if (
-            event.repeat
-        ) {
-
+        if (event.repeat) {
             return;
-
         }
 
 
@@ -6569,9 +8339,7 @@ document.addEventListener(
             event.key.toLowerCase();
 
 
-        if (
-            key === "w"
-        ) {
+        if (key === "w") {
 
             event.preventDefault();
 
@@ -6581,9 +8349,7 @@ document.addEventListener(
 
         }
 
-        else if (
-            key === "a"
-        ) {
+        else if (key === "a") {
 
             event.preventDefault();
 
@@ -6593,9 +8359,7 @@ document.addEventListener(
 
         }
 
-        else if (
-            key === "s"
-        ) {
+        else if (key === "s") {
 
             event.preventDefault();
 
@@ -6605,9 +8369,7 @@ document.addEventListener(
 
         }
 
-        else if (
-            key === "d"
-        ) {
+        else if (key === "d") {
 
             event.preventDefault();
 
@@ -6618,8 +8380,7 @@ document.addEventListener(
         }
 
         else if (
-            event.code ===
-            "Space"
+            event.code === "Space"
         ) {
 
             event.preventDefault();
@@ -6638,7 +8399,7 @@ document.addEventListener(
 
 document.addEventListener(
     "keyup",
-    function(event) {
+    event => {
 
         const key =
             event.key.toLowerCase();
@@ -6660,16 +8421,14 @@ document.addEventListener(
 
 
 /* =========================================================
-   WINDOW BLUR SAFETY
+   BROWSER SAFETY
 ========================================================= */
 
 window.addEventListener(
     "blur",
-    function() {
+    () => {
 
-        if (
-            movementActive
-        ) {
+        if (movementActive) {
 
             emergencyStop();
 
@@ -6679,13 +8438,9 @@ window.addEventListener(
 );
 
 
-/* =========================================================
-   VISIBILITY SAFETY
-========================================================= */
-
 document.addEventListener(
     "visibilitychange",
-    function() {
+    () => {
 
         if (
             document.hidden &&
@@ -6701,14 +8456,14 @@ document.addEventListener(
 
 
 /* =========================================================
-   INITIAL STATUS
+   INITIALIZATION
 ========================================================= */
 
 getRoverStatus();
 
 
 /* =========================================================
-   LIVE STATUS REFRESH
+   LIVE STATUS
 ========================================================= */
 
 setInterval(

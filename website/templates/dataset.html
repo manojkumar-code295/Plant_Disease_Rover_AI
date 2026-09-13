@@ -1,1827 +1,943 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<meta name="theme-color"
-      content="#0b3d2e">
-
-<meta name="description"
-      content="Precision Agriculture Smart Rover - Prediction Dataset">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#073b2a">
 
 <title>Dataset | Precision Agriculture Smart Rover</title>
 
-
 <style>
+:root{
+    --green-950:#05271d;
+    --green-900:#073b2a;
+    --green-800:#0b513a;
+    --green-700:#176b45;
+    --green-600:#26965f;
+    --green-500:#42c477;
+    --green-100:#e9f8ef;
+    --green-50:#f4fcf7;
 
-/* =========================================================
-   MODERN PRECISION AGRICULTURE DATASET
-========================================================= */
+    --text:#17231d;
+    --muted:#718078;
+    --border:#e4ece7;
+    --bg:#f3f7f5;
+    --white:#fff;
 
-:root {
+    --red:#dc3545;
+    --red-bg:#fff0f1;
 
-    --primary: #176b45;
-    --primary-dark: #0b3d2e;
-    --primary-light: #eaf7ef;
+    --yellow:#d99524;
+    --yellow-bg:#fff7e8;
 
-    --accent: #39b86f;
-    --accent-light: #dff6e8;
+    --purple:#7047d9;
+    --purple-bg:#f1edff;
 
-    --danger: #dc3545;
-    --danger-light: #fff0f1;
-
-    --warning: #e9a23b;
-    --warning-light: #fff7e8;
-
-    --text: #17221d;
-    --text-soft: #64736b;
-    --text-light: #91a098;
-
-    --background: #f4f8f5;
-    --white: #ffffff;
-
-    --border: #e3ebe6;
-
-    --shadow-sm:
-        0 4px 15px rgba(15, 55, 35, 0.05);
-
-    --shadow-md:
-        0 10px 30px rgba(15, 55, 35, 0.08);
-
-    --shadow-lg:
-        0 18px 45px rgba(15, 55, 35, 0.12);
-
-    --radius-sm: 10px;
-    --radius-md: 16px;
-    --radius-lg: 22px;
-
+    --shadow:0 10px 35px rgba(7,59,42,.08);
+    --shadow-hover:0 18px 45px rgba(7,59,42,.13);
 }
 
-
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-html {
-    scroll-behavior: smooth;
+html{
+    scroll-behavior:smooth;
 }
 
-body {
-
-    font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        Helvetica,
-        sans-serif;
-
+body{
+    font-family:Inter,"Segoe UI",Arial,sans-serif;
     background:
-        radial-gradient(
-            circle at top right,
-            rgba(57,184,111,0.07),
-            transparent 30%
-        ),
-        var(--background);
-
-    color: var(--text);
-
-    min-height: 100vh;
-
-    -webkit-font-smoothing: antialiased;
-
+        radial-gradient(circle at 90% 0%,rgba(66,196,119,.12),transparent 28%),
+        radial-gradient(circle at 20% 20%,rgba(38,150,95,.06),transparent 25%),
+        var(--bg);
+    color:var(--text);
+    min-height:100vh;
 }
 
-a {
-    text-decoration: none;
-    color: inherit;
+a{
+    text-decoration:none;
+    color:inherit;
 }
 
-button {
-    font-family: inherit;
+button{
+    font-family:inherit;
 }
 
-
-/* =========================================================
-   SCROLLBAR
-========================================================= */
-
-::-webkit-scrollbar {
-    width: 7px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #b9c9c0;
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #8fa79a;
-}
-
-
-/* =========================================================
-   APP
-========================================================= */
-
-.app {
-    min-height: 100vh;
-}
-
-
-/* =========================================================
+/* =========================
    SIDEBAR
-========================================================= */
+========================= */
 
-.sidebar {
-
-    position: fixed;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 260px;
-
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:265px;
     background:
-        linear-gradient(
-            180deg,
-            #0b3d2e 0%,
-            #0a3025 100%
-        );
-
-    color: white;
-
-    padding: 24px 15px;
-
-    z-index: 1000;
-
-    overflow-y: auto;
-
-    border-right:
-        1px solid rgba(255,255,255,0.04);
-
+        linear-gradient(180deg,#073b2a 0%,#052c21 100%);
+    color:white;
+    padding:22px 14px;
+    z-index:1000;
+    overflow-y:auto;
+    box-shadow:8px 0 30px rgba(0,0,0,.08);
 }
 
-
-/* =========================================================
-   LOGO
-========================================================= */
-
-.logo {
-
-    padding:
-        8px 13px 24px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,0.10);
-
+.logo{
+    padding:8px 14px 25px;
+    border-bottom:1px solid rgba(255,255,255,.10);
 }
 
-.logo-icon {
+.logo-icon{
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#2d9d66,#176b45);
+    font-size:29px;
+    margin-bottom:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
 
-    width: 48px;
-    height: 48px;
+.logo h1{
+    font-size:18px;
+    line-height:1.35;
+    font-weight:800;
+}
 
-    display: flex;
+.logo p{
+    color:#9fc1b1;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:7px;
+}
 
-    justify-content: center;
-    align-items: center;
+.menu-title{
+    color:#709789;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    margin:27px 12px 11px;
+    text-transform:uppercase;
+}
 
-    border-radius: 14px;
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    color:#c5d7cf;
+    padding:13px 14px;
+    border-radius:13px;
+    margin-bottom:5px;
+    font-size:13px;
+    font-weight:650;
+    transition:.25s;
+}
 
-    background:
-        linear-gradient(
-            135deg,
-            rgba(69,210,128,0.22),
-            rgba(69,210,128,0.08)
-        );
+.menu a:hover{
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    transform:translateX(3px);
+}
 
-    border:
-        1px solid rgba(111,239,159,0.15);
+.menu a.active{
+    color:white;
+    background:linear-gradient(135deg,#2b9360,#176b45);
+    box-shadow:0 10px 25px rgba(0,0,0,.20);
+}
 
-    font-size: 27px;
+.menu-icon{
+    width:24px;
+    text-align:center;
+    font-size:18px;
+}
 
-    margin-bottom: 13px;
+.sidebar-bottom{
+    position:absolute;
+    left:15px;
+    right:15px;
+    bottom:22px;
+}
 
+.connection-box{
+    padding:14px;
+    border-radius:14px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.connection-title{
+    color:#769b8b;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1px;
+    margin-bottom:9px;
+}
+
+.connection-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#dcebe4;
+    font-size:11px;
+    font-weight:700;
+}
+
+.green-dot{
+    width:8px;
+    height:8px;
+    flex:0 0 8px;
+    background:#36d57b;
+    border-radius:50%;
     box-shadow:
-        0 8px 25px rgba(0,0,0,0.12);
-
+        0 0 0 4px rgba(54,213,123,.10),
+        0 0 12px rgba(54,213,123,.75);
 }
 
-.logo h1 {
-
-    font-size: 17px;
-
-    line-height: 1.35;
-
-    font-weight: 750;
-
-    letter-spacing: -0.2px;
-
-}
-
-.logo p {
-
-    color: #a7c3b7;
-
-    font-size: 11px;
-
-    margin-top: 7px;
-
-    line-height: 1.5;
-
-}
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-.menu-title {
-
-    color: #72998a;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.4px;
-
-    margin:
-        27px 12px 11px;
-
-    text-transform: uppercase;
-
-}
-
-.menu a {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 13px;
-
-    color: #c1d3ca;
-
-    padding: 13px 14px;
-
-    border-radius: 12px;
-
-    margin-bottom: 5px;
-
-    font-size: 13px;
-
-    font-weight: 650;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        color 0.2s ease;
-
-}
-
-.menu a:hover {
-
-    background:
-        rgba(255,255,255,0.08);
-
-    color: white;
-
-    transform:
-        translateX(2px);
-
-}
-
-.menu a.active {
-
-    background:
-        linear-gradient(
-            135deg,
-            #2d8b5c,
-            #226e49
-        );
-
-    color: white;
-
-    box-shadow:
-        0 8px 20px rgba(0,0,0,0.18);
-
-}
-
-.menu-icon {
-
-    width: 23px;
-
-    text-align: center;
-
-    font-size: 18px;
-
-}
-
-
-/* =========================================================
-   SIDEBAR CONNECTION
-========================================================= */
-
-.sidebar-bottom {
-
-    position: absolute;
-
-    left: 15px;
-    right: 15px;
-
-    bottom: 23px;
-
-}
-
-.connection-box {
-
-    background:
-        rgba(255,255,255,0.065);
-
-    border:
-        1px solid rgba(255,255,255,0.07);
-
-    border-radius: 13px;
-
-    padding: 14px;
-
-    backdrop-filter:
-        blur(8px);
-
-}
-
-.connection-title {
-
-    color: #82a696;
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: 1px;
-
-    margin-bottom: 9px;
-
-}
-
-.connection-status {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    color: #e0eee7;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-}
-
-.green-dot {
-
-    width: 8px;
-    height: 8px;
-
-    flex: 0 0 8px;
-
-    background: #35d47a;
-
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 0 4px rgba(53,212,122,0.10),
-        0 0 10px rgba(53,212,122,0.75);
-
-}
-
-
-/* =========================================================
+/* =========================
    MAIN
-========================================================= */
+========================= */
 
-.main {
-
-    margin-left: 260px;
-
-    width:
-        calc(100% - 260px);
-
-    min-height: 100vh;
-
+.main{
+    margin-left:265px;
+    width:calc(100% - 265px);
+    min-height:100vh;
 }
 
-
-/* =========================================================
+/* =========================
    TOPBAR
-========================================================= */
+========================= */
 
-.topbar {
-
-    min-height: 82px;
-
-    background:
-        rgba(255,255,255,0.92);
-
-    border-bottom:
-        1px solid var(--border);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding:
-        15px 40px;
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 100;
-
-    backdrop-filter:
-        blur(15px);
-
+.topbar{
+    min-height:80px;
+    padding:15px 40px;
+    background:rgba(255,255,255,.88);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:100;
+    backdrop-filter:blur(18px);
 }
 
-.topbar-title h2 {
-
-    font-size: 19px;
-
-    color: var(--primary-dark);
-
-    font-weight: 750;
-
-    letter-spacing: -0.3px;
-
+.topbar-title h2{
+    color:var(--green-900);
+    font-size:19px;
+    font-weight:800;
 }
 
-.topbar-title p {
-
-    color: var(--text-light);
-
-    font-size: 11px;
-
-    margin-top: 5px;
-
+.topbar-title p{
+    color:#9aa79f;
+    font-size:11px;
+    margin-top:5px;
 }
 
-
-/* =========================================================
-   SYSTEM BADGE
-========================================================= */
-
-.system-badge {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    background:
-        var(--primary-light);
-
-    color:
-        #13713f;
-
-    border:
-        1px solid #ccebd8;
-
-    padding:
-        9px 15px;
-
-    border-radius: 30px;
-
-    font-size: 11px;
-
-    font-weight: 750;
-
-    box-shadow:
-        0 4px 12px rgba(23,107,69,0.05);
-
+.system-badge{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 15px;
+    border-radius:30px;
+    background:var(--green-100);
+    border:1px solid #ccebd8;
+    color:#147341;
+    font-size:11px;
+    font-weight:800;
 }
 
-
-/* =========================================================
+/* =========================
    CONTENT
-========================================================= */
+========================= */
 
-.content {
-
-    padding:
-        34px 40px 25px;
-
-    max-width:
-        1550px;
-
-    margin:
-        auto;
-
+.content{
+    max-width:1550px;
+    margin:auto;
+    padding:38px 40px 30px;
 }
 
-
-/* =========================================================
-   WELCOME
-========================================================= */
-
-.welcome {
-
-    margin-bottom: 25px;
-
-}
-
-.welcome h1 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        27px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        -0.6px;
-
-}
-
-.welcome p {
-
-    color:
-        var(--text-soft);
-
-    margin-top:
-        7px;
-
-    font-size:
-        12px;
-
-}
-
-
-/* =========================================================
-   SECTION HEADING
-========================================================= */
-
-.section-heading {
-
-    display:
-        flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
-    margin-bottom:
-        15px;
-
-}
-
-.section-heading h3 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        16px;
-
-    font-weight:
-        750;
-
-}
-
-.section-heading span {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    font-weight:
-        600;
-
-}
-
-
-/* =========================================================
-   STATISTICS
-========================================================= */
-
-.statistics-grid {
-
-    display:
-        grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap:
-        18px;
-
-    margin-bottom:
-        32px;
-
-}
-
-.stat-card {
-
+.hero{
+    position:relative;
+    overflow:hidden;
+    padding:30px;
+    border-radius:24px;
     background:
-        rgba(255,255,255,0.96);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-md);
-
-    padding:
-        21px;
-
-    box-shadow:
-        var(--shadow-sm);
-
-    position:
-        relative;
-
-    overflow:
-        hidden;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-
+        linear-gradient(135deg,#073b2a,#176b45 65%,#26965f);
+    color:white;
+    box-shadow:var(--shadow);
+    margin-bottom:25px;
 }
 
-.stat-card:hover {
-
-    transform:
-        translateY(-3px);
-
-    box-shadow:
-        var(--shadow-md);
-
+.hero::before{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    right:-70px;
+    top:-90px;
+    background:rgba(255,255,255,.07);
 }
 
-.stat-card::before {
-
-    content: "";
-
-    position:
-        absolute;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 4px;
-
-    background:
-        var(--accent);
-
-    opacity: 0.8;
-
+.hero::after{
+    content:"";
+    position:absolute;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    right:110px;
+    bottom:-90px;
+    background:rgba(255,255,255,.05);
 }
 
-.stat-card::after {
-
-    content: "";
-
-    position:
-        absolute;
-
-    right:
-        -35px;
-
-    top:
-        -35px;
-
-    width:
-        110px;
-
-    height:
-        110px;
-
-    border-radius:
-        50%;
-
-    background:
-        var(--primary-light);
-
+.hero-content{
+    position:relative;
+    z-index:2;
 }
 
-.stat-label {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
-    text-transform:
-        uppercase;
-
-    letter-spacing:
-        0.6px;
-
+.hero-label{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:7px 12px;
+    border-radius:30px;
+    background:rgba(255,255,255,.11);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.5px;
+    margin-bottom:15px;
 }
 
-.stat-number {
-
-    margin-top:
-        12px;
-
-    font-size:
-        30px;
-
-    color:
-        var(--primary-dark);
-
-    font-weight:
-        800;
-
-    position:
-        relative;
-
-    z-index:
-        1;
-
+.hero h1{
+    font-size:31px;
+    font-weight:850;
+    letter-spacing:-.8px;
 }
 
-.stat-icon {
-
-    float:
-        right;
-
-    width:
-        42px;
-
-    height:
-        42px;
-
-    border-radius:
-        12px;
-
-    display:
-        flex;
-
-    justify-content:
-        center;
-
-    align-items:
-        center;
-
-    background:
-        var(--primary-light);
-
-    font-size:
-        19px;
-
-    position:
-        relative;
-
-    z-index:
-        1;
-
+.hero p{
+    margin-top:9px;
+    color:#c8e2d5;
+    font-size:13px;
+    max-width:650px;
+    line-height:1.6;
 }
 
-.stat-subtitle {
-
-    margin-top:
-        5px;
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
+.hero-mini{
+    margin-top:19px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
 }
 
-.online {
-
-    color:
-        #159447;
-
+.hero-mini span{
+    padding:8px 12px;
+    border-radius:10px;
+    background:rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.09);
+    color:#e6f4ed;
+    font-size:10px;
+    font-weight:700;
 }
 
+/* =========================
+   STAT CARDS
+========================= */
 
-/* =========================================================
+.statistics-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:17px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    position:relative;
+    overflow:hidden;
+    background:rgba(255,255,255,.96);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:var(--shadow);
+    transition:.25s;
+}
+
+.stat-card:hover{
+    transform:translateY(-4px);
+    box-shadow:var(--shadow-hover);
+}
+
+.stat-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:4px;
+    background:var(--green-500);
+}
+
+.stat-card:nth-child(2)::before{
+    background:#4f8f70;
+}
+
+.stat-card:nth-child(3)::before{
+    background:#25b76a;
+}
+
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.stat-icon{
+    width:45px;
+    height:45px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:13px;
+    background:var(--green-100);
+    font-size:20px;
+}
+
+.stat-label{
+    color:#829089;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    margin-top:16px;
+}
+
+.stat-number{
+    color:var(--green-900);
+    font-size:30px;
+    font-weight:850;
+    margin-top:6px;
+}
+
+.stat-number.latest{
+    font-size:21px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.stat-number.online{
+    color:#159447;
+}
+
+.stat-subtitle{
+    color:#9aa69f;
+    font-size:10px;
+    margin-top:5px;
+}
+
+/* =========================
+   SECTION TITLE
+========================= */
+
+.section-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.section-heading h3{
+    color:var(--green-900);
+    font-size:17px;
+    font-weight:800;
+}
+
+.section-heading span{
+    color:#96a29b;
+    font-size:10px;
+    font-weight:700;
+}
+
+/* =========================
    DATASET CARD
-========================================================= */
+========================= */
 
-.dataset-card {
-
-    background:
-        rgba(255,255,255,0.97);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        var(--radius-lg);
-
-    box-shadow:
-        var(--shadow-sm);
-
-    overflow:
-        hidden;
-
-    transition:
-        box-shadow 0.25s ease;
-
+.dataset-card{
+    background:rgba(255,255,255,.97);
+    border:1px solid var(--border);
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
 }
 
-.dataset-card:hover {
-
-    box-shadow:
-        var(--shadow-md);
-
+.dataset-header{
+    padding:22px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
 }
 
-
-/* =========================================================
-   DATASET HEADER
-========================================================= */
-
-.dataset-header {
-
-    padding:
-        21px 23px;
-
-    border-bottom:
-        1px solid var(--border);
-
-    display:
-        flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
-    gap:
-        15px;
-
-    flex-wrap:
-        wrap;
-
+.dataset-title{
+    display:flex;
+    align-items:center;
+    gap:13px;
 }
 
-.dataset-header h3 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        15px;
-
-    font-weight:
-        750;
-
+.dataset-title-icon{
+    width:43px;
+    height:43px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:12px;
+    background:var(--green-100);
+    font-size:20px;
 }
 
-.dataset-header p {
-
-    margin-top:
-        5px;
-
-    color:
-        var(--text-soft);
-
-    font-size:
-        10px;
-
-    line-height:
-        1.5;
-
+.dataset-header h3{
+    color:var(--green-900);
+    font-size:15px;
+    font-weight:800;
 }
 
-.record-count {
-
-    background:
-        var(--primary-light);
-
-    color:
-        #23613e;
-
-    border:
-        1px solid #cfe8d8;
-
-    padding:
-        8px 14px;
-
-    border-radius:
-        20px;
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
+.dataset-header p{
+    color:#829089;
+    font-size:10px;
+    margin-top:5px;
 }
 
-
-/* =========================================================
-   TABLE CONTAINER
-========================================================= */
-
-.table-container {
-
-    width:
-        100%;
-
-    overflow-x:
-        auto;
-
+.record-count{
+    background:var(--green-100);
+    color:#1b7047;
+    border:1px solid #cde8d7;
+    padding:8px 14px;
+    border-radius:30px;
+    font-size:10px;
+    font-weight:800;
 }
 
-table {
+/* =========================
+   TABLE
+========================= */
 
-    width:
-        100%;
-
-    border-collapse:
-        collapse;
-
-    min-width:
-        1050px;
-
+.table-container{
+    width:100%;
+    overflow-x:auto;
 }
 
-
-/* =========================================================
-   TABLE HEADER
-========================================================= */
-
-thead {
-
-    background:
-        linear-gradient(
-            135deg,
-            #0b3d2e,
-            #176b45
-        );
-
-    color:
-        white;
-
+table{
+    width:100%;
+    min-width:1120px;
+    border-collapse:collapse;
 }
 
-th {
-
-    padding:
-        14px 13px;
-
-    text-align:
-        left;
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        0.5px;
-
-    text-transform:
-        uppercase;
-
-    white-space:
-        nowrap;
-
+thead{
+    background:linear-gradient(135deg,#073b2a,#176b45);
 }
 
-
-/* =========================================================
-   TABLE DATA
-========================================================= */
-
-td {
-
-    padding:
-        14px 13px;
-
-    border-bottom:
-        1px solid #edf1ee;
-
-    vertical-align:
-        middle;
-
-    font-size:
-        11px;
-
+th{
+    color:white;
+    text-align:left;
+    padding:15px 14px;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+    white-space:nowrap;
 }
 
-tbody tr {
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease;
-
+td{
+    padding:15px 14px;
+    border-bottom:1px solid #edf1ee;
+    vertical-align:middle;
+    font-size:11px;
 }
 
-tbody tr:hover {
-
-    background:
-        #f7fbf8;
-
+tbody tr{
+    transition:.2s;
 }
 
-
-/* =========================================================
-   ID
-========================================================= */
-
-.record-id {
-
-    color:
-        #6b7280;
-
-    font-weight:
-        800;
-
+tbody tr:hover{
+    background:#f7fbf8;
 }
 
+tbody tr:last-child td{
+    border-bottom:none;
+}
 
-/* =========================================================
+.record-id{
+    color:#7d8983;
+    font-weight:800;
+}
+
+/* =========================
    IMAGE
-========================================================= */
+========================= */
 
-.image-wrapper {
-
-    width:
-        72px;
-
-    height:
-        62px;
-
-    border-radius:
-        10px;
-
-    overflow:
-        hidden;
-
-    background:
-        #edf4ef;
-
-    border:
-        1px solid #dfe8e2;
-
-    box-shadow:
-        0 3px 10px rgba(15,55,35,0.05);
-
+.image-wrapper{
+    position:relative;
+    width:78px;
+    height:65px;
+    border-radius:12px;
+    overflow:hidden;
+    background:#edf5ef;
+    border:1px solid #dce8e0;
+    cursor:pointer;
 }
 
-.history-image {
-
-    width:
-        100%;
-
-    height:
-        100%;
-
-    object-fit:
-        cover;
-
-    display:
-        block;
-
-    transition:
-        transform 0.3s ease;
-
+.history-image{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:.35s;
 }
 
-.history-image:hover {
-
-    transform:
-        scale(1.08);
-
+.image-wrapper::after{
+    content:"🔍";
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(7,59,42,.60);
+    color:white;
+    opacity:0;
+    transition:.25s;
+    font-size:17px;
 }
 
-
-/* =========================================================
-   DISEASE BADGES
-========================================================= */
-
-.disease-badge {
-
-    display:
-        inline-block;
-
-    padding:
-        6px 11px;
-
-    border-radius:
-        20px;
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
-    white-space:
-        nowrap;
-
+.image-wrapper:hover .history-image{
+    transform:scale(1.08);
 }
 
-.disease-healthy {
-
-    background:
-        #dcfce7;
-
-    color:
-        #15803d;
-
-    border:
-        1px solid #c5efd2;
-
+.image-wrapper:hover::after{
+    opacity:1;
 }
 
-.disease-bacterial {
+/* =========================
+   DISEASE
+========================= */
 
-    background:
-        #fee2e2;
-
-    color:
-        #b91c1c;
-
-    border:
-        1px solid #f8caca;
-
+.disease-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:7px 11px;
+    border-radius:30px;
+    font-size:10px;
+    font-weight:800;
+    white-space:nowrap;
 }
 
-.disease-cercospora {
-
-    background:
-        #fef3c7;
-
-    color:
-        #b45309;
-
-    border:
-        1px solid #f6e5a8;
-
+.disease-healthy{
+    color:#15803d;
+    background:#dcfce7;
+    border:1px solid #c5efd2;
 }
 
-.disease-curl {
-
-    background:
-        #ede9fe;
-
-    color:
-        #6d28d9;
-
-    border:
-        1px solid #ddd5fe;
-
+.disease-bacterial{
+    color:#b91c1c;
+    background:#fee2e2;
+    border:1px solid #f8caca;
 }
 
-.disease-other {
-
-    background:
-        #e5e7eb;
-
-    color:
-        #374151;
-
+.disease-cercospora{
+    color:#b45309;
+    background:#fef3c7;
+    border:1px solid #f6e5a8;
 }
 
-
-/* =========================================================
-   RECOMMENDATION CELLS
-========================================================= */
-
-.recommendation {
-
-    max-width:
-        190px;
-
-    line-height:
-        1.55;
-
-    color:
-        #374151;
-
+.disease-curl{
+    color:#6d28d9;
+    background:#ede9fe;
+    border:1px solid #ddd5fe;
 }
 
-
-/* =========================================================
-   DATE / TIME
-========================================================= */
-
-.date-text {
-
-    color:
-        #374151;
-
-    white-space:
-        nowrap;
-
-    font-weight:
-        600;
-
+.disease-other{
+    color:#374151;
+    background:#e5e7eb;
 }
 
-.time-text {
+/* =========================
+   RECOMMENDATIONS
+========================= */
 
-    color:
-        #6b7280;
-
-    white-space:
-        nowrap;
-
+.recommendation{
+    max-width:210px;
+    color:#44514a;
+    line-height:1.55;
 }
 
-
-/* =========================================================
-   EMPTY STATE
-========================================================= */
-
-.empty-history {
-
-    text-align:
-        center;
-
-    padding:
-        80px 25px;
-
-    color:
-        #6b7280;
-
+.recommendation::first-letter{
+    font-weight:700;
 }
 
-.empty-icon {
-
-    width:
-        70px;
-
-    height:
-        70px;
-
-    margin:
-        0 auto 18px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    background:
-        var(--primary-light);
-
-    border:
-        1px solid #d5e9dc;
-
-    border-radius:
-        20px;
-
-    font-size:
-        35px;
-
+.date-text{
+    color:#33413a;
+    white-space:nowrap;
+    font-weight:700;
 }
 
-.empty-history h3 {
-
-    color:
-        var(--primary-dark);
-
-    margin-bottom:
-        10px;
-
-    font-size:
-        19px;
-
+.time-text{
+    color:#7b8781;
+    white-space:nowrap;
 }
 
-.empty-history p {
-
-    font-size:
-        11px;
-
-    line-height:
-        1.7;
-
-}
-
-
-/* =========================================================
-   DATASET FOOTER
-========================================================= */
-
-.dataset-footer {
-
-    padding:
-        15px 23px;
-
-    background:
-        #fafcfb;
-
-    border-top:
-        1px solid var(--border);
-
-    color:
-        #7b8982;
-
-    font-size:
-        9px;
-
-}
-
-
-/* =========================================================
+/* =========================
    FOOTER
-========================================================= */
+========================= */
 
-footer {
-
-    text-align:
-        center;
-
-    color:
-        #98a69f;
-
-    font-size:
-        9px;
-
-    padding:
-        28px 20px;
-
+.dataset-footer{
+    padding:14px 24px;
+    background:#fafcfb;
+    border-top:1px solid var(--border);
+    color:#85918b;
+    font-size:9px;
 }
 
+footer{
+    text-align:center;
+    color:#9aa69f;
+    font-size:9px;
+    padding:28px 20px;
+}
 
-/* =========================================================
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-history{
+    padding:85px 25px;
+    text-align:center;
+}
+
+.empty-icon{
+    width:78px;
+    height:78px;
+    margin:0 auto 20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:22px;
+    background:var(--green-100);
+    border:1px solid #d5e9dc;
+    font-size:37px;
+}
+
+.empty-history h3{
+    color:var(--green-900);
+    font-size:20px;
+    margin-bottom:9px;
+}
+
+.empty-history p{
+    max-width:430px;
+    margin:auto;
+    color:#7a8780;
+    font-size:11px;
+    line-height:1.7;
+}
+
+/* =========================
    MOBILE NAV
-========================================================= */
+========================= */
 
-.mobile-nav {
-
-    display:
-        none;
-
+.mobile-nav{
+    display:none;
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
 
-/* =========================================================
-   RESPONSIVE - TABLET
-========================================================= */
+@media(max-width:1100px){
 
-@media(max-width:1100px) {
-
-    .content {
-
-        padding:
-            30px 28px;
-
+    .content{
+        padding:30px 25px;
     }
 
-    .statistics-grid {
-
-        grid-template-columns:
-            repeat(3, 1fr);
-
+    .statistics-grid{
+        grid-template-columns:1fr;
     }
-
 }
 
+@media(max-width:800px){
 
-/* =========================================================
-   RESPONSIVE - SMALL TABLET
-========================================================= */
-
-@media(max-width:800px) {
-
-    .sidebar {
-
-        width:
-            72px;
-
-        padding:
-            20px 8px;
-
+    .sidebar{
+        width:72px;
+        padding:20px 8px;
     }
 
-    .logo {
-
-        text-align:
-            center;
-
-        padding:
-            5px 0 20px;
-
+    .logo{
+        text-align:center;
+        padding:5px 0 20px;
     }
 
-    .logo-icon {
-
-        margin:
-            auto auto 12px;
-
+    .logo-icon{
+        margin:auto;
     }
 
     .logo h1,
     .logo p,
     .menu-title,
-    .connection-box {
-
-        display:
-            none;
-
+    .connection-box{
+        display:none;
     }
 
-    .menu a {
-
-        justify-content:
-            center;
-
-        padding:
-            13px 5px;
-
+    .menu a{
+        justify-content:center;
+        padding:13px 5px;
     }
 
-    .menu-icon {
-
-        font-size:
-            20px;
-
+    .menu-icon{
+        font-size:20px;
     }
 
-    .main {
-
-        margin-left:
-            72px;
-
-        width:
-            calc(100% - 72px);
-
+    .main{
+        margin-left:72px;
+        width:calc(100% - 72px);
     }
 
-    .topbar {
-
-        padding:
-            15px 22px;
-
+    .topbar{
+        padding:14px 22px;
     }
 
-    .content {
-
-        padding:
-            26px 20px;
-
+    .hero h1{
+        font-size:27px;
     }
-
-    .statistics-grid {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
 }
 
+@media(max-width:550px){
 
-/* =========================================================
-   RESPONSIVE - MOBILE
-========================================================= */
-
-@media(max-width:550px) {
-
-    body {
-
-        padding-bottom:
-            70px;
-
+    body{
+        padding-bottom:70px;
     }
 
-    .sidebar {
-
-        display:
-            none;
-
+    .sidebar{
+        display:none;
     }
 
-    .main {
-
-        margin-left:
-            0;
-
-        width:
-            100%;
-
+    .main{
+        margin-left:0;
+        width:100%;
     }
 
-    .topbar {
-
-        min-height:
-            66px;
-
-        padding:
-            10px 15px;
-
+    .topbar{
+        min-height:65px;
+        padding:10px 15px;
     }
 
-    .topbar-title h2 {
-
-        font-size:
-            14px;
-
+    .topbar-title h2{
+        font-size:14px;
     }
 
-    .topbar-title p {
-
-        display:
-            none;
-
+    .topbar-title p{
+        display:none;
     }
 
-    .system-badge {
-
-        padding:
-            7px 10px;
-
-        font-size:
-            9px;
-
+    .system-badge{
+        padding:7px 10px;
+        font-size:9px;
     }
 
-    .content {
-
-        padding:
-            21px 14px;
-
+    .content{
+        padding:18px 13px 25px;
     }
 
-    .welcome {
-
-        margin-bottom:
-            21px;
-
+    .hero{
+        padding:23px 20px;
+        border-radius:19px;
     }
 
-    .welcome h1 {
-
-        font-size:
-            21px;
-
+    .hero h1{
+        font-size:23px;
     }
 
-    .welcome p {
-
-        font-size:
-            10px;
-
+    .hero p{
+        font-size:11px;
     }
 
-    .stat-card {
-
-        padding:
-            17px;
-
+    .hero-mini span{
+        font-size:9px;
     }
 
-    .dataset-header {
-
-        padding:
-            17px;
-
+    .stat-card{
+        padding:18px;
     }
 
-    .dataset-header p {
-
-        font-size:
-            9px;
-
+    .dataset-card{
+        border-radius:18px;
     }
 
-    .record-count {
-
-        padding:
-            7px 11px;
-
+    .dataset-header{
+        padding:17px;
     }
 
-    .table-container {
-
-        overflow-x:
-            auto;
-
-        -webkit-overflow-scrolling:
-            touch;
-
+    .dataset-footer{
+        padding:13px 17px;
     }
 
-    table {
-
-        min-width:
-            1000px;
-
+    .mobile-nav{
+        position:fixed;
+        display:flex;
+        left:0;
+        right:0;
+        bottom:0;
+        height:68px;
+        background:rgba(255,255,255,.96);
+        border-top:1px solid #dfe7e2;
+        justify-content:space-around;
+        align-items:center;
+        z-index:9998;
+        box-shadow:0 -6px 25px rgba(0,0,0,.08);
+        backdrop-filter:blur(14px);
     }
 
-    .empty-history {
-
-        padding:
-            65px 18px;
-
+    .mobile-nav a{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:3px;
+        color:#789088;
+        font-size:8px;
+        font-weight:750;
+        min-width:48px;
     }
 
-    .mobile-nav {
-
-        position:
-            fixed;
-
-        left:
-            0;
-
-        right:
-            0;
-
-        bottom:
-            0;
-
-        height:
-            68px;
-
-        background:
-            rgba(255,255,255,0.96);
-
-        border-top:
-            1px solid #dfe7e2;
-
-        display:
-            flex;
-
-        justify-content:
-            space-around;
-
-        align-items:
-            center;
-
-        z-index:
-            9998;
-
-        box-shadow:
-            0 -6px 25px rgba(0,0,0,0.08);
-
-        backdrop-filter:
-            blur(12px);
-
+    .mobile-nav a span{
+        font-size:19px;
     }
 
-    .mobile-nav a {
-
-        display:
-            flex;
-
-        flex-direction:
-            column;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        gap:
-            3px;
-
-        color:
-            #789088;
-
-        font-size:
-            8px;
-
-        font-weight:
-            750;
-
-        min-width:
-            48px;
-
+    .mobile-nav a.active{
+        color:#28734e;
     }
-
-    .mobile-nav a span {
-
-        font-size:
-            19px;
-
-    }
-
-    .mobile-nav a.active {
-
-        color:
-            #28734e;
-
-    }
-
 }
 
+@media(prefers-reduced-motion:reduce){
 
-/* =========================================================
-   EXTRA SMALL DEVICES
-========================================================= */
-
-@media(max-width:380px) {
-
-    .topbar-title h2 {
-
-        font-size:
-            12px;
-
+    *{
+        animation:none!important;
+        transition:none!important;
+        scroll-behavior:auto!important;
     }
-
-    .system-badge {
-
-        padding:
-            6px 8px;
-
-        font-size:
-            8px;
-
-    }
-
-    .welcome h1 {
-
-        font-size:
-            19px;
-
-    }
-
 }
-
-
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
-
-@media(prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        scroll-behavior:
-            auto !important;
-
-        animation-duration:
-            0.01ms !important;
-
-        animation-iteration-count:
-            1 !important;
-
-        transition-duration:
-            0.01ms !important;
-
-    }
-
-}
-
 </style>
-
 </head>
-
 
 <body>
 
 <div class="app">
 
-
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!-- ================= SIDEBAR ================= -->
 
 <aside class="sidebar">
 
@@ -1842,94 +958,43 @@ footer {
 
     </div>
 
-
     <div class="menu-title">
         Main Menu
     </div>
 
-
     <div class="menu">
 
         <a href="/">
-
-            <span class="menu-icon">
-                🏠
-            </span>
-
-            <span>
-                Dashboard
-            </span>
-
+            <span class="menu-icon">🏠</span>
+            <span>Dashboard</span>
         </a>
-
 
         <a href="/rover">
-
-            <span class="menu-icon">
-                🚜
-            </span>
-
-            <span>
-                Rover Control
-            </span>
-
+            <span class="menu-icon">🚜</span>
+            <span>Rover Control</span>
         </a>
 
-
-        <a href="/dataset"
-           class="active">
-
-            <span class="menu-icon">
-                📁
-            </span>
-
-            <span>
-                Dataset
-            </span>
-
+        <a href="/dataset" class="active">
+            <span class="menu-icon">📁</span>
+            <span>Dataset</span>
         </a>
-
 
         <a href="/analytics">
-
-            <span class="menu-icon">
-                📊
-            </span>
-
-            <span>
-                Analytics
-            </span>
-
+            <span class="menu-icon">📊</span>
+            <span>Analytics</span>
         </a>
-
 
         <a href="/daily-data">
-
-            <span class="menu-icon">
-                📅
-            </span>
-
-            <span>
-                Daily Data
-            </span>
-
+            <span class="menu-icon">📅</span>
+            <span>Daily Data</span>
         </a>
 
-
         <a href="/settings">
-
-            <span class="menu-icon">
-                ⚙️
-            </span>
-
-            <span>
-                Settings
-            </span>
-
+            <span class="menu-icon">⚙️</span>
+            <span>Settings</span>
         </a>
 
     </div>
-
 
     <div class="sidebar-bottom">
 
@@ -1954,12 +1019,9 @@ footer {
 </aside>
 
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
+<!-- ================= MAIN ================= -->
 
 <div class="main">
-
 
 <header class="topbar">
 
@@ -1975,14 +1037,11 @@ footer {
 
     </div>
 
-
     <div class="system-badge">
 
         <span class="green-dot"></span>
 
-        <span>
-            AI System Online
-        </span>
+        AI System Online
 
     </div>
 
@@ -1992,37 +1051,65 @@ footer {
 <main class="content">
 
 
-<!-- =========================================================
-     WELCOME
-========================================================= -->
+<!-- ================= HERO ================= -->
 
-<section class="welcome">
+<section class="hero">
 
-    <h1>
-        Prediction Dataset 📊
-    </h1>
+    <div class="hero-content">
 
-    <p>
-        View all AI leaf detection results and
-        agricultural recommendations.
-    </p>
+        <div class="hero-label">
+            🌿 AI DATA INTELLIGENCE
+        </div>
+
+        <h1>
+            Prediction Dataset
+        </h1>
+
+        <p>
+            Explore all leaf disease detection results,
+            AI confidence information and agricultural
+            treatment recommendations collected by
+            your smart rover.
+        </p>
+
+        <div class="hero-mini">
+
+            <span>
+                🔬 AI Detection
+            </span>
+
+            <span>
+                🌱 Plant Health
+            </span>
+
+            <span>
+                💊 Treatment Advice
+            </span>
+
+            <span>
+                💾 Automatic Storage
+            </span>
+
+        </div>
+
+    </div>
 
 </section>
 
 
-<!-- =========================================================
-     STATISTICS
-========================================================= -->
+<!-- ================= STATISTICS ================= -->
 
 <section class="statistics-grid">
 
 
-<!-- TOTAL -->
-
 <div class="stat-card">
 
-    <div class="stat-icon">
-        🔍
+    <div class="stat-top">
+
+        <div class="stat-icon">
+            🔍
+        </div>
+
     </div>
 
     <div class="stat-label">
@@ -2030,32 +1117,31 @@ footer {
     </div>
 
     <div class="stat-number">
-
         {{ history|length }}
-
     </div>
 
     <div class="stat-subtitle">
-        Total AI analyses
+        Total AI analyses stored
     </div>
 
 </div>
 
 
-<!-- LATEST -->
-
 <div class="stat-card">
 
-    <div class="stat-icon">
-        🌿
+    <div class="stat-top">
+
+        <div class="stat-icon">
+            🌿
+        </div>
+
     </div>
 
     <div class="stat-label">
         Latest Detection
     </div>
 
-    <div class="stat-number"
-         style="font-size:22px;">
+    <div class="stat-number latest">
 
         {% if history %}
 
@@ -2063,7 +1149,7 @@ footer {
 
         {% else %}
 
-            None
+            No prediction
 
         {% endif %}
 
@@ -2076,12 +1162,14 @@ footer {
 </div>
 
 
-<!-- SYSTEM -->
-
 <div class="stat-card">
 
-    <div class="stat-icon">
-        ⚡
+    <div class="stat-top">
+
+        <div class="stat-icon">
+            ⚡
+        </div>
+
     </div>
 
     <div class="stat-label">
@@ -2089,9 +1177,7 @@ footer {
     </div>
 
     <div class="stat-number online">
-
         ● ONLINE
-
     </div>
 
     <div class="stat-subtitle">
@@ -2104,9 +1190,7 @@ footer {
 </section>
 
 
-<!-- =========================================================
-     DATASET SECTION
-========================================================= -->
+<!-- ================= SECTION TITLE ================= -->
 
 <div class="section-heading">
 
@@ -2115,31 +1199,37 @@ footer {
     </h3>
 
     <span>
-        Stored AI Results
+        STORED AI RESULTS
     </span>
 
 </div>
 
 
+<!-- ================= DATASET ================= -->
+
 <div class="dataset-card">
 
 
-<!-- =========================================================
-     CARD HEADER
-========================================================= -->
-
 <div class="dataset-header">
 
-    <div>
+    <div class="dataset-title">
 
-        <h3>
-            📊 Saved Prediction Records
-        </h3>
+        <div class="dataset-title-icon">
+            📊
+        </div>
 
-        <p>
-            AI detection results stored by the
-            Precision Agriculture system.
-        </p>
+        <div>
+
+            <h3>
+                Saved Prediction Records
+            </h3>
+
+            <p>
+                Complete history of AI leaf disease
+                predictions and recommendations.
+            </p>
+
+        </div>
 
     </div>
 
@@ -2148,19 +1238,12 @@ footer {
 
         {{ history|length }}
 
-        Record
-        {% if history|length != 1 %}
-            s
-        {% endif %}
+        Record{% if history|length != 1 %}s{% endif %}
 
     </span>
 
 </div>
 
-
-<!-- =========================================================
-     HISTORY TABLE
-========================================================= -->
 
 {% if history %}
 
@@ -2173,37 +1256,21 @@ footer {
 
 <tr>
 
-    <th>
-        ID
-    </th>
+    <th>ID</th>
 
-    <th>
-        Leaf Image
-    </th>
+    <th>Leaf Image</th>
 
-    <th>
-        Disease
-    </th>
+    <th>Disease</th>
 
-    <th>
-        Chemical
-    </th>
+    <th>Chemical</th>
 
-    <th>
-        Fertilizer
-    </th>
+    <th>Fertilizer</th>
 
-    <th>
-        Treatment
-    </th>
+    <th>Treatment</th>
 
-    <th>
-        Date
-    </th>
+    <th>Date</th>
 
-    <th>
-        Time
-    </th>
+    <th>Time</th>
 
 </tr>
 
@@ -2215,11 +1282,8 @@ footer {
 
 {% for item in history %}
 
-
 <tr>
 
-
-<!-- ID -->
 
 <td class="record-id">
 
@@ -2227,8 +1291,6 @@ footer {
 
 </td>
 
-
-<!-- IMAGE -->
 
 <td>
 
@@ -2253,8 +1315,6 @@ footer {
 </td>
 
 
-<!-- DISEASE -->
-
 <td>
 
     {% set disease =
@@ -2265,43 +1325,41 @@ footer {
     {% if "healthy" in disease %}
 
         <span class="disease-badge disease-healthy">
-            Healthy
+            ● Healthy
         </span>
 
 
     {% elif "bacterial" in disease %}
 
         <span class="disease-badge disease-bacterial">
-            Bacterial Spot
+            ● Bacterial Spot
         </span>
 
 
     {% elif "cercospora" in disease %}
 
         <span class="disease-badge disease-cercospora">
-            Cercospora Leaf Spot
+            ● Cercospora Leaf Spot
         </span>
 
 
     {% elif "curl" in disease %}
 
         <span class="disease-badge disease-curl">
-            Curl Virus
+            ● Curl Virus
         </span>
 
 
     {% else %}
 
         <span class="disease-badge disease-other">
-            {{ item["disease"] }}
+            ● {{ item["disease"] }}
         </span>
 
     {% endif %}
 
 </td>
 
-
-<!-- CHEMICAL -->
 
 <td>
 
@@ -2314,8 +1372,6 @@ footer {
 </td>
 
 
-<!-- FERTILIZER -->
-
 <td>
 
     <div class="recommendation">
@@ -2326,8 +1382,6 @@ footer {
 
 </td>
 
-
-<!-- TREATMENT -->
 
 <td>
 
@@ -2340,16 +1394,12 @@ footer {
 </td>
 
 
-<!-- DATE -->
-
 <td class="date-text">
 
     {{ item["date"] }}
 
 </td>
 
-
-<!-- TIME -->
 
 <td class="time-text">
 
@@ -2359,7 +1409,6 @@ footer {
 
 
 </tr>
-
 
 {% endfor %}
 
@@ -2371,24 +1420,17 @@ footer {
 </div>
 
 
-<!-- =========================================================
-     DATASET FOOTER
-========================================================= -->
-
 <div class="dataset-footer">
 
-    💾 Prediction records are automatically stored
-    when an AI detection is completed.
+    💾
+    Prediction records are automatically stored
+    whenever an AI detection is completed.
 
 </div>
 
 
 {% else %}
 
-
-<!-- =========================================================
-     EMPTY DATASET
-========================================================= -->
 
 <div class="empty-history">
 
@@ -2402,7 +1444,9 @@ footer {
 
     <p>
         Run your AI prediction program to create
-        the first dataset record.
+        the first dataset record. Once the rover
+        detects a leaf, the result will appear here
+        automatically.
     </p>
 
 </div>
@@ -2410,81 +1454,56 @@ footer {
 
 {% endif %}
 
-
 </div>
-
-
-</main>
 
 
 <footer>
 
     🌱 Precision Agriculture Smart Rover
-    &nbsp;•&nbsp;
+    &nbsp; • &nbsp;
     AI-Based Plant Leaf Disease Detection System
 
 </footer>
 
 
-</div>
+</main>
 
 </div>
 
+</div>
 
-<!-- =========================================================
-     MOBILE NAVIGATION
-========================================================= -->
+
+<!-- ================= MOBILE NAV ================= -->
 
 <nav class="mobile-nav">
 
     <a href="/">
-
         <span>🏠</span>
-
         Dashboard
-
     </a>
-
 
     <a href="/rover">
-
         <span>🚜</span>
-
         Rover
-
     </a>
 
-
-    <a href="/dataset"
-       class="active">
-
+    <a href="/dataset" class="active">
         <span>📁</span>
-
         Dataset
-
     </a>
-
 
     <a href="/analytics">
-
         <span>📊</span>
-
         Analytics
-
     </a>
 
-
     <a href="/settings">
-
         <span>⚙️</span>
-
         Settings
-
     </a>
 
 </nav>
 
 
 </body>
-
 </html>

@@ -3,997 +3,2535 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    <title>Analytics | Precision Agriculture</title>
+<meta name="theme-color"
+      content="#0b3d2e">
 
-    <style>
+<meta name="description"
+      content="Precision Agriculture Smart Rover Analytics">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<title>Analytics | Precision Agriculture Smart Rover</title>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f5;
-            color: #1f2937;
-        }
 
+<style>
 
-        /* =====================================================
-           HEADER
-        ===================================================== */
+/* =========================================================
+   ROOT
+========================================================= */
 
-        header {
-            background: #12372a;
-            color: white;
-            padding: 22px 40px;
+:root {
 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+    --primary: #176b45;
+    --primary-dark: #0b3d2e;
+    --primary-light: #eaf7ef;
 
-            gap: 20px;
-            flex-wrap: wrap;
-        }
+    --accent: #39b86f;
 
-        header h1 {
-            font-size: 26px;
-        }
+    --green: #16a34a;
+    --green-light: #dcfce7;
 
-        header p {
-            margin-top: 6px;
-            color: #cbded3;
-            font-size: 14px;
-        }
+    --red: #dc2626;
+    --red-light: #fee2e2;
 
+    --orange: #d97706;
+    --orange-light: #fef3c7;
 
-        /* SYSTEM STATUS */
+    --purple: #7c3aed;
+    --purple-light: #ede9fe;
 
-        .system-status {
-            display: flex;
-            align-items: center;
-            gap: 9px;
+    --text: #17221d;
+    --text-soft: #64736b;
+    --text-light: #91a098;
 
-            background: rgba(255,255,255,0.10);
+    --background: #f4f8f5;
+    --white: #ffffff;
 
-            padding: 10px 15px;
+    --border: #e3ebe6;
 
-            border-radius: 25px;
+    --shadow-sm:
+        0 4px 15px rgba(15,55,35,0.05);
 
-            font-size: 13px;
-            font-weight: bold;
-        }
+    --shadow-md:
+        0 10px 30px rgba(15,55,35,0.08);
 
-        .status-dot {
-            width: 10px;
-            height: 10px;
+    --shadow-lg:
+        0 18px 45px rgba(15,55,35,0.12);
 
-            background: #22c55e;
+}
 
-            border-radius: 50%;
 
-            box-shadow:
-                0 0 0 4px rgba(34,197,94,0.15);
+/* =========================================================
+   RESET
+========================================================= */
 
-            animation: pulse 2s infinite;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        @keyframes pulse {
+html {
+    scroll-behavior: smooth;
+}
 
-            0% {
-                box-shadow:
-                    0 0 0 0 rgba(34,197,94,0.5);
-            }
+body {
 
-            70% {
-                box-shadow:
-                    0 0 0 7px rgba(34,197,94,0);
-            }
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
 
-            100% {
-                box-shadow:
-                    0 0 0 0 rgba(34,197,94,0);
-            }
+    background:
 
-        }
+        radial-gradient(
+            circle at top right,
+            rgba(57,184,111,0.08),
+            transparent 30%
+        ),
 
+        radial-gradient(
+            circle at bottom left,
+            rgba(23,107,69,0.05),
+            transparent 28%
+        ),
 
-        /* =====================================================
-           NAVIGATION
-        ===================================================== */
+        var(--background);
 
-        nav {
-            background: white;
+    color: var(--text);
 
-            padding: 15px 40px;
+    min-height: 100vh;
 
-            display: flex;
+    -webkit-font-smoothing: antialiased;
 
-            gap: 28px;
+}
 
-            box-shadow:
-                0 2px 8px rgba(0,0,0,0.08);
 
-            flex-wrap: wrap;
-        }
+/* =========================================================
+   SCROLLBAR
+========================================================= */
 
-        nav a {
-            text-decoration: none;
+::-webkit-scrollbar {
+    width: 7px;
+}
 
-            color: #374151;
+::-webkit-scrollbar-track {
+    background: transparent;
+}
 
-            font-weight: bold;
+::-webkit-scrollbar-thumb {
+    background: #b9c9c0;
+    border-radius: 20px;
+}
 
-            transition: 0.2s;
-        }
+::-webkit-scrollbar-thumb:hover {
+    background: #8fa79a;
+}
 
-        nav a:hover {
-            color: #2f7d57;
-        }
 
-        nav a.active {
-            color: #23613e;
-        }
+/* =========================================================
+   APP
+========================================================= */
 
+.app {
+    min-height: 100vh;
+}
 
-        /* =====================================================
-           MAIN
-        ===================================================== */
 
-        main {
-            max-width: 1400px;
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
-            margin: auto;
+.sidebar {
 
-            padding: 35px 40px;
-        }
+    position: fixed;
 
+    left: 0;
+    top: 0;
+    bottom: 0;
 
-        /* =====================================================
-           PAGE TITLE
-        ===================================================== */
+    width: 260px;
 
-        .page-title {
-            margin-bottom: 25px;
-        }
+    background:
+        linear-gradient(
+            180deg,
+            #0b3d2e 0%,
+            #0a3025 100%
+        );
 
-        .page-title h2 {
-            color: #12372a;
+    color: white;
 
-            font-size: 28px;
-        }
+    padding: 24px 15px;
 
-        .page-title p {
-            color: #6b7280;
+    z-index: 1000;
 
-            margin-top: 7px;
+    overflow-y: auto;
 
-            line-height: 1.5;
-        }
+    border-right:
+        1px solid rgba(255,255,255,0.04);
 
+}
 
-        /* =====================================================
-           SUMMARY CARDS
-        ===================================================== */
 
-        .summary {
-            display: grid;
+/* =========================================================
+   LOGO
+========================================================= */
 
-            grid-template-columns:
-                repeat(4, 1fr);
+.logo {
 
-            gap: 20px;
+    padding:
+        8px 13px 24px;
 
-            margin-bottom: 30px;
-        }
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
 
-        .summary-card {
-            background: white;
+}
 
-            padding: 25px;
+.logo-icon {
 
-            border-radius: 14px;
+    width: 48px;
+    height: 48px;
 
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.06);
+    display: flex;
 
-            position: relative;
+    justify-content: center;
+    align-items: center;
 
-            overflow: hidden;
+    border-radius: 14px;
 
-            transition: 0.25s;
-        }
+    background:
+        linear-gradient(
+            135deg,
+            rgba(69,210,128,0.22),
+            rgba(69,210,128,0.08)
+        );
 
-        .summary-card:hover {
-            transform: translateY(-3px);
+    border:
+        1px solid rgba(111,239,159,0.15);
 
-            box-shadow:
-                0 7px 20px rgba(0,0,0,0.09);
-        }
+    font-size: 27px;
 
-        .summary-card::before {
-            content: "";
+    margin-bottom: 13px;
 
-            position: absolute;
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.12);
 
-            left: 0;
-            top: 0;
+    animation:
+        logoFloat 4s ease-in-out infinite;
 
-            width: 5px;
-            height: 100%;
+}
 
-            background: #23613e;
-        }
+@keyframes logoFloat {
 
-        .summary-card span {
-            color: #6b7280;
+    0%,100% {
+        transform: translateY(0);
+    }
 
-            font-size: 13px;
-        }
+    50% {
+        transform: translateY(-3px);
+    }
 
-        .summary-card h2 {
-            margin-top: 10px;
+}
 
-            color: #12372a;
+.logo h1 {
 
-            font-size: 30px;
-        }
+    font-size: 17px;
 
-        .summary-card small {
-            display: block;
+    line-height: 1.35;
 
-            margin-top: 7px;
+    font-weight: 750;
 
-            color: #9ca3af;
+}
 
-            font-size: 12px;
-        }
+.logo p {
 
-        .healthy {
-            color: #16a34a !important;
-        }
+    color: #a7c3b7;
 
-        .diseased {
-            color: #dc2626 !important;
-        }
+    font-size: 11px;
 
+    margin-top: 7px;
 
-        /* =====================================================
-           ANALYTICS GRID
-        ===================================================== */
+    line-height: 1.5;
 
-        .analytics-grid {
-            display: grid;
+}
 
-            grid-template-columns:
-                1fr 1fr;
 
-            gap: 25px;
-        }
+/* =========================================================
+   MENU
+========================================================= */
 
+.menu-title {
 
-        /* =====================================================
-           GENERAL CARD
-        ===================================================== */
+    color: #72998a;
 
-        .card {
-            background: white;
+    font-size: 10px;
 
-            padding: 30px;
+    font-weight: 800;
 
-            border-radius: 15px;
+    letter-spacing: 1.4px;
 
-            box-shadow:
-                0 4px 15px rgba(0,0,0,0.06);
-        }
+    margin:
+        27px 12px 11px;
 
-        .card h3 {
-            color: #12372a;
+    text-transform: uppercase;
 
-            margin-bottom: 25px;
+}
 
-            font-size: 19px;
-        }
+.menu a {
 
+    display: flex;
 
-        /* =====================================================
-           DISEASE BAR CHART
-        ===================================================== */
+    align-items: center;
 
-        .chart-row {
-            margin-bottom: 23px;
-        }
+    gap: 13px;
 
-        .chart-row:last-child {
-            margin-bottom: 0;
-        }
+    color: #c1d3ca;
 
-        .chart-label {
-            display: flex;
+    padding: 13px 14px;
 
-            justify-content: space-between;
+    border-radius: 12px;
 
-            align-items: center;
+    margin-bottom: 5px;
 
-            margin-bottom: 8px;
+    font-size: 13px;
 
-            font-size: 14px;
-        }
+    font-weight: 650;
 
-        .chart-label strong {
-            color: #12372a;
-        }
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        color 0.2s ease;
 
-        .bar-background {
-            height: 24px;
+}
 
-            background: #e5e7eb;
+.menu a:hover {
 
-            border-radius: 20px;
+    background:
+        rgba(255,255,255,0.08);
 
-            overflow: hidden;
-        }
+    color: white;
 
-        .bar {
-            height: 100%;
+    transform:
+        translateX(3px);
 
-            min-width: 0;
+}
 
-            border-radius: 20px;
+.menu a.active {
 
-            transition:
-                width 0.7s ease;
-        }
+    background:
+        linear-gradient(
+            135deg,
+            #2d8b5c,
+            #226e49
+        );
 
-        .healthy-bar {
-            background: #16a34a;
-        }
+    color: white;
 
-        .bar.bacterial {
-            background: #dc2626;
-        }
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.18);
 
-        .bar.cercospora {
-            background: #d97706;
-        }
+}
 
-        .bar.curl {
-            background: #7c3aed;
-        }
+.menu-icon {
 
+    width: 23px;
 
-        /* =====================================================
-           MINI DISEASE CARDS
-        ===================================================== */
+    text-align: center;
 
-        .disease-summary {
-            margin-top: 25px;
+    font-size: 18px;
 
-            display: grid;
+}
 
-            grid-template-columns:
-                repeat(3, 1fr);
 
-            gap: 12px;
-        }
+/* =========================================================
+   SIDEBAR CONNECTION
+========================================================= */
 
-        .disease-mini {
-            border: 1px solid #e5e7eb;
+.sidebar-bottom {
 
-            border-radius: 10px;
+    position: absolute;
 
-            padding: 14px;
+    left: 15px;
+    right: 15px;
 
-            background: #fafcfb;
+    bottom: 23px;
 
-            transition: 0.2s;
-        }
+}
 
-        .disease-mini:hover {
-            transform: translateY(-2px);
+.connection-box {
 
-            box-shadow:
-                0 3px 10px rgba(0,0,0,0.05);
-        }
+    background:
+        rgba(255,255,255,0.065);
 
-        .disease-mini span {
-            display: block;
+    border:
+        1px solid rgba(255,255,255,0.07);
 
-            color: #6b7280;
+    border-radius: 13px;
 
-            font-size: 12px;
+    padding: 14px;
 
-            margin-bottom: 7px;
-        }
+    backdrop-filter:
+        blur(8px);
 
-        .disease-mini strong {
-            font-size: 21px;
+}
 
-            color: #12372a;
-        }
+.connection-title {
 
-        .mini-bacterial strong {
-            color: #dc2626;
-        }
+    color: #82a696;
 
-        .mini-cercospora strong {
-            color: #d97706;
-        }
+    font-size: 9px;
 
-        .mini-curl strong {
-            color: #7c3aed;
-        }
+    font-weight: 800;
 
+    letter-spacing: 1px;
 
-        /* =====================================================
-           HEALTHY VS DISEASED
-        ===================================================== */
+    margin-bottom: 9px;
 
-        .distribution {
-            display: flex;
+}
 
-            justify-content: center;
+.connection-status {
 
-            align-items: center;
+    display: flex;
 
-            min-height: 260px;
-        }
+    align-items: center;
 
-        .circle {
-            width: 220px;
+    gap: 8px;
 
-            height: 220px;
+    color: #e0eee7;
 
-            border-radius: 50%;
+    font-size: 11px;
 
-            background:
-                conic-gradient(
-                    #16a34a 0deg,
-                    #16a34a var(--healthy-angle),
-                    #dc2626 var(--healthy-angle),
-                    #dc2626 360deg
-                );
+    font-weight: 700;
 
-            display: flex;
+}
 
-            align-items: center;
+.green-dot {
 
-            justify-content: center;
+    width: 8px;
+    height: 8px;
 
-            position: relative;
-        }
+    flex: 0 0 8px;
 
-        .circle::after {
-            content: "";
+    background: #35d47a;
 
-            position: absolute;
+    border-radius: 50%;
 
-            inset: 0;
+    box-shadow:
+        0 0 0 4px rgba(53,212,122,0.10),
+        0 0 10px rgba(53,212,122,0.75);
 
-            border-radius: 50%;
+    animation:
+        statusPulse 2s infinite;
 
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.08);
-        }
+}
 
-        .circle-inner {
-            width: 130px;
+@keyframes statusPulse {
 
-            height: 130px;
+    0%,100% {
+        opacity: 1;
+    }
 
-            background: white;
+    50% {
+        opacity: .45;
+    }
 
-            border-radius: 50%;
+}
 
-            display: flex;
 
-            flex-direction: column;
+/* =========================================================
+   MAIN
+========================================================= */
 
-            align-items: center;
+.main {
 
-            justify-content: center;
+    margin-left: 260px;
 
-            position: relative;
+    width:
+        calc(100% - 260px);
 
-            z-index: 2;
+    min-height: 100vh;
 
-            box-shadow:
-                0 2px 10px rgba(0,0,0,0.08);
-        }
+}
 
-        .circle-inner strong {
-            font-size: 28px;
 
-            color: #12372a;
-        }
+/* =========================================================
+   TOPBAR
+========================================================= */
 
-        .circle-inner span {
-            color: #6b7280;
+.topbar {
 
-            font-size: 12px;
+    min-height: 82px;
 
-            margin-top: 4px;
-        }
+    background:
+        rgba(255,255,255,0.92);
 
+    border-bottom:
+        1px solid var(--border);
 
-        /* =====================================================
-           LEGEND
-        ===================================================== */
+    display: flex;
 
-        .legend {
-            margin-top: 15px;
-        }
+    align-items: center;
 
-        .legend-item {
-            display: flex;
+    justify-content: space-between;
 
-            align-items: center;
+    padding:
+        15px 40px;
 
-            margin: 10px 0;
+    position: sticky;
 
-            font-size: 14px;
-        }
+    top: 0;
 
-        .legend-box {
-            width: 14px;
+    z-index: 100;
 
-            height: 14px;
+    backdrop-filter:
+        blur(15px);
 
-            border-radius: 3px;
+}
 
-            margin-right: 10px;
-        }
+.topbar-title h2 {
 
-        .legend-healthy {
-            background: #16a34a;
-        }
+    font-size: 19px;
 
-        .legend-diseased {
-            background: #dc2626;
-        }
+    color: var(--primary-dark);
 
+    font-weight: 750;
 
-        /* =====================================================
-           CONFIDENCE
-        ===================================================== */
+}
 
-        .confidence-card {
-            margin-top: 25px;
+.topbar-title p {
 
-            padding-top: 20px;
+    color: var(--text-light);
 
-            border-top:
-                1px solid #e5e7eb;
-        }
+    font-size: 11px;
 
-        .confidence-info {
-            display: flex;
+    margin-top: 5px;
 
-            justify-content: space-between;
+}
 
-            align-items: center;
+.system-badge {
 
-            margin-bottom: 10px;
+    display: flex;
 
-            font-size: 14px;
-        }
+    align-items: center;
 
-        .confidence-info strong {
-            color: #12372a;
-        }
+    gap: 9px;
 
-        .confidence-background {
-            height: 14px;
+    background:
+        var(--primary-light);
 
-            background: #e5e7eb;
+    color:
+        #13713f;
 
-            border-radius: 20px;
+    border:
+        1px solid #ccebd8;
 
-            overflow: hidden;
-        }
+    padding:
+        9px 15px;
 
-        .confidence-fill {
-            height: 100%;
+    border-radius: 30px;
 
-            width:
-                {% if statistics.total > 0 %}
-                    {{ statistics.average_confidence|default(0) }}%
-                {% else %}
-                    0%
-                {% endif %};
+    font-size: 11px;
 
-            max-width: 100%;
+    font-weight: 750;
 
-            background: #23613e;
+}
 
-            border-radius: 20px;
 
-            transition:
-                width 0.7s ease;
-        }
+/* =========================================================
+   CONTENT
+========================================================= */
 
+.content {
 
-        /* =====================================================
-           DAILY DATA BUTTON
-        ===================================================== */
+    padding:
+        34px 40px 30px;
 
-        .daily-data-container {
-            margin-top: 25px;
-        }
+    max-width:
+        1550px;
 
-        .daily-data-link {
-            display: inline-block;
+    margin:
+        auto;
 
-            padding: 12px 20px;
+}
 
-            background: #23613e;
 
-            color: white;
+/* =========================================================
+   PAGE INTRO
+========================================================= */
 
-            text-decoration: none;
+.page-intro {
 
-            border-radius: 8px;
+    margin-bottom: 27px;
 
-            font-weight: bold;
+    animation:
+        fadeUp .55s ease both;
 
-            transition: 0.2s;
-        }
+}
 
-        .daily-data-link:hover {
-            background: #12372a;
+.page-intro h1 {
 
-            transform: translateY(-1px);
-        }
+    color:
+        var(--primary-dark);
 
+    font-size:
+        28px;
 
-        /* =====================================================
-           HISTORY CARD
-        ===================================================== */
+    font-weight:
+        800;
 
-        .history-card {
-            margin-top: 30px;
-        }
+    letter-spacing:
+        -0.6px;
 
-        .history-header {
-            display: flex;
+}
 
-            justify-content: space-between;
+.page-intro p {
 
-            align-items: center;
+    color:
+        var(--text-soft);
 
-            margin-bottom: 12px;
+    margin-top:
+        7px;
 
-            gap: 15px;
+    font-size:
+        12px;
 
-            flex-wrap: wrap;
-        }
+}
 
-        .history-header h3 {
-            margin-bottom: 0;
-        }
 
-        .refresh-button {
-            border: none;
+/* =========================================================
+   FADE ANIMATION
+========================================================= */
 
-            background: #12372a;
+@keyframes fadeUp {
 
-            color: white;
+    from {
 
-            padding: 10px 18px;
+        opacity: 0;
 
-            border-radius: 8px;
+        transform:
+            translateY(12px);
 
-            cursor: pointer;
+    }
 
-            font-weight: bold;
+    to {
 
-            transition: 0.2s;
-        }
+        opacity: 1;
 
-        .refresh-button:hover {
-            background: #23613e;
+        transform:
+            translateY(0);
 
-            transform: translateY(-1px);
-        }
+    }
 
-        .refresh-button:active {
-            transform: translateY(0);
-        }
+}
 
-        .history-status {
-            color: #6b7280;
 
-            font-size: 14px;
+/* =========================================================
+   SUMMARY GRID
+========================================================= */
 
-            margin-bottom: 15px;
-        }
+.summary-grid {
 
+    display:
+        grid;
 
-        /* =====================================================
-           TABLE
-        ===================================================== */
+    grid-template-columns:
+        repeat(4,1fr);
 
-        .table-container {
-            width: 100%;
+    gap:
+        18px;
 
-            overflow-x: auto;
+    margin-bottom:
+        28px;
 
-            border-radius: 10px;
+}
 
-            border:
-                1px solid #e5e7eb;
-        }
 
-        table {
-            width: 100%;
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
 
-            border-collapse: collapse;
+.summary-card {
 
-            min-width: 950px;
-        }
+    position:
+        relative;
 
-        thead {
-            background: #12372a;
+    background:
+        rgba(255,255,255,.97);
 
-            color: white;
-        }
+    border:
+        1px solid var(--border);
 
-        th {
-            padding: 14px 12px;
+    border-radius:
+        17px;
 
-            text-align: left;
+    padding:
+        21px;
 
-            font-size: 13px;
+    box-shadow:
+        var(--shadow-sm);
 
-            white-space: nowrap;
-        }
+    overflow:
+        hidden;
 
-        td {
-            padding: 14px 12px;
+    animation:
+        fadeUp .6s ease both;
 
-            text-align: left;
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
 
-            border-bottom:
-                1px solid #e5e7eb;
+}
 
-            font-size: 13px;
+.summary-card:nth-child(2) {
+    animation-delay: .08s;
+}
 
-            vertical-align: middle;
-        }
+.summary-card:nth-child(3) {
+    animation-delay: .16s;
+}
 
-        tbody tr {
-            transition: 0.15s;
-        }
+.summary-card:nth-child(4) {
+    animation-delay: .24s;
+}
 
-        tbody tr:hover {
-            background: #f8faf9;
-        }
+.summary-card:hover {
 
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
+    transform:
+        translateY(-4px);
 
+    box-shadow:
+        var(--shadow-md);
 
-        /* =====================================================
-           TABLE TEXT
-        ===================================================== */
+}
 
-        .healthy-text {
-            color: #16a34a;
+.summary-card::before {
 
-            font-weight: bold;
-        }
+    content: "";
 
-        .disease-text {
-            color: #dc2626;
+    position:
+        absolute;
 
-            font-weight: bold;
-        }
+    left: 0;
+    top: 0;
+    bottom: 0;
 
-        .confidence {
-            font-weight: bold;
+    width: 4px;
 
-            color: #12372a;
-        }
+    background:
+        var(--accent);
 
+}
 
-        /* =====================================================
-           VIEW IMAGE BUTTON
-        ===================================================== */
+.summary-card:nth-child(2)::before {
+    background: var(--green);
+}
 
-        .view-image {
-            display: inline-block;
+.summary-card:nth-child(3)::before {
+    background: var(--red);
+}
 
-            padding: 6px 12px;
+.summary-card:nth-child(4)::before {
+    background: var(--purple);
+}
 
-            background: #23613e;
+.summary-top {
 
-            color: white;
+    display:
+        flex;
 
-            text-decoration: none;
+    align-items:
+        center;
 
-            border-radius: 6px;
+    justify-content:
+        space-between;
 
-            font-size: 12px;
+}
 
-            font-weight: bold;
+.summary-label {
 
-            transition: 0.2s;
-        }
+    color:
+        var(--text-light);
 
-        .view-image:hover {
-            background: #12372a;
-        }
+    font-size:
+        10px;
 
+    font-weight:
+        800;
 
-        /* =====================================================
-           LOADING
-        ===================================================== */
+    text-transform:
+        uppercase;
 
-        .loading {
-            text-align: center;
+    letter-spacing:
+        .7px;
 
-            padding: 35px !important;
+}
 
-            color: #6b7280;
-        }
+.summary-icon {
 
+    width:
+        40px;
 
-        /* =====================================================
-           NO HISTORY
-        ===================================================== */
+    height:
+        40px;
 
-        .no-history {
-            text-align: center;
+    border-radius:
+        12px;
 
-            padding: 35px !important;
+    display:
+        flex;
 
-            color: #6b7280;
-        }
+    align-items:
+        center;
 
+    justify-content:
+        center;
 
-        /* =====================================================
-           ERROR
-        ===================================================== */
+    background:
+        var(--primary-light);
 
-        .error-message {
-            text-align: center;
+    font-size:
+        18px;
 
-            padding: 25px !important;
+}
 
-            color: #dc2626;
+.summary-card h2 {
 
-            background: #fef2f2;
+    margin-top:
+        13px;
 
-            border-radius: 8px;
-        }
+    color:
+        var(--primary-dark);
 
+    font-size:
+        30px;
 
-        /* =====================================================
-           FOOTER
-        ===================================================== */
+    font-weight:
+        800;
 
-        .page-footer {
-            margin-top: 30px;
+}
 
-            padding: 18px;
+.summary-card small {
 
-            text-align: center;
+    display:
+        block;
 
-            color: #6b7280;
+    margin-top:
+        6px;
 
-            font-size: 12px;
-        }
+    color:
+        var(--text-light);
 
+    font-size:
+        10px;
 
-        /* =====================================================
-           RESPONSIVE 1100px
-        ===================================================== */
+}
 
-        @media(max-width: 1100px) {
+.green-value {
+    color: var(--green) !important;
+}
 
-            .summary {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
+.red-value {
+    color: var(--red) !important;
+}
 
-            .analytics-grid {
-                grid-template-columns: 1fr;
-            }
 
-        }
+/* =========================================================
+   SECTION TITLE
+========================================================= */
 
+.section-title {
 
-        /* =====================================================
-           RESPONSIVE 700px
-        ===================================================== */
+    display:
+        flex;
 
-        @media(max-width: 700px) {
+    align-items:
+        center;
 
-            header {
-                padding: 20px;
-            }
+    justify-content:
+        space-between;
 
-            header h1 {
-                font-size: 22px;
-            }
+    margin:
+        5px 0 15px;
 
-            nav {
-                padding: 15px 20px;
+}
 
-                gap: 18px;
-            }
+.section-title h3 {
 
-            main {
-                padding: 25px 18px;
-            }
+    color:
+        var(--primary-dark);
 
-            .summary {
-                grid-template-columns: 1fr;
-            }
+    font-size:
+        16px;
 
-            .page-title h2 {
-                font-size: 23px;
-            }
+    font-weight:
+        800;
 
-            .card {
-                padding: 22px;
-            }
+}
 
-            .disease-summary {
-                grid-template-columns: 1fr;
-            }
+.section-title span {
 
-            .history-header {
-                flex-direction: column;
+    color:
+        var(--text-light);
 
-                align-items: flex-start;
-            }
+    font-size:
+        10px;
 
-            .refresh-button {
-                width: 100%;
-            }
+}
 
-        }
 
+/* =========================================================
+   ANALYTICS GRID
+========================================================= */
 
-        /* =====================================================
-           RESPONSIVE 450px
-        ===================================================== */
+.analytics-grid {
 
-        @media(max-width: 450px) {
+    display:
+        grid;
 
-            .system-status {
-                width: 100%;
+    grid-template-columns:
+        1.1fr .9fr;
 
-                justify-content: center;
-            }
+    gap:
+        20px;
 
-            .circle {
-                width: 190px;
+    margin-bottom:
+        20px;
 
-                height: 190px;
-            }
+}
 
-            .circle-inner {
-                width: 115px;
 
-                height: 115px;
-            }
+/* =========================================================
+   CARD
+========================================================= */
 
-            .circle-inner strong {
-                font-size: 24px;
-            }
+.card {
 
-        }
+    background:
+        rgba(255,255,255,.97);
 
-    </style>
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        19px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    padding:
+        25px;
+
+    animation:
+        fadeUp .65s ease both;
+
+}
+
+.card:hover {
+
+    box-shadow:
+        var(--shadow-md);
+
+}
+
+.card-heading {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        25px;
+
+}
+
+.card-heading h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+
+}
+
+.card-heading p {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* =========================================================
+   DISEASE BARS
+========================================================= */
+
+.chart-row {
+
+    margin-bottom:
+        19px;
+
+}
+
+.chart-row:last-child {
+
+    margin-bottom:
+        0;
+
+}
+
+.chart-label {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        12px;
+
+}
+
+.chart-label span {
+
+    color:
+        var(--text-soft);
+
+    font-weight:
+        600;
+
+}
+
+.chart-label strong {
+
+    color:
+        var(--primary-dark);
+
+}
+
+.bar-background {
+
+    height:
+        13px;
+
+    background:
+        #edf1ee;
+
+    border-radius:
+        30px;
+
+    overflow:
+        hidden;
+
+}
+
+.bar {
+
+    height:
+        100%;
+
+    border-radius:
+        30px;
+
+    width:
+        0;
+
+    animation:
+        growBar 1.1s ease forwards;
+
+}
+
+@keyframes growBar {
+
+    from {
+        width: 0;
+    }
+
+}
+
+.healthy-bar {
+    background: var(--green);
+}
+
+.bacterial-bar {
+    background: var(--red);
+}
+
+.cercospora-bar {
+    background: var(--orange);
+}
+
+.curl-bar {
+    background: var(--purple);
+}
+
+
+/* =========================================================
+   MINI CARDS
+========================================================= */
+
+.disease-summary {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:
+        10px;
+
+    margin-top:
+        23px;
+
+}
+
+.disease-mini {
+
+    padding:
+        13px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        12px;
+
+    background:
+        #fafcfb;
+
+}
+
+.disease-mini span {
+
+    display:
+        block;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    margin-bottom:
+        7px;
+
+}
+
+.disease-mini strong {
+
+    font-size:
+        21px;
+
+    color:
+        var(--primary-dark);
+
+}
+
+.mini-bacterial strong {
+    color: var(--red);
+}
+
+.mini-cercospora strong {
+    color: var(--orange);
+}
+
+.mini-curl strong {
+    color: var(--purple);
+}
+
+
+/* =========================================================
+   DONUT
+========================================================= */
+
+.distribution {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        8px 0 20px;
+
+}
+
+.donut {
+
+    width:
+        215px;
+
+    height:
+        215px;
+
+    border-radius:
+        50%;
+
+    background:
+        conic-gradient(
+            var(--green) 0deg,
+            var(--green) var(--healthy-angle),
+            var(--red) var(--healthy-angle),
+            var(--red) 360deg
+        );
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    position:
+        relative;
+
+    box-shadow:
+        0 15px 35px rgba(15,55,35,.10);
+
+    animation:
+        donutIn .9s ease both;
+
+}
+
+@keyframes donutIn {
+
+    from {
+
+        transform:
+            scale(.75);
+
+        opacity:
+            0;
+
+    }
+
+    to {
+
+        transform:
+            scale(1);
+
+        opacity:
+            1;
+
+    }
+
+}
+
+.donut::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        16px;
+
+    border-radius:
+        50%;
+
+    background:
+        white;
+
+}
+
+.donut-inner {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    text-align:
+        center;
+
+}
+
+.donut-inner strong {
+
+    display:
+        block;
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        29px;
+
+    font-weight:
+        800;
+
+}
+
+.donut-inner span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+}
+
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+.legend {
+
+    border-top:
+        1px solid var(--border);
+
+    padding-top:
+        18px;
+
+}
+
+.legend-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        11px;
+
+    font-size:
+        12px;
+
+}
+
+.legend-left {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+}
+
+.legend-box {
+
+    width:
+        11px;
+
+    height:
+        11px;
+
+    border-radius:
+        4px;
+
+}
+
+.legend-healthy {
+    background: var(--green);
+}
+
+.legend-diseased {
+    background: var(--red);
+}
+
+.legend-item strong {
+
+    color:
+        var(--primary-dark);
+
+}
+
+
+/* =========================================================
+   CONFIDENCE
+========================================================= */
+
+.confidence-section {
+
+    margin-top:
+        18px;
+
+    padding-top:
+        18px;
+
+    border-top:
+        1px solid var(--border);
+
+}
+
+.confidence-top {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        8px;
+
+    font-size:
+        11px;
+
+}
+
+.confidence-top span {
+
+    color:
+        var(--text-soft);
+
+}
+
+.confidence-top strong {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        15px;
+
+}
+
+.confidence-background {
+
+    height:
+        11px;
+
+    background:
+        #e8eeea;
+
+    border-radius:
+        30px;
+
+    overflow:
+        hidden;
+
+}
+
+.confidence-fill {
+
+    height:
+        100%;
+
+    width:
+        0;
+
+    max-width:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #39b86f,
+            #176b45
+        );
+
+    border-radius:
+        30px;
+
+    animation:
+        confidenceGrow 1.2s ease forwards;
+
+}
+
+@keyframes confidenceGrow {
+
+    from {
+        width: 0;
+    }
+
+}
+
+
+/* =========================================================
+   QUICK ACTIONS
+========================================================= */
+
+.quick-actions {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    flex-wrap:
+        wrap;
+
+    margin-bottom:
+        25px;
+
+}
+
+.action-button {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    padding:
+        11px 16px;
+
+    border-radius:
+        10px;
+
+    text-decoration:
+        none;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+
+}
+
+.action-primary {
+
+    background:
+        var(--primary-dark);
+
+    color:
+        white;
+
+}
+
+.action-secondary {
+
+    background:
+        white;
+
+    color:
+        var(--primary-dark);
+
+    border:
+        1px solid var(--border);
+
+}
+
+.action-button:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        var(--shadow-sm);
+
+}
+
+
+/* =========================================================
+   HISTORY CARD
+========================================================= */
+
+.history-card {
+
+    margin-top:
+        10px;
+
+    padding:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+.history-header {
+
+    padding:
+        22px 24px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+.history-title h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        17px;
+
+}
+
+.history-title p {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    margin-top:
+        5px;
+
+}
+
+.refresh-button {
+
+    border:
+        none;
+
+    background:
+        var(--primary-dark);
+
+    color:
+        white;
+
+    padding:
+        10px 16px;
+
+    border-radius:
+        9px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        11px;
+
+    font-weight:
+        750;
+
+    transition:
+        .2s;
+
+}
+
+.refresh-button:hover {
+
+    background:
+        var(--primary);
+
+    transform:
+        translateY(-1px);
+
+}
+
+.refresh-button.loading {
+
+    opacity:
+        .7;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.history-status {
+
+    padding:
+        13px 24px;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    background:
+        #fafcfb;
+
+    border-bottom:
+        1px solid var(--border);
+
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-container {
+
+    width:
+        100%;
+
+    overflow-x:
+        auto;
+
+}
+
+table {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+    min-width:
+        1000px;
+
+}
+
+thead {
+
+    background:
+        linear-gradient(
+            135deg,
+            #0b3d2e,
+            #176b45
+        );
+
+    color:
+        white;
+
+}
+
+th {
+
+    padding:
+        13px;
+
+    text-align:
+        left;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        .5px;
+
+    text-transform:
+        uppercase;
+
+    white-space:
+        nowrap;
+
+}
+
+td {
+
+    padding:
+        13px;
+
+    border-bottom:
+        1px solid #edf1ee;
+
+    font-size:
+        11px;
+
+    vertical-align:
+        middle;
+
+}
+
+tbody tr {
+
+    transition:
+        background .18s ease;
+
+}
+
+tbody tr:hover {
+
+    background:
+        #f7fbf8;
+
+}
+
+tbody tr:last-child td {
+
+    border-bottom:
+        none;
+
+}
+
+
+/* =========================================================
+   DISEASE BADGES
+========================================================= */
+
+.disease-badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    white-space:
+        nowrap;
+
+}
+
+.disease-healthy {
+
+    background:
+        var(--green-light);
+
+    color:
+        #15803d;
+
+}
+
+.disease-bacterial {
+
+    background:
+        var(--red-light);
+
+    color:
+        #b91c1c;
+
+}
+
+.disease-cercospora {
+
+    background:
+        var(--orange-light);
+
+    color:
+        #b45309;
+
+}
+
+.disease-curl {
+
+    background:
+        var(--purple-light);
+
+    color:
+        #6d28d9;
+
+}
+
+.disease-other {
+
+    background:
+        #e5e7eb;
+
+    color:
+        #374151;
+
+}
+
+
+/* =========================================================
+   CONFIDENCE PILL
+========================================================= */
+
+.confidence-pill {
+
+    display:
+        inline-block;
+
+    padding:
+        5px 9px;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary-dark);
+
+    border-radius:
+        20px;
+
+    font-weight:
+        800;
+
+    font-size:
+        9px;
+
+}
+
+
+/* =========================================================
+   IMAGE BUTTON
+========================================================= */
+
+.view-image {
+
+    border:
+        none;
+
+    background:
+        var(--primary-light);
+
+    color:
+        var(--primary-dark);
+
+    padding:
+        7px 11px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        .2s;
+
+}
+
+.view-image:hover {
+
+    background:
+        #d5efdf;
+
+}
+
+
+/* =========================================================
+   EMPTY / ERROR
+========================================================= */
+
+.loading,
+.no-history,
+.error-message {
+
+    text-align:
+        center;
+
+    padding:
+        35px !important;
+
+    color:
+        var(--text-soft);
+
+}
+
+.error-message {
+
+    color:
+        var(--red);
+
+    background:
+        #fff6f6;
+
+}
+
+
+/* =========================================================
+   IMAGE MODAL
+========================================================= */
+
+.image-modal {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    background:
+        rgba(4,20,13,.78);
+
+    display:
+        none;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        25px;
+
+    z-index:
+        99999;
+
+    backdrop-filter:
+        blur(5px);
+
+}
+
+.image-modal.show {
+
+    display:
+        flex;
+
+}
+
+.modal-content {
+
+    position:
+        relative;
+
+    background:
+        white;
+
+    padding:
+        10px;
+
+    border-radius:
+        15px;
+
+    max-width:
+        900px;
+
+    max-height:
+        90vh;
+
+    animation:
+        modalIn .25s ease;
+
+}
+
+@keyframes modalIn {
+
+    from {
+
+        transform:
+            scale(.92);
+
+        opacity:
+            0;
+
+    }
+
+    to {
+
+        transform:
+            scale(1);
+
+        opacity:
+            1;
+
+    }
+
+}
+
+.modal-content img {
+
+    display:
+        block;
+
+    max-width:
+        100%;
+
+    max-height:
+        82vh;
+
+    border-radius:
+        10px;
+
+    object-fit:
+        contain;
+
+}
+
+.modal-close {
+
+    position:
+        absolute;
+
+    right:
+        -12px;
+
+    top:
+        -12px;
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    border:
+        none;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--red);
+
+    color:
+        white;
+
+    font-size:
+        20px;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        bold;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.page-footer {
+
+    text-align:
+        center;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    padding:
+        28px 20px;
+
+}
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-nav {
+
+    display:
+        none;
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:1100px) {
+
+    .summary-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+    .analytics-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media(max-width:800px) {
+
+    .sidebar {
+
+        width:
+            72px;
+
+        padding:
+            20px 8px;
+
+    }
+
+    .logo {
+
+        text-align:
+            center;
+
+        padding:
+            5px 0 20px;
+
+    }
+
+    .logo-icon {
+
+        margin:
+            auto auto 12px;
+
+    }
+
+    .logo h1,
+    .logo p,
+    .menu-title,
+    .connection-box {
+
+        display:
+            none;
+
+    }
+
+    .menu a {
+
+        justify-content:
+            center;
+
+        padding:
+            13px 5px;
+
+    }
+
+    .menu-icon {
+
+        font-size:
+            20px;
+
+    }
+
+    .main {
+
+        margin-left:
+            72px;
+
+        width:
+            calc(100% - 72px);
+
+    }
+
+    .topbar {
+
+        padding:
+            15px 22px;
+
+    }
+
+    .content {
+
+        padding:
+            26px 20px;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:550px) {
+
+    body {
+
+        padding-bottom:
+            70px;
+
+    }
+
+    .sidebar {
+
+        display:
+            none;
+
+    }
+
+    .main {
+
+        margin-left:
+            0;
+
+        width:
+            100%;
+
+    }
+
+    .topbar {
+
+        min-height:
+            66px;
+
+        padding:
+            10px 15px;
+
+    }
+
+    .topbar-title h2 {
+
+        font-size:
+            14px;
+
+    }
+
+    .topbar-title p {
+
+        display:
+            none;
+
+    }
+
+    .system-badge {
+
+        padding:
+            7px 10px;
+
+        font-size:
+            9px;
+
+    }
+
+    .content {
+
+        padding:
+            21px 14px;
+
+    }
+
+    .page-intro h1 {
+
+        font-size:
+            22px;
+
+    }
+
+    .summary-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .card {
+
+        padding:
+            19px;
+
+    }
+
+    .disease-summary {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .donut {
+
+        width:
+            190px;
+
+        height:
+            190px;
+
+    }
+
+    .history-header {
+
+        align-items:
+            flex-start;
+
+    }
+
+    .refresh-button {
+
+        width:
+            100%;
+
+    }
+
+    .mobile-nav {
+
+        position:
+            fixed;
+
+        left:
+            0;
+
+        right:
+            0;
+
+        bottom:
+            0;
+
+        height:
+            68px;
+
+        background:
+            rgba(255,255,255,.97);
+
+        border-top:
+            1px solid #dfe7e2;
+
+        display:
+            flex;
+
+        justify-content:
+            space-around;
+
+        align-items:
+            center;
+
+        z-index:
+            9998;
+
+        box-shadow:
+            0 -6px 25px rgba(0,0,0,.08);
+
+        backdrop-filter:
+            blur(12px);
+
+    }
+
+    .mobile-nav a {
+
+        display:
+            flex;
+
+        flex-direction:
+            column;
+
+        align-items:
+            center;
+
+        gap:
+            3px;
+
+        color:
+            #789088;
+
+        font-size:
+            8px;
+
+        font-weight:
+            750;
+
+        min-width:
+            48px;
+
+    }
+
+    .mobile-nav a span {
+
+        font-size:
+            19px;
+
+    }
+
+    .mobile-nav a.active {
+
+        color:
+            #28734e;
+
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media(prefers-reduced-motion:reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation:
+            none !important;
+
+        transition:
+            none !important;
+
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -1001,496 +2539,597 @@
 <body>
 
 
+<div class="app">
+
+
 <!-- =====================================================
-     HEADER
+     SIDEBAR
 ===================================================== -->
 
-<header>
+<aside class="sidebar">
 
-    <div>
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            🌱
+        </div>
 
         <h1>
-            🌱 Precision Agriculture Smart Rover
+            Precision Agriculture
+            Smart Rover
         </h1>
 
         <p>
-            AI Detection Analytics
+            AI-Powered Plant Monitoring System
         </p>
 
     </div>
 
 
-    <!-- SYSTEM STATUS -->
+    <div class="menu-title">
+        Main Menu
+    </div>
 
-    <div class="system-status">
 
-        <span class="status-dot"></span>
+    <div class="menu">
 
-        <span>
-            AI System Online
-        </span>
+
+        <a href="/">
+
+            <span class="menu-icon">
+                🏠
+            </span>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <a href="/rover">
+
+            <span class="menu-icon">
+                🚜
+            </span>
+
+            <span>
+                Rover Control
+            </span>
+
+        </a>
+
+
+        <a href="/dataset">
+
+            <span class="menu-icon">
+                📁
+            </span>
+
+            <span>
+                Dataset
+            </span>
+
+        </a>
+
+
+        <a href="/analytics"
+           class="active">
+
+            <span class="menu-icon">
+                📊
+            </span>
+
+            <span>
+                Analytics
+            </span>
+
+        </a>
+
+
+        <a href="/daily-data">
+
+            <span class="menu-icon">
+                📅
+            </span>
+
+            <span>
+                Daily Data
+            </span>
+
+        </a>
+
+
+        <a href="/settings">
+
+            <span class="menu-icon">
+                ⚙️
+            </span>
+
+            <span>
+                Settings
+            </span>
+
+        </a>
+
 
     </div>
 
-</header>
+
+    <div class="sidebar-bottom">
+
+        <div class="connection-box">
+
+            <div class="connection-title">
+                AI SYSTEM
+            </div>
+
+            <div class="connection-status">
+
+                <span class="green-dot"></span>
+
+                System Online
+
+            </div>
+
+        </div>
+
+    </div>
 
 
-<!-- =====================================================
-     NAVIGATION
-===================================================== -->
-
-<nav>
-
-    <a href="/">
-        Dashboard
-    </a>
-
-    <a href="/rover">
-        Rover Control
-    </a>
-
-    <a href="/dataset">
-        Dataset
-    </a>
-
-    <a href="/analytics" class="active">
-        Analytics
-    </a>
-
-    <a href="/daily-data">
-        Daily Data
-    </a>
-
-    <a href="/settings">
-        Settings
-    </a>
-
-</nav>
+</aside>
 
 
 <!-- =====================================================
      MAIN
 ===================================================== -->
 
-<main>
+<div class="main">
 
 
-    <!-- =================================================
-         PAGE TITLE
-    ================================================== -->
+<header class="topbar">
 
-    <div class="page-title">
+
+    <div class="topbar-title">
 
         <h2>
             Analytics Dashboard
         </h2>
 
         <p>
-            Monitor AI-based plant disease detection,
-            prediction confidence and detection history.
+            Precision Agriculture Smart Rover
         </p>
 
     </div>
 
 
-    <!-- =================================================
-         SUMMARY
-    ================================================== -->
+    <div class="system-badge">
 
-    <div class="summary">
+        <span class="green-dot"></span>
 
-
-        <!-- TOTAL -->
-
-        <div class="summary-card">
-
-            <span>
-                Total Predictions
-            </span>
-
-            <h2>
-                {{ statistics.total|default(0) }}
-            </h2>
-
-            <small>
-                All recorded AI predictions
-            </small>
-
-        </div>
-
-
-        <!-- HEALTHY -->
-
-        <div class="summary-card">
-
-            <span>
-                Healthy Leaves
-            </span>
-
-            <h2 class="healthy">
-                {{ statistics.healthy|default(0) }}
-            </h2>
-
-            <small>
-                Healthy plant samples
-            </small>
-
-        </div>
-
-
-        <!-- DISEASED -->
-
-        <div class="summary-card">
-
-            <span>
-                Diseased Leaves
-            </span>
-
-            <h2 class="diseased">
-                {{ statistics.diseased|default(0) }}
-            </h2>
-
-            <small>
-                Detected disease samples
-            </small>
-
-        </div>
-
-
-        <!-- DISEASE TYPES -->
-
-        <div class="summary-card">
-
-            <span>
-                Disease Types
-            </span>
-
-            <h2>
-                3
-            </h2>
-
-            <small>
-                Bacterial, Cercospora & Curl Virus
-            </small>
-
-        </div>
-
+        AI System Online
 
     </div>
 
 
-    <!-- =================================================
-         ANALYTICS GRID
-    ================================================== -->
-
-    <div class="analytics-grid">
+</header>
 
 
-        <!-- =================================================
-             DISEASE DETECTION COUNT
-        ================================================= -->
+<main class="content">
 
-        <div class="card">
+
+<!-- =====================================================
+     INTRO
+===================================================== -->
+
+<section class="page-intro">
+
+    <h1>
+        AI Detection Analytics 📊
+    </h1>
+
+    <p>
+        Monitor plant disease predictions,
+        detection distribution and AI confidence.
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     SUMMARY
+===================================================== -->
+
+<section class="summary-grid">
+
+
+    <div class="summary-card">
+
+        <div class="summary-top">
+
+            <span class="summary-label">
+                Total Predictions
+            </span>
+
+            <div class="summary-icon">
+                🔍
+            </div>
+
+        </div>
+
+        <h2>
+            {{ statistics.total|default(0) }}
+        </h2>
+
+        <small>
+            All recorded AI analyses
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-top">
+
+            <span class="summary-label">
+                Healthy Leaves
+            </span>
+
+            <div class="summary-icon">
+                🌿
+            </div>
+
+        </div>
+
+        <h2 class="green-value">
+            {{ statistics.healthy|default(0) }}
+        </h2>
+
+        <small>
+            Healthy plant samples
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-top">
+
+            <span class="summary-label">
+                Diseased Leaves
+            </span>
+
+            <div class="summary-icon">
+                ⚠️
+            </div>
+
+        </div>
+
+        <h2 class="red-value">
+            {{ statistics.diseased|default(0) }}
+        </h2>
+
+        <small>
+            Disease samples detected
+        </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-top">
+
+            <span class="summary-label">
+                Disease Types
+            </span>
+
+            <div class="summary-icon">
+                🧬
+            </div>
+
+        </div>
+
+        <h2>
+            3
+        </h2>
+
+        <small>
+            Bacterial • Cercospora • Curl
+        </small>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     SECTION
+===================================================== -->
+
+<div class="section-title">
+
+    <h3>
+        Detection Overview
+    </h3>
+
+    <span>
+        Live calculated statistics
+    </span>
+
+</div>
+
+
+<!-- =====================================================
+     ANALYTICS GRID
+===================================================== -->
+
+<section class="analytics-grid">
+
+
+<!-- =====================================================
+     DISEASE CARD
+===================================================== -->
+
+<div class="card">
+
+
+    <div class="card-heading">
+
+        <div>
 
             <h3>
                 📊 Disease Detection Count
             </h3>
 
+            <p>
+                Distribution of detected leaf conditions
+            </p>
 
-            <!-- HEALTHY -->
+        </div>
 
-            <div class="chart-row">
-
-                <div class="chart-label">
-
-                    <span>
-                        Healthy Leaf
-                    </span>
-
-                    <strong>
-                        {{ statistics.healthy|default(0) }}
-                    </strong>
-
-                </div>
-
-                <div class="bar-background">
-
-                    <div
-                        class="bar healthy-bar"
-                        style="width:
-                        {% if statistics.total > 0 %}
-                            {{ (statistics.healthy / statistics.total) * 100 }}%
-                        {% else %}
-                            0%
-                        {% endif %};">
-                    </div>
-
-                </div>
-
-            </div>
+    </div>
 
 
-            <!-- BACTERIAL -->
+    <!-- HEALTHY -->
 
-            <div class="chart-row">
+    <div class="chart-row">
 
-                <div class="chart-label">
+        <div class="chart-label">
 
-                    <span>
-                        Bacterial Spot
-                    </span>
+            <span>
+                Healthy Leaf
+            </span>
 
-                    <strong>
-                        {{ statistics.bacterial_spot|default(0) }}
-                    </strong>
+            <strong>
+                {{ statistics.healthy|default(0) }}
+            </strong>
 
-                </div>
+        </div>
 
-                <div class="bar-background">
+        <div class="bar-background">
 
-                    <div
-                        class="bar bacterial"
-                        style="width:
-                        {% if statistics.total > 0 %}
-                            {{ (statistics.bacterial_spot / statistics.total) * 100 }}%
-                        {% else %}
-                            0%
-                        {% endif %};">
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- CERCOSPORA -->
-
-            <div class="chart-row">
-
-                <div class="chart-label">
-
-                    <span>
-                        Cercospora Leaf Spot
-                    </span>
-
-                    <strong>
-                        {{ statistics.cercospora|default(0) }}
-                    </strong>
-
-                </div>
-
-                <div class="bar-background">
-
-                    <div
-                        class="bar cercospora"
-                        style="width:
-                        {% if statistics.total > 0 %}
-                            {{ (statistics.cercospora / statistics.total) * 100 }}%
-                        {% else %}
-                            0%
-                        {% endif %};">
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- CURL VIRUS -->
-
-            <div class="chart-row">
-
-                <div class="chart-label">
-
-                    <span>
-                        Curl Virus
-                    </span>
-
-                    <strong>
-                        {{ statistics.curl_virus|default(0) }}
-                    </strong>
-
-                </div>
-
-                <div class="bar-background">
-
-                    <div
-                        class="bar curl"
-                        style="width:
-                        {% if statistics.total > 0 %}
-                            {{ (statistics.curl_virus / statistics.total) * 100 }}%
-                        {% else %}
-                            0%
-                        {% endif %};">
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- MINI SUMMARY -->
-
-            <div class="disease-summary">
-
-
-                <div class="disease-mini mini-bacterial">
-
-                    <span>
-                        Bacterial Spot
-                    </span>
-
-                    <strong>
-                        {{ statistics.bacterial_spot|default(0) }}
-                    </strong>
-
-                </div>
-
-
-                <div class="disease-mini mini-cercospora">
-
-                    <span>
-                        Cercospora
-                    </span>
-
-                    <strong>
-                        {{ statistics.cercospora|default(0) }}
-                    </strong>
-
-                </div>
-
-
-                <div class="disease-mini mini-curl">
-
-                    <span>
-                        Curl Virus
-                    </span>
-
-                    <strong>
-                        {{ statistics.curl_virus|default(0) }}
-                    </strong>
-
-                </div>
-
+            <div
+                class="bar healthy-bar"
+                style="width:
+                {% if statistics.total > 0 %}
+                    {{ (statistics.healthy / statistics.total) * 100 }}%
+                {% else %}
+                    0%
+                {% endif %};">
 
             </div>
 
         </div>
 
+    </div>
 
-        <!-- =================================================
-             HEALTHY VS DISEASED
-        ================================================== -->
 
-        <div class="card">
+    <!-- BACTERIAL -->
+
+    <div class="chart-row">
+
+        <div class="chart-label">
+
+            <span>
+                Bacterial Spot
+            </span>
+
+            <strong>
+                {{ statistics.bacterial_spot|default(0) }}
+            </strong>
+
+        </div>
+
+        <div class="bar-background">
+
+            <div
+                class="bar bacterial-bar"
+                style="width:
+                {% if statistics.total > 0 %}
+                    {{ (statistics.bacterial_spot / statistics.total) * 100 }}%
+                {% else %}
+                    0%
+                {% endif %};">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CERCOSPORA -->
+
+    <div class="chart-row">
+
+        <div class="chart-label">
+
+            <span>
+                Cercospora Leaf Spot
+            </span>
+
+            <strong>
+                {{ statistics.cercospora|default(0) }}
+            </strong>
+
+        </div>
+
+        <div class="bar-background">
+
+            <div
+                class="bar cercospora-bar"
+                style="width:
+                {% if statistics.total > 0 %}
+                    {{ (statistics.cercospora / statistics.total) * 100 }}%
+                {% else %}
+                    0%
+                {% endif %};">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CURL -->
+
+    <div class="chart-row">
+
+        <div class="chart-label">
+
+            <span>
+                Curl Virus
+            </span>
+
+            <strong>
+                {{ statistics.curl_virus|default(0) }}
+            </strong>
+
+        </div>
+
+        <div class="bar-background">
+
+            <div
+                class="bar curl-bar"
+                style="width:
+                {% if statistics.total > 0 %}
+                    {{ (statistics.curl_virus / statistics.total) * 100 }}%
+                {% else %}
+                    0%
+                {% endif %};">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MINI SUMMARY -->
+
+    <div class="disease-summary">
+
+
+        <div class="disease-mini mini-bacterial">
+
+            <span>
+                Bacterial Spot
+            </span>
+
+            <strong>
+                {{ statistics.bacterial_spot|default(0) }}
+            </strong>
+
+        </div>
+
+
+        <div class="disease-mini mini-cercospora">
+
+            <span>
+                Cercospora
+            </span>
+
+            <strong>
+                {{ statistics.cercospora|default(0) }}
+            </strong>
+
+        </div>
+
+
+        <div class="disease-mini mini-curl">
+
+            <span>
+                Curl Virus
+            </span>
+
+            <strong>
+                {{ statistics.curl_virus|default(0) }}
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     HEALTH VS DISEASE
+===================================================== -->
+
+<div class="card">
+
+
+    <div class="card-heading">
+
+        <div>
 
             <h3>
                 🥬 Healthy vs Diseased
             </h3>
 
+            <p>
+                Overall plant health distribution
+            </p>
 
-            <div class="distribution">
+        </div>
 
-                <div
-                    class="circle"
-
-                    style="--healthy-angle:
-                    {% if statistics.total > 0 %}
-                        {{ (statistics.healthy / statistics.total) * 360 }}deg
-                    {% else %}
-                        0deg
-                    {% endif %};">
+    </div>
 
 
-                    <div class="circle-inner">
-
-                        <strong>
-                            {{ statistics.total|default(0) }}
-                        </strong>
-
-                        <span>
-                            Predictions
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
+    <div class="distribution">
 
 
-            <!-- LEGEND -->
+        <div
+            class="donut"
 
-            <div class="legend">
-
-
-                <div class="legend-item">
-
-                    <div
-                        class="legend-box legend-healthy">
-                    </div>
-
-                    <span>
-
-                        Healthy:
-
-                        <strong>
-                            {{ statistics.healthy|default(0) }}
-                        </strong>
-
-                    </span>
-
-                </div>
+            style="--healthy-angle:
+            {% if statistics.total > 0 %}
+                {{ (statistics.healthy / statistics.total) * 360 }}deg
+            {% else %}
+                0deg
+            {% endif %};">
 
 
-                <div class="legend-item">
+            <div class="donut-inner">
 
-                    <div
-                        class="legend-box legend-diseased">
-                    </div>
+                <strong>
+                    {{ statistics.total|default(0) }}
+                </strong>
 
-                    <span>
-
-                        Diseased:
-
-                        <strong>
-                            {{ statistics.diseased|default(0) }}
-                        </strong>
-
-                    </span>
-
-                </div>
-
+                <span>
+                    Predictions
+                </span>
 
             </div>
-
-
-            <!-- CONFIDENCE -->
-
-            <div class="confidence-card">
-
-                <div class="confidence-info">
-
-                    <span>
-                        Average AI Confidence
-                    </span>
-
-                    <strong>
-                        {{ statistics.average_confidence|default(0) }}%
-                    </strong>
-
-                </div>
-
-
-                <div class="confidence-background">
-
-                    <div class="confidence-fill">
-                    </div>
-
-                </div>
-
-            </div>
-
 
         </div>
 
@@ -1498,140 +3137,363 @@
     </div>
 
 
-    <!-- =================================================
-         DAILY DATA
-    ================================================== -->
+    <div class="legend">
 
-    <div class="daily-data-container">
 
-        <a
-            href="/daily-data"
-            class="daily-data-link">
+        <div class="legend-item">
 
-            📅 View Daily Prediction Data →
+            <div class="legend-left">
 
-        </a>
+                <span class="legend-box legend-healthy"></span>
+
+                <span>
+                    Healthy Leaves
+                </span>
+
+            </div>
+
+            <strong>
+                {{ statistics.healthy|default(0) }}
+            </strong>
+
+        </div>
+
+
+        <div class="legend-item">
+
+            <div class="legend-left">
+
+                <span class="legend-box legend-diseased"></span>
+
+                <span>
+                    Diseased Leaves
+                </span>
+
+            </div>
+
+            <strong>
+                {{ statistics.diseased|default(0) }}
+            </strong>
+
+        </div>
+
 
     </div>
 
 
-    <!-- =================================================
-         PREDICTION HISTORY
-    ================================================== -->
+    <!-- CONFIDENCE -->
 
-    <div class="card history-card">
+    <div class="confidence-section">
 
 
-        <div class="history-header">
+        <div class="confidence-top">
+
+            <span>
+                Average AI Confidence
+            </span>
+
+            <strong>
+                {{ statistics.average_confidence|default(0) }}%
+            </strong>
+
+        </div>
+
+
+        <div class="confidence-background">
+
+            <div
+                class="confidence-fill"
+
+                style="width:
+                {% if statistics.total > 0 %}
+                    {{ statistics.average_confidence|default(0) }}%
+                {% else %}
+                    0%
+                {% endif %};">
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+</section>
+
+
+<!-- =====================================================
+     QUICK ACTIONS
+===================================================== -->
+
+<div class="quick-actions">
+
+
+    <a
+        href="/daily-data"
+        class="action-button action-primary">
+
+        📅
+
+        View Daily Data
+
+    </a>
+
+
+    <a
+        href="/dataset"
+        class="action-button action-secondary">
+
+        📁
+
+        Open Dataset
+
+    </a>
+
+
+</div>
+
+
+<!-- =====================================================
+     HISTORY
+===================================================== -->
+
+<section class="card history-card">
+
+
+    <div class="history-header">
+
+
+        <div class="history-title">
 
             <h3>
                 📋 Prediction History
             </h3>
 
-
-            <button
-                type="button"
-                class="refresh-button"
-                onclick="loadHistory()">
-
-                ↻ Refresh History
-
-            </button>
+            <p>
+                Recent AI detection records
+            </p>
 
         </div>
 
 
-        <div
-            id="historyStatus"
-            class="history-status">
+        <button
+            type="button"
+            class="refresh-button"
+            id="refreshButton"
+            onclick="loadHistory()">
 
-            Loading prediction history...
+            ↻ Refresh History
 
-        </div>
+        </button>
 
-
-        <div class="table-container">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            #
-                        </th>
-
-                        <th>
-                            Date & Time
-                        </th>
-
-                        <th>
-                            Disease
-                        </th>
-
-                        <th>
-                            Confidence
-                        </th>
-
-                        <th>
-                            Chemical
-                        </th>
-
-                        <th>
-                            Fertilizer
-                        </th>
-
-                        <th>
-                            Treatment
-                        </th>
-
-                        <th>
-                            Image
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="historyTableBody">
-
-                    <tr>
-
-                        <td
-                            colspan="8"
-                            class="loading">
-
-                            Loading prediction history...
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
 
     </div>
 
 
-    <!-- =================================================
-         FOOTER
-    ================================================== -->
+    <div
+        id="historyStatus"
+        class="history-status">
 
-    <div class="page-footer">
-
-        🌱 Precision Agriculture Smart Rover
-        &nbsp; | &nbsp;
-        AI Detection Analytics
+        Loading prediction history...
 
     </div>
+
+
+    <div class="table-container">
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Date & Time
+                    </th>
+
+                    <th>
+                        Disease
+                    </th>
+
+                    <th>
+                        Confidence
+                    </th>
+
+                    <th>
+                        Chemical
+                    </th>
+
+                    <th>
+                        Fertilizer
+                    </th>
+
+                    <th>
+                        Treatment
+                    </th>
+
+                    <th>
+                        Image
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="historyTableBody">
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="loading">
+
+                        Loading prediction history...
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+
+        </table>
+
+
+    </div>
+
+
+</section>
+
+
+<div class="page-footer">
+
+    🌱 Precision Agriculture Smart Rover
+
+    &nbsp; • &nbsp;
+
+    AI-Based Plant Leaf Disease Detection System
+
+</div>
 
 
 </main>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     MOBILE NAV
+===================================================== -->
+
+<nav class="mobile-nav">
+
+
+    <a href="/">
+
+        <span>
+            🏠
+        </span>
+
+        Dashboard
+
+    </a>
+
+
+    <a href="/rover">
+
+        <span>
+            🚜
+        </span>
+
+        Rover
+
+    </a>
+
+
+    <a href="/dataset">
+
+        <span>
+            📁
+        </span>
+
+        Dataset
+
+    </a>
+
+
+    <a href="/analytics"
+       class="active">
+
+        <span>
+            📊
+        </span>
+
+        Analytics
+
+    </a>
+
+
+    <a href="/settings">
+
+        <span>
+            ⚙️
+        </span>
+
+        Settings
+
+    </a>
+
+
+</nav>
+
+
+<!-- =====================================================
+     IMAGE MODAL
+===================================================== -->
+
+<div
+    id="imageModal"
+    class="image-modal"
+    onclick="closeImage(event)">
+
+
+    <div class="modal-content">
+
+
+        <button
+            class="modal-close"
+            onclick="closeImage()">
+
+            ×
+
+        </button>
+
+
+        <img
+            id="modalImage"
+            src=""
+            alt="Prediction image">
+
+
+    </div>
+
+
+</div>
 
 
 <!-- =====================================================
@@ -1660,7 +3522,20 @@ async function loadHistory() {
         );
 
 
-    /* SHOW LOADING */
+    const refreshButton =
+        document.getElementById(
+            "refreshButton"
+        );
+
+
+    refreshButton.classList.add(
+        "loading"
+    );
+
+
+    refreshButton.textContent =
+        "⟳ Loading...";
+
 
     tableBody.innerHTML = `
 
@@ -1686,10 +3561,6 @@ async function loadHistory() {
     try {
 
 
-        /* =========================================
-           API REQUEST
-        ========================================= */
-
         const response =
             await fetch(
                 "/api/history",
@@ -1702,27 +3573,20 @@ async function loadHistory() {
                         "Accept":
                             "application/json"
                     }
+
                 }
             );
 
 
-        /* =========================================
-           CHECK RESPONSE
-        ========================================= */
-
         if (!response.ok) {
 
             throw new Error(
-                "Server returned HTTP " +
+                "HTTP " +
                 response.status
             );
 
         }
 
-
-        /* =========================================
-           JSON DATA
-        ========================================= */
 
         const data =
             await response.json();
@@ -1731,7 +3595,9 @@ async function loadHistory() {
         if (
             !data ||
             !data.success ||
-            !Array.isArray(data.history)
+            !Array.isArray(
+                data.history
+            )
         ) {
 
             throw new Error(
@@ -1745,11 +3611,9 @@ async function loadHistory() {
             data.history;
 
 
-        /* =========================================
-           EMPTY HISTORY
-        ========================================= */
-
-        if (history.length === 0) {
+        if (
+            history.length === 0
+        ) {
 
 
             tableBody.innerHTML = `
@@ -1779,19 +3643,11 @@ async function loadHistory() {
         }
 
 
-        /* =========================================
-           CLEAR TABLE
-        ========================================= */
-
         tableBody.innerHTML = "";
 
 
-        /* =========================================
-           CREATE ROWS
-        ========================================= */
-
         history.forEach(
-            (record, index) => {
+            (record,index) => {
 
 
                 const row =
@@ -1799,10 +3655,6 @@ async function loadHistory() {
                         "tr"
                     );
 
-
-                /* =====================================
-                   GET VALUES
-                ===================================== */
 
                 const disease =
                     record.disease ||
@@ -1840,41 +3692,63 @@ async function loadHistory() {
                     "";
 
 
-                /* =====================================
-                   DISEASE TYPE
-                ===================================== */
-
                 const diseaseLower =
                     disease.toLowerCase();
 
 
-                const isHealthy =
-                    diseaseLower.includes(
-                        "healthy"
-                    );
-
-
-                const diseaseClass =
-                    isHealthy
-                        ? "healthy-text"
-                        : "disease-text";
-
-
-                /* =====================================
-                   CONFIDENCE SAFETY
-                ===================================== */
-
-                let safeConfidence =
-                    confidence;
+                let diseaseClass =
+                    "disease-other";
 
 
                 if (
-                    isNaN(safeConfidence)
+                    diseaseLower.includes(
+                        "healthy"
+                    )
                 ) {
 
-                    safeConfidence = 0;
+                    diseaseClass =
+                        "disease-healthy";
 
                 }
+
+                else if (
+                    diseaseLower.includes(
+                        "bacterial"
+                    )
+                ) {
+
+                    diseaseClass =
+                        "disease-bacterial";
+
+                }
+
+                else if (
+                    diseaseLower.includes(
+                        "cercospora"
+                    )
+                ) {
+
+                    diseaseClass =
+                        "disease-cercospora";
+
+                }
+
+                else if (
+                    diseaseLower.includes(
+                        "curl"
+                    )
+                ) {
+
+                    diseaseClass =
+                        "disease-curl";
+
+                }
+
+
+                let safeConfidence =
+                    isNaN(confidence)
+                        ? 0
+                        : confidence;
 
 
                 safeConfidence =
@@ -1887,40 +3761,37 @@ async function loadHistory() {
                     );
 
 
-                /* =====================================
-                   IMAGE
-                ===================================== */
-
                 let imageHTML =
                     "No image";
 
 
                 if (image) {
 
+                    const encodedImage =
+                        encodeURIComponent(
+                            image
+                        );
+
 
                     imageHTML = `
 
-                        <a
+                        <button
+                            type="button"
+
                             class="view-image"
 
-                            href="/static/images/${encodeURIComponent(image)}"
+                            onclick="openImage(
+                                '/static/images/${encodedImage}'
+                            )">
 
-                            target="_blank"
+                            👁 View
 
-                            rel="noopener noreferrer">
-
-                            View
-
-                        </a>
+                        </button>
 
                     `;
 
                 }
 
-
-                /* =====================================
-                   CREATE ROW
-                ===================================== */
 
                 row.innerHTML = `
 
@@ -1932,12 +3803,26 @@ async function loadHistory() {
                         ${escapeHTML(timestamp)}
                     </td>
 
-                    <td class="${diseaseClass}">
-                        ${escapeHTML(disease)}
+                    <td>
+
+                        <span
+                            class="disease-badge ${diseaseClass}">
+
+                            ${escapeHTML(disease)}
+
+                        </span>
+
                     </td>
 
-                    <td class="confidence">
-                        ${safeConfidence.toFixed(2)}%
+                    <td>
+
+                        <span
+                            class="confidence-pill">
+
+                            ${safeConfidence.toFixed(2)}%
+
+                        </span>
+
                     </td>
 
                     <td>
@@ -1967,10 +3852,6 @@ async function loadHistory() {
         );
 
 
-        /* =========================================
-           STATUS
-        ========================================= */
-
         status.textContent =
             history.length +
             " prediction" +
@@ -1985,22 +3866,14 @@ async function loadHistory() {
     }
 
 
-    catch (error) {
+    catch(error) {
 
-
-        /* =========================================
-           CONSOLE ERROR
-        ========================================= */
 
         console.error(
             "HISTORY ERROR:",
             error
         );
 
-
-        /* =========================================
-           ERROR TABLE
-        ========================================= */
 
         tableBody.innerHTML = `
 
@@ -2014,8 +3887,8 @@ async function loadHistory() {
 
                     <br><br>
 
-                    Please check the server connection
-                    and try again.
+                    Please check the Flask server
+                    connection and try again.
 
                 </td>
 
@@ -2029,6 +3902,20 @@ async function loadHistory() {
 
     }
 
+
+    finally {
+
+
+        refreshButton.classList.remove(
+            "loading"
+        );
+
+
+        refreshButton.textContent =
+            "↻ Refresh History";
+
+    }
+
 }
 
 
@@ -2037,7 +3924,6 @@ async function loadHistory() {
 ========================================================= */
 
 function escapeHTML(value) {
-
 
     return String(value)
 
@@ -2070,7 +3956,98 @@ function escapeHTML(value) {
 
 
 /* =========================================================
-   PAGE LOAD
+   IMAGE OPEN
+========================================================= */
+
+function openImage(src) {
+
+    const modal =
+        document.getElementById(
+            "imageModal"
+        );
+
+
+    const image =
+        document.getElementById(
+            "modalImage"
+        );
+
+
+    image.src =
+        src;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================================
+   IMAGE CLOSE
+========================================================= */
+
+function closeImage(event) {
+
+    const modal =
+        document.getElementById(
+            "imageModal"
+        );
+
+
+    if (
+        event &&
+        event.target !== modal
+    ) {
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "show"
+    );
+
+
+    document.getElementById(
+        "modalImage"
+    ).src = "";
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================================
+   ESCAPE KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeImage();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL LOAD
 ========================================================= */
 
 document.addEventListener(

@@ -4182,6 +4182,3208 @@ footer {
 
         padding:
             7px 10px;
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="theme-color"
+    content="#0b3d2e"
+>
+
+<meta
+    name="description"
+    content="AI-Powered Plant Leaf Disease Detection Dashboard"
+>
+
+<title>
+    Precision Agriculture Smart Rover
+</title>
+
+
+<style>
+
+/* =========================================================
+   ROOT
+========================================================= */
+
+:root {
+
+    --primary-dark: #0b3d2e;
+    --primary: #28734e;
+    --primary-light: #edf7ef;
+
+    --accent: #39b86f;
+
+    --background: #f5f8f6;
+
+    --text: #26352d;
+    --text-light: #789088;
+    --text-soft: #63736b;
+
+    --border: #dfe8e2;
+
+    --shadow-sm:
+        0 6px 20px rgba(15, 55, 35, 0.06);
+
+    --shadow-md:
+        0 12px 32px rgba(15, 55, 35, 0.09);
+
+    --shadow-lg:
+        0 18px 45px rgba(15, 55, 35, 0.12);
+
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 22px;
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(57,184,111,0.07),
+            transparent 30%
+        ),
+        var(--background);
+
+    color: var(--text);
+
+    min-height: 100vh;
+
+    -webkit-font-smoothing: antialiased;
+
+    overflow-x: hidden;
+
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   AMBIENT BACKGROUND
+========================================================= */
+
+body::before {
+
+    content: "";
+
+    position: fixed;
+
+    width: 480px;
+    height: 480px;
+
+    top: -230px;
+    right: -160px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(57,184,111,0.09),
+            transparent 68%
+        );
+
+    pointer-events: none;
+
+    z-index: -1;
+
+    animation:
+        ambientGlow 9s ease-in-out infinite;
+
+}
+
+body::after {
+
+    content: "";
+
+    position: fixed;
+
+    width: 350px;
+    height: 350px;
+
+    left: -180px;
+    bottom: -150px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(40,115,78,0.045),
+            transparent 68%
+        );
+
+    pointer-events: none;
+
+    z-index: -1;
+
+    animation:
+        ambientGlow2 11s ease-in-out infinite;
+
+}
+
+@keyframes ambientGlow {
+
+    0%,
+    100% {
+        transform:
+            translate(0,0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translate(-25px,22px)
+            scale(1.08);
+    }
+
+}
+
+@keyframes ambientGlow2 {
+
+    0%,
+    100% {
+        transform:
+            translate(0,0)
+            scale(1);
+    }
+
+    50% {
+        transform:
+            translate(20px,-18px)
+            scale(1.08);
+    }
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #b9c9c0;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #8fa79a;
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+    min-height: 100vh;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    position: fixed;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 260px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #0b3d2e 0%,
+            #0a3025 100%
+        );
+
+    color: white;
+
+    padding: 24px 15px;
+
+    z-index: 1000;
+
+    overflow-y: auto;
+
+    border-right:
+        1px solid rgba(255,255,255,0.04);
+
+    animation:
+        sidebarEnter
+        0.75s
+        cubic-bezier(.22,1,.36,1)
+        both;
+
+}
+
+@keyframes sidebarEnter {
+
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+
+/* =========================================================
+   LOGO
+========================================================= */
+
+.logo {
+
+    padding:
+        8px 13px 24px;
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.10);
+
+}
+
+.logo-icon {
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(69,210,128,0.22),
+            rgba(69,210,128,0.08)
+        );
+
+    border:
+        1px solid rgba(111,239,159,0.15);
+
+    font-size: 27px;
+
+    margin-bottom: 13px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.12);
+
+    animation:
+        logoAppear
+        0.8s
+        cubic-bezier(.22,1,.36,1)
+        0.15s
+        both;
+
+}
+
+@keyframes logoAppear {
+
+    from {
+        opacity: 0;
+        transform:
+            scale(.7)
+            rotate(-12deg);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            scale(1)
+            rotate(0);
+    }
+
+}
+
+.logo-icon:hover {
+
+    animation:
+        logoHover
+        0.55s
+        ease;
+
+}
+
+@keyframes logoHover {
+
+    0% {
+        transform: rotate(0) scale(1);
+    }
+
+    40% {
+        transform: rotate(-8deg) scale(1.08);
+    }
+
+    70% {
+        transform: rotate(5deg) scale(1.04);
+    }
+
+    100% {
+        transform: rotate(0) scale(1);
+    }
+
+}
+
+.logo h1 {
+
+    font-size: 17px;
+
+    line-height: 1.35;
+
+    font-weight: 750;
+
+    letter-spacing: -0.2px;
+
+}
+
+.logo p {
+
+    color: #a7c3b7;
+
+    font-size: 11px;
+
+    margin-top: 7px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   MENU
+========================================================= */
+
+.menu-title {
+
+    color: #72998a;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.4px;
+
+    margin:
+        27px 12px 11px;
+
+    text-transform: uppercase;
+
+}
+
+.menu a {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    color: #c1d3ca;
+
+    padding: 13px 14px;
+
+    border-radius: 12px;
+
+    margin-bottom: 5px;
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    overflow: hidden;
+
+    opacity: 0;
+
+    animation:
+        menuItemEnter
+        0.5s
+        ease-out
+        forwards;
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+.menu a:nth-child(1) {
+    animation-delay: .20s;
+}
+
+.menu a:nth-child(2) {
+    animation-delay: .27s;
+}
+
+.menu a:nth-child(3) {
+    animation-delay: .34s;
+}
+
+.menu a:nth-child(4) {
+    animation-delay: .41s;
+}
+
+.menu a:nth-child(5) {
+    animation-delay: .48s;
+}
+
+@keyframes menuItemEnter {
+
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+.menu a::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    top: 50%;
+
+    width: 3px;
+
+    height: 0;
+
+    border-radius:
+        0 5px 5px 0;
+
+    background:
+        #6ee7a1;
+
+    transform:
+        translateY(-50%);
+
+    transition:
+        height .25s ease;
+
+}
+
+.menu a:hover,
+.menu a.active {
+
+    color: white;
+
+}
+
+.menu a:hover {
+
+    background:
+        rgba(255,255,255,0.08);
+
+    transform:
+        translateX(3px);
+
+}
+
+.menu a.active {
+
+    background:
+        linear-gradient(
+            135deg,
+            #2d8b5c,
+            #226e49
+        );
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.18);
+
+}
+
+.menu a:hover::before,
+.menu a.active::before {
+    height: 60%;
+}
+
+.menu-icon {
+
+    width: 23px;
+
+    text-align: center;
+
+    font-size: 18px;
+
+    transition:
+        transform .3s
+        cubic-bezier(.22,1,.36,1);
+
+}
+
+.menu a:hover .menu-icon {
+
+    transform:
+        scale(1.13)
+        rotate(-5deg);
+
+}
+
+
+/* =========================================================
+   SIDEBAR CONNECTION
+========================================================= */
+
+.sidebar-bottom {
+
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+
+    bottom: 23px;
+
+}
+
+.connection-box {
+
+    background:
+        rgba(255,255,255,0.065);
+
+    border:
+        1px solid rgba(255,255,255,0.07);
+
+    border-radius: 13px;
+
+    padding: 14px;
+
+    backdrop-filter:
+        blur(8px);
+
+}
+
+.connection-title {
+
+    color: #82a696;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 9px;
+
+}
+
+.connection-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color: #e0eee7;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+.green-dot {
+
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 8px;
+
+    background: #35d47a;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 4px rgba(53,212,122,0.10),
+        0 0 10px rgba(53,212,122,0.75);
+
+    animation:
+        systemPulse
+        2s
+        ease-in-out
+        infinite;
+
+}
+
+@keyframes systemPulse {
+
+    0%,
+    100% {
+
+        box-shadow:
+            0 0 0 3px rgba(53,212,122,.08),
+            0 0 7px rgba(53,212,122,.55);
+
+    }
+
+    50% {
+
+        box-shadow:
+            0 0 0 7px rgba(53,212,122,.04),
+            0 0 16px rgba(53,212,122,.9);
+
+    }
+
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+
+    margin-left: 260px;
+
+    width:
+        calc(100% - 260px);
+
+    min-height: 100vh;
+
+    animation:
+        pageFadeIn
+        .7s
+        ease-out
+        both;
+
+}
+
+@keyframes pageFadeIn {
+
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar {
+
+    min-height: 82px;
+
+    background:
+        rgba(255,255,255,0.92);
+
+    border-bottom:
+        1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        15px 40px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    backdrop-filter:
+        blur(15px);
+
+    animation:
+        topbarEnter
+        .65s
+        ease-out
+        both;
+
+}
+
+@keyframes topbarEnter {
+
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+.topbar-title h2 {
+
+    font-size: 19px;
+
+    color: var(--primary-dark);
+
+    font-weight: 750;
+
+    letter-spacing: -0.3px;
+
+}
+
+.topbar-title p {
+
+    color: var(--text-light);
+
+    font-size: 11px;
+
+    margin-top: 5px;
+
+}
+
+
+/* =========================================================
+   SYSTEM BADGE
+========================================================= */
+
+.system-badge {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    background:
+        var(--primary-light);
+
+    color:
+        #13713f;
+
+    border:
+        1px solid #ccebd8;
+
+    padding:
+        9px 15px;
+
+    border-radius: 30px;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    box-shadow:
+        0 4px 12px rgba(23,107,69,0.05);
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+
+}
+
+.system-badge:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(23,107,69,.12);
+
+}
+
+.online-mode {
+
+    background:
+        #edf9f1 !important;
+
+    color:
+        #168044 !important;
+
+}
+
+.offline-mode {
+
+    background:
+        #8b1e2b !important;
+
+    color:
+        white !important;
+
+    border-color:
+        #8b1e2b !important;
+
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content {
+
+    padding:
+        34px 40px 25px;
+
+    max-width:
+        1550px;
+
+    margin:
+        auto;
+
+}
+
+
+/* =========================================================
+   WELCOME
+========================================================= */
+
+.welcome {
+
+    margin-bottom: 25px;
+
+    animation:
+        contentEnter
+        .65s
+        cubic-bezier(.22,1,.36,1)
+        .1s
+        both;
+
+}
+
+@keyframes contentEnter {
+
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+.welcome h1 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        27px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -0.6px;
+
+}
+
+.welcome p {
+
+    color:
+        var(--text-soft);
+
+    margin-top:
+        7px;
+
+    font-size:
+        12px;
+
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.statistics-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+    margin-bottom:
+        32px;
+
+    animation:
+        contentEnter
+        .7s
+        cubic-bezier(.22,1,.36,1)
+        .18s
+        both;
+
+}
+
+.stat-card {
+
+    background:
+        rgba(255,255,255,0.96);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        21px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    transition:
+        transform .35s cubic-bezier(.22,1,.36,1),
+        box-shadow .35s ease,
+        border-color .35s ease;
+
+}
+
+.stat-card:hover {
+
+    transform:
+        translateY(-6px)
+        scale(1.012);
+
+    border-color:
+        #cce4d5;
+
+    box-shadow:
+        0 18px 40px rgba(15,55,35,.13);
+
+}
+
+.stat-card::before {
+
+    content: "";
+
+    position:
+        absolute;
+
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    width: 4px;
+
+    background:
+        var(--accent);
+
+    opacity: 0.8;
+
+}
+
+.stat-card::after {
+
+    content: "";
+
+    position:
+        absolute;
+
+    right:
+        -35px;
+
+    top:
+        -35px;
+
+    width:
+        110px;
+
+    height:
+        110px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(--primary-light);
+
+    transition:
+        transform .5s ease,
+        opacity .5s ease;
+
+}
+
+.stat-card:hover::after {
+
+    transform:
+        scale(1.25);
+
+    opacity:
+        .85;
+
+}
+
+.stat-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+}
+
+.stat-label {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.6px;
+
+}
+
+.stat-icon {
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    border-radius:
+        12px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    background:
+        var(--primary-light);
+
+    font-size:
+        19px;
+
+    position:
+        relative;
+
+    z-index:
+        1;
+
+    transition:
+        transform .4s
+        cubic-bezier(.22,1,.36,1),
+        box-shadow .3s ease;
+
+}
+
+.stat-card:hover .stat-icon {
+
+    transform:
+        scale(1.1)
+        rotate(-5deg);
+
+    box-shadow:
+        0 8px 18px rgba(35,120,75,.12);
+
+}
+
+.stat-number {
+
+    margin-top:
+        14px;
+
+    font-size:
+        32px;
+
+    color:
+        var(--primary-dark);
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -1px;
+
+    transition:
+        transform .3s ease;
+
+}
+
+.stat-card:hover .stat-number {
+
+    transform:
+        translateX(3px);
+
+}
+
+.stat-subtitle {
+
+    margin-top:
+        5px;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+}
+
+.healthy-number {
+
+    color:
+        #159447;
+
+}
+
+.diseased-number {
+
+    color:
+        #d92d3d;
+
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+========================================================= */
+
+.section-heading {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        15px;
+
+    animation:
+        contentEnter
+        .65s
+        cubic-bezier(.22,1,.36,1)
+        .25s
+        both;
+
+}
+
+.section-heading h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        16px;
+
+    font-weight:
+        750;
+
+}
+
+.section-heading span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   DETECTION
+========================================================= */
+
+.detection-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.05fr 1fr;
+
+    gap:
+        22px;
+
+    animation:
+        contentEnter
+        .7s
+        cubic-bezier(.22,1,.36,1)
+        .3s
+        both;
+
+}
+
+.card {
+
+    background:
+        rgba(255,255,255,0.97);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        box-shadow .35s ease,
+        transform .35s cubic-bezier(.22,1,.36,1),
+        border-color .35s ease;
+
+}
+
+.card:hover {
+
+    box-shadow:
+        var(--shadow-md);
+
+    border-color:
+        #d2e5da;
+
+    transform:
+        translateY(-3px);
+
+}
+
+
+/* =========================================================
+   IMAGE CARD
+========================================================= */
+
+.image-card {
+
+    padding:
+        21px;
+
+}
+
+.image-card-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        15px;
+
+}
+
+.image-card-header h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        14px;
+
+    font-weight:
+        750;
+
+}
+
+.image-label {
+
+    background:
+        #eef8f1;
+
+    color:
+        #28764d;
+
+    border:
+        1px solid #d8ebdf;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+    transition:
+        transform .3s ease;
+
+}
+
+.image-card:hover .image-label {
+
+    transform:
+        translateY(-2px);
+
+}
+
+.image-box {
+
+    width:
+        100%;
+
+    height:
+        365px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #eaf3ed,
+            #f5f9f6
+        );
+
+    border-radius:
+        15px;
+
+    overflow:
+        hidden;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    border:
+        1px solid #dce8e0;
+
+    position:
+        relative;
+
+    transition:
+        border-color .35s ease,
+        box-shadow .35s ease;
+
+}
+
+.image-box::before {
+
+    content:
+        "AI CAMERA INPUT";
+
+    position:
+        absolute;
+
+    top:
+        12px;
+
+    left:
+        12px;
+
+    z-index:
+        2;
+
+    background:
+        rgba(11,61,46,0.78);
+
+    color:
+        white;
+
+    padding:
+        5px 9px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.6px;
+
+    backdrop-filter:
+        blur(5px);
+
+    transition:
+        transform .3s ease,
+        opacity .3s ease;
+
+}
+
+.image-card:hover .image-box {
+
+    border-color:
+        #c5dfcf;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(45,139,92,.04),
+        0 8px 25px rgba(15,55,35,.07);
+
+}
+
+.image-card:hover .image-box::before {
+
+    transform:
+        translateY(2px);
+
+    opacity:
+        .95;
+
+}
+
+.image-box img {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        contain;
+
+    display:
+        block;
+
+    transition:
+        transform .6s
+        cubic-bezier(.22,1,.36,1),
+        opacity .35s ease;
+
+}
+
+.image-card:hover .image-box img {
+
+    transform:
+        scale(1.025);
+
+}
+
+.image-placeholder {
+
+    font-size:
+        58px;
+
+    opacity:
+        0.45;
+
+    animation:
+        leafFloat
+        3s
+        ease-in-out
+        infinite;
+
+}
+
+@keyframes leafFloat {
+
+    0%,
+    100% {
+        transform:
+            translateY(0)
+            rotate(0);
+    }
+
+    50% {
+        transform:
+            translateY(-7px)
+            rotate(3deg);
+    }
+
+}
+
+.image-name {
+
+    margin-top:
+        11px;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        10px;
+
+    text-align:
+        center;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* =========================================================
+   RESULT CARD
+========================================================= */
+
+.result-card {
+
+    padding:
+        21px;
+
+}
+
+.result-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    margin-bottom:
+        18px;
+
+}
+
+.result-header h3 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        14px;
+
+    font-weight:
+        750;
+
+}
+
+.ai-badge {
+
+    background:
+        linear-gradient(
+            135deg,
+            #e9f9ef,
+            #dff5e7
+        );
+
+    color:
+        #137b43;
+
+    border:
+        1px solid #ccebd7;
+
+    padding:
+        6px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    animation:
+        aiBadgePulse
+        3s
+        ease-in-out
+        infinite;
+
+}
+
+@keyframes aiBadgePulse {
+
+    0%,
+    100% {
+
+        box-shadow:
+            0 0 0 rgba(45,139,92,0);
+
+    }
+
+    50% {
+
+        box-shadow:
+            0 0 0 5px rgba(45,139,92,.035);
+
+    }
+
+}
+
+
+/* =========================================================
+   DETECTION RESULT
+========================================================= */
+
+.detection-result {
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf8ef 0%,
+            #f8fcf9 100%
+        );
+
+    border:
+        1px solid #d6eadc;
+
+    border-radius:
+        15px;
+
+    padding:
+        21px;
+
+    margin-bottom:
+        17px;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+
+}
+
+.detection-result:hover {
+
+    transform:
+        translateY(-2px);
+
+    box-shadow:
+        0 10px 25px rgba(30,103,65,.07);
+
+}
+
+.detection-result::after {
+
+    content:
+        "🤖";
+
+    position:
+        absolute;
+
+    right:
+        18px;
+
+    bottom:
+        8px;
+
+    font-size:
+        46px;
+
+    opacity:
+        0.08;
+
+    transition:
+        transform .5s ease;
+
+}
+
+.detection-result:hover::after {
+
+    transform:
+        rotate(-8deg)
+        scale(1.08);
+
+}
+
+.detection-result small {
+
+    color:
+        var(--text-soft);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.7px;
+
+}
+
+.detection-result h1 {
+
+    color:
+        #1e6741;
+
+    font-size:
+        25px;
+
+    margin-top:
+        7px;
+
+    font-weight:
+        800;
+
+    line-height:
+        1.2;
+
+    word-break:
+        break-word;
+
+}
+
+.result-status {
+
+    display:
+        inline-block;
+
+    margin-top:
+        10px;
+
+    background:
+        #dff5e6;
+
+    color:
+        #187441;
+
+    border:
+        1px solid #c9e9d3;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =========================================================
+   INFORMATION
+========================================================= */
+
+.info-box {
+
+    display:
+        flex;
+
+    gap:
+        14px;
+
+    align-items:
+        flex-start;
+
+    padding:
+        14px 0;
+
+    border-bottom:
+        1px solid #edf1ee;
+
+    transition:
+        padding-left .3s ease,
+        background .3s ease;
+
+}
+
+.info-box:hover {
+
+    padding-left:
+        5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(237,247,239,.65),
+            transparent
+        );
+
+}
+
+.info-icon {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    min-width:
+        38px;
+
+    border-radius:
+        10px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #f0f7f2;
+
+    border:
+        1px solid #e0ebe3;
+
+    font-size:
+        17px;
+
+    transition:
+        transform .35s
+        cubic-bezier(.22,1,.36,1),
+        background .3s ease;
+
+}
+
+.info-box:hover .info-icon {
+
+    transform:
+        scale(1.08)
+        rotate(-4deg);
+
+    background:
+        #e8f5ec;
+
+}
+
+.info-content span {
+
+    display:
+        block;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.4px;
+
+    margin-bottom:
+        5px;
+
+}
+
+.info-content strong {
+
+    color:
+        #334139;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.55;
+
+    word-break:
+        break-word;
+
+}
+
+.treatment-box {
+
+    margin-top:
+        5px;
+
+    padding-top:
+        14px;
+
+}
+
+.treatment-box span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.4px;
+
+}
+
+.treatment-box p {
+
+    margin-top:
+        7px;
+
+    color:
+        #4c5a52;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.65;
+
+}
+
+
+/* =========================================================
+   CONFIDENCE
+========================================================= */
+
+.confidence-box {
+
+    margin-top:
+        18px;
+
+}
+
+.confidence-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+}
+
+.confidence-header span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+#confidence-value {
+
+    color:
+        #28734e;
+
+}
+
+.progress {
+
+    width:
+        100%;
+
+    height:
+        9px;
+
+    background:
+        #e7efe9;
+
+    border-radius:
+        20px;
+
+    overflow:
+        hidden;
+
+}
+
+.progress-bar {
+
+    width:
+        0%;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2b8055,
+            #42c477
+        );
+
+    border-radius:
+        20px;
+
+    transition:
+        width .9s
+        cubic-bezier(.22,1,.36,1);
+
+    box-shadow:
+        0 0 10px rgba(66,196,119,.25);
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+.progress-bar::after {
+
+    content: "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        -40%;
+
+    width:
+        35%;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.55),
+            transparent
+        );
+
+    animation:
+        confidenceShine
+        2.8s
+        ease-in-out
+        infinite;
+
+}
+
+@keyframes confidenceShine {
+
+    0% {
+        left: -40%;
+    }
+
+    60%,
+    100% {
+        left: 120%;
+    }
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-section {
+
+    margin-top:
+        31px;
+
+    animation:
+        contentEnter
+        .7s
+        cubic-bezier(.22,1,.36,1)
+        .38s
+        both;
+
+}
+
+.status-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+}
+
+.status-card {
+
+    background:
+        white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        19px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        transform .35s
+        cubic-bezier(.22,1,.36,1),
+        box-shadow .35s ease,
+        border-color .35s ease;
+
+}
+
+.status-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        var(--shadow-md);
+
+    border-color:
+        #cfe3d7;
+
+}
+
+.status-icon {
+
+    width:
+        47px;
+
+    height:
+        47px;
+
+    border-radius:
+        13px;
+
+    background:
+        #edf7ef;
+
+    border:
+        1px solid #deebe2;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    font-size:
+        21px;
+
+    transition:
+        transform .4s
+        cubic-bezier(.22,1,.36,1);
+
+}
+
+.status-card:hover .status-icon {
+
+    transform:
+        scale(1.1)
+        rotate(-5deg);
+
+}
+
+.status-info span {
+
+    display:
+        block;
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.5px;
+
+    margin-bottom:
+        5px;
+
+}
+
+.status-info strong {
+
+    font-size:
+        13px;
+
+    font-weight:
+        800;
+
+    transition:
+        color .3s ease,
+        transform .3s ease;
+
+}
+
+.status-online {
+
+    color:
+        #159447;
+
+}
+
+.status-offline {
+
+    color:
+        #dc3545;
+
+}
+
+
+/* =========================================================
+   QUICK ACCESS
+========================================================= */
+
+.quick-section {
+
+    margin-top:
+        31px;
+
+    animation:
+        contentEnter
+        .7s
+        cubic-bezier(.22,1,.36,1)
+        .46s
+        both;
+
+}
+
+.quick-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        18px;
+
+}
+
+.quick-card {
+
+    background:
+        white;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        var(--radius-md);
+
+    padding:
+        19px;
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    transition:
+        transform .35s
+        cubic-bezier(.22,1,.36,1),
+        box-shadow .35s ease,
+        border-color .35s ease;
+
+}
+
+.quick-card::before {
+
+    content: "";
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    bottom:
+        0;
+
+    width:
+        100%;
+
+    height:
+        2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #43bb77,
+            transparent
+        );
+
+    transform:
+        scaleX(0);
+
+    transition:
+        transform .4s ease;
+
+}
+
+.quick-card:hover {
+
+    transform:
+        translateY(-5px);
+
+    box-shadow:
+        var(--shadow-md);
+
+    border-color:
+        #cfe3d7;
+
+}
+
+.quick-card:hover::before {
+
+    transform:
+        scaleX(1);
+
+}
+
+.quick-icon {
+
+    width:
+        43px;
+
+    height:
+        43px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        12px;
+
+    background:
+        #edf7ef;
+
+    font-size:
+        21px;
+
+    margin-bottom:
+        11px;
+
+    transition:
+        transform .4s
+        cubic-bezier(.22,1,.36,1),
+        box-shadow .3s ease;
+
+}
+
+.quick-card:hover .quick-icon {
+
+    transform:
+        translateY(-3px)
+        scale(1.08)
+        rotate(-4deg);
+
+    box-shadow:
+        0 8px 20px rgba(35,120,75,.10);
+
+}
+
+.quick-card h4 {
+
+    color:
+        var(--primary-dark);
+
+    font-size:
+        13px;
+
+    font-weight:
+        750;
+
+}
+
+.quick-card p {
+
+    color:
+        var(--text-soft);
+
+    font-size:
+        10px;
+
+    margin-top:
+        6px;
+
+    line-height:
+        1.6;
+
+}
+
+.quick-card a {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    margin-top:
+        13px;
+
+    color:
+        #28734e;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    transition:
+        transform .3s ease,
+        color .3s ease;
+
+}
+
+.quick-card a:hover {
+
+    color:
+        #125b38;
+
+    transform:
+        translateX(5px);
+
+}
+
+
+/* =========================================================
+   LIVE INDICATOR
+========================================================= */
+
+.live-update {
+
+    position:
+        fixed;
+
+    right:
+        20px;
+
+    bottom:
+        20px;
+
+    background:
+        rgba(11,61,46,0.96);
+
+    color:
+        white;
+
+    padding:
+        10px 15px;
+
+    border-radius:
+        25px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        750;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.16);
+
+    z-index:
+        9999;
+
+    transition:
+        transform .3s ease,
+        box-shadow .3s ease;
+
+    backdrop-filter:
+        blur(8px);
+
+    animation:
+        liveIndicatorEnter
+        .7s
+        cubic-bezier(.22,1,.36,1)
+        .8s
+        both;
+
+}
+
+.live-update:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.20);
+
+}
+
+@keyframes liveIndicatorEnter {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(15px)
+            scale(.95);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
+
+}
+
+.live-update-dot {
+
+    display:
+        inline-block;
+
+    width:
+        7px;
+
+    height:
+        7px;
+
+    background:
+        #36d477;
+
+    border-radius:
+        50%;
+
+    margin-right:
+        7px;
+
+    box-shadow:
+        0 0 8px rgba(54,212,119,0.9);
+
+    animation:
+        liveDotPulse
+        1.7s
+        ease-in-out
+        infinite;
+
+}
+
+@keyframes liveDotPulse {
+
+    0%,
+    100% {
+
+        transform:
+            scale(1);
+
+        opacity:
+            1;
+
+    }
+
+    50% {
+
+        transform:
+            scale(1.35);
+
+        opacity:
+            .7;
+
+    }
+
+}
+
+.live-flash {
+
+    animation:
+        liveFlash
+        .7s
+        ease-in-out
+        2;
+
+}
+
+@keyframes liveFlash {
+
+    50% {
+
+        transform:
+            scale(1.06);
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE EFFECT
+========================================================= */
+
+.updated {
+
+    animation:
+        updateGlow
+        .8s
+        cubic-bezier(.22,1,.36,1);
+
+}
+
+@keyframes updateGlow {
+
+    0% {
+
+        transform:
+            scale(1);
+
+        box-shadow:
+            0 0 0 rgba(45,139,92,0);
+
+    }
+
+    45% {
+
+        transform:
+            scale(1.015);
+
+        box-shadow:
+            0 0 0 7px rgba(45,139,92,.06);
+
+    }
+
+    100% {
+
+        transform:
+            scale(1);
+
+        box-shadow:
+            0 0 0 rgba(45,139,92,0);
+
+    }
+
+}
+
+
+/* =========================================================
+   NEW RESULT ANIMATION
+========================================================= */
+
+.detection-result.updated {
+
+    animation:
+        resultReceived
+        .8s
+        cubic-bezier(.22,1,.36,1);
+
+}
+
+@keyframes resultReceived {
+
+    0% {
+
+        opacity:
+            .65;
+
+        transform:
+            scale(.985)
+            translateY(4px);
+
+    }
+
+    45% {
+
+        opacity:
+            1;
+
+        transform:
+            scale(1.015)
+            translateY(0);
+
+        box-shadow:
+            0 0 0 7px rgba(45,139,92,.07);
+
+    }
+
+    100% {
+
+        opacity:
+            1;
+
+        transform:
+            scale(1)
+            translateY(0);
+
+        box-shadow:
+            0 0 0 rgba(45,139,92,0);
+
+    }
+
+}
+
+.detection-result.updated
+#disease-result {
+
+    animation:
+        diseaseTextEnter
+        .65s
+        cubic-bezier(.22,1,.36,1);
+
+}
+
+@keyframes diseaseTextEnter {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateY(8px);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================================================
+   INSTALL APP
+========================================================= */
+
+.install-app-button {
+
+    display:
+        none;
+
+    position:
+        fixed;
+
+    left:
+        50%;
+
+    bottom:
+        82px;
+
+    transform:
+        translateX(-50%);
+
+    background:
+        linear-gradient(
+            135deg,
+            #2d8b5c,
+            #226e49
+        );
+
+    color:
+        white;
+
+    border:
+        none;
+
+    border-radius:
+        25px;
+
+    padding:
+        11px 18px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        800;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,0.18);
+
+    z-index:
+        10000;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform .3s
+        cubic-bezier(.22,1,.36,1),
+        box-shadow .3s ease;
+
+}
+
+.install-app-button:hover {
+
+    transform:
+        translateX(-50%)
+        translateY(-4px)
+        scale(1.025);
+
+    box-shadow:
+        0 14px 32px rgba(0,0,0,.22);
+
+}
+
+.install-app-button:active {
+
+    transform:
+        translateX(-50%)
+        translateY(-1px)
+        scale(.98);
+
+}
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-nav {
+
+    display:
+        none;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+
+    text-align:
+        center;
+
+    color:
+        #98a69f;
+
+    font-size:
+        9px;
+
+    padding:
+        28px 20px;
+
+    animation:
+        contentEnter
+        .7s
+        ease-out
+        .55s
+        both;
+
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:1100px) {
+
+    .content {
+        padding:
+            30px 28px;
+    }
+
+    .detection-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .image-box {
+        height:
+            390px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL TABLET
+========================================================= */
+
+@media(max-width:800px) {
+
+    .sidebar {
+
+        width:
+            72px;
+
+        padding:
+            20px 8px;
+
+    }
+
+    .logo {
+
+        text-align:
+            center;
+
+        padding:
+            5px 0 20px;
+
+    }
+
+    .logo-icon {
+
+        margin:
+            auto auto 12px;
+
+    }
+
+    .logo h1,
+    .logo p,
+    .menu-title,
+    .connection-box {
+
+        display:
+            none;
+
+    }
+
+    .menu a {
+
+        justify-content:
+            center;
+
+        padding:
+            13px 5px;
+
+    }
+
+    .menu-icon {
+
+        font-size:
+            20px;
+
+    }
+
+    .main {
+
+        margin-left:
+            72px;
+
+        width:
+            calc(100% - 72px);
+
+    }
+
+    .topbar {
+
+        padding:
+            15px 22px;
+
+    }
+
+    .content {
+
+        padding:
+            26px 20px;
+
+    }
+
+    .statistics-grid,
+    .status-grid,
+    .quick-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:550px) {
+
+    body {
+
+        padding-bottom:
+            70px;
+
+    }
+
+    .sidebar {
+
+        display:
+            none;
+
+    }
+
+    .main {
+
+        margin-left:
+            0;
+
+        width:
+            100%;
+
+    }
+
+    .topbar {
+
+        min-height:
+            66px;
+
+        padding:
+            10px 15px;
+
+    }
+
+    .topbar-title h2 {
+
+        font-size:
+            14px;
+
+    }
+
+    .topbar-title p {
+
+        display:
+            none;
+
+    }
+
+    .system-badge {
+
+        padding:
+            7px 10px;
 
         font-size:
             9px;
@@ -4333,6 +7535,28 @@ footer {
         backdrop-filter:
             blur(12px);
 
+        animation:
+            mobileNavEnter
+            .6s
+            ease-out
+            both;
+
+    }
+
+    @keyframes mobileNavEnter {
+
+        from {
+            opacity: 0;
+            transform:
+                translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform:
+                translateY(0);
+        }
+
     }
 
     .mobile-nav a {
@@ -4364,12 +7588,36 @@ footer {
         min-width:
             50px;
 
+        transition:
+            color .25s ease,
+            transform .25s ease;
+
     }
 
     .mobile-nav a span {
 
         font-size:
             19px;
+
+        transition:
+            transform .3s
+            cubic-bezier(.22,1,.36,1);
+
+    }
+
+    .mobile-nav a:hover {
+
+        transform:
+            translateY(-3px);
+
+    }
+
+    .mobile-nav a:hover span,
+    .mobile-nav a.active span {
+
+        transform:
+            translateY(-2px)
+            scale(1.08);
 
     }
 
@@ -4383,31 +7631,40 @@ footer {
 }
 
 
-/* EXTRA SMALL */
+/* =========================================================
+   EXTRA SMALL
+========================================================= */
 
 @media(max-width:380px) {
 
     .topbar-title h2 {
-        font-size: 12px;
+        font-size:
+            12px;
     }
 
     .system-badge {
-        padding: 6px 8px;
-        font-size: 8px;
+        padding:
+            6px 8px;
+        font-size:
+            8px;
     }
 
     .welcome h1 {
-        font-size: 19px;
+        font-size:
+            19px;
     }
 
     .image-box {
-        height: 240px;
+        height:
+            240px;
     }
 
 }
 
 
-/* ACCESSIBILITY */
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
 
 @media(prefers-reduced-motion: reduce) {
 
@@ -4441,7 +7698,9 @@ footer {
 <div class="app">
 
 
-<!-- SIDEBAR -->
+<!-- =====================================================
+     SIDEBAR
+===================================================== -->
 
 <aside class="sidebar">
 
@@ -4471,28 +7730,67 @@ footer {
     <div class="menu">
 
         <a href="/" class="active">
-            <span class="menu-icon">🏠</span>
-            <span>Dashboard</span>
+
+            <span class="menu-icon">
+                🏠
+            </span>
+
+            <span>
+                Dashboard
+            </span>
+
         </a>
+
 
         <a href="/rover">
-            <span class="menu-icon">🚜</span>
-            <span>Rover Control</span>
+
+            <span class="menu-icon">
+                🚜
+            </span>
+
+            <span>
+                Rover Control
+            </span>
+
         </a>
+
 
         <a href="/dataset">
-            <span class="menu-icon">📁</span>
-            <span>Dataset</span>
+
+            <span class="menu-icon">
+                📁
+            </span>
+
+            <span>
+                Dataset
+            </span>
+
         </a>
+
 
         <a href="/analytics">
-            <span class="menu-icon">📊</span>
-            <span>Analytics</span>
+
+            <span class="menu-icon">
+                📊
+            </span>
+
+            <span>
+                Analytics
+            </span>
+
         </a>
 
+
         <a href="/settings">
-            <span class="menu-icon">⚙️</span>
-            <span>Settings</span>
+
+            <span class="menu-icon">
+                ⚙️
+            </span>
+
+            <span>
+                Settings
+            </span>
+
         </a>
 
     </div>
@@ -4521,7 +7819,9 @@ footer {
 </aside>
 
 
-<!-- MAIN -->
+<!-- =====================================================
+     MAIN
+===================================================== -->
 
 <div class="main">
 
@@ -4541,8 +7841,10 @@ footer {
     </div>
 
 
-    <div class="system-badge online-mode"
-         id="system-badge">
+    <div
+        class="system-badge online-mode"
+        id="system-badge"
+    >
 
         <span class="green-dot"></span>
 
@@ -4558,7 +7860,9 @@ footer {
 <main class="content">
 
 
-<!-- WELCOME -->
+<!-- =====================================================
+     WELCOME
+===================================================== -->
 
 <section class="welcome">
 
@@ -4574,7 +7878,9 @@ footer {
 </section>
 
 
-<!-- STATISTICS -->
+<!-- =====================================================
+     STATISTICS
+===================================================== -->
 
 <section class="statistics-grid">
 
@@ -4593,11 +7899,11 @@ footer {
 
     </div>
 
-    <div class="stat-number"
-         id="total-predictions">
-
+    <div
+        class="stat-number"
+        id="total-predictions"
+    >
         {{ statistics.total }}
-
     </div>
 
     <div class="stat-subtitle">
@@ -4621,15 +7927,17 @@ footer {
 
     </div>
 
-    <div class="stat-number healthy-number"
-         id="healthy-predictions">
-
+    <div
+        class="stat-number healthy-number"
+        id="healthy-predictions"
+    >
         {{ statistics.healthy }}
-
     </div>
 
-    <div class="stat-subtitle"
-         id="healthy-percent">
+    <div
+        class="stat-subtitle"
+        id="healthy-percent"
+    >
 
         {% if statistics.total > 0 %}
 
@@ -4663,15 +7971,17 @@ footer {
 
     </div>
 
-    <div class="stat-number diseased-number"
-         id="diseased-predictions">
-
+    <div
+        class="stat-number diseased-number"
+        id="diseased-predictions"
+    >
         {{ statistics.diseased }}
-
     </div>
 
-    <div class="stat-subtitle"
-         id="diseased-percent">
+    <div
+        class="stat-subtitle"
+        id="diseased-percent"
+    >
 
         {% if statistics.total > 0 %}
 
@@ -4694,7 +8004,9 @@ footer {
 </section>
 
 
-<!-- AI DETECTION -->
+<!-- =====================================================
+     AI DETECTION
+===================================================== -->
 
 <div class="section-heading">
 
@@ -4729,8 +8041,10 @@ footer {
     </div>
 
 
-    <div class="image-box"
-         id="image-box">
+    <div
+        class="image-box"
+        id="image-box"
+    >
 
         {% if detection.image %}
 
@@ -4740,15 +8054,16 @@ footer {
                 'static',
                 filename='images/' + detection.image
             ) }}?v={{ detection.timestamp }}"
-            alt="Latest Plant Leaf">
+            alt="Latest Plant Leaf"
+        >
 
         {% else %}
 
-        <div class="image-placeholder"
-             id="image-placeholder">
-
+        <div
+            class="image-placeholder"
+            id="image-placeholder"
+        >
             🌿
-
         </div>
 
         {% endif %}
@@ -4756,11 +8071,11 @@ footer {
     </div>
 
 
-    <div class="image-name"
-         id="image-name">
-
+    <div
+        class="image-name"
+        id="image-name"
+    >
         {{ detection.image or "No image available" }}
-
     </div>
 
 </div>
@@ -4795,11 +8110,11 @@ footer {
 
         </h1>
 
-        <span class="result-status"
-              id="result-status">
-
+        <span
+            class="result-status"
+            id="result-status"
+        >
             DETECTION COMPLETE
-
         </span>
 
     </div>
@@ -4886,11 +8201,11 @@ footer {
 
         <div class="progress">
 
-            <div class="progress-bar"
-                 id="confidence-bar"
-                 style="width: {{ detection.confidence or 0 }}%;">
-
-            </div>
+            <div
+                class="progress-bar"
+                id="confidence-bar"
+                style="width: {{ detection.confidence or 0 }}%;"
+            ></div>
 
         </div>
 
@@ -4902,7 +8217,9 @@ footer {
 </section>
 
 
-<!-- SYSTEM STATUS -->
+<!-- =====================================================
+     SYSTEM STATUS
+===================================================== -->
 
 <section class="status-section">
 
@@ -4934,11 +8251,11 @@ footer {
             AI MODEL
         </span>
 
-        <strong class="status-online"
-                id="ai-status">
-
+        <strong
+            class="status-online"
+            id="ai-status"
+        >
             ONLINE
-
         </strong>
 
     </div>
@@ -4958,11 +8275,11 @@ footer {
             ROVER
         </span>
 
-        <strong id="rover-status"
-                class="status-offline">
-
+        <strong
+            id="rover-status"
+            class="status-offline"
+        >
             NOT CONNECTED
-
         </strong>
 
     </div>
@@ -4982,11 +8299,11 @@ footer {
             SPRAY PUMP
         </span>
 
-        <strong id="pump-status"
-                class="status-offline">
-
+        <strong
+            id="pump-status"
+            class="status-offline"
+        >
             OFF
-
         </strong>
 
     </div>
@@ -4999,7 +8316,9 @@ footer {
 </section>
 
 
-<!-- QUICK ACCESS -->
+<!-- =====================================================
+     QUICK ACCESS
+===================================================== -->
 
 <section class="quick-section">
 
@@ -5107,13 +8426,17 @@ AI-Based Plant Leaf Disease Detection System
 </div>
 
 
-<!-- MOBILE NAV -->
+<!-- =====================================================
+     MOBILE NAV
+===================================================== -->
 
 <nav class="mobile-nav">
 
     <a href="/" class="active">
 
-        <span>🏠</span>
+        <span>
+            🏠
+        </span>
 
         Dashboard
 
@@ -5122,7 +8445,9 @@ AI-Based Plant Leaf Disease Detection System
 
     <a href="/rover">
 
-        <span>🚜</span>
+        <span>
+            🚜
+        </span>
 
         Rover
 
@@ -5131,7 +8456,9 @@ AI-Based Plant Leaf Disease Detection System
 
     <a href="/dataset">
 
-        <span>📁</span>
+        <span>
+            📁
+        </span>
 
         Dataset
 
@@ -5140,7 +8467,9 @@ AI-Based Plant Leaf Disease Detection System
 
     <a href="/analytics">
 
-        <span>📊</span>
+        <span>
+            📊
+        </span>
 
         Analytics
 
@@ -5149,7 +8478,9 @@ AI-Based Plant Leaf Disease Detection System
 
     <a href="/settings">
 
-        <span>⚙️</span>
+        <span>
+            ⚙️
+        </span>
 
         Settings
 
@@ -5158,21 +8489,28 @@ AI-Based Plant Leaf Disease Detection System
 </nav>
 
 
-<!-- INSTALL APP -->
+<!-- =====================================================
+     INSTALL APP
+===================================================== -->
 
 <button
     id="install-app-button"
-    class="install-app-button">
+    class="install-app-button"
+>
 
     📱 Install Smart Rover App
 
 </button>
 
 
-<!-- LIVE INDICATOR -->
+<!-- =====================================================
+     LIVE INDICATOR
+===================================================== -->
 
-<div class="live-update"
-     id="live-indicator">
+<div
+    class="live-update"
+    id="live-indicator"
+>
 
     <span class="live-update-dot"></span>
 
@@ -5275,61 +8613,45 @@ function updateStatistics(statistics) {
         return;
     }
 
-
     const total =
-        safeNumber(
-            statistics.total
-        );
-
+        safeNumber(statistics.total);
 
     const healthy =
-        safeNumber(
-            statistics.healthy
-        );
-
+        safeNumber(statistics.healthy);
 
     const diseased =
-        safeNumber(
-            statistics.diseased
-        );
-
+        safeNumber(statistics.diseased);
 
     setText(
         "total-predictions",
         total
     );
 
-
     setText(
         "healthy-predictions",
         healthy
     );
-
 
     setText(
         "diseased-predictions",
         diseased
     );
 
-
     const healthyPercentage =
         total > 0
         ? ((healthy / total) * 100).toFixed(1)
         : "0.0";
-
 
     const diseasedPercentage =
         total > 0
         ? ((diseased / total) * 100).toFixed(1)
         : "0.0";
 
-
     setText(
         "healthy-percent",
         healthyPercentage +
         "% of all predictions"
     );
-
 
     setText(
         "diseased-percent",
@@ -5351,7 +8673,6 @@ function updateImage(filename, timestamp = "") {
             "image-box"
         );
 
-
     if (!imageBox) {
         return;
     }
@@ -5365,16 +8686,20 @@ function updateImage(filename, timestamp = "") {
             );
 
         if (existingImage) {
-
             existingImage.remove();
-
         }
 
 
-        if (!document.getElementById("image-placeholder")) {
+        if (
+            !document.getElementById(
+                "image-placeholder"
+            )
+        ) {
 
             const placeholder =
-                document.createElement("div");
+                document.createElement(
+                    "div"
+                );
 
             placeholder.id =
                 "image-placeholder";
@@ -5407,11 +8732,8 @@ function updateImage(filename, timestamp = "") {
             "image-placeholder"
         );
 
-
     if (placeholder) {
-
         placeholder.remove();
-
     }
 
 
@@ -5466,8 +8788,19 @@ function updateImage(filename, timestamp = "") {
         imageURL
     ) {
 
+        image.style.opacity =
+            "0";
+
         image.src =
             imageURL;
+
+        image.onload =
+            function() {
+
+                image.style.opacity =
+                    "1";
+
+            };
 
     }
 
@@ -5485,6 +8818,9 @@ function updateImage(filename, timestamp = "") {
                 "Unable to load image:",
                 filename
             );
+
+            image.style.opacity =
+                "0";
 
         };
 
@@ -5584,6 +8920,10 @@ function updateResult(result) {
         result.timestamp
     );
 
+
+    /* =====================================================
+       RESULT ANIMATION
+    ===================================================== */
 
     const cards =
         document.querySelectorAll(
@@ -5697,9 +9037,7 @@ async function updateRoverStatus() {
         const url =
 
             "/api/rover/status" +
-
             "?v=" +
-
             Date.now();
 
 
@@ -5770,7 +9108,11 @@ async function updateRoverStatus() {
 
         if (roverStatus) {
 
-            if (Boolean(rover.connected)) {
+            if (
+                Boolean(
+                    rover.connected
+                )
+            ) {
 
                 roverStatus.textContent =
                     "CONNECTED";
@@ -5801,7 +9143,11 @@ async function updateRoverStatus() {
 
         if (pumpStatus) {
 
-            if (Boolean(rover.pump)) {
+            if (
+                Boolean(
+                    rover.pump
+                )
+            ) {
 
                 pumpStatus.textContent =
                     "ON";
@@ -5898,9 +9244,7 @@ async function checkDashboard() {
         const url =
 
             "/api/dashboard-state" +
-
             "?_=" +
-
             Date.now();
 
 
@@ -6278,10 +9622,12 @@ if (
         function() {
 
             navigator.serviceWorker.register(
+
                 "{{ url_for(
                     'static',
                     filename='service-worker.js'
                 ) }}"
+
             )
 
             .then(
