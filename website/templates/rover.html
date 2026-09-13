@@ -5561,117 +5561,1536 @@ main {
 .move-button.active {
 
     transform:
-        scale(.94);
+<!DOCTYPE html>
+<html lang="en">
 
-    box-shadow:
-        0 3px 8px
-        rgba(0,0,0,.20);
-}
+<head>
 
-.move-button.forward {
-    grid-column: 2;
-}
+<meta charset="UTF-8">
 
-.move-button.left {
-    grid-column: 1;
-}
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
 
-.move-button.stop {
+<title>
+    Precision Agriculture | Rover Control
+</title>
 
-    grid-column: 2;
 
-    background:
-        linear-gradient(
-            135deg,
-            #dc2626,
-            #b91c1c
-        );
+<style>
 
-    box-shadow:
-        0 8px 18px
-        rgba(220,38,38,.22);
-}
+/* =========================================================
+   ROOT
+========================================================= */
 
-.move-button.right {
-    grid-column: 3;
-}
+:root {
 
-.move-button.backward {
-    grid-column: 2;
+    --green-950: #082c1c;
+    --green-900: #0d3b27;
+    --green-800: #14532d;
+    --green-700: #166534;
+    --green-600: #16a34a;
+    --green-500: #22c55e;
+
+    --lime: #84cc16;
+
+    --blue: #2563eb;
+    --blue-light: #60a5fa;
+
+    --red: #dc2626;
+    --red-dark: #991b1b;
+
+    --orange: #f97316;
+
+    --white: #ffffff;
+
+    --bg:
+        #eef6f0;
+
+    --card:
+        rgba(255,255,255,.92);
+
+    --text:
+        #183326;
+
+    --muted:
+        #74827b;
+
+    --border:
+        #dce8df;
+
+    --shadow:
+        0 18px 45px rgba(19,55,37,.10);
+
 }
 
 
 /* =========================================================
-   COMMAND TRANSMISSION
+   RESET
 ========================================================= */
 
-.command-box {
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-    position: relative;
 
-    overflow: hidden;
+html {
+    scroll-behavior: smooth;
+}
 
-    margin-top: 22px;
 
-    padding: 19px;
+body {
 
-    text-align: center;
+    min-height: 100vh;
+
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    color: var(--text);
+
+    background:
+
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(34,197,94,.10),
+            transparent 25%
+        ),
+
+        radial-gradient(
+            circle at 90% 85%,
+            rgba(37,99,235,.08),
+            transparent 25%
+        ),
+
+        var(--bg);
+
+}
+
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+
+    min-height: 100vh;
+
+    display: grid;
+
+    grid-template-columns:
+        245px 1fr;
+
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    position: fixed;
+
+    inset:
+        0 auto 0 0;
+
+    width: 245px;
+
+    z-index: 100;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 25px 17px;
+
+    color: white;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            #092d1d,
+            #0d3b27 55%,
+            #082c1c
+        );
+
+    box-shadow:
+        8px 0 35px rgba(0,0,0,.10);
+
+}
+
+
+/* BRAND */
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding:
+        5px 8px 28px;
+
+}
+
+
+.brand-icon {
+
+    width: 45px;
+    height: 45px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 14px;
+
+    font-size: 23px;
+
+    background:
+        rgba(255,255,255,.10);
 
     border:
         1px solid
-        #dfe9e3;
+        rgba(255,255,255,.12);
 
-    border-radius: 15px;
+}
+
+
+.brand h1 {
+
+    font-size: 14px;
+
+    line-height: 1.25;
+
+    font-weight: 900;
+
+}
+
+
+.brand span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        #a9c8b5;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: .08em;
+
+    text-transform: uppercase;
+
+}
+
+
+/* NAV */
+
+.sidebar-nav {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.sidebar-nav a {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding:
+        13px 14px;
+
+    color:
+        #b8d0c1;
+
+    text-decoration: none;
+
+    border-radius: 13px;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    transition:
+        .2s ease;
+
+}
+
+
+.sidebar-nav a:hover {
+
+    color: white;
+
+    background:
+        rgba(255,255,255,.08);
+
+    transform:
+        translateX(3px);
+
+}
+
+
+.sidebar-nav a.active {
+
+    color: white;
 
     background:
         linear-gradient(
             135deg,
-            #f5f8f6,
-            #edf5ef
+            #1d7043,
+            #14532d
         );
+
+    box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.16);
+
 }
 
-.command-box span {
+
+.nav-icon {
+
+    width: 25px;
+
+    text-align: center;
+
+    font-size: 17px;
+
+}
+
+
+/* SIDEBAR FOOTER */
+
+.sidebar-footer {
+
+    margin-top: auto;
+
+    padding:
+        15px 9px 4px;
 
     color:
-        #7a857f;
+        #89a995;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+
+}
+
+
+.sidebar-footer strong {
+
+    color:
+        #cce4d4;
+
+}
+
+
+/* =========================================================
+   MAIN AREA
+========================================================= */
+
+.main {
+
+    grid-column: 2;
+
+    min-width: 0;
+
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 50;
+
+    min-height: 76px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        15px 34px;
+
+    border-bottom:
+        1px solid
+        rgba(216,229,220,.85);
+
+    background:
+        rgba(248,252,249,.84);
+
+    backdrop-filter:
+        blur(18px);
+
+}
+
+
+.top-title span {
+
+    color:
+        var(--muted);
 
     font-size: 10px;
 
     font-weight: 800;
 
-    text-transform:
-        uppercase;
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+
 }
 
-.command-box h2 {
 
-    margin-top: 7px;
+.top-title h2 {
 
-    color:
-        var(--green-dark);
+    margin-top: 3px;
 
-    font-size: 24px;
+    font-size: 20px;
 
     font-weight: 950;
 
-    transition:
-        transform .2s ease;
 }
 
-.command-box.sending::after {
+
+.connection-pill {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        9px 14px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 30px;
+
+    background: white;
+
+    box-shadow:
+        0 5px 18px
+        rgba(0,0,0,.05);
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+}
+
+
+.status-dot {
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    background:
+        #ef4444;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(239,68,68,.10);
+
+}
+
+
+.status-dot.online {
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(34,197,94,.12),
+        0 0 13px
+        rgba(34,197,94,.55);
+
+    animation:
+        statusPulse 1.6s infinite;
+
+}
+
+
+@keyframes statusPulse {
+
+    50% {
+        box-shadow:
+            0 0 0 7px
+            rgba(34,197,94,.04),
+            0 0 16px
+            rgba(34,197,94,.7);
+    }
+
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content {
+
+    max-width: 1450px;
+
+    margin: auto;
+
+    padding:
+        30px 34px 40px;
+
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    min-height: 150px;
+
+    padding:
+        27px 30px;
+
+    margin-bottom: 20px;
+
+    border:
+        1px solid
+        #d7e7dc;
+
+    border-radius: 23px;
+
+    background:
+
+        linear-gradient(
+            120deg,
+            #f8fcf9,
+            #e9f7ed
+        );
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+.hero::after {
+
+    content: "🌱";
+
+    position: absolute;
+
+    right: 40px;
+    bottom: -35px;
+
+    font-size: 130px;
+
+    opacity: .07;
+
+    transform:
+        rotate(-15deg);
+
+}
+
+
+.hero-text {
+
+    position: relative;
+
+    z-index: 1;
+
+}
+
+
+.hero-kicker {
+
+    color:
+        var(--green-600);
+
+    font-size: 10px;
+
+    font-weight: 950;
+
+    letter-spacing: .12em;
+
+    text-transform: uppercase;
+
+}
+
+
+.hero h1 {
+
+    margin-top: 7px;
+
+    font-size:
+        clamp(24px,3vw,38px);
+
+    font-weight: 950;
+
+    letter-spacing: -.04em;
+
+}
+
+
+.hero p {
+
+    max-width: 620px;
+
+    margin-top: 8px;
+
+    color:
+        var(--muted);
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =========================================================
+   SYSTEM CARDS
+========================================================= */
+
+.system-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap: 13px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.system-card {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 17px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 17px;
+
+    background:
+        var(--card);
+
+    box-shadow:
+        0 8px 25px
+        rgba(20,83,45,.06);
+
+}
+
+
+.system-card::after {
 
     content: "";
 
     position: absolute;
 
-    left: -30%;
+    right: -18px;
+    bottom: -25px;
+
+    width: 70px;
+    height: 70px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(34,197,94,.06);
+
+}
+
+
+.system-card span {
+
+    display: block;
+
+    color:
+        var(--muted);
+
+    font-size: 9px;
+
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+
+}
+
+
+.system-card strong {
+
+    display: block;
+
+    margin-top: 7px;
+
+    color:
+        var(--green-900);
+
+    font-size: 17px;
+
+    font-weight: 950;
+
+}
+
+
+.online-text {
+    color: #16a34a !important;
+}
+
+
+.offline-text {
+    color: #dc2626 !important;
+}
+
+
+/* =========================================================
+   DASHBOARD GRID
+========================================================= */
+
+.dashboard-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0,1.25fr)
+        minmax(330px,.75fr);
+
+    gap: 20px;
+
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card {
+
+    padding: 23px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 22px;
+
+    background:
+        rgba(255,255,255,.94);
+
+    box-shadow:
+        var(--shadow);
+
+}
+
+
+.card-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 17px;
+
+}
+
+
+.card-heading h3 {
+
+    font-size: 15px;
+
+    font-weight: 950;
+
+}
+
+
+.card-heading span {
+
+    color:
+        var(--muted);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+}
+
+
+/* =========================================================
+   ROVER CONNECTION
+========================================================= */
+
+.rover-connection {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding:
+        13px 15px;
+
+    margin-bottom: 18px;
+
+    border:
+        1px solid
+        #e1ebe4;
+
+    border-radius: 14px;
+
+    background:
+        #f7faf8;
+
+}
+
+
+.connection-state {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+.connection-state .mini-dot {
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background:
+        #ef4444;
+
+}
+
+
+.connection-state .mini-dot.online {
+
+    background:
+        #22c55e;
+
+    box-shadow:
+        0 0 12px
+        rgba(34,197,94,.7);
+
+}
+
+
+.connection-state strong {
+
+    display: block;
+
+    font-size: 11px;
+
+    font-weight: 950;
+
+}
+
+
+.connection-state small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    color:
+        var(--muted);
+
+    font-size: 9px;
+
+}
+
+
+.connection-meta {
+
+    text-align: right;
+
+    color:
+        var(--muted);
+
+    font-size: 9px;
+
+}
+
+
+.connection-meta strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        var(--green-900);
+
+    font-size: 10px;
+
+}
+
+
+/* =========================================================
+   STEERING AREA
+========================================================= */
+
+.steering-stage {
+
+    position: relative;
+
+    min-height: 405px;
+
+    display: grid;
+
+    place-items: center;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            #f8fcf9 0%,
+            #edf7f0 55%,
+            #e4f1e8 100%
+        );
+
+    border:
+        1px solid
+        #dceae0;
+
+}
+
+
+.steering-stage::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 370px;
+    height: 370px;
+
+    border:
+        1px dashed
+        rgba(35,97,62,.14);
+
+    border-radius: 50%;
+
+}
+
+
+.steering-stage::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    border:
+        1px dashed
+        rgba(35,97,62,.10);
+
+    border-radius: 50%;
+
+}
+
+
+/* =========================================================
+   STEERING WHEEL
+========================================================= */
+
+.steering-wheel {
+
+    position: relative;
+
+    z-index: 5;
+
+    width: 315px;
+    height: 315px;
+
+    border-radius: 50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            #e8f1eb 0 29%,
+            #163d2b 30% 35%,
+            #0c2f20 36% 100%
+        );
+
+    border:
+        11px solid
+        #0a2b1d;
+
+    box-shadow:
+
+        inset 0 0 0 7px
+        rgba(255,255,255,.05),
+
+        inset 0 0 35px
+        rgba(0,0,0,.28),
+
+        0 20px 45px
+        rgba(8,44,28,.24);
+
+    transition:
+        transform .18s ease;
+
+}
+
+
+.steering-wheel.active-forward {
+    transform: rotate(0deg);
+}
+
+
+.steering-wheel.active-left {
+    transform: rotate(-5deg);
+}
+
+
+.steering-wheel.active-right {
+    transform: rotate(5deg);
+}
+
+
+.steering-wheel.active-backward {
+    transform: rotate(0deg);
+}
+
+
+/* WHEEL SPOKES */
+
+.wheel-spoke {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 22px;
+    height: 130px;
+
+    transform-origin:
+        center bottom;
+
+    background:
+        linear-gradient(
+            90deg,
+            #174d34,
+            #23613e,
+            #174d34
+        );
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        inset 0 0 4px
+        rgba(255,255,255,.12);
+
+}
+
+
+.spoke-1 {
+
+    transform:
+        translate(-50%,-100%)
+        rotate(0deg);
+
+}
+
+
+.spoke-2 {
+
+    transform:
+        translate(-50%,-100%)
+        rotate(120deg);
+
+}
+
+
+.spoke-3 {
+
+    transform:
+        translate(-50%,-100%)
+        rotate(240deg);
+
+}
+
+
+/* CENTER */
+
+.wheel-center {
+
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    z-index: 10;
+
+    width: 90px;
+    height: 90px;
+
+    transform:
+        translate(-50%,-50%);
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            #dc2626,
+            #991b1b
+        );
+
+    border:
+        7px solid
+        #f0f5f2;
+
+    box-shadow:
+
+        0 8px 18px
+        rgba(153,27,27,.30),
+
+        inset 0 0 0 2px
+        rgba(255,255,255,.15);
+
+    cursor: pointer;
+
+    font-size: 10px;
+
+    font-weight: 950;
+
+    user-select: none;
+
+    transition:
+        .18s ease;
+
+}
+
+
+.wheel-center:hover {
+
+    transform:
+        translate(-50%,-50%)
+        scale(1.06);
+
+}
+
+
+.wheel-center:active {
+
+    transform:
+        translate(-50%,-50%)
+        scale(.94);
+
+}
+
+
+/* DIRECTION BUTTONS */
+
+.wheel-control {
+
+    position: absolute;
+
+    z-index: 12;
+
+    width: 73px;
+    height: 73px;
+
+    display: grid;
+
+    place-items: center;
+
+    border:
+        1px solid
+        rgba(255,255,255,.18);
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            145deg,
+            #286d48,
+            #174d34
+        );
+
+    box-shadow:
+        0 8px 17px
+        rgba(0,0,0,.18);
+
+    cursor: pointer;
+
+    user-select: none;
+
+    touch-action: none;
+
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease,
+        background .15s ease;
+
+}
+
+
+.wheel-control:hover {
+
+    background:
+        linear-gradient(
+            145deg,
+            #34875a,
+            #1c5e3e
+        );
+
+    transform:
+        scale(1.07);
+
+}
+
+
+.wheel-control:active,
+.wheel-control.active {
+
+    transform:
+        scale(.92);
+
+    box-shadow:
+        0 3px 8px
+        rgba(0,0,0,.20);
+
+    background:
+        linear-gradient(
+            145deg,
+            #22a657,
+            #15803d
+        );
+
+}
+
+
+.wheel-control .arrow {
+
+    font-size: 24px;
+
+    line-height: 1;
+
+}
+
+
+.wheel-control small {
+
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 7px;
+
+    font-weight: 950;
+
+    letter-spacing: .04em;
+
+}
+
+
+/* POSITIONS */
+
+.wheel-forward {
+
+    left: 50%;
+    top: 7px;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+.wheel-forward:hover,
+.wheel-forward.active {
+
+    transform:
+        translateX(-50%)
+        scale(1.07);
+
+}
+
+
+.wheel-backward {
+
+    left: 50%;
+    bottom: 7px;
+
+    transform:
+        translateX(-50%);
+
+}
+
+
+.wheel-backward:hover,
+.wheel-backward.active {
+
+    transform:
+        translateX(-50%)
+        scale(1.07);
+
+}
+
+
+.wheel-left {
+
+    left: 7px;
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+}
+
+
+.wheel-left:hover,
+.wheel-left.active {
+
+    transform:
+        translateY(-50%)
+        scale(1.07);
+
+}
+
+
+.wheel-right {
+
+    right: 7px;
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+}
+
+
+.wheel-right:hover,
+.wheel-right.active {
+
+    transform:
+        translateY(-50%)
+        scale(1.07);
+
+}
+
+
+/* =========================================================
+   MOVEMENT DISPLAY
+========================================================= */
+
+.movement-display {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 15px;
+
+}
+
+
+.movement-box {
+
+    padding:
+        13px 15px;
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius: 13px;
+
+    background:
+        #f8fbf9;
+
+}
+
+
+.movement-box span {
+
+    color:
+        var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    text-transform: uppercase;
+
+}
+
+
+.movement-box strong {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color:
+        var(--green-900);
+
+    font-size: 17px;
+
+    font-weight: 950;
+
+}
+
+
+/* =========================================================
+   COMMAND
+========================================================= */
+
+.command-panel {
+
+    position: relative;
+
+    overflow: hidden;
+
+    margin-top: 12px;
+
+    padding:
+        13px 15px;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eff7f1,
+            #e9f3ec
+        );
+
+}
+
+
+.command-panel span {
+
+    color:
+        var(--muted);
+
+    font-size: 8px;
+
+    font-weight: 900;
+
+    text-transform: uppercase;
+
+}
+
+
+.command-panel strong {
+
+    margin-left: 8px;
+
+    color:
+        var(--green-900);
+
+    font-size: 13px;
+
+}
+
+
+.command-panel.sending::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: -25%;
 
     bottom: 0;
 
-    width: 30%;
+    width: 25%;
 
-    height: 3px;
+    height: 2px;
 
     background:
         linear-gradient(
@@ -5682,157 +7101,17 @@ main {
         );
 
     animation:
-        transmission 1s linear;
+        transmission .8s linear;
+
 }
+
 
 @keyframes transmission {
 
     to {
         left: 100%;
     }
-}
 
-.speed-display {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 6px;
-
-    margin-top: 8px;
-
-    color:
-        #7a857f;
-
-    font-size: 12px;
-}
-
-.speed-display strong {
-
-    color:
-        var(--green-dark);
-}
-
-
-/* =========================================================
-   SPEED BAR
-========================================================= */
-
-.speed-bar {
-
-    width: min(330px,100%);
-
-    height: 7px;
-
-    margin:
-        13px auto 0;
-
-    overflow: hidden;
-
-    border-radius: 10px;
-
-    background:
-        #dce8df;
-}
-
-.speed-progress {
-
-    width: 0%;
-
-    height: 100%;
-
-    border-radius: inherit;
-
-    background:
-        linear-gradient(
-            90deg,
-            #23613e,
-            #22c55e
-        );
-
-    transition:
-        width .35s ease;
-}
-
-
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-.message-box {
-
-    display: none;
-
-    margin-top: 15px;
-
-    padding:
-        12px 15px;
-
-    border-radius: 11px;
-
-    text-align: center;
-
-    font-size: 12px;
-
-    font-weight: 900;
-
-    animation:
-        messageIn .3s ease;
-}
-
-.message-success {
-
-    background:
-        #dcfce7;
-
-    color:
-        #166534;
-
-    border:
-        1px solid
-        #bbf7d0;
-}
-
-.message-error {
-
-    background:
-        #fee2e2;
-
-    color:
-        #991b1b;
-
-    border:
-        1px solid
-        #fecaca;
-}
-
-.message-info {
-
-    background:
-        #dbeafe;
-
-    color:
-        #1e40af;
-
-    border:
-        1px solid
-        #bfdbfe;
-}
-
-@keyframes messageIn {
-
-    from {
-        opacity: 0;
-        transform:
-            translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform:
-            translateY(0);
-    }
 }
 
 
@@ -5840,21 +7119,23 @@ main {
    KEYBOARD
 ========================================================= */
 
-.keyboard-info {
+.keyboard {
 
-    margin-top: 17px;
-
-    color:
-        #89938e;
+    margin-top: 13px;
 
     text-align: center;
 
-    font-size: 11px;
+    color:
+        var(--muted);
+
+    font-size: 9px;
 
     line-height: 2;
+
 }
 
-.keyboard-info strong {
+
+.keyboard kbd {
 
     display: inline-block;
 
@@ -5868,19 +7149,24 @@ main {
 
     border:
         1px solid
-        #d9e2dc;
+        #d6e2da;
 
     border-radius: 5px;
 
     background:
-        #f1f5f2;
+        #f4f7f5;
 
     color:
         #315744;
 
+    font-size: 9px;
+
+    font-weight: 900;
+
     box-shadow:
         0 2px 4px
         rgba(0,0,0,.06);
+
 }
 
 
@@ -5888,133 +7174,138 @@ main {
    EMERGENCY
 ========================================================= */
 
-.emergency-button {
-
-    position: relative;
+.emergency {
 
     width: 100%;
 
-    margin-top: 18px;
+    margin-top: 15px;
 
-    padding: 17px;
+    padding:
+        14px;
 
     border: none;
 
-    border-radius: 15px;
+    border-radius: 14px;
 
     color: white;
 
     background:
+
         linear-gradient(
             135deg,
             #991b1b,
             #dc2626
         );
 
-    font-size: 14px;
+    cursor: pointer;
+
+    font-size: 11px;
 
     font-weight: 950;
 
-    cursor: pointer;
-
     box-shadow:
-        0 8px 20px
-        rgba(220,38,38,.24);
+        0 9px 20px
+        rgba(220,38,38,.22);
 
     transition:
         .2s ease;
+
 }
 
-.emergency-button:hover {
+
+.emergency:hover {
 
     transform:
-        translateY(-3px);
+        translateY(-2px);
 
     box-shadow:
-        0 13px 27px
-        rgba(220,38,38,.32);
+        0 13px 25px
+        rgba(220,38,38,.30);
+
 }
 
-.emergency-button:active {
+
+.emergency:active {
 
     transform:
         scale(.97);
+
 }
 
-.emergency-button.flash {
+
+.emergency.flash {
 
     animation:
         emergencyFlash .5s ease;
+
 }
+
 
 @keyframes emergencyFlash {
 
-    25%,
-    75% {
+    25%,75% {
         transform:
-            scale(1.03);
+            scale(1.035);
     }
+
 }
 
 
 /* =========================================================
-   PUMP
+   PUMP CARD
 ========================================================= */
 
 .pump-card {
-    min-height: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
 }
 
-
-/* =========================================================
-   PUMP VISUAL
-========================================================= */
 
 .pump-visual {
 
     position: relative;
 
-    height: 200px;
+    min-height: 245px;
 
-    display: flex;
+    display: grid;
 
-    align-items: center;
-
-    justify-content: center;
-
-    margin-bottom: 20px;
+    place-items: center;
 
     overflow: hidden;
 
-    border-radius: 20px;
+    border-radius: 19px;
 
     background:
+
         linear-gradient(
             180deg,
-            #eff8ff,
-            #e9f5ef
+            #edf7ff,
+            #edf8f0
         );
 
     border:
         1px solid
         #dce9e3;
+
 }
 
-
-/* =========================================================
-   PUMP MACHINE
-========================================================= */
 
 .pump-machine {
 
     position: relative;
 
-    width: 125px;
-    height: 95px;
+    width: 130px;
+    height: 100px;
 
-    border-radius: 24px;
+    z-index: 5;
+
+    border-radius: 27px;
 
     background:
+
         linear-gradient(
             145deg,
             #12372a,
@@ -6022,12 +7313,14 @@ main {
         );
 
     box-shadow:
-        0 14px 28px
-        rgba(18,55,42,.22);
+        0 17px 30px
+        rgba(18,55,42,.23);
 
     animation:
         pumpFloat 3s ease-in-out infinite;
+
 }
+
 
 @keyframes pumpFloat {
 
@@ -6040,7 +7333,9 @@ main {
         transform:
             translateY(-8px);
     }
+
 }
+
 
 .pump-machine::before {
 
@@ -6048,11 +7343,11 @@ main {
 
     position: absolute;
 
-    width: 47px;
-    height: 47px;
-
     left: 50%;
     top: 50%;
+
+    width: 50px;
+    height: 50px;
 
     transform:
         translate(-50%,-50%);
@@ -6062,7 +7357,9 @@ main {
         rgba(255,255,255,.72);
 
     border-radius: 50%;
+
 }
+
 
 .pump-machine::after {
 
@@ -6076,25 +7373,28 @@ main {
     transform:
         translate(-50%,-50%);
 
-    font-size: 22px;
+    font-size: 23px;
+
 }
 
 
-/* =========================================================
-   WATER
-========================================================= */
+/* WATER STREAM */
 
 .water-stream {
 
     position: absolute;
 
     left: 50%;
+    top: 38px;
 
-    top: 35px;
-
-    width: 5px;
+    width: 6px;
 
     height: 0;
+
+    transform:
+        translateX(-50%);
+
+    opacity: 0;
 
     border-radius: 10px;
 
@@ -6105,31 +7405,30 @@ main {
             #2563eb
         );
 
-    transform:
-        translateX(-50%);
-
-    opacity: 0;
-
     transition:
         .4s ease;
+
 }
+
 
 .pump-visual.active .water-stream {
 
-    height: 105px;
+    height: 130px;
 
     opacity: 1;
 
     animation:
-        waterFlow .8s linear infinite;
+        waterFlow .7s linear infinite;
+
 }
+
 
 @keyframes waterFlow {
 
     0% {
         transform:
             translateX(-50%)
-            scaleY(.8);
+            scaleY(.75);
     }
 
     50% {
@@ -6141,9 +7440,13 @@ main {
     100% {
         transform:
             translateX(-50%)
-            scaleY(.8);
+            scaleY(.75);
     }
+
 }
+
+
+/* DROPS */
 
 .water-drop {
 
@@ -6159,36 +7462,44 @@ main {
         #3b82f6;
 
     opacity: 0;
+
 }
+
 
 .pump-visual.active .water-drop {
 
     opacity: 1;
 
     animation:
-        dropFall 1.5s linear infinite;
+        dropFall 1.4s linear infinite;
+
 }
 
-.water-drop:nth-child(1) {
-    left: 38%;
+
+.water-drop:nth-child(2) {
+    left: 42%;
     animation-delay: 0s;
 }
 
-.water-drop:nth-child(2) {
-    left: 50%;
-    animation-delay: .5s;
-}
 
 .water-drop:nth-child(3) {
-    left: 62%;
-    animation-delay: 1s;
+    left: 50%;
+    animation-delay: .45s;
 }
+
+
+.water-drop:nth-child(4) {
+    left: 58%;
+    animation-delay: .9s;
+}
+
 
 @keyframes dropFall {
 
     from {
         transform:
             translateY(-20px);
+
         opacity: 0;
     }
 
@@ -6198,9 +7509,11 @@ main {
 
     to {
         transform:
-            translateY(130px);
+            translateY(150px);
+
         opacity: 0;
     }
+
 }
 
 
@@ -6210,55 +7523,54 @@ main {
 
 .pump-status {
 
-    position: relative;
+    margin-top: 14px;
 
-    padding: 21px;
+    padding:
+        18px;
 
     text-align: center;
 
     border:
         1px solid
-        #e1e9e4;
+        var(--border);
 
     border-radius: 15px;
 
     background:
-        linear-gradient(
-            135deg,
-            #f7faf8,
-            #edf5ef
-        );
+        #f8fbf9;
+
 }
 
-.pump-status > span {
+
+.pump-status span {
 
     color:
-        #7a857f;
+        var(--muted);
 
-    font-size: 10px;
+    font-size: 8px;
 
-    font-weight: 800;
+    font-weight: 900;
 
-    text-transform:
-        uppercase;
+    text-transform: uppercase;
+
 }
+
 
 .pump-status strong {
 
     display: block;
 
-    margin-top: 7px;
+    margin-top: 6px;
 
     color:
-        #dc2626;
+        var(--red);
 
-    font-size: 28px;
+    font-size: 27px;
 
     font-weight: 950;
 
-    transition:
-        .3s ease;
 }
+
 
 .pump-indicator {
 
@@ -6270,24 +7582,28 @@ main {
 
     gap: 8px;
 
-    margin-top: 13px;
+    margin-top: 9px;
 
     color:
-        #7a857f;
+        var(--muted);
 
-    font-size: 12px;
+    font-size: 10px;
+
 }
+
 
 .pump-light {
 
-    width: 10px;
-    height: 10px;
+    width: 9px;
+    height: 9px;
 
     border-radius: 50%;
 
     background:
         #dc2626;
+
 }
+
 
 .pump-light.on {
 
@@ -6298,18 +7614,21 @@ main {
         0 0 0 4px
         rgba(22,163,74,.10),
         0 0 15px
-        rgba(22,163,74,.8);
+        rgba(22,163,74,.75);
 
     animation:
         pumpPulse 1.2s infinite;
+
 }
+
 
 @keyframes pumpPulse {
 
     50% {
         transform:
-            scale(1.3);
+            scale(1.35);
     }
+
 }
 
 
@@ -6324,47 +7643,51 @@ main {
     grid-template-columns:
         1fr 1fr;
 
-    gap: 12px;
+    gap: 10px;
 
-    margin-top: 17px;
+    margin-top: 14px;
+
 }
 
-.pump-button {
+
+.pump-btn {
 
     padding:
-        17px 12px;
+        14px;
 
     border: none;
 
-    border-radius: 14px;
+    border-radius: 13px;
 
     color: white;
 
-    font-size: 13px;
+    cursor: pointer;
+
+    font-size: 10px;
 
     font-weight: 950;
-
-    cursor: pointer;
 
     transition:
         .2s ease;
 
-    box-shadow:
-        0 7px 15px
-        rgba(0,0,0,.12);
 }
 
-.pump-button:hover {
+
+.pump-btn:hover {
 
     transform:
-        translateY(-3px);
+        translateY(-2px);
+
 }
 
-.pump-button:active {
+
+.pump-btn:active {
 
     transform:
         scale(.97);
+
 }
+
 
 .pump-on {
 
@@ -6374,7 +7697,13 @@ main {
             #16a34a,
             #15803d
         );
+
+    box-shadow:
+        0 7px 15px
+        rgba(22,163,74,.18);
+
 }
+
 
 .pump-off {
 
@@ -6384,6 +7713,11 @@ main {
             #dc2626,
             #b91c1c
         );
+
+    box-shadow:
+        0 7px 15px
+        rgba(220,38,38,.18);
+
 }
 
 
@@ -6393,34 +7727,116 @@ main {
 
 .notice {
 
-    margin-top: 19px;
+    margin-top: auto;
 
-    padding: 17px;
+    padding:
+        14px;
+
+    margin-top: 15px;
 
     border-left:
         4px solid
-        #f97316;
+        var(--orange);
 
     border-radius: 10px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #fff7ed,
-            #fffaf5
-        );
 
     color:
         #7c2d12;
 
-    font-size: 12px;
+    background:
+        #fff7ed;
 
-    line-height: 1.65;
+    font-size: 9px;
+
+    line-height: 1.7;
+
 }
 
+
 .notice strong {
+
     color:
         #9a3412;
+
+}
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.message {
+
+    position: fixed;
+
+    right: 28px;
+    bottom: 25px;
+
+    z-index: 300;
+
+    max-width: 320px;
+
+    display: none;
+
+    padding:
+        13px 17px;
+
+    border-radius: 13px;
+
+    color: white;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    box-shadow:
+        0 15px 35px
+        rgba(0,0,0,.18);
+
+    animation:
+        messageIn .3s ease;
+
+}
+
+
+.message.success {
+
+    background:
+        #15803d;
+
+}
+
+
+.message.error {
+
+    background:
+        #b91c1c;
+
+}
+
+
+.message.info {
+
+    background:
+        #1d4ed8;
+
+}
+
+
+@keyframes messageIn {
+
+    from {
+        opacity: 0;
+        transform:
+            translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translateY(0);
+    }
+
 }
 
 
@@ -6430,19 +7846,16 @@ main {
 
 footer {
 
-    position: relative;
-
-    z-index: 2;
-
     padding:
-        22px;
+        25px 10px 10px;
 
     text-align: center;
 
     color:
-        #75817b;
+        #87948d;
 
-    font-size: 11px;
+    font-size: 9px;
+
 }
 
 
@@ -6450,119 +7863,323 @@ footer {
    RESPONSIVE
 ========================================================= */
 
-@media(max-width:950px) {
+@media(max-width:1100px) {
 
-    .system-panel {
-        grid-template-columns:
-            repeat(2,1fr);
-    }
+    .dashboard-grid {
 
-    .control-layout {
         grid-template-columns:
             1fr;
+
     }
+
+    .pump-card {
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 15px;
+
+    }
+
+    .pump-card .card-heading {
+
+        grid-column:
+            1 / -1;
+
+        margin-bottom: 0;
+
+    }
+
+    .notice {
+
+        grid-column:
+            1 / -1;
+
+        margin-top: 0;
+
+    }
+
 }
 
 
-@media(max-width:650px) {
+@media(max-width:850px) {
 
-    header {
+    .app {
+
+        display: block;
+
+    }
+
+    .sidebar {
+
+        position: fixed;
+
+        top: auto;
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: 70px;
+
         padding:
-            55px 18px 25px;
+            7px 8px;
+
+        flex-direction: row;
+
+        align-items: center;
+
+        border-radius:
+            18px 18px 0 0;
+
     }
 
-    header h1 {
-        font-size: 22px;
+    .brand,
+    .sidebar-footer {
+
+        display: none;
+
     }
 
-    header p {
-        font-size: 12px;
-    }
+    .sidebar-nav {
 
-    .header-status {
+        width: 100%;
 
-        top: 12px;
-        right: 50%;
+        display: grid;
 
-        transform:
-            translateX(50%);
-    }
+        grid-template-columns:
+            repeat(5,1fr);
 
-    nav {
         gap: 4px;
-        padding: 9px;
+
     }
 
-    nav a {
+    .sidebar-nav a {
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 2px;
+
+        padding: 6px 3px;
+
+        font-size: 8px;
+
+    }
+
+    .nav-icon {
+
+        font-size: 17px;
+
+    }
+
+    .main {
+
+        padding-bottom: 75px;
+
+    }
+
+    .system-grid {
+
+        grid-template-columns:
+            repeat(2,1fr);
+
+    }
+
+}
+
+
+@media(max-width:600px) {
+
+    .topbar {
+
         padding:
-            8px 9px;
-        font-size: 11px;
+            13px 15px;
+
     }
 
-    main {
+    .top-title h2 {
+
+        font-size: 16px;
+
+    }
+
+    .connection-pill {
+
         padding:
-            25px 12px 35px;
+            8px 10px;
+
+        font-size: 9px;
+
     }
 
-    .page-title h2 {
+    .content {
+
+        padding:
+            18px 12px 30px;
+
+    }
+
+    .hero {
+
+        padding:
+            21px;
+
+        min-height:
+            135px;
+
+    }
+
+    .hero h1 {
+
         font-size: 25px;
+
+    }
+
+    .hero p {
+
+        font-size: 10px;
+
     }
 
     .card {
-        padding: 19px;
-        border-radius: 18px;
+
+        padding:
+            17px;
+
     }
 
-    .rover {
-        transform:
-            scale(.88);
+    .steering-stage {
+
+        min-height:
+            350px;
+
     }
 
-    .pump-buttons {
-        grid-template-columns:
-            1fr;
+    .steering-wheel {
+
+        width: 270px;
+        height: 270px;
+
     }
+
+    .wheel-spoke {
+
+        height: 110px;
+
+    }
+
+    .wheel-control {
+
+        width: 63px;
+        height: 63px;
+
+    }
+
+    .wheel-center {
+
+        width: 78px;
+        height: 78px;
+
+        font-size: 9px;
+
+    }
+
+    .wheel-forward {
+
+        top: 5px;
+
+    }
+
+    .wheel-backward {
+
+        bottom: 5px;
+
+    }
+
+    .wheel-left {
+
+        left: 5px;
+
+    }
+
+    .wheel-right {
+
+        right: 5px;
+
+    }
+
+    .pump-card {
+
+        display: block;
+
+    }
+
 }
 
 
-@media(max-width:430px) {
-
-    .system-panel {
-        gap: 10px;
-    }
+@media(max-width:400px) {
 
     .system-card {
-        padding: 15px;
-        min-height: 75px;
+
+        padding:
+            13px;
+
     }
 
     .system-card strong {
-        font-size: 15px;
+
+        font-size:
+            14px;
+
     }
 
-    .movement-buttons {
-        max-width: 300px;
-        gap: 8px;
+    .steering-stage {
+
+        min-height:
+            310px;
+
     }
 
-    .move-button {
-        min-height: 62px;
-        font-size: 10px;
+    .steering-wheel {
+
+        width: 235px;
+        height: 235px;
+
     }
 
-    .connection-details {
-        grid-template-columns:
-            1fr;
+    .wheel-spoke {
+
+        height: 95px;
+
+        width: 18px;
+
     }
 
-    .rover {
-        transform:
-            scale(.72);
+    .wheel-control {
+
+        width: 55px;
+        height: 55px;
+
     }
 
-    .keyboard-info {
-        font-size: 10px;
+    .wheel-control .arrow {
+
+        font-size: 18px;
+
     }
+
+    .wheel-center {
+
+        width: 67px;
+        height: 67px;
+
+        border-width: 5px;
+
+    }
+
 }
 
 
@@ -6584,7 +8201,9 @@ footer {
 
         transition-duration:
             .01ms !important;
+
     }
+
 }
 
 </style>
@@ -6595,205 +8214,291 @@ footer {
 <body>
 
 
-<!-- =========================================================
-     HEADER
-========================================================= -->
+<div class="app">
 
-<header>
 
-    <div class="header-status">
+<!-- =======================================================
+     SIDEBAR
+======================================================= -->
 
-        <span
-            id="header-status-dot"
-            class="status-dot">
-        </span>
+<aside class="sidebar">
 
-        <span id="header-status-text">
-            Raspberry Pi Offline
-        </span>
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🌱
+        </div>
+
+        <div>
+
+            <h1>
+                Precision Agriculture
+            </h1>
+
+            <span>
+                Smart Rover System
+            </span>
+
+        </div>
 
     </div>
 
-    <div class="header-content">
 
-        <h1>
-            🌱 Precision Agriculture Smart Rover
-        </h1>
+    <nav class="sidebar-nav">
 
-        <p>
-            Intelligent Rover Control & Agricultural Automation
-        </p>
+        <a href="/">
+            <span class="nav-icon">🏠</span>
+            Dashboard
+        </a>
+
+        <a href="/rover" class="active">
+            <span class="nav-icon">🚜</span>
+            Rover Control
+        </a>
+
+        <a href="/dataset">
+            <span class="nav-icon">🗂</span>
+            Dataset
+        </a>
+
+        <a href="/analytics">
+            <span class="nav-icon">📊</span>
+            Analytics
+        </a>
+
+        <a href="/settings">
+            <span class="nav-icon">⚙️</span>
+            Settings
+        </a>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+        <strong>
+            AI Plant Disease Detection
+        </strong>
+
+        <br>
+
+        Intelligent Agricultural Automation
+
+        <br><br>
+
+        Rover Control System v1.0
 
     </div>
 
-</header>
+</aside>
 
 
-<!-- =========================================================
-     NAVIGATION
-========================================================= -->
 
-<nav>
-
-    <a href="/">
-        🏠 Dashboard
-    </a>
-
-    <a href="/rover" class="active">
-        🚜 Rover
-    </a>
-
-    <a href="/dataset">
-        🗂 Dataset
-    </a>
-
-    <a href="/analytics">
-        📊 Analytics
-    </a>
-
-    <a href="/settings">
-        ⚙️ Settings
-    </a>
-
-</nav>
-
-
-<!-- =========================================================
+<!-- =======================================================
      MAIN
-========================================================= -->
+======================================================= -->
 
-<main>
-
-
-    <div class="page-title">
-
-        <h2>
-            🚜 Rover Control Center
-        </h2>
-
-        <p>
-            Control rover movement and agricultural spraying
-            from one intelligent interface.
-        </p>
-
-    </div>
+<div class="main">
 
 
-    <!-- =====================================================
-         SYSTEM PANEL
-    ====================================================== -->
+    <!-- TOP BAR -->
 
-    <section class="system-panel">
+    <header class="topbar">
 
-
-        <div class="system-card">
+        <div class="top-title">
 
             <span>
-                Raspberry Pi
+                Agricultural Robotics
             </span>
 
-            <strong
-                id="system-connection"
-                class="offline-text">
-                OFFLINE
-            </strong>
+            <h2>
+                🚜 Rover Control Center
+            </h2>
 
         </div>
 
 
-        <div class="system-card">
+        <div class="connection-pill">
 
-            <span>
-                Movement
+            <span
+                id="header-status-dot"
+                class="status-dot">
             </span>
 
-            <strong id="system-direction">
-                STOPPED
-            </strong>
+            <span id="header-status-text">
+                Raspberry Pi Offline
+            </span>
 
         </div>
 
-
-        <div class="system-card">
-
-            <span>
-                Speed
-            </span>
-
-            <strong>
-
-                <span
-                    id="system-speed"
-                    style="display:inline">
-                    0
-                </span>
-
-                %
-
-            </strong>
-
-        </div>
+    </header>
 
 
-        <div class="system-card">
 
-            <span>
-                Spray Pump
-            </span>
-
-            <strong id="system-pump">
-                OFF
-            </strong>
-
-        </div>
-
-
-    </section>
-
-
-    <!-- =====================================================
-         CONTROL LAYOUT
-    ====================================================== -->
-
-    <div class="control-layout">
+    <main class="content">
 
 
         <!-- =================================================
-             MOVEMENT CARD
+             HERO
         ================================================== -->
 
-        <div class="card">
+        <section class="hero">
 
-            <h3>
-                🚜 Rover Movement Control
-            </h3>
+            <div class="hero-text">
+
+                <div class="hero-kicker">
+                    Precision Agriculture
+                </div>
+
+                <h1>
+                    Smart Rover Command Center
+                </h1>
+
+                <p>
+                    Control rover movement, monitor the
+                    Raspberry Pi connection, and manage
+                    agricultural spraying from a single
+                    intelligent interface.
+                </p>
+
+            </div>
+
+        </section>
 
 
-            <!-- CONNECTION -->
 
-            <div class="rover-status">
+        <!-- =================================================
+             SYSTEM STATUS
+        ================================================== -->
+
+        <section class="system-grid">
+
+
+            <div class="system-card">
 
                 <span>
-                    Raspberry Pi Connection
+                    Raspberry Pi
                 </span>
 
-                <h2
-                    id="rover-status"
-                    class="disconnected">
+                <strong
+                    id="system-connection"
+                    class="offline-text">
 
-                    NOT CONNECTED
+                    OFFLINE
 
-                </h2>
+                </strong>
+
+            </div>
 
 
-                <div class="connection-details">
+            <div class="system-card">
+
+                <span>
+                    Movement
+                </span>
+
+                <strong id="system-direction">
+                    STOPPED
+                </strong>
+
+            </div>
 
 
-                    <div class="connection-item">
+            <div class="system-card">
 
-                        <span>
-                            Last Seen
+                <span>
+                    Speed
+                </span>
+
+                <strong>
+                    <span id="system-speed">
+                        0
+                    </span>
+                    %
+                </strong>
+
+            </div>
+
+
+            <div class="system-card">
+
+                <span>
+                    Spray Pump
+                </span>
+
+                <strong
+                    id="system-pump"
+                    class="offline-text">
+
+                    OFF
+
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             MAIN CONTROL
+        ================================================== -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- =================================================
+                 ROVER
+            ================================================== -->
+
+            <div class="card">
+
+
+                <div class="card-heading">
+
+                    <h3>
+                        🚜 Steering & Movement
+                    </h3>
+
+                    <span>
+                        MANUAL CONTROL
+                    </span>
+
+                </div>
+
+
+
+                <!-- CONNECTION -->
+
+                <div class="rover-connection">
+
+                    <div class="connection-state">
+
+                        <span
+                            id="rover-mini-dot"
+                            class="mini-dot">
                         </span>
+
+                        <div>
+
+                            <strong id="rover-status">
+                                NOT CONNECTED
+                            </strong>
+
+                            <small>
+                                Raspberry Pi Connection
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="connection-meta">
+
+                        Last Seen
 
                         <strong id="last-seen">
                             —
@@ -6801,15 +8506,164 @@ footer {
 
                     </div>
 
+                </div>
 
-                    <div class="connection-item">
+
+
+                <!-- =================================================
+                     STEERING WHEEL
+                ================================================== -->
+
+                <div class="steering-stage">
+
+
+                    <div
+                        id="steering-wheel"
+                        class="steering-wheel">
+
+
+                        <!-- SPOKES -->
+
+                        <div
+                            class="wheel-spoke spoke-1">
+                        </div>
+
+                        <div
+                            class="wheel-spoke spoke-2">
+                        </div>
+
+                        <div
+                            class="wheel-spoke spoke-3">
+                        </div>
+
+
+                        <!-- FORWARD -->
+
+                        <button
+                            id="forward-btn"
+                            type="button"
+                            class="wheel-control wheel-forward"
+                            data-command="forward">
+
+                            <span class="arrow">
+                                ▲
+                            </span>
+
+                            <small>
+                                FORWARD
+                            </small>
+
+                        </button>
+
+
+                        <!-- LEFT -->
+
+                        <button
+                            id="left-btn"
+                            type="button"
+                            class="wheel-control wheel-left"
+                            data-command="left">
+
+                            <span class="arrow">
+                                ◀
+                            </span>
+
+                            <small>
+                                LEFT
+                            </small>
+
+                        </button>
+
+
+                        <!-- RIGHT -->
+
+                        <button
+                            id="right-btn"
+                            type="button"
+                            class="wheel-control wheel-right"
+                            data-command="right">
+
+                            <span class="arrow">
+                                ▶
+                            </span>
+
+                            <small>
+                                RIGHT
+                            </small>
+
+                        </button>
+
+
+                        <!-- REVERSE -->
+
+                        <button
+                            id="backward-btn"
+                            type="button"
+                            class="wheel-control wheel-backward"
+                            data-command="backward">
+
+                            <span class="arrow">
+                                ▼
+                            </span>
+
+                            <small>
+                                REVERSE
+                            </small>
+
+                        </button>
+
+
+                        <!-- STOP -->
+
+                        <button
+                            id="stop-btn"
+                            type="button"
+                            class="wheel-center">
+
+                            🛑
+                            <br>
+                            STOP
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     MOVEMENT STATUS
+                ================================================== -->
+
+                <div class="movement-display">
+
+
+                    <div class="movement-box">
 
                         <span>
-                            Control Mode
+                            Current Direction
                         </span>
 
-                        <strong id="rover-mode">
-                            Manual
+                        <strong id="movement-state">
+                            STOPPED
+                        </strong>
+
+                    </div>
+
+
+                    <div class="movement-box">
+
+                        <span>
+                            Current Speed
+                        </span>
+
+                        <strong>
+                            <span id="current-speed">
+                                0
+                            </span>
+                            %
                         </strong>
 
                     </div>
@@ -6817,351 +8671,238 @@ footer {
 
                 </div>
 
-            </div>
 
 
-            <!-- ROVER VISUAL -->
-
-            <div class="rover-display">
-
-                <div class="rover-ground"></div>
+                <!-- COMMAND -->
 
                 <div
-                    id="rover"
-                    class="rover">
+                    id="command-box"
+                    class="command-panel">
 
-                    <div class="rover-light"></div>
+                    <span>
+                        Command Transmitted
+                    </span>
 
-                    <div
-                        class="rover-wheel left">
-                    </div>
-
-                    <div
-                        class="rover-wheel right">
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- MOVEMENT STATE -->
-
-            <div class="movement-state">
-
-                <span>
-                    Current Movement
-                </span>
-
-                <strong id="movement-state">
-                    STOPPED
-                </strong>
-
-            </div>
-
-
-            <!-- MOVEMENT BUTTONS -->
-
-            <div class="movement-buttons">
-
-
-                <button
-                    id="forward-btn"
-                    class="move-button forward"
-                    type="button">
-
-                    ▲
-                    <br>
-                    FORWARD
-
-                </button>
-
-
-                <button
-                    id="left-btn"
-                    class="move-button left"
-                    type="button">
-
-                    ◀
-                    <br>
-                    LEFT
-
-                </button>
-
-
-                <button
-                    id="stop-btn"
-                    class="move-button stop"
-                    type="button">
-
-                    ■
-                    <br>
-                    STOP
-
-                </button>
-
-
-                <button
-                    id="right-btn"
-                    class="move-button right"
-                    type="button">
-
-                    ▶
-                    <br>
-                    RIGHT
-
-                </button>
-
-
-                <button
-                    id="backward-btn"
-                    class="move-button backward"
-                    type="button">
-
-                    ▼
-                    <br>
-                    REVERSE
-
-                </button>
-
-
-            </div>
-
-
-            <!-- COMMAND -->
-
-            <div
-                id="command-box"
-                class="command-box">
-
-                <span>
-                    Command Transmitted
-                </span>
-
-                <h2 id="current-command">
-                    STOP
-                </h2>
-
-                <div class="speed-display">
-
-                    Speed:
-
-                    <strong>
-
-                        <span id="current-speed">
-                            0
-                        </span>
-
-                        %
-
+                    <strong id="current-command">
+                        STOP
                     </strong>
 
                 </div>
 
-                <div class="speed-bar">
 
-                    <div
-                        id="speed-progress"
-                        class="speed-progress">
+
+                <!-- KEYBOARD -->
+
+                <div class="keyboard">
+
+                    <kbd>W</kbd>
+                    Forward
+
+                    <kbd>A</kbd>
+                    Left
+
+                    <kbd>S</kbd>
+                    Reverse
+
+                    <kbd>D</kbd>
+                    Right
+
+                    <kbd>SPACE</kbd>
+                    Stop
+
+                </div>
+
+
+
+                <!-- EMERGENCY -->
+
+                <button
+                    id="emergency-button"
+                    class="emergency"
+                    type="button">
+
+                    🚨 EMERGENCY STOP
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 PUMP
+            ================================================== -->
+
+            <div class="card pump-card">
+
+
+                <div class="card-heading">
+
+                    <h3>
+                        💧 Smart Spray Pump
+                    </h3>
+
+                    <span>
+                        AGRICULTURAL SPRAYING
+                    </span>
+
+                </div>
+
+
+
+                <!-- PUMP VISUAL -->
+
+                <div
+                    id="pump-visual"
+                    class="pump-visual">
+
+
+                    <div class="water-stream"></div>
+
+                    <div class="water-drop"></div>
+
+                    <div class="water-drop"></div>
+
+                    <div class="water-drop"></div>
+
+
+                    <div class="pump-machine"></div>
+
+
+                </div>
+
+
+
+                <!-- STATUS -->
+
+                <div class="pump-status">
+
+                    <span>
+                        Current Pump Status
+                    </span>
+
+                    <strong id="pump-status">
+                        OFF
+                    </strong>
+
+                    <div class="pump-indicator">
+
+                        <span
+                            id="pump-light"
+                            class="pump-light">
+                        </span>
+
+                        <span id="pump-indicator-text">
+                            Pump is OFF
+                        </span>
+
                     </div>
 
                 </div>
 
-            </div>
 
 
-            <!-- MESSAGE -->
+                <!-- BUTTONS -->
 
-            <div
-                id="message-box"
-                class="message-box">
-            </div>
+                <div class="pump-buttons">
 
+                    <button
+                        id="pump-on-button"
+                        type="button"
+                        class="pump-btn pump-on">
 
-            <!-- KEYBOARD -->
+                        💧 PUMP ON
 
-            <div class="keyboard-info">
-
-                <strong>W</strong>
-                Forward
-
-                <strong>A</strong>
-                Left
-
-                <strong>S</strong>
-                Reverse
-
-                <strong>D</strong>
-                Right
-
-                <strong>Space</strong>
-                Stop
-
-            </div>
+                    </button>
 
 
-            <!-- EMERGENCY -->
+                    <button
+                        id="pump-off-button"
+                        type="button"
+                        class="pump-btn pump-off">
 
-            <button
-                id="emergency-button"
-                class="emergency-button"
-                type="button">
+                        ⛔ PUMP OFF
 
-                🛑 EMERGENCY STOP
-
-            </button>
-
-        </div>
-
-
-        <!-- =================================================
-             PUMP CARD
-        ================================================== -->
-
-        <div class="card pump-card">
-
-            <h3>
-                💧 Smart Spray Pump
-            </h3>
-
-
-            <!-- PUMP VISUAL -->
-
-            <div
-                id="pump-visual"
-                class="pump-visual">
-
-                <div class="water-stream"></div>
-
-                <div class="water-drop"></div>
-                <div class="water-drop"></div>
-                <div class="water-drop"></div>
-
-                <div class="pump-machine"></div>
-
-            </div>
-
-
-            <!-- PUMP STATUS -->
-
-            <div class="pump-status">
-
-                <span>
-                    Current Pump Status
-                </span>
-
-                <strong id="pump-status">
-                    OFF
-                </strong>
-
-                <div class="pump-indicator">
-
-                    <span
-                        id="pump-light"
-                        class="pump-light">
-                    </span>
-
-                    <span id="pump-indicator-text">
-                        Pump is OFF
-                    </span>
+                    </button>
 
                 </div>
 
+
+
+                <!-- NOTICE -->
+
+                <div class="notice">
+
+                    <strong>
+                        ⚠️ Safety & Communication
+                    </strong>
+
+                    <br><br>
+
+                    Movement commands are sent to the
+                    Flask server and made available to
+                    the Raspberry Pi.
+
+                    <br><br>
+
+                    The Raspberry Pi receives the latest
+                    movement command and controls the
+                    motor driver.
+
+                    <br><br>
+
+                    The spray pump is controlled through
+                    the existing rover pump API.
+
+                    <br><br>
+
+                    Always use
+                    <strong>
+                        Emergency Stop
+                    </strong>
+                    whenever immediate shutdown is required.
+
+                </div>
+
+
             </div>
 
 
-            <!-- BUTTONS -->
-
-            <div class="pump-buttons">
-
-                <button
-                    id="pump-on-button"
-                    class="pump-button pump-on"
-                    type="button">
-
-                    💧 PUMP ON
-
-                </button>
+        </section>
 
 
-                <button
-                    id="pump-off-button"
-                    class="pump-button pump-off"
-                    type="button">
 
-                    ⛔ PUMP OFF
+        <footer>
 
-                </button>
+            🌱 Precision Agriculture Smart Rover
+            &nbsp; • &nbsp;
+            AI Plant Disease Detection
+            &nbsp; • &nbsp;
+            Intelligent Rover Control
 
-            </div>
-
-
-            <!-- PUMP COMMAND -->
-
-            <div class="command-box">
-
-                <span>
-                    Current Pump Command
-                </span>
-
-                <h2 id="pump-command">
-                    OFF
-                </h2>
-
-            </div>
+        </footer>
 
 
-            <!-- NOTICE -->
-
-            <div class="notice">
-
-                <strong>
-                    ⚠️ Rover Control System
-                </strong>
-
-                <br><br>
-
-                Movement commands are sent to the
-                Flask server and made available to
-                the Raspberry Pi.
-
-                <br><br>
-
-                The Raspberry Pi receives the latest
-                command and controls the motor driver.
-
-                <br><br>
-
-                The spray pump is controlled through
-                the rover pump API.
-
-                <br><br>
-
-                <strong>
-                    Safety:
-                </strong>
-
-                Use the emergency stop immediately
-                whenever required.
-
-            </div>
-
-        </div>
-
-    </div>
-
-</main>
+    </main>
 
 
-<footer>
+</div>
 
-    🌱 Precision Agriculture Smart Rover
-    &nbsp; • &nbsp;
-    AI Plant Disease Detection
-    &nbsp; • &nbsp;
-    Intelligent Rover Control
 
-</footer>
+</div>
+
+
+
+<!-- =========================================================
+     MESSAGE
+========================================================= -->
+
+<div
+    id="message-box"
+    class="message">
+</div>
+
 
 
 <script>
@@ -7176,31 +8917,21 @@ let movementActive = false;
 
 let messageTimer = null;
 
-let commandRequestInProgress = false;
+let activePointerId = null;
 
 
 /* =========================================================
    DOM
 ========================================================= */
 
-const rover =
+const roverWheel =
     document.getElementById(
-        "rover"
+        "steering-wheel"
     );
 
 const commandBox =
     document.getElementById(
         "command-box"
-    );
-
-const movementState =
-    document.getElementById(
-        "movement-state"
-    );
-
-const speedProgress =
-    document.getElementById(
-        "speed-progress"
     );
 
 const pumpVisual =
@@ -7227,8 +8958,7 @@ function showMessage(
         message;
 
     box.className =
-        "message-box message-" +
-        type;
+        "message " + type;
 
     box.style.display =
         "block";
@@ -7247,6 +8977,7 @@ function showMessage(
             },
             2500
         );
+
 }
 
 
@@ -7266,9 +8997,6 @@ function updateCommandDisplay(
     element.textContent =
         String(command).toUpperCase();
 
-    element.style.transform =
-        "scale(1.10)";
-
     commandBox.classList.remove(
         "sending"
     );
@@ -7279,15 +9007,6 @@ function updateCommandDisplay(
         "sending"
     );
 
-    setTimeout(
-        () => {
-
-            element.style.transform =
-                "scale(1)";
-
-        },
-        180
-    );
 }
 
 
@@ -7308,18 +9027,41 @@ function setSpeed(
             )
         );
 
+
     document.getElementById(
         "system-speed"
     ).textContent =
         value;
+
 
     document.getElementById(
         "current-speed"
     ).textContent =
         value;
 
-    speedProgress.style.width =
-        value + "%";
+}
+
+
+/* =========================================================
+   REMOVE ACTIVE
+========================================================= */
+
+function removeActiveButtons() {
+
+    document
+        .querySelectorAll(
+            ".wheel-control"
+        )
+        .forEach(
+            button => {
+
+                button.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
 }
 
 
@@ -7333,10 +9075,14 @@ function setActiveButton(
 
     removeActiveButtons();
 
+
     const button =
-        document.getElementById(
-            command + "-btn"
+        document.querySelector(
+            '[data-command="' +
+            command +
+            '"]'
         );
+
 
     if (button) {
 
@@ -7345,28 +9091,20 @@ function setActiveButton(
         );
 
     }
-}
 
 
-/* =========================================================
-   REMOVE ACTIVE BUTTONS
-========================================================= */
+    roverWheel.classList.remove(
+        "active-forward",
+        "active-backward",
+        "active-left",
+        "active-right"
+    );
 
-function removeActiveButtons() {
 
-    document
-        .querySelectorAll(
-            ".move-button"
-        )
-        .forEach(
-            button => {
+    roverWheel.classList.add(
+        "active-" + command
+    );
 
-                button.classList.remove(
-                    "active"
-                );
-
-            }
-        );
 }
 
 
@@ -7378,68 +9116,30 @@ function updateMovementVisual(
     command
 ) {
 
-    movementState.textContent =
+    const upper =
         String(command).toUpperCase();
+
+
+    document.getElementById(
+        "movement-state"
+    ).textContent =
+        upper;
+
 
     document.getElementById(
         "system-direction"
     ).textContent =
-        String(command).toUpperCase();
+        upper;
 
 
-    rover.classList.remove(
-        "moving"
-    );
+    if (command === "stop") {
 
-
-    if (
-        command !== "stop"
-    ) {
-
-        rover.classList.add(
-            "moving"
+        roverWheel.classList.remove(
+            "active-forward",
+            "active-backward",
+            "active-left",
+            "active-right"
         );
-
-    }
-
-
-    rover.style.transform =
-        "translateX(0)";
-
-
-    if (
-        command === "left"
-    ) {
-
-        rover.style.transform =
-            "translateX(-10px)";
-
-    }
-
-    else if (
-        command === "right"
-    ) {
-
-        rover.style.transform =
-            "translateX(10px)";
-
-    }
-
-    else if (
-        command === "forward"
-    ) {
-
-        rover.style.transform =
-            "translateY(-4px)";
-
-    }
-
-    else if (
-        command === "backward"
-    ) {
-
-        rover.style.transform =
-            "translateY(4px)";
 
     }
 
@@ -7452,7 +9152,7 @@ function updateMovementVisual(
 
 function startMove(
     command,
-    event
+    event = null
 ) {
 
     if (event) {
@@ -7464,7 +9164,9 @@ function startMove(
         movementActive &&
         currentMovement === command
     ) {
+
         return;
+
     }
 
 
@@ -7479,9 +9181,11 @@ function startMove(
         command
     );
 
+
     updateMovementVisual(
         command
     );
+
 
     updateCommandDisplay(
         command
@@ -7490,8 +9194,8 @@ function startMove(
 
     /*
        Default manual speed.
-       You can later replace this
-       with a speed slider.
+       Keep this compatible with
+       your existing backend.
     */
 
     setSpeed(70);
@@ -7500,6 +9204,7 @@ function startMove(
     sendCommand(
         command
     );
+
 }
 
 
@@ -7508,11 +9213,21 @@ function startMove(
 ========================================================= */
 
 function stopMove(
-    event
+    event = null
 ) {
 
     if (event) {
         event.preventDefault();
+    }
+
+
+    if (
+        !movementActive &&
+        currentMovement === "stop"
+    ) {
+
+        return;
+
     }
 
 
@@ -7525,19 +9240,24 @@ function stopMove(
 
     removeActiveButtons();
 
+
     updateMovementVisual(
         "stop"
     );
+
 
     updateCommandDisplay(
         "stop"
     );
 
+
     setSpeed(0);
+
 
     sendCommand(
         "stop"
     );
+
 }
 
 
@@ -7556,13 +9276,16 @@ function emergencyStop() {
 
     removeActiveButtons();
 
+
     updateMovementVisual(
         "stop"
     );
 
+
     updateCommandDisplay(
         "stop"
     );
+
 
     setSpeed(0);
 
@@ -7572,11 +9295,14 @@ function emergencyStop() {
             "emergency-button"
         );
 
+
     button.classList.remove(
         "flash"
     );
 
+
     void button.offsetWidth;
+
 
     button.classList.add(
         "flash"
@@ -7589,9 +9315,10 @@ function emergencyStop() {
 
 
     showMessage(
-        "🛑 EMERGENCY STOP SENT",
+        "🚨 EMERGENCY STOP SENT",
         "error"
     );
+
 }
 
 
@@ -7636,6 +9363,7 @@ async function sendCommand(
             data.success
         ) {
 
+
             if (data.rover) {
 
                 updateRoverStatus(
@@ -7678,6 +9406,7 @@ async function sendCommand(
             "Command error:",
             error
         );
+
 
         showMessage(
             "❌ Flask server not connected",
@@ -7735,6 +9464,7 @@ async function pumpControl(
             data.success
         ) {
 
+
             if (data.rover) {
 
                 updateRoverStatus(
@@ -7772,6 +9502,7 @@ async function pumpControl(
             error
         );
 
+
         showMessage(
             "❌ Flask server not connected",
             "error"
@@ -7783,7 +9514,7 @@ async function pumpControl(
 
 
 /* =========================================================
-   UPDATE PUMP UI
+   PUMP UI
 ========================================================= */
 
 function updatePumpUI(
@@ -7797,11 +9528,6 @@ function updatePumpUI(
     const status =
         document.getElementById(
             "pump-status"
-        );
-
-    const command =
-        document.getElementById(
-            "pump-command"
         );
 
     const light =
@@ -7826,7 +9552,7 @@ function updatePumpUI(
             : "OFF";
 
 
-    command.textContent =
+    systemPump.textContent =
         isOn
             ? "ON"
             : "OFF";
@@ -7838,16 +9564,10 @@ function updatePumpUI(
             : "#dc2626";
 
 
-    systemPump.textContent =
+    systemPump.className =
         isOn
-            ? "ON"
-            : "OFF";
-
-
-    systemPump.style.color =
-        isOn
-            ? "#16a34a"
-            : "#dc2626";
+            ? "online-text"
+            : "offline-text";
 
 
     light.classList.toggle(
@@ -7903,19 +9623,14 @@ function updateRoverStatus(
             "header-status-dot"
         );
 
-    const direction =
+    const miniDot =
         document.getElementById(
-            "system-direction"
+            "rover-mini-dot"
         );
 
     const lastSeen =
         document.getElementById(
             "last-seen"
-        );
-
-    const mode =
-        document.getElementById(
-            "rover-mode"
         );
 
 
@@ -7927,9 +9642,6 @@ function updateRoverStatus(
 
         status.textContent =
             "CONNECTED";
-
-        status.className =
-            "connected";
 
         connection.textContent =
             "ONLINE";
@@ -7944,8 +9656,8 @@ function updateRoverStatus(
             "online"
         );
 
-        rover.classList.add(
-            "connected"
+        miniDot.classList.add(
+            "online"
         );
 
     }
@@ -7954,9 +9666,6 @@ function updateRoverStatus(
 
         status.textContent =
             "NOT CONNECTED";
-
-        status.className =
-            "disconnected";
 
         connection.textContent =
             "OFFLINE";
@@ -7971,8 +9680,8 @@ function updateRoverStatus(
             "online"
         );
 
-        rover.classList.remove(
-            "connected"
+        miniDot.classList.remove(
+            "online"
         );
 
     }
@@ -7984,10 +9693,33 @@ function updateRoverStatus(
         roverData.direction
     ) {
 
-        direction.textContent =
+        const direction =
             String(
                 roverData.direction
-            ).toUpperCase();
+            ).toLowerCase();
+
+
+        document.getElementById(
+            "system-direction"
+        ).textContent =
+            direction.toUpperCase();
+
+
+        /*
+           Don't overwrite local active
+           movement unnecessarily.
+        */
+
+        if (
+            !movementActive
+        ) {
+
+            document.getElementById(
+                "movement-state"
+            ).textContent =
+                direction.toUpperCase();
+
+        }
 
     }
 
@@ -8018,18 +9750,6 @@ function updateRoverStatus(
     }
 
 
-    /* MODE */
-
-    if (
-        roverData.mode
-    ) {
-
-        mode.textContent =
-            roverData.mode;
-
-    }
-
-
     /* LAST SEEN */
 
     if (
@@ -8045,7 +9765,7 @@ function updateRoverStatus(
 
 
 /* =========================================================
-   GET STATUS
+   GET ROVER STATUS
 ========================================================= */
 
 async function getRoverStatus() {
@@ -8120,8 +9840,10 @@ async function getRoverStatus() {
         );
 
 
-        rover.classList.remove(
-            "connected"
+        document.getElementById(
+            "rover-mini-dot"
+        ).classList.remove(
+            "online"
         );
 
     }
@@ -8130,113 +9852,122 @@ async function getRoverStatus() {
 
 
 /* =========================================================
-   BUTTON REFERENCES
+   STEERING BUTTONS
 ========================================================= */
 
-const forwardButton =
-    document.getElementById(
-        "forward-btn"
+const movementButtons =
+    document.querySelectorAll(
+        ".wheel-control"
     );
 
-const leftButton =
-    document.getElementById(
-        "left-btn"
-    );
 
-const rightButton =
-    document.getElementById(
-        "right-btn"
-    );
+movementButtons.forEach(
+    button => {
 
-const backwardButton =
-    document.getElementById(
-        "backward-btn"
-    );
+        const command =
+            button.dataset.command;
 
-const stopButton =
-    document.getElementById(
-        "stop-btn"
-    );
+
+        button.addEventListener(
+            "pointerdown",
+            event => {
+
+                event.preventDefault();
+
+
+                activePointerId =
+                    event.pointerId;
+
+
+                try {
+
+                    button.setPointerCapture(
+                        event.pointerId
+                    );
+
+                }
+
+                catch (error) {
+                    /* ignore */
+                }
+
+
+                startMove(
+                    command,
+                    event
+                );
+
+            }
+        );
+
+
+        button.addEventListener(
+            "pointerup",
+            event => {
+
+                event.preventDefault();
+
+
+                if (
+                    activePointerId ===
+                    event.pointerId
+                ) {
+
+                    activePointerId =
+                        null;
+
+                    stopMove(
+                        event
+                    );
+
+                }
+
+            }
+        );
+
+
+        button.addEventListener(
+            "pointercancel",
+            event => {
+
+                activePointerId =
+                    null;
+
+                stopMove(
+                    event
+                );
+
+            }
+        );
+
+    }
+);
 
 
 /* =========================================================
-   MOVEMENT EVENTS
+   GLOBAL POINTER SAFETY
 ========================================================= */
 
-function attachMovementEvents(
-    button,
-    command
-) {
+document.addEventListener(
+    "pointerup",
+    event => {
 
-    button.addEventListener(
-        "pointerdown",
-        event => {
+        if (
+            movementActive &&
+            activePointerId ===
+            event.pointerId
+        ) {
 
-            event.preventDefault();
-
-            button.setPointerCapture(
-                event.pointerId
-            );
-
-            startMove(
-                command,
-                event
-            );
-
-        }
-    );
-
-
-    button.addEventListener(
-        "pointerup",
-        event => {
-
-            event.preventDefault();
+            activePointerId =
+                null;
 
             stopMove(
                 event
             );
 
         }
-    );
 
-
-    button.addEventListener(
-        "pointercancel",
-        event => {
-
-            stopMove(
-                event
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   ATTACH MOVEMENT
-========================================================= */
-
-attachMovementEvents(
-    forwardButton,
-    "forward"
-);
-
-attachMovementEvents(
-    leftButton,
-    "left"
-);
-
-attachMovementEvents(
-    rightButton,
-    "right"
-);
-
-attachMovementEvents(
-    backwardButton,
-    "backward"
+    }
 );
 
 
@@ -8244,14 +9975,18 @@ attachMovementEvents(
    STOP BUTTON
 ========================================================= */
 
-stopButton.addEventListener(
-    "click",
-    function() {
+document
+    .getElementById(
+        "stop-btn"
+    )
+    .addEventListener(
+        "click",
+        () => {
 
-        emergencyStop();
+            stopMove();
 
-    }
-);
+        }
+    );
 
 
 /* =========================================================
@@ -8412,7 +10147,11 @@ document.addEventListener(
             key === "d"
         ) {
 
-            stopMove();
+            if (movementActive) {
+
+                stopMove();
+
+            }
 
         }
 
@@ -8458,6 +10197,16 @@ document.addEventListener(
 /* =========================================================
    INITIALIZATION
 ========================================================= */
+
+updatePumpUI(
+    false
+);
+
+
+updateMovementVisual(
+    "stop"
+);
+
 
 getRoverStatus();
 
