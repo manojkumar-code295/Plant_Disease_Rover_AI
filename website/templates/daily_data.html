@@ -435,7 +435,8 @@
 
 
         /* =========================================================
-           NAVIGATION
+           TOP NAVIGATION
+           DAILY DATA REMOVED FROM HERE
         ========================================================= */
 
         nav {
@@ -529,6 +530,305 @@
             box-shadow:
                 0 5px 14px
                 rgba(35,97,62,0.2);
+
+        }
+
+
+        /* =========================================================
+           ANALYTICS SIDEBAR
+        ========================================================= */
+
+        .analytics-sidebar {
+
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 290px;
+            height: 100vh;
+
+            z-index: 10001;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #ffffff,
+                    #f6faf7
+                );
+
+            border-right:
+                1px solid
+                var(--border);
+
+            box-shadow:
+                12px 0 35px
+                rgba(18,55,42,0.14);
+
+            transform:
+                translateX(-105%);
+
+            transition:
+                transform 0.35s
+                cubic-bezier(.2,.8,.2,1);
+
+            overflow-y: auto;
+
+        }
+
+
+        .analytics-sidebar.show {
+
+            transform:
+                translateX(0);
+
+        }
+
+
+        .sidebar-header {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            padding:
+                22px 20px;
+
+            color:
+                white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #12372a,
+                    #23613e
+                );
+
+        }
+
+
+        .sidebar-title {
+
+            font-size:
+                18px;
+
+            font-weight:
+                850;
+
+        }
+
+
+        .sidebar-close {
+
+            width:
+                34px;
+
+            height:
+                34px;
+
+            border:
+                none;
+
+            border-radius:
+                9px;
+
+            background:
+                rgba(255,255,255,0.12);
+
+            color:
+                white;
+
+            font-size:
+                22px;
+
+            cursor:
+                pointer;
+
+            transition:
+                0.2s ease;
+
+        }
+
+
+        .sidebar-close:hover {
+
+            background:
+                rgba(255,255,255,0.2);
+
+            transform:
+                rotate(90deg);
+
+        }
+
+
+        .sidebar-menu {
+
+            padding:
+                18px 13px;
+
+        }
+
+
+        .sidebar-item {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            width:
+                100%;
+
+            margin-bottom:
+                7px;
+
+            padding:
+                13px 14px;
+
+            border-radius:
+                11px;
+
+            text-decoration:
+                none;
+
+            color:
+                #53615a;
+
+            font-size:
+                13px;
+
+            font-weight:
+                750;
+
+            transition:
+                0.25s ease;
+
+        }
+
+
+        .sidebar-item:hover {
+
+            color:
+                var(--green);
+
+            background:
+                #edf7f0;
+
+            transform:
+                translateX(3px);
+
+        }
+
+
+        .sidebar-item.active {
+
+            color:
+                white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--green),
+                    var(--light-green)
+                );
+
+            box-shadow:
+                0 6px 16px
+                rgba(35,97,62,0.2);
+
+        }
+
+
+        .sidebar-icon {
+
+            width:
+                32px;
+
+            height:
+                32px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            flex-shrink:
+                0;
+
+            border-radius:
+                9px;
+
+            background:
+                rgba(47,125,87,0.08);
+
+            font-size:
+                16px;
+
+        }
+
+
+        .sidebar-item.active .sidebar-icon {
+
+            background:
+                rgba(255,255,255,0.14);
+
+        }
+
+
+        /* =========================================================
+           SIDEBAR OVERLAY
+        ========================================================= */
+
+        .sidebar-overlay {
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            z-index:
+                10000;
+
+            background:
+                rgba(4,15,10,0.42);
+
+            backdrop-filter:
+                blur(3px);
+
+            opacity:
+                0;
+
+            visibility:
+                hidden;
+
+            transition:
+                opacity 0.3s ease,
+                visibility 0.3s ease;
+
+        }
+
+
+        .sidebar-overlay.show {
+
+            opacity:
+                1;
+
+            visibility:
+                visible;
 
         }
 
@@ -2788,6 +3088,14 @@
 
             }
 
+
+            .analytics-sidebar {
+
+                width:
+                    260px;
+
+            }
+
         }
 
 
@@ -2876,7 +3184,7 @@
 
 
 <!-- =========================================================
-     NAVIGATION
+     TOP NAVIGATION
 ========================================================= -->
 
 <nav>
@@ -2893,13 +3201,9 @@
         🗂 Dataset
     </a>
 
-    <a href="/analytics">
+    <a href="/analytics"
+       id="analytics-nav-link">
         📊 Analytics
-    </a>
-
-    <a href="/daily-data"
-       class="active">
-        📅 Daily Data
     </a>
 
     <a href="/settings">
@@ -2907,6 +3211,89 @@
     </a>
 
 </nav>
+
+
+<!-- =========================================================
+     ANALYTICS SIDEBAR
+========================================================= -->
+
+<aside
+    class="analytics-sidebar"
+    id="analyticsSidebar"
+>
+
+
+    <div class="sidebar-header">
+
+        <div class="sidebar-title">
+            📊 Analytics
+        </div>
+
+
+        <button
+            class="sidebar-close"
+            onclick="closeAnalyticsSidebar()"
+            aria-label="Close Analytics sidebar"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="sidebar-menu">
+
+
+        <a
+            href="/analytics"
+            class="sidebar-item"
+        >
+
+            <span class="sidebar-icon">
+                📊
+            </span>
+
+            <span>
+                Analytics Overview
+            </span>
+
+        </a>
+
+
+        <!-- =====================================================
+             DAILY DATA IS NOW INSIDE ANALYTICS
+        ====================================================== -->
+
+        <a
+            href="/daily-data"
+            class="sidebar-item active"
+        >
+
+            <span class="sidebar-icon">
+                📅
+            </span>
+
+            <span>
+                Daily Data
+            </span>
+
+        </a>
+
+
+    </div>
+
+</aside>
+
+
+<!-- =========================================================
+     SIDEBAR OVERLAY
+========================================================= -->
+
+<div
+    class="sidebar-overlay"
+    id="sidebarOverlay"
+    onclick="closeAnalyticsSidebar()"
+></div>
 
 
 <!-- =========================================================
@@ -3573,7 +3960,6 @@
 
     </div>
 
-
 </div>
 
 
@@ -3608,6 +3994,142 @@
 
 
 <script>
+
+
+/* =========================================================
+   ANALYTICS SIDEBAR
+========================================================= */
+
+function openAnalyticsSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "analyticsSidebar"
+        );
+
+    const overlay =
+        document.getElementById(
+            "sidebarOverlay"
+        );
+
+
+    if (sidebar) {
+
+        sidebar.classList.add(
+            "show"
+        );
+
+    }
+
+
+    if (overlay) {
+
+        overlay.classList.add(
+            "show"
+        );
+
+    }
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* =========================================================
+   CLOSE ANALYTICS SIDEBAR
+========================================================= */
+
+function closeAnalyticsSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "analyticsSidebar"
+        );
+
+    const overlay =
+        document.getElementById(
+            "sidebarOverlay"
+        );
+
+
+    if (sidebar) {
+
+        sidebar.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    if (overlay) {
+
+        overlay.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    document.body.style.overflow =
+        "";
+
+}
+
+
+/* =========================================================
+   ANALYTICS NAVIGATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+
+        const analyticsLink =
+            document.getElementById(
+                "analytics-nav-link"
+            );
+
+
+        if (analyticsLink) {
+
+            analyticsLink.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+
+                    openAnalyticsSidebar();
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   ESCAPE KEY - CLOSE SIDEBAR
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeAnalyticsSidebar();
+
+        }
+
+    }
+);
 
 
 /* =========================================================
@@ -3881,6 +4403,8 @@ document.addEventListener(
             document.body.style.overflow =
                 "";
 
+
+            closeAnalyticsSidebar();
 
         }
 
