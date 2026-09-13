@@ -10,7 +10,7 @@ from flask import (
     request,
     jsonify,
     make_response,
-    send_from_directory
+    send_from_directory,
 )
 
 
@@ -22,7 +22,7 @@ app = Flask(
     __name__,
     static_folder="static",
     static_url_path="/static",
-    template_folder="templates"
+    template_folder="templates",
 )
 
 app.config["JSON_SORT_KEYS"] = False
@@ -35,48 +35,19 @@ app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-TEMPLATE_FOLDER = os.path.join(
-    BASE_DIR,
-    "templates"
-)
+TEMPLATE_FOLDER = os.path.join(BASE_DIR, "templates")
+STATIC_FOLDER = os.path.join(BASE_DIR, "static")
+IMAGE_FOLDER = os.path.join(STATIC_FOLDER, "images")
 
-STATIC_FOLDER = os.path.join(
-    BASE_DIR,
-    "static"
-)
-
-IMAGE_FOLDER = os.path.join(
-    STATIC_FOLDER,
-    "images"
-)
-
-RESULT_FILE = os.path.join(
-    BASE_DIR,
-    "result.json"
-)
-
-HISTORY_FILE = os.path.join(
-    BASE_DIR,
-    "history.json"
-)
-
-DAILY_DATA_FILE = os.path.join(
-    BASE_DIR,
-    "daily_data.json"
-)
-
-SETTINGS_FILE = os.path.join(
-    BASE_DIR,
-    "rover_settings.json"
-)
+RESULT_FILE = os.path.join(BASE_DIR, "result.json")
+HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
+DAILY_DATA_FILE = os.path.join(BASE_DIR, "daily_data.json")
+SETTINGS_FILE = os.path.join(BASE_DIR, "rover_settings.json")
 
 app.template_folder = TEMPLATE_FOLDER
 app.static_folder = STATIC_FOLDER
 
-os.makedirs(
-    IMAGE_FOLDER,
-    exist_ok=True
-)
+os.makedirs(IMAGE_FOLDER, exist_ok=True)
 
 
 # ============================================================
@@ -98,25 +69,14 @@ ROVER_TIMEOUT_SECONDS = 10
 # ============================================================
 
 DEFAULT_RESULT = {
-
     "result_id": "",
-
     "image": "",
-
     "disease": "No prediction yet",
-
     "chemical": "Not available",
-
     "fertilizer": "Not available",
-
-    "treatment": (
-        "No prediction has been processed yet."
-    ),
-
+    "treatment": "No prediction has been processed yet.",
     "confidence": 0.0,
-
-    "timestamp": ""
-
+    "timestamp": "",
 }
 
 
@@ -125,23 +85,14 @@ DEFAULT_RESULT = {
 # ============================================================
 
 rover_state = {
-
     "connected": False,
-
     "direction": "Stopped",
-
     "speed": 50,
-
     "pump": False,
-
     "mode": "Manual",
-
     "last_command": "stop",
-
     "command_id": 0,
-
-    "last_seen": None
-
+    "last_seen": None,
 }
 
 
@@ -150,17 +101,11 @@ rover_state = {
 # ============================================================
 
 DEFAULT_ROVER_SETTINGS = {
-
     "auto_mode": False,
-
     "spray_enabled": True,
-
     "detection_enabled": True,
-
     "confidence_threshold": 80,
-
-    "speed": 50
-
+    "speed": 50,
 }
 
 
@@ -168,92 +113,65 @@ DEFAULT_ROVER_SETTINGS = {
 # JSON HELPERS
 # ============================================================
 
-def load_json_file(
-    file_path,
-    default_value
-):
-
+def load_json_file(file_path, default_value):
     try:
-
-        if not os.path.exists(
-            file_path
-        ):
-
+        if not os.path.exists(file_path):
             return default_value
 
         with open(
             file_path,
             "r",
-            encoding="utf-8"
+            encoding="utf-8",
         ) as file:
-
             data = json.load(file)
 
         return data
 
     except Exception as error:
-
         print(
             "JSON READ ERROR:",
             file_path,
-            error
+            error,
         )
 
         return default_value
 
 
-def save_json_file(
-    file_path,
-    data
-):
-
-    temporary_file = (
-        file_path +
-        ".tmp"
-    )
+def save_json_file(file_path, data):
+    temporary_file = file_path + ".tmp"
 
     try:
-
         with open(
             temporary_file,
             "w",
-            encoding="utf-8"
+            encoding="utf-8",
         ) as file:
 
             json.dump(
                 data,
                 file,
                 indent=4,
-                ensure_ascii=False
+                ensure_ascii=False,
             )
 
         os.replace(
             temporary_file,
-            file_path
+            file_path,
         )
 
         return True
 
     except Exception as error:
-
         print(
             "JSON WRITE ERROR:",
             file_path,
-            error
+            error,
         )
 
         try:
-
-            if os.path.exists(
-                temporary_file
-            ):
-
-                os.remove(
-                    temporary_file
-                )
-
+            if os.path.exists(temporary_file):
+                os.remove(temporary_file)
         except Exception:
-
             pass
 
         return False
@@ -265,33 +183,20 @@ def save_json_file(
 
 def parse_boolean(value):
 
-    if isinstance(
-        value,
-        bool
-    ):
-
+    if isinstance(value, bool):
         return value
 
-    if isinstance(
-        value,
-        (int, float)
-    ):
-
+    if isinstance(value, (int, float)):
         return bool(value)
 
-    if isinstance(
-        value,
-        str
-    ):
+    if isinstance(value, str):
 
         return value.strip().lower() in [
-
             "true",
             "1",
             "yes",
             "on",
-            "enabled"
-
+            "enabled",
         ]
 
     return False
@@ -304,25 +209,20 @@ def parse_boolean(value):
 def clean_confidence(value):
 
     try:
-
         value = float(value)
 
     except Exception:
-
         value = 0.0
 
     return round(
-
         max(
             0.0,
             min(
                 100.0,
-                value
-            )
+                value,
+            ),
         ),
-
-        2
-
+        2,
     )
 
 
@@ -333,24 +233,19 @@ def clean_confidence(value):
 def load_rover_settings():
 
     settings = load_json_file(
-
         SETTINGS_FILE,
-
-        DEFAULT_ROVER_SETTINGS.copy()
-
+        DEFAULT_ROVER_SETTINGS.copy(),
     )
 
     if not isinstance(
         settings,
-        dict
+        dict,
     ):
-
         settings = DEFAULT_ROVER_SETTINGS.copy()
 
     for key, value in DEFAULT_ROVER_SETTINGS.items():
 
         if key not in settings:
-
             settings[key] = value
 
     return settings
@@ -367,14 +262,11 @@ rover_settings = load_rover_settings()
 def add_no_cache_headers(response):
 
     response.headers["Cache-Control"] = (
-
         "no-store, no-cache, must-revalidate, "
         "max-age=0, s-maxage=0"
-
     )
 
     response.headers["Pragma"] = "no-cache"
-
     response.headers["Expires"] = "0"
 
     return response
@@ -387,33 +279,26 @@ def add_no_cache_headers(response):
 def get_latest_result():
 
     result = load_json_file(
-
         RESULT_FILE,
-
-        DEFAULT_RESULT.copy()
-
+        DEFAULT_RESULT.copy(),
     )
 
     if not isinstance(
         result,
-        dict
+        dict,
     ):
-
         result = DEFAULT_RESULT.copy()
 
     for key, value in DEFAULT_RESULT.items():
 
         if key not in result:
-
             result[key] = value
 
     result["confidence"] = clean_confidence(
-
         result.get(
             "confidence",
-            0
-        )
-
+            0,
+        ),
     )
 
     return result
@@ -424,11 +309,8 @@ def save_latest_result(result):
     with data_lock:
 
         return save_json_file(
-
             RESULT_FILE,
-
-            result
-
+            result,
         )
 
 
@@ -439,18 +321,14 @@ def save_latest_result(result):
 def get_history():
 
     history = load_json_file(
-
         HISTORY_FILE,
-
-        []
-
+        [],
     )
 
     if not isinstance(
         history,
-        list
+        list,
     ):
-
         history = []
 
     return history
@@ -461,11 +339,8 @@ def save_history(history):
     with data_lock:
 
         return save_json_file(
-
             HISTORY_FILE,
-
-            history
-
+            history,
         )
 
 
@@ -477,16 +352,21 @@ def add_history_record(result):
 
         history.insert(
             0,
-            result
+            result,
         )
 
-        # Maximum 100 records
-        history = history[:100]
+        # IMPORTANT:
+        # No 100-record limit.
+        # Every prediction is preserved.
 
-        save_json_file(
+        if not save_json_file(
             HISTORY_FILE,
-            history
-        )
+            history,
+        ):
+
+            print(
+                "WARNING: Failed to save prediction history."
+            )
 
         return history
 
@@ -498,18 +378,14 @@ def add_history_record(result):
 def get_daily_data():
 
     daily_data = load_json_file(
-
         DAILY_DATA_FILE,
-
-        {}
-
+        {},
     )
 
     if not isinstance(
         daily_data,
-        dict
+        dict,
     ):
-
         daily_data = {}
 
     return daily_data
@@ -520,11 +396,8 @@ def save_daily_data(daily_data):
     with data_lock:
 
         return save_json_file(
-
             DAILY_DATA_FILE,
-
-            daily_data
-
+            daily_data,
         )
 
 
@@ -558,9 +431,160 @@ def create_empty_day(date):
 
         "confidence_count": 0,
 
-        "records": []
-
+        "records": [],
     }
+
+
+# ============================================================
+# NORMALIZE DAY
+# ============================================================
+
+def normalize_day(day, date):
+
+    if not isinstance(
+        day,
+        dict,
+    ):
+
+        day = create_empty_day(date)
+
+    normalized = create_empty_day(
+        day.get(
+            "date",
+            date,
+        ),
+    )
+
+    for key in normalized:
+
+        if key == "records":
+            continue
+
+        if key in day:
+            normalized[key] = day[key]
+
+    records = day.get(
+        "records",
+        [],
+    )
+
+    if isinstance(
+        records,
+        list,
+    ):
+
+        normalized["records"] = records
+
+    else:
+
+        normalized["records"] = []
+
+    integer_fields = [
+
+        "total",
+        "healthy",
+        "diseased",
+        "bacterial_spot",
+        "cercospora",
+        "curl_virus",
+        "unclear",
+        "other",
+        "confidence_count",
+
+    ]
+
+    for field in integer_fields:
+
+        try:
+
+            normalized[field] = int(
+                normalized.get(
+                    field,
+                    0,
+                ),
+            )
+
+        except Exception:
+
+            normalized[field] = 0
+
+    try:
+
+        normalized["confidence_total"] = float(
+            normalized.get(
+                "confidence_total",
+                0.0,
+            ),
+        )
+
+    except Exception:
+
+        normalized["confidence_total"] = 0.0
+
+    return normalized
+
+
+# ============================================================
+# DISEASE CLASSIFICATION
+# ============================================================
+
+def classify_disease(disease):
+
+    disease = str(
+        disease or "",
+    ).strip().lower()
+
+    if "healthy" in disease:
+        return "healthy"
+
+    if "bacterial" in disease:
+        return "bacterial_spot"
+
+    if "cercospora" in disease:
+        return "cercospora"
+
+    if "curl" in disease:
+        return "curl_virus"
+
+    if "unclear" in disease:
+        return "unclear"
+
+    return "other"
+
+
+# ============================================================
+# GET DATE FROM RESULT
+# ============================================================
+
+def get_result_date(result):
+
+    timestamp = str(
+        result.get(
+            "timestamp",
+            "",
+        ),
+    ).strip()
+
+    if len(timestamp) >= 10:
+
+        possible_date = timestamp[:10]
+
+        try:
+
+            datetime.strptime(
+                possible_date,
+                "%Y-%m-%d",
+            )
+
+            return possible_date
+
+        except ValueError:
+
+            pass
+
+    return datetime.now().strftime(
+        "%Y-%m-%d",
+    )
 
 
 # ============================================================
@@ -573,211 +597,117 @@ def add_daily_record(result):
 
         daily_data = get_daily_data()
 
-        timestamp = str(
+        # Use the actual prediction date.
+        # This allows yesterday's predictions to remain
+        # under yesterday instead of being moved to today.
 
-            result.get(
-                "timestamp",
-                ""
-            )
-
+        date = get_result_date(
+            result,
         )
 
-        if len(timestamp) >= 10:
-
-            date = timestamp[:10]
-
-        else:
-
-            date = datetime.now().strftime(
-                "%Y-%m-%d"
-            )
-
-        if date not in daily_data:
-
-            daily_data[date] = create_empty_day(
-                date
-            )
-
-        day = daily_data[date]
+        day = normalize_day(
+            daily_data.get(
+                date,
+            ),
+            date,
+        )
 
         # ----------------------------------------------------
         # TOTAL
         # ----------------------------------------------------
 
-        day["total"] = int(
-
-            day.get(
-                "total",
-                0
-            )
-
-        ) + 1
+        day["total"] += 1
 
         # ----------------------------------------------------
         # DISEASE
         # ----------------------------------------------------
 
-        disease = str(
-
+        disease_type = classify_disease(
             result.get(
                 "disease",
-                ""
-            )
+                "",
+            ),
+        )
 
-        ).strip().lower()
+        if disease_type == "healthy":
 
-        if "healthy" in disease:
+            day["healthy"] += 1
 
-            day["healthy"] = int(
+        elif disease_type == "bacterial_spot":
 
-                day.get(
-                    "healthy",
-                    0
-                )
+            day["bacterial_spot"] += 1
+            day["diseased"] += 1
 
-            ) + 1
+        elif disease_type == "cercospora":
 
-        elif "bacterial" in disease:
+            day["cercospora"] += 1
+            day["diseased"] += 1
 
-            day["bacterial_spot"] = int(
+        elif disease_type == "curl_virus":
 
-                day.get(
-                    "bacterial_spot",
-                    0
-                )
+            day["curl_virus"] += 1
+            day["diseased"] += 1
 
-            ) + 1
+        elif disease_type == "unclear":
 
-            day["diseased"] = int(
-
-                day.get(
-                    "diseased",
-                    0
-                )
-
-            ) + 1
-
-        elif "cercospora" in disease:
-
-            day["cercospora"] = int(
-
-                day.get(
-                    "cercospora",
-                    0
-                )
-
-            ) + 1
-
-            day["diseased"] = int(
-
-                day.get(
-                    "diseased",
-                    0
-                )
-
-            ) + 1
-
-        elif "curl" in disease:
-
-            day["curl_virus"] = int(
-
-                day.get(
-                    "curl_virus",
-                    0
-                )
-
-            ) + 1
-
-            day["diseased"] = int(
-
-                day.get(
-                    "diseased",
-                    0
-                )
-
-            ) + 1
-
-        elif "unclear" in disease:
-
-            day["unclear"] = int(
-
-                day.get(
-                    "unclear",
-                    0
-                )
-
-            ) + 1
+            day["unclear"] += 1
 
         else:
 
-            day["other"] = int(
-
-                day.get(
-                    "other",
-                    0
-                )
-
-            ) + 1
+            day["other"] += 1
 
         # ----------------------------------------------------
         # CONFIDENCE
         # ----------------------------------------------------
 
         confidence = clean_confidence(
-
             result.get(
                 "confidence",
-                0
-            )
-
+                0,
+            ),
         )
 
-        day["confidence_total"] = float(
+        day["confidence_total"] += confidence
 
-            day.get(
-                "confidence_total",
-                0
-            )
-
-        ) + confidence
-
-        day["confidence_count"] = int(
-
-            day.get(
-                "confidence_count",
-                0
-            )
-
-        ) + 1
+        day["confidence_count"] += 1
 
         # ----------------------------------------------------
-        # RECORD
+        # SAVE RECORD
         # ----------------------------------------------------
 
         records = day.get(
             "records",
-            []
+            [],
         )
 
         if not isinstance(
             records,
-            list
+            list,
         ):
 
             records = []
 
         records.insert(
             0,
-            result
+            result,
         )
 
-        # Maximum 500 records per day
-        day["records"] = records[:500]
+        # IMPORTANT:
+        # No 500-record limit.
+        # All predictions remain stored.
 
-        save_json_file(
+        day["records"] = records
+
+        daily_data[date] = day
+
+        if not save_json_file(
             DAILY_DATA_FILE,
-            daily_data
-        )
+            daily_data,
+        ):
+
+            print(
+                "WARNING: Failed to save daily prediction data."
+            )
 
         return daily_data
 
@@ -792,42 +722,33 @@ def get_daily_data_list():
 
     result = []
 
-    for date, day in daily_data.items():
+    for date, raw_day in daily_data.items():
 
-        if not isinstance(
-            day,
-            dict
-        ):
-
-            continue
+        day = normalize_day(
+            raw_day,
+            date,
+        )
 
         confidence_total = float(
-
             day.get(
                 "confidence_total",
-                0
-            )
-
+                0,
+            ),
         )
 
         confidence_count = int(
-
             day.get(
                 "confidence_count",
-                0
-            )
-
+                0,
+            ),
         )
 
         if confidence_count > 0:
 
             average_confidence = round(
-
-                confidence_total /
-                confidence_count,
-
-                2
-
+                confidence_total
+                / confidence_count,
+                2,
             )
 
         else:
@@ -839,79 +760,79 @@ def get_daily_data_list():
             "date":
                 day.get(
                     "date",
-                    date
+                    date,
                 ),
 
             "total":
                 int(
                     day.get(
                         "total",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "healthy":
                 int(
                     day.get(
                         "healthy",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "diseased":
                 int(
                     day.get(
                         "diseased",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "bacterial_spot":
                 int(
                     day.get(
                         "bacterial_spot",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "cercospora":
                 int(
                     day.get(
                         "cercospora",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "cercospora_leaf_spot":
                 int(
                     day.get(
                         "cercospora",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "curl_virus":
                 int(
                     day.get(
                         "curl_virus",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "unclear":
                 int(
                     day.get(
                         "unclear",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "other":
                 int(
                     day.get(
                         "other",
-                        0
-                    )
+                        0,
+                    ),
                 ),
 
             "average_confidence":
@@ -920,17 +841,15 @@ def get_daily_data_list():
             "records":
                 day.get(
                     "records",
-                    []
-                )
-
+                    [],
+                ),
         })
 
+    # Newest date first.
+
     result.sort(
-
         key=lambda item: item["date"],
-
-        reverse=True
-
+        reverse=True,
     )
 
     return result
@@ -960,37 +879,34 @@ def get_analytics():
 
         if not isinstance(
             record,
-            dict
+            dict,
         ):
-
             continue
 
-        disease = str(
-
+        disease_type = classify_disease(
             record.get(
                 "disease",
-                ""
-            )
+                "",
+            ),
+        )
 
-        ).strip().lower()
-
-        if "healthy" in disease:
+        if disease_type == "healthy":
 
             healthy += 1
 
-        elif "bacterial" in disease:
+        elif disease_type == "bacterial_spot":
 
             bacterial_spot += 1
 
-        elif "cercospora" in disease:
+        elif disease_type == "cercospora":
 
             cercospora += 1
 
-        elif "curl" in disease:
+        elif disease_type == "curl_virus":
 
             curl_virus += 1
 
-        elif "unclear" in disease:
+        elif disease_type == "unclear":
 
             unclear += 1
 
@@ -999,25 +915,20 @@ def get_analytics():
             other += 1
 
         confidence = clean_confidence(
-
             record.get(
                 "confidence",
-                0
-            )
-
+                0,
+            ),
         )
 
         confidence_total += confidence
-
         confidence_count += 1
 
     if confidence_count > 0:
 
         average_confidence = (
-
-            confidence_total /
-            confidence_count
-
+            confidence_total
+            / confidence_count
         )
 
     else:
@@ -1025,35 +936,26 @@ def get_analytics():
         average_confidence = 0
 
     diseased = (
-
         bacterial_spot
-        +
-        cercospora
-        +
-        curl_virus
-
+        + cercospora
+        + curl_virus
     )
 
     if total > 0:
 
         healthy_percentage = (
-
-            healthy /
-            total
-
+            healthy
+            / total
         ) * 100
 
         disease_percentage = (
-
-            diseased /
-            total
-
+            diseased
+            / total
         ) * 100
 
     else:
 
         healthy_percentage = 0
-
         disease_percentage = 0
 
     latest = get_latest_result()
@@ -1090,120 +992,95 @@ def get_analytics():
         "healthy_percentage":
             round(
                 healthy_percentage,
-                2
+                2,
             ),
 
         "disease_percentage":
             round(
                 disease_percentage,
-                2
+                2,
             ),
 
         "average_confidence":
             round(
                 average_confidence,
-                2
+                2,
             ),
 
         "last_prediction":
             latest.get(
                 "disease",
-                "No prediction yet"
+                "No prediction yet",
             ),
 
         "last_confidence":
             latest.get(
                 "confidence",
-                0
+                0,
             ),
 
         "last_image":
             latest.get(
                 "image",
-                ""
+                "",
             ),
 
         "last_timestamp":
             latest.get(
                 "timestamp",
-                ""
-            )
-
+                "",
+            ),
     }
 
 
 # ============================================================
-# ROVER CONNECTION CHECK
+# ROVER CONNECTION
 # ============================================================
 
 def refresh_rover_connection():
 
     last_seen = rover_state.get(
-        "last_seen"
+        "last_seen",
     )
 
     if not last_seen:
 
-        rover_state[
-            "connected"
-        ] = False
+        rover_state["connected"] = False
 
         return False
 
     try:
 
         last_seen_time = datetime.strptime(
-
             last_seen,
-
-            "%Y-%m-%d %H:%M:%S"
-
+            "%Y-%m-%d %H:%M:%S",
         )
 
         elapsed = (
-
             datetime.now()
-            -
-            last_seen_time
-
+            - last_seen_time
         ).total_seconds()
 
         if elapsed > ROVER_TIMEOUT_SECONDS:
 
-            rover_state[
-                "connected"
-            ] = False
+            rover_state["connected"] = False
 
-            # Safety shutdown
-            rover_state[
-                "pump"
-            ] = False
+            # Safety shutdown.
 
-            rover_state[
-                "direction"
-            ] = "Stopped"
-
-            rover_state[
-                "last_command"
-            ] = "stop"
-
-            rover_state[
-                "speed"
-            ] = 0
+            rover_state["pump"] = False
+            rover_state["direction"] = "Stopped"
+            rover_state["last_command"] = "stop"
+            rover_state["speed"] = 0
 
             return False
 
-        rover_state[
-            "connected"
-        ] = True
+        rover_state["connected"] = True
 
         return True
 
     except Exception:
 
-        rover_state[
-            "connected"
-        ] = False
+        rover_state["connected"] = False
 
         return False
 
@@ -1241,9 +1118,11 @@ def get_dashboard_data():
         "rover":
             rover_state,
 
-        "settings":
-            rover_settings
+        "rover_state":
+            rover_state,
 
+        "settings":
+            rover_settings,
     }
 
 
@@ -1255,11 +1134,8 @@ def get_dashboard_data():
 def dashboard():
 
     return render_template(
-
         "dashboard.html",
-
-        **get_dashboard_data()
-
+        **get_dashboard_data(),
     )
 
 
@@ -1271,25 +1147,16 @@ def analytics():
     refresh_rover_connection()
 
     return render_template(
-
         "analytics.html",
-
         result=result,
-
         detection=result,
-
         latest_result=result,
-
         statistics=get_analytics(),
-
         history=get_history(),
-
         daily_data=get_daily_data_list(),
-
         rover=rover_state,
-
-        settings=rover_settings
-
+        rover_state=rover_state,
+        settings=rover_settings,
     )
 
 
@@ -1301,25 +1168,16 @@ def daily_data():
     refresh_rover_connection()
 
     return render_template(
-
         "daily_data.html",
-
         result=result,
-
         detection=result,
-
         latest_result=result,
-
         statistics=get_analytics(),
-
         history=get_history(),
-
         daily_data=get_daily_data_list(),
-
         rover=rover_state,
-
-        settings=rover_settings
-
+        rover_state=rover_state,
+        settings=rover_settings,
     )
 
 
@@ -1331,25 +1189,16 @@ def dataset():
     refresh_rover_connection()
 
     return render_template(
-
         "dataset.html",
-
         result=result,
-
         detection=result,
-
         latest_result=result,
-
         statistics=get_analytics(),
-
         history=get_history(),
-
         daily_data=get_daily_data_list(),
-
         rover=rover_state,
-
-        settings=rover_settings
-
+        rover_state=rover_state,
+        settings=rover_settings,
     )
 
 
@@ -1361,25 +1210,16 @@ def rover():
     refresh_rover_connection()
 
     return render_template(
-
         "rover.html",
-
         result=result,
-
         detection=result,
-
         latest_result=result,
-
         statistics=get_analytics(),
-
         history=get_history(),
-
+        daily_data=get_daily_data_list(),
         rover=rover_state,
-
         rover_state=rover_state,
-
-        settings=rover_settings
-
+        settings=rover_settings,
     )
 
 
@@ -1391,25 +1231,16 @@ def settings():
     refresh_rover_connection()
 
     return render_template(
-
         "settings.html",
-
         result=result,
-
         detection=result,
-
         latest_result=result,
-
         statistics=get_analytics(),
-
         history=get_history(),
-
         daily_data=get_daily_data_list(),
-
         rover=rover_state,
-
-        settings=rover_settings
-
+        rover_state=rover_state,
+        settings=rover_settings,
     )
 
 
@@ -1423,14 +1254,11 @@ def settings():
 def pwa_icon(filename):
 
     return send_from_directory(
-
         os.path.join(
             STATIC_FOLDER,
-            "icons"
+            "icons",
         ),
-
-        filename
-
+        filename,
     )
 
 
@@ -1442,15 +1270,12 @@ def pwa_icon(filename):
 def manifest():
 
     manifest_path = os.path.join(
-
         STATIC_FOLDER,
-
-        "manifest.json"
-
+        "manifest.json",
     )
 
     if not os.path.exists(
-        manifest_path
+        manifest_path,
     ):
 
         return jsonify({
@@ -1471,24 +1296,19 @@ def manifest():
                 "#f4f7f5",
 
             "theme_color":
-                "#12372a"
-
+                "#12372a",
         })
 
     with open(
-
         manifest_path,
-
         "r",
-
-        encoding="utf-8"
-
+        encoding="utf-8",
     ) as file:
 
         data = file.read()
 
     response = make_response(
-        data
+        data,
     )
 
     response.headers[
@@ -1506,36 +1326,29 @@ def manifest():
 def service_worker():
 
     path = os.path.join(
-
         STATIC_FOLDER,
-
-        "service-worker.js"
-
+        "service-worker.js",
     )
 
     if not os.path.exists(
-        path
+        path,
     ):
 
         return (
             "Service worker not found.",
-            404
+            404,
         )
 
     with open(
-
         path,
-
         "r",
-
-        encoding="utf-8"
-
+        encoding="utf-8",
     ) as file:
 
         javascript = file.read()
 
     response = make_response(
-        javascript
+        javascript,
     )
 
     response.headers[
@@ -1555,7 +1368,7 @@ def service_worker():
 
 @app.route(
     "/api/health",
-    methods=["GET"]
+    methods=["GET"],
 )
 def health():
 
@@ -1580,9 +1393,8 @@ def health():
 
         "timestamp":
             datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-
+                "%Y-%m-%d %H:%M:%S",
+            ),
     })
 
 
@@ -1592,7 +1404,7 @@ def health():
 
 @app.route(
     "/api/result",
-    methods=["GET"]
+    methods=["GET"],
 )
 def api_result():
 
@@ -1602,8 +1414,7 @@ def api_result():
             True,
 
         "result":
-            get_latest_result()
-
+            get_latest_result(),
     })
 
 
@@ -1613,7 +1424,7 @@ def api_result():
 
 @app.route(
     "/api/dashboard-state",
-    methods=["GET"]
+    methods=["GET"],
 )
 def api_dashboard_state():
 
@@ -1633,6 +1444,9 @@ def api_dashboard_state():
         "daily_data":
             get_daily_data_list(),
 
+        "history":
+            get_history(),
+
         "rover":
             rover_state,
 
@@ -1641,9 +1455,8 @@ def api_dashboard_state():
 
         "server_time":
             datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-
+                "%Y-%m-%d %H:%M:%S",
+            ),
     })
 
 
@@ -1653,7 +1466,7 @@ def api_dashboard_state():
 
 @app.route(
     "/api/history",
-    methods=["GET"]
+    methods=["GET"],
 )
 def api_history():
 
@@ -1668,8 +1481,7 @@ def api_history():
             len(history),
 
         "history":
-            history
-
+            history,
     })
 
 
@@ -1679,11 +1491,11 @@ def api_history():
 
 @app.route(
     "/api/daily-data",
-    methods=["GET"]
+    methods=["GET"],
 )
 def api_daily_data():
 
-    daily_data = get_daily_data_list()
+    daily_data_result = get_daily_data_list()
 
     return jsonify({
 
@@ -1691,11 +1503,10 @@ def api_daily_data():
             True,
 
         "count":
-            len(daily_data),
+            len(daily_data_result),
 
         "daily_data":
-            daily_data
-
+            daily_data_result,
     })
 
 
@@ -1705,7 +1516,7 @@ def api_daily_data():
 
 @app.route(
     "/api/analytics",
-    methods=["GET"]
+    methods=["GET"],
 )
 def api_analytics():
 
@@ -1715,31 +1526,21 @@ def api_analytics():
             True,
 
         "statistics":
-            get_analytics()
-
+            get_analytics(),
     })
 
 
 # ============================================================
 # CAMERA AI RESULT
 #
-# IMPORTANT:
 # KEEP THIS URL:
 #
 # /api/update-result
-#
-# Camera sends:
-# disease
-# chemical
-# fertilizer
-# treatment
-# confidence
-# image
 # ============================================================
 
 @app.route(
     "/api/update-result",
-    methods=["POST"]
+    methods=["POST"],
 )
 def update_result():
 
@@ -1750,47 +1551,32 @@ def update_result():
         # ----------------------------------------------------
 
         disease = request.form.get(
-
             "disease",
-
-            "Unknown"
-
+            "Unknown",
         ).strip()
 
         chemical = request.form.get(
-
             "chemical",
-
-            "Not available"
-
+            "Not available",
         ).strip()
 
         fertilizer = request.form.get(
-
             "fertilizer",
-
-            "Not available"
-
+            "Not available",
         ).strip()
 
         treatment = request.form.get(
-
             "treatment",
-
-            "Not available"
-
+            "Not available",
         ).strip()
 
         confidence = request.form.get(
-
             "confidence",
-
-            "0"
-
+            "0",
         )
 
         confidence_value = clean_confidence(
-            confidence
+            confidence,
         )
 
         # ----------------------------------------------------
@@ -1798,7 +1584,7 @@ def update_result():
         # ----------------------------------------------------
 
         image = request.files.get(
-            "image"
+            "image",
         )
 
         if image is None:
@@ -1809,22 +1595,18 @@ def update_result():
                     False,
 
                 "message":
-                    "No image received"
+                    "No image received",
 
             }), 400
 
         original_filename = os.path.basename(
-
             image.filename
             or
-            "leaf.jpg"
-
+            "leaf.jpg",
         )
 
         extension = os.path.splitext(
-
-            original_filename
-
+            original_filename,
         )[1].lower()
 
         allowed_extensions = [
@@ -1832,7 +1614,7 @@ def update_result():
             ".jpg",
             ".jpeg",
             ".png",
-            ".webp"
+            ".webp",
 
         ]
 
@@ -1847,7 +1629,7 @@ def update_result():
         filename = (
 
             datetime.now().strftime(
-                "%Y%m%d_%H%M%S"
+                "%Y%m%d_%H%M%S",
             )
 
             + "_"
@@ -1855,19 +1637,15 @@ def update_result():
             + uuid.uuid4().hex[:8]
 
             + extension
-
         )
 
         image_path = os.path.join(
-
             IMAGE_FOLDER,
-
-            filename
-
+            filename,
         )
 
         image.save(
-            image_path
+            image_path,
         )
 
         # ----------------------------------------------------
@@ -1907,17 +1685,16 @@ def update_result():
 
             "timestamp":
                 datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-
+                    "%Y-%m-%d %H:%M:%S",
+                ),
         }
 
         # ----------------------------------------------------
-        # SAVE LATEST
+        # SAVE LATEST RESULT
         # ----------------------------------------------------
 
         if not save_latest_result(
-            result
+            result,
         ):
 
             return jsonify({
@@ -1926,16 +1703,16 @@ def update_result():
                     False,
 
                 "message":
-                    "Failed to save latest result"
+                    "Failed to save latest result",
 
             }), 500
 
         # ----------------------------------------------------
-        # SAVE HISTORY
+        # SAVE COMPLETE HISTORY
         # ----------------------------------------------------
 
         add_history_record(
-            result
+            result,
         )
 
         # ----------------------------------------------------
@@ -1943,7 +1720,7 @@ def update_result():
         # ----------------------------------------------------
 
         add_daily_record(
-            result
+            result,
         )
 
         print(
@@ -1956,22 +1733,22 @@ def update_result():
 
         print(
             "Disease:",
-            result["disease"]
+            result["disease"],
         )
 
         print(
             "Confidence:",
-            result["confidence"]
+            result["confidence"],
         )
 
         print(
             "Image:",
-            filename
+            filename,
         )
 
         print(
             "Timestamp:",
-            result["timestamp"]
+            result["timestamp"],
         )
 
         print(
@@ -1998,15 +1775,14 @@ def update_result():
                 ),
 
             "result":
-                result
-
+                result,
         })
 
     except Exception as error:
 
         print(
             "AI API ERROR:",
-            error
+            error,
         )
 
         return jsonify({
@@ -2015,7 +1791,7 @@ def update_result():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2026,14 +1802,14 @@ def update_result():
 
 @app.route(
     "/api/rover/control",
-    methods=["POST"]
+    methods=["POST"],
 )
 def rover_control():
 
     try:
 
         data = request.get_json(
-            silent=True
+            silent=True,
         )
 
         if data is None:
@@ -2044,10 +1820,16 @@ def rover_control():
 
             data.get(
                 "command",
-                "stop"
+                "stop",
             )
 
         ).lower().strip()
+
+        # Support "reverse" from the frontend.
+
+        if command == "reverse":
+
+            command = "backward"
 
         valid_commands = [
 
@@ -2055,7 +1837,7 @@ def rover_control():
             "backward",
             "left",
             "right",
-            "stop"
+            "stop",
 
         ]
 
@@ -2070,7 +1852,7 @@ def rover_control():
                     "Invalid rover command",
 
                 "command":
-                    command
+                    command,
 
             }), 400
 
@@ -2089,8 +1871,7 @@ def rover_control():
                 "Right",
 
             "stop":
-                "Stopped"
-
+                "Stopped",
         }
 
         rover_state[
@@ -2115,7 +1896,9 @@ def rover_control():
 
         else:
 
-            if rover_state["speed"] == 0:
+            if rover_state[
+                "speed"
+            ] == 0:
 
                 rover_state[
                     "speed"
@@ -2125,7 +1908,7 @@ def rover_control():
 
         print(
             "ROVER COMMAND:",
-            command
+            command,
         )
 
         return jsonify({
@@ -2145,15 +1928,14 @@ def rover_control():
                 ],
 
             "rover":
-                rover_state
-
+                rover_state,
         })
 
     except Exception as error:
 
         print(
             "ROVER CONTROL ERROR:",
-            error
+            error,
         )
 
         return jsonify({
@@ -2162,7 +1944,90 @@ def rover_control():
                 False,
 
             "message":
-                str(error)
+                str(error),
+
+        }), 500
+
+
+# ============================================================
+# EMERGENCY STOP
+# ============================================================
+
+@app.route(
+    "/api/rover/emergency-stop",
+    methods=["POST"],
+)
+def rover_emergency_stop():
+
+    try:
+
+        rover_state[
+            "direction"
+        ] = "Stopped"
+
+        rover_state[
+            "speed"
+        ] = 0
+
+        rover_state[
+            "pump"
+        ] = False
+
+        rover_state[
+            "last_command"
+        ] = "emergency_stop"
+
+        rover_state[
+            "command_id"
+        ] += 1
+
+        print(
+            "!!! ROVER EMERGENCY STOP !!!"
+        )
+
+        return jsonify({
+
+            "success":
+                True,
+
+            "message":
+                "Emergency stop activated",
+
+            "command":
+                "emergency_stop",
+
+            "command_id":
+                rover_state[
+                    "command_id"
+                ],
+
+            "pump":
+                False,
+
+            "speed":
+                0,
+
+            "direction":
+                "Stopped",
+
+            "rover":
+                rover_state,
+        })
+
+    except Exception as error:
+
+        print(
+            "EMERGENCY STOP ERROR:",
+            error,
+        )
+
+        return jsonify({
+
+            "success":
+                False,
+
+            "message":
+                str(error),
 
         }), 500
 
@@ -2173,7 +2038,7 @@ def rover_control():
 
 @app.route(
     "/api/rover/command",
-    methods=["GET"]
+    methods=["GET"],
 )
 def rover_command():
 
@@ -2217,8 +2082,7 @@ def rover_command():
         "connected":
             rover_state[
                 "connected"
-            ]
-
+            ],
     })
 
 
@@ -2228,7 +2092,7 @@ def rover_command():
 
 @app.route(
     "/api/rover/heartbeat",
-    methods=["POST"]
+    methods=["POST"],
 )
 def rover_heartbeat():
 
@@ -2241,7 +2105,7 @@ def rover_heartbeat():
         rover_state[
             "last_seen"
         ] = datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
+            "%Y-%m-%d %H:%M:%S",
         )
 
         return jsonify({
@@ -2253,8 +2117,7 @@ def rover_heartbeat():
                 "Raspberry Pi connected",
 
             "rover":
-                rover_state
-
+                rover_state,
         })
 
     except Exception as error:
@@ -2265,7 +2128,7 @@ def rover_heartbeat():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2276,7 +2139,7 @@ def rover_heartbeat():
 
 @app.route(
     "/api/rover/status",
-    methods=["GET"]
+    methods=["GET"],
 )
 def rover_status():
 
@@ -2292,9 +2155,8 @@ def rover_status():
 
         "server_time":
             datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-
+                "%Y-%m-%d %H:%M:%S",
+            ),
     })
 
 
@@ -2304,14 +2166,14 @@ def rover_status():
 
 @app.route(
     "/api/rover/speed",
-    methods=["POST"]
+    methods=["POST"],
 )
 def rover_speed():
 
     try:
 
         data = request.get_json(
-            silent=True
+            silent=True,
         )
 
         if data is None:
@@ -2322,20 +2184,17 @@ def rover_speed():
 
             data.get(
                 "speed",
-                50
+                50,
             )
 
         )
 
         speed = max(
-
             0,
-
             min(
                 100,
-                speed
-            )
-
+                speed,
+            ),
         )
 
         rover_state[
@@ -2347,11 +2206,8 @@ def rover_speed():
         ] = speed
 
         save_json_file(
-
             SETTINGS_FILE,
-
-            rover_settings
-
+            rover_settings,
         )
 
         return jsonify({
@@ -2363,8 +2219,7 @@ def rover_speed():
                 speed,
 
             "rover":
-                rover_state
-
+                rover_state,
         })
 
     except Exception as error:
@@ -2375,7 +2230,7 @@ def rover_speed():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2386,14 +2241,14 @@ def rover_speed():
 
 @app.route(
     "/api/rover/pump",
-    methods=["POST"]
+    methods=["POST"],
 )
 def rover_pump():
 
     try:
 
         data = request.get_json(
-            silent=True
+            silent=True,
         )
 
         if data is None:
@@ -2402,11 +2257,11 @@ def rover_pump():
 
         state = data.get(
             "state",
-            False
+            False,
         )
 
         state = parse_boolean(
-            state
+            state,
         )
 
         # ----------------------------------------------------
@@ -2414,11 +2269,8 @@ def rover_pump():
         # ----------------------------------------------------
 
         if state and not rover_settings.get(
-
             "spray_enabled",
-
-            True
-
+            True,
         ):
 
             return jsonify({
@@ -2430,7 +2282,7 @@ def rover_pump():
                     "Spray system is disabled in settings",
 
                 "pump":
-                    False
+                    False,
 
             }), 403
 
@@ -2449,7 +2301,6 @@ def rover_pump():
             else
 
             "pump_off"
-
         )
 
         rover_state[
@@ -2475,8 +2326,7 @@ def rover_pump():
             "command_id":
                 rover_state[
                     "command_id"
-                ]
-
+                ],
         })
 
     except Exception as error:
@@ -2487,7 +2337,7 @@ def rover_pump():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2498,7 +2348,7 @@ def rover_pump():
 
 @app.route(
     "/api/settings",
-    methods=["GET"]
+    methods=["GET"],
 )
 def get_settings():
 
@@ -2508,8 +2358,7 @@ def get_settings():
             True,
 
         "settings":
-            rover_settings
-
+            rover_settings,
     })
 
 
@@ -2519,14 +2368,14 @@ def get_settings():
 
 @app.route(
     "/api/settings",
-    methods=["POST"]
+    methods=["POST"],
 )
 def update_settings():
 
     try:
 
         data = request.get_json(
-            silent=True
+            silent=True,
         )
 
         if data is None:
@@ -2541,7 +2390,7 @@ def update_settings():
 
             "auto_mode",
             "spray_enabled",
-            "detection_enabled"
+            "detection_enabled",
 
         ]
 
@@ -2554,9 +2403,8 @@ def update_settings():
                 ] = parse_boolean(
 
                     data.get(
-                        field
-                    )
-
+                        field,
+                    ),
                 )
 
         # ----------------------------------------------------
@@ -2570,27 +2418,23 @@ def update_settings():
                 threshold = float(
 
                     data.get(
-                        "confidence_threshold"
+                        "confidence_threshold",
                     )
-
                 )
 
                 threshold = max(
-
                     0,
-
                     min(
                         100,
-                        threshold
-                    )
-
+                        threshold,
+                    ),
                 )
 
                 rover_settings[
                     "confidence_threshold"
                 ] = round(
                     threshold,
-                    2
+                    2,
                 )
 
             except Exception:
@@ -2608,20 +2452,16 @@ def update_settings():
                 speed = int(
 
                     data.get(
-                        "speed"
+                        "speed",
                     )
-
                 )
 
                 speed = max(
-
                     0,
-
                     min(
                         100,
-                        speed
-                    )
-
+                        speed,
+                    ),
                 )
 
                 rover_settings[
@@ -2685,15 +2525,12 @@ def update_settings():
                 ] = "pump_off"
 
         # ----------------------------------------------------
-        # SAVE
+        # SAVE SETTINGS
         # ----------------------------------------------------
 
         save_json_file(
-
             SETTINGS_FILE,
-
-            rover_settings
-
+            rover_settings,
         )
 
         return jsonify({
@@ -2708,15 +2545,14 @@ def update_settings():
                 rover_settings,
 
             "rover":
-                rover_state
-
+                rover_state,
         })
 
     except Exception as error:
 
         print(
             "SETTINGS ERROR:",
-            error
+            error,
         )
 
         return jsonify({
@@ -2725,7 +2561,7 @@ def update_settings():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2736,15 +2572,25 @@ def update_settings():
 
 @app.route(
     "/api/history/clear",
-    methods=["POST"]
+    methods=["POST"],
 )
 def clear_history():
 
     try:
 
-        save_history(
-            []
-        )
+        if not save_history(
+            [],
+        ):
+
+            return jsonify({
+
+                "success":
+                    False,
+
+                "message":
+                    "Failed to clear prediction history",
+
+            }), 500
 
         return jsonify({
 
@@ -2755,8 +2601,7 @@ def clear_history():
                 "Prediction history cleared",
 
             "count":
-                0
-
+                0,
         })
 
     except Exception as error:
@@ -2767,7 +2612,7 @@ def clear_history():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2778,15 +2623,25 @@ def clear_history():
 
 @app.route(
     "/api/daily-data/clear",
-    methods=["POST"]
+    methods=["POST"],
 )
 def clear_daily_data():
 
     try:
 
-        save_daily_data(
-            {}
-        )
+        if not save_daily_data(
+            {},
+        ):
+
+            return jsonify({
+
+                "success":
+                    False,
+
+                "message":
+                    "Failed to clear daily prediction data",
+
+            }), 500
 
         return jsonify({
 
@@ -2797,8 +2652,7 @@ def clear_daily_data():
                 "Daily prediction data cleared",
 
             "count":
-                0
-
+                0,
         })
 
     except Exception as error:
@@ -2809,7 +2663,7 @@ def clear_daily_data():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2820,17 +2674,25 @@ def clear_daily_data():
 
 @app.route(
     "/api/result/clear",
-    methods=["POST"]
+    methods=["POST"],
 )
 def clear_result():
 
     try:
 
-        save_latest_result(
+        if not save_latest_result(
+            DEFAULT_RESULT.copy(),
+        ):
 
-            DEFAULT_RESULT.copy()
+            return jsonify({
 
-        )
+                "success":
+                    False,
+
+                "message":
+                    "Failed to clear latest result",
+
+            }), 500
 
         return jsonify({
 
@@ -2841,8 +2703,7 @@ def clear_result():
                 "Latest result cleared",
 
             "result":
-                DEFAULT_RESULT.copy()
-
+                DEFAULT_RESULT.copy(),
         })
 
     except Exception as error:
@@ -2853,7 +2714,7 @@ def clear_result():
                 False,
 
             "message":
-                str(error)
+                str(error),
 
         }), 500
 
@@ -2886,8 +2747,7 @@ def request_too_large(error):
             (
                 "Uploaded file is too large. "
                 "Maximum size is 10 MB."
-            )
-
+            ),
     }), 413
 
 
@@ -2900,8 +2760,7 @@ def page_not_found(error):
             False,
 
         "error":
-            "Page not found"
-
+            "Page not found",
     }), 404
 
 
@@ -2914,8 +2773,7 @@ def internal_server_error(error):
             False,
 
         "error":
-            "Internal server error"
-
+            "Internal server error",
     }), 500
 
 
@@ -2929,9 +2787,8 @@ if __name__ == "__main__":
 
         os.environ.get(
             "PORT",
-            5000
+            5000,
         )
-
     )
 
     print(
@@ -2948,7 +2805,7 @@ if __name__ == "__main__":
 
     print(
         "PORT:",
-        port
+        port,
     )
 
     print(
@@ -2984,11 +2841,27 @@ if __name__ == "__main__":
     )
 
     print(
+        "HISTORY API:"
+    )
+
+    print(
+        "/api/history"
+    )
+
+    print(
         "ROVER CONTROL:"
     )
 
     print(
         "/api/rover/control"
+    )
+
+    print(
+        "EMERGENCY STOP:"
+    )
+
+    print(
+        "/api/rover/emergency-stop"
     )
 
     print(
@@ -3024,6 +2897,14 @@ if __name__ == "__main__":
     )
 
     print(
+        "SETTINGS:"
+    )
+
+    print(
+        "/api/settings"
+    )
+
+    print(
         "PWA:"
     )
 
@@ -3043,6 +2924,5 @@ if __name__ == "__main__":
 
         debug=False,
 
-        threaded=True
-
+        threaded=True,
     )
