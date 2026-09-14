@@ -4238,7 +4238,54 @@ footer {
         0 12px 32px rgba(15, 55, 35, 0.09);
 
     --shadow-lg:
-        0 18px 45px rgba(15, 55, 35, 0.12);
+====================================================
+   CONFIDENCE
+========================================================= */
+
+.confidence-box {
+
+    margin-top:
+        18px;
+
+}
+
+.confidence-header {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        7px;
+
+}
+
+.confidence-header span {
+
+    color:
+        var(--text-light);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+#confidence-value {
+
+    color:
+        #28734e;
+
+}
+
+.progress {
+
+    width:
+               0 18px 45px rgba(15, 55, 35, 0.12);
 
     --radius-sm: 10px;
     --radius-md: 16px;
@@ -6235,56 +6282,53 @@ body::after {
         1.65;
 
 }
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:1100px) {
+
+    .content {
+        padding:
+            30px 28px;
+    }
+
+    .detection-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .image-box {
+        height:
+            390px;
+    }
+
+}
 
 
 /* =========================================================
-   CONFIDENCE
+   SMALL TABLET
 ========================================================= */
 
-.confidence-box {
+@media(max-width:800px) {
 
-    margin-top:
-        18px;
+    .sidebar {
 
-}
+        width:
+            72px;
 
-.confidence-header {
+        padding:
+            20px 8px;
 
-    display:
-        flex;
+    }
 
-    justify-content:
-        space-between;
+    .logo {
 
-    margin-bottom:
-        7px;
+        text-align:
+       
 
-}
 
-.confidence-header span {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
-
-}
-
-#confidence-value {
-
-    color:
-        #28734e;
-
-}
-
-.progress {
-
-    width:
-        100%;
+/* ===== 100%;
 
     height:
         9px;
@@ -7205,51 +7249,7 @@ footer {
 
 }
 
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media(max-width:1100px) {
-
-    .content {
-        padding:
-            30px 28px;
-    }
-
-    .detection-grid {
-        grid-template-columns:
-            1fr;
-    }
-
-    .image-box {
-        height:
-            390px;
-    }
-
-}
-
-
-/* =========================================================
-   SMALL TABLET
-========================================================= */
-
-@media(max-width:800px) {
-
-    .sidebar {
-
-        width:
-            72px;
-
-        padding:
-            20px 8px;
-
-    }
-
-    .logo {
-
-        text-align:
-            center;
+     center;
 
         padding:
             5px 0 20px;
@@ -8185,250 +8185,3769 @@ footer {
     <div class="confidence-box">
 
         <div class="confidence-header">
+<!DOCTYPE html>
+<html lang="en">
 
-            <span>
-                AI CONFIDENCE
-            </span>
+<head>
 
-            <span id="confidence-value">
+    <meta charset="UTF-8">
 
-                {{ detection.confidence or 0 }}%
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-            </span>
+    <meta
+        name="theme-color"
+        content="#0b3d2e"
+    >
+
+    <meta
+        name="description"
+        content="Precision Agriculture Smart Rover - AI-Powered Plant Leaf Disease Detection System"
+    >
+
+    <title>
+        Plant Leaf Detection Dashboard
+    </title>
+
+
+    <style>
+
+        /* =========================================================
+           ROOT
+        ========================================================= */
+
+        :root {
+
+            --primary:
+                #28734e;
+
+            --primary-dark:
+                #0b3d2e;
+
+            --primary-light:
+                #43bb77;
+
+            --green:
+                #159447;
+
+            --green-light:
+                #edf7ef;
+
+            --background:
+                #f6f9f7;
+
+            --border:
+                #e2ebe5;
+
+            --text:
+                #20342b;
+
+            --text-light:
+                #789088;
+
+            --text-soft:
+                #87978f;
+
+            --white:
+                #ffffff;
+
+            --danger:
+                #dc3545;
+
+            --radius-md:
+                16px;
+
+            --radius-sm:
+                12px;
+
+            --shadow-sm:
+                0 4px 16px rgba(20, 70, 45, 0.06);
+
+            --shadow-md:
+                0 12px 30px rgba(20, 70, 45, 0.10);
+
+        }
+
+
+        /* =========================================================
+           RESET
+        ========================================================= */
+
+        * {
+
+            margin:
+                0;
+
+            padding:
+                0;
+
+            box-sizing:
+                border-box;
+
+        }
+
+
+        html {
+
+            scroll-behavior:
+                smooth;
+
+        }
+
+
+        body {
+
+            font-family:
+                Inter,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background:
+                var(--background);
+
+            color:
+                var(--text);
+
+            min-height:
+                100vh;
+
+            overflow-x:
+                hidden;
+
+        }
+
+
+        a {
+
+            text-decoration:
+                none;
+
+        }
+
+
+        button {
+
+            font-family:
+                inherit;
+
+        }
+
+
+        /* =========================================================
+           APP
+        ========================================================= */
+
+        .app {
+
+            min-height:
+                100vh;
+
+            display:
+                flex;
+
+        }
+
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .sidebar {
+
+            position:
+                fixed;
+
+            left:
+                0;
+
+            top:
+                0;
+
+            bottom:
+                0;
+
+            width:
+                245px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #0b3d2e,
+                    #104b38
+                );
+
+            color:
+                white;
+
+            padding:
+                26px 17px;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            z-index:
+                1000;
+
+            box-shadow:
+                5px 0 25px rgba(0,0,0,.08);
+
+        }
+
+
+        /* =========================================================
+           LOGO
+        ========================================================= */
+
+        .logo {
+
+            text-align:
+                center;
+
+            padding:
+                4px 5px 24px;
+
+        }
+
+
+        .logo-icon {
+
+            width:
+                58px;
+
+            height:
+                58px;
+
+            margin:
+                0 auto 14px;
+
+            border-radius:
+                17px;
+
+            background:
+                rgba(255,255,255,.12);
+
+            border:
+                1px solid rgba(255,255,255,.12);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                28px;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,.10);
+
+        }
+
+
+        .logo h1 {
+
+            font-size:
+                16px;
+
+            line-height:
+                1.35;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                -.2px;
+
+        }
+
+
+        .logo p {
+
+            margin-top:
+                8px;
+
+            font-size:
+                9px;
+
+            line-height:
+                1.5;
+
+            color:
+                rgba(255,255,255,.62);
+
+        }
+
+
+        /* =========================================================
+           MENU
+        ========================================================= */
+
+        .menu-title {
+
+            color:
+                rgba(255,255,255,.42);
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1px;
+
+            padding:
+                12px 12px 8px;
+
+            text-transform:
+                uppercase;
+
+        }
+
+
+        .menu {
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                5px;
+
+        }
+
+
+        .menu a {
+
+            color:
+                rgba(255,255,255,.72);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            padding:
+                12px 13px;
+
+            border-radius:
+                12px;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            transition:
+                background .25s ease,
+                color .25s ease,
+                transform .25s ease;
+
+        }
+
+
+        .menu a:hover {
+
+            background:
+                rgba(255,255,255,.08);
+
+            color:
+                white;
+
+            transform:
+                translateX(3px);
+
+        }
+
+
+        .menu a.active {
+
+            background:
+                rgba(255,255,255,.14);
+
+            color:
+                white;
+
+            box-shadow:
+                inset 3px 0 0 #43bb77;
+
+        }
+
+
+        .menu-icon {
+
+            width:
+                25px;
+
+            text-align:
+                center;
+
+            font-size:
+                17px;
+
+        }
+
+
+        /* =========================================================
+           SIDEBAR BOTTOM
+        ========================================================= */
+
+        .sidebar-bottom {
+
+            margin-top:
+                auto;
+
+        }
+
+
+        .connection-box {
+
+            padding:
+                14px;
+
+            border-radius:
+                13px;
+
+            background:
+                rgba(255,255,255,.07);
+
+            border:
+                1px solid rgba(255,255,255,.08);
+
+        }
+
+
+        .connection-title {
+
+            color:
+                rgba(255,255,255,.45);
+
+            font-size:
+                8px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                .8px;
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .connection-status {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        .green-dot {
+
+            width:
+                7px;
+
+            height:
+                7px;
+
+            border-radius:
+                50%;
+
+            background:
+                #36d477;
+
+            display:
+                inline-block;
+
+            box-shadow:
+                0 0 8px rgba(54,212,119,.75);
+
+        }
+
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .main {
+
+            margin-left:
+                245px;
+
+            width:
+                calc(100% - 245px);
+
+            min-height:
+                100vh;
+
+        }
+
+
+        /* =========================================================
+           TOPBAR
+        ========================================================= */
+
+        .topbar {
+
+            min-height:
+                78px;
+
+            padding:
+                16px 31px;
+
+            background:
+                rgba(255,255,255,.96);
+
+            border-bottom:
+                1px solid var(--border);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            position:
+                sticky;
+
+            top:
+                0;
+
+            z-index:
+                100;
+
+            backdrop-filter:
+                blur(12px);
+
+        }
+
+
+        .topbar-title h2 {
+
+            font-size:
+                16px;
+
+            font-weight:
+                800;
+
+            color:
+                var(--primary-dark);
+
+        }
+
+
+        .topbar-title p {
+
+            margin-top:
+                4px;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                9px;
+
+        }
+
+
+        /* =========================================================
+           SYSTEM BADGE
+        ========================================================= */
+
+        .system-badge {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            padding:
+                8px 12px;
+
+            border-radius:
+                20px;
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
+
+            transition:
+                .3s ease;
+
+        }
+
+
+        .online-mode {
+
+            background:
+                #edf8f0;
+
+            color:
+                #167b43;
+
+            border:
+                1px solid #d8eddf;
+
+        }
+
+
+        .offline-mode {
+
+            background:
+                #fff0f0;
+
+            color:
+                #c8323f;
+
+            border:
+                1px solid #f1d5d8;
+
+        }
+
+
+        /* =========================================================
+           CONTENT
+        ========================================================= */
+
+        .content {
+
+            padding:
+                31px;
+
+            max-width:
+                1500px;
+
+            margin:
+                auto;
+
+        }
+
+
+        /* =========================================================
+           CONTENT ENTER
+        ========================================================= */
+
+        @keyframes contentEnter {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(12px);
+
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* =========================================================
+           WELCOME
+        ========================================================= */
+
+        .welcome {
+
+            margin-bottom:
+                26px;
+
+            animation:
+                contentEnter
+                .7s
+                cubic-bezier(.22,1,.36,1)
+                both;
+
+        }
+
+
+        .welcome h1 {
+
+            color:
+                var(--primary-dark);
+
+            font-size:
+                27px;
+
+            line-height:
+                1.2;
+
+            font-weight:
+                850;
+
+        }
+
+
+        .welcome p {
+
+            color:
+                var(--text-light);
+
+            font-size:
+                11px;
+
+            margin-top:
+                8px;
+
+        }
+
+
+        /* =========================================================
+           STATISTICS
+        ========================================================= */
+
+        .statistics-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                18px;
+
+            margin-bottom:
+                31px;
+
+            animation:
+                contentEnter
+                .7s
+                cubic-bezier(.22,1,.36,1)
+                .1s
+                both;
+
+        }
+
+
+        .stat-card {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius-md);
+
+            padding:
+                19px;
+
+            box-shadow:
+                var(--shadow-sm);
+
+            transition:
+                transform .35s
+                cubic-bezier(.22,1,.36,1),
+                box-shadow .35s ease,
+                border-color .35s ease;
+
+        }
+
+
+        .stat-card:hover {
+
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                var(--shadow-md);
+
+            border-color:
+                #cfe3d7;
+
+        }
+
+
+        .stat-top {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+        }
+
+
+        .stat-label {
+
+            color:
+                var(--text-light);
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                .5px;
+
+            text-transform:
+                uppercase;
+
+        }
+
+
+        .stat-icon {
+
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border-radius:
+                11px;
+
+            background:
+                var(--green-light);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .stat-number {
+
+            margin-top:
+                13px;
+
+            font-size:
+                31px;
+
+            line-height:
+                1;
+
+            font-weight:
+                850;
+
+            color:
+                var(--primary-dark);
+
+        }
+
+
+        .healthy-number {
+
+            color:
+                #159447;
+
+        }
+
+
+        .diseased-number {
+
+            color:
+                #d15b49;
+
+        }
+
+
+        .stat-subtitle {
+
+            margin-top:
+                8px;
+
+            color:
+                var(--text-soft);
+
+            font-size:
+                9px;
+
+        }
+
+
+        /* =========================================================
+           SECTION HEADING
+        ========================================================= */
+
+        .section-heading {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            margin-bottom:
+                14px;
+
+        }
+
+
+        .section-heading h3 {
+
+            color:
+                var(--primary-dark);
+
+            font-size:
+                14px;
+
+            font-weight:
+                800;
+
+        }
+
+
+        .section-heading > span {
+
+            color:
+                var(--text-light);
+
+            font-size:
+                9px;
+
+            font-weight:
+                750;
+
+        }
+
+
+        /* =========================================================
+           DETECTION GRID
+        ========================================================= */
+
+        .detection-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                minmax(0, 1fr);
+
+            gap:
+                18px;
+
+        }
+
+
+        .card {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius-md);
+
+            box-shadow:
+                var(--shadow-sm);
+
+        }
+
+
+        /* =========================================================
+           IMAGE CARD
+        ========================================================= */
+
+        .image-card {
+
+            padding:
+                19px;
+
+        }
+
+
+        .image-card-header,
+        .result-header {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                10px;
+
+            margin-bottom:
+                14px;
+
+        }
+
+
+        .image-card-header h3,
+        .result-header h3 {
+
+            font-size:
+                12px;
+
+            font-weight:
+                800;
+
+            color:
+                var(--primary-dark);
+
+        }
+
+
+        .image-label,
+        .ai-badge {
+
+            font-size:
+                7px;
+
+            font-weight:
+                850;
+
+            letter-spacing:
+                .7px;
+
+            padding:
+                6px 8px;
+
+            border-radius:
+                8px;
+
+            background:
+                #edf7ef;
+
+            color:
+                #28734e;
+
+            border:
+                1px solid #deebe2;
+
+            white-space:
+                nowrap;
+
+        }
+
+
+        .image-box {
+
+            width:
+                100%;
+
+            height:
+                355px;
+
+            border-radius:
+                14px;
+
+            background:
+                #f2f6f3;
+
+            border:
+                1px dashed #cbdad0;
+
+            overflow:
+                hidden;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+        }
+
+
+        .image-box img {
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            object-fit:
+                contain;
+
+            display:
+                block;
+
+            transition:
+                opacity .35s ease;
+
+        }
+
+
+        .image-placeholder {
+
+            font-size:
+                48px;
+
+            opacity:
+                .45;
+
+        }
+
+
+        .image-name {
+
+            margin-top:
+                11px;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                9px;
+
+            white-space:
+                nowrap;
+
+            overflow:
+                hidden;
+
+            text-overflow:
+                ellipsis;
+
+        }
+
+
+        /* =========================================================
+           RESULT CARD
+        ========================================================= */
+
+        .result-card {
+
+            padding:
+                19px;
+
+        }
+
+
+        .detection-result {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f4faf6,
+                    #eef7f1
+                );
+
+            border:
+                1px solid #deebe2;
+
+            border-radius:
+                14px;
+
+            padding:
+                18px;
+
+            margin-bottom:
+                13px;
+
+        }
+
+
+        .detection-result small {
+
+            display:
+                block;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                8px;
+
+            font-weight:
+                850;
+
+            letter-spacing:
+                .7px;
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .detection-result h1 {
+
+            color:
+                var(--primary-dark);
+
+            font-size:
+                24px;
+
+            line-height:
+                1.25;
+
+            font-weight:
+                850;
+
+            word-break:
+                break-word;
+
+        }
+
+
+        .result-status {
+
+            display:
+                inline-block;
+
+            margin-top:
+                9px;
+
+            color:
+                #159447;
+
+            font-size:
+                8px;
+
+            font-weight:
+                850;
+
+        }
+
+
+        /* =========================================================
+           INFO BOX
+        ========================================================= */
+
+        .info-box {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            padding:
+                13px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                12px;
+
+            margin-bottom:
+                10px;
+
+            transition:
+                transform .3s ease,
+                box-shadow .3s ease,
+                border-color .3s ease;
+
+        }
+
+
+        .info-box:hover {
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                var(--shadow-sm);
+
+            border-color:
+                #cfe3d7;
+
+        }
+
+
+        .info-icon {
+
+            width:
+                39px;
+
+            height:
+                39px;
+
+            flex-shrink:
+                0;
+
+            border-radius:
+                11px;
+
+            background:
+                #edf7ef;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .info-content span {
+
+            display:
+                block;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                7px;
+
+            font-weight:
+                850;
+
+            letter-spacing:
+                .6px;
+
+            margin-bottom:
+                5px;
+
+        }
+
+
+        .info-content strong {
+
+            display:
+                block;
+
+            color:
+                var(--text);
+
+            font-size:
+                10px;
+
+            line-height:
+                1.45;
+
+            font-weight:
+                800;
+
+            word-break:
+                break-word;
+
+        }
+
+
+        /* =========================================================
+           TREATMENT
+        ========================================================= */
+
+        .treatment-box {
+
+            padding:
+                14px;
+
+            border-radius:
+                12px;
+
+            background:
+                #fafcfb;
+
+            border:
+                1px solid var(--border);
+
+            margin-top:
+                11px;
+
+        }
+
+
+        .treatment-box > span {
+
+            display:
+                block;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                7px;
+
+            font-weight:
+                850;
+
+            letter-spacing:
+                .6px;
+
+            margin-bottom:
+                7px;
+
+        }
+
+
+        .treatment-box p {
+
+            color:
+                var(--text);
+
+            font-size:
+                10px;
+
+            line-height:
+                1.65;
+
+        }
+
+
+        /* =========================================================
+           CONFIDENCE
+        ========================================================= */
+
+        .confidence-box {
+
+            margin-top:
+                16px;
+
+        }
+
+
+        .confidence-header {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .confidence-header span {
+
+            font-size:
+                8px;
+
+            font-weight:
+                850;
+
+            color:
+                var(--text-light);
+
+            letter-spacing:
+                .5px;
+
+        }
+
+
+        #confidence-value {
+
+            color:
+                var(--primary-dark);
+
+        }
+
+
+        .progress {
+
+            width:
+                100%;
+
+            height:
+                9px;
+
+            background:
+                #e7efe9;
+
+            border-radius:
+                20px;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .progress-bar {
+
+            width:
+                0%;
+
+            height:
+                100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #2b8055,
+                    #42c477
+                );
+
+            border-radius:
+                20px;
+
+            transition:
+                width .9s
+                cubic-bezier(.22,1,.36,1);
+
+            box-shadow:
+                0 0 10px rgba(66,196,119,.25);
+
+            position:
+                relative;
+
+            overflow:
+                hidden;
+
+        }
+
+
+        .progress-bar::after {
+
+            content:
+                "";
+
+            position:
+                absolute;
+
+            top:
+                0;
+
+            left:
+                -40%;
+
+            width:
+                35%;
+
+            height:
+                100%;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255,255,255,.55),
+                    transparent
+                );
+
+            animation:
+                confidenceShine
+                2.8s
+                ease-in-out
+                infinite;
+
+        }
+
+
+        @keyframes confidenceShine {
+
+            0% {
+
+                left:
+                    -40%;
+
+            }
+
+            60%,
+            100% {
+
+                left:
+                    120%;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           STATUS
+        ========================================================= */
+
+        .status-section {
+
+            margin-top:
+                31px;
+
+            animation:
+                contentEnter
+                .7s
+                cubic-bezier(.22,1,.36,1)
+                .38s
+                both;
+
+        }
+
+
+        .status-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                18px;
+
+        }
+
+
+        .status-card {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius-md);
+
+            padding:
+                19px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                14px;
+
+            box-shadow:
+                var(--shadow-sm);
+
+            transition:
+                transform .35s
+                cubic-bezier(.22,1,.36,1),
+                box-shadow .35s ease,
+                border-color .35s ease;
+
+        }
+
+
+        .status-card:hover {
+
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                var(--shadow-md);
+
+            border-color:
+                #cfe3d7;
+
+        }
+
+
+        .status-icon {
+
+            width:
+                47px;
+
+            height:
+                47px;
+
+            border-radius:
+                13px;
+
+            background:
+                #edf7ef;
+
+            border:
+                1px solid #deebe2;
+
+            display:
+                flex;
+
+            justify-content:
+                center;
+
+            align-items:
+                center;
+
+            font-size:
+                21px;
+
+            transition:
+                transform .4s
+                cubic-bezier(.22,1,.36,1);
+
+        }
+
+
+        .status-card:hover .status-icon {
+
+            transform:
+                scale(1.1)
+                rotate(-5deg);
+
+        }
+
+
+        .status-info span {
+
+            display:
+                block;
+
+            color:
+                var(--text-light);
+
+            font-size:
+                9px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                .5px;
+
+            margin-bottom:
+                5px;
+
+        }
+
+
+        .status-info strong {
+
+            font-size:
+                13px;
+
+            font-weight:
+                800;
+
+        }
+
+
+        .status-online {
+
+            color:
+                #159447;
+
+        }
+
+
+        .status-offline {
+
+            color:
+                #dc3545;
+
+        }
+
+
+        /* =========================================================
+           QUICK ACCESS
+        ========================================================= */
+
+        .quick-section {
+
+            margin-top:
+                31px;
+
+            animation:
+                contentEnter
+                .7s
+                cubic-bezier(.22,1,.36,1)
+                .46s
+                both;
+
+        }
+
+
+        .quick-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                18px;
+
+        }
+
+
+        .quick-card {
+
+            background:
+                white;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                var(--radius-md);
+
+            padding:
+                19px;
+
+            position:
+                relative;
+
+            overflow:
+                hidden;
+
+            transition:
+                transform .35s
+                cubic-bezier(.22,1,.36,1),
+                box-shadow .35s ease,
+                border-color .35s ease;
+
+        }
+
+
+        .quick-card::before {
+
+            content:
+                "";
+
+            position:
+                absolute;
+
+            left:
+                0;
+
+            bottom:
+                0;
+
+            width:
+                100%;
+
+            height:
+                2px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    transparent,
+                    #43bb77,
+                    transparent
+                );
+
+            transform:
+                scaleX(0);
+
+            transition:
+                transform .4s ease;
+
+        }
+
+
+        .quick-card:hover {
+
+            transform:
+                translateY(-5px);
+
+            box-shadow:
+                var(--shadow-md);
+
+            border-color:
+                #cfe3d7;
+
+        }
+
+
+        .quick-card:hover::before {
+
+            transform:
+                scaleX(1);
+
+        }
+
+
+        .quick-icon {
+
+            width:
+                43px;
+
+            height:
+                43px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                12px;
+
+            background:
+                #edf7ef;
+
+            font-size:
+                21px;
+
+            margin-bottom:
+                11px;
+
+            transition:
+                transform .4s
+                cubic-bezier(.22,1,.36,1),
+                box-shadow .3s ease;
+
+        }
+
+
+        .quick-card:hover .quick-icon {
+
+            transform:
+                translateY(-3px)
+                scale(1.08)
+                rotate(-4deg);
+
+            box-shadow:
+                0 8px 20px rgba(35,120,75,.10);
+
+        }
+
+
+        .quick-card h4 {
+
+            color:
+                var(--primary-dark);
+
+            font-size:
+                13px;
+
+            font-weight:
+                750;
+
+        }
+
+
+        .quick-card p {
+
+            color:
+                var(--text-soft);
+
+            font-size:
+                10px;
+
+            margin-top:
+                6px;
+
+            line-height:
+                1.6;
+
+        }
+
+
+        .quick-card a {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            margin-top:
+                13px;
+
+            color:
+                #28734e;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
+            transition:
+                transform .3s ease,
+                color .3s ease;
+
+        }
+
+
+        .quick-card a:hover {
+
+            color:
+                #125b38;
+
+            transform:
+                translateX(5px);
+
+        }
+
+
+        /* =========================================================
+           LIVE INDICATOR
+        ========================================================= */
+
+        .live-update {
+
+            position:
+                fixed;
+
+            right:
+                20px;
+
+            bottom:
+                20px;
+
+            background:
+                rgba(11,61,46,0.96);
+
+            color:
+                white;
+
+            padding:
+                10px 15px;
+
+            border-radius:
+                25px;
+
+            font-size:
+                10px;
+
+            font-weight:
+                750;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.16);
+
+            z-index:
+                9999;
+
+            transition:
+                transform .3s ease,
+                box-shadow .3s ease;
+
+            backdrop-filter:
+                blur(8px);
+
+            animation:
+                liveIndicatorEnter
+                .7s
+                cubic-bezier(.22,1,.36,1)
+                .8s
+                both;
+
+        }
+
+
+        .live-update:hover {
+
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+                0 12px 30px rgba(0,0,0,.20);
+
+        }
+
+
+        @keyframes liveIndicatorEnter {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(15px)
+                    scale(.95);
+
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+
+            }
+
+        }
+
+
+        .live-update-dot {
+
+            display:
+                inline-block;
+
+            width:
+                7px;
+
+            height:
+                7px;
+
+            background:
+                #36d477;
+
+            border-radius:
+                50%;
+
+            margin-right:
+                7px;
+
+            box-shadow:
+                0 0 8px rgba(54,212,119,0.9);
+
+            animation:
+                liveDotPulse
+                1.7s
+                ease-in-out
+                infinite;
+
+        }
+
+
+        @keyframes liveDotPulse {
+
+            0%,
+            100% {
+
+                transform:
+                    scale(1);
+
+                opacity:
+                    1;
+
+            }
+
+            50% {
+
+                transform:
+                    scale(1.35);
+
+                opacity:
+                    .7;
+
+            }
+
+        }
+
+
+        .live-flash {
+
+            animation:
+                liveFlash
+                .7s
+                ease-in-out
+                2;
+
+        }
+
+
+        @keyframes liveFlash {
+
+            50% {
+
+                transform:
+                    scale(1.06);
+
+            }
+
+        }
+
+
+        /* =========================================================
+           UPDATE EFFECT
+        ========================================================= */
+
+        .updated {
+
+            animation:
+                updateGlow
+                .8s
+                cubic-bezier(.22,1,.36,1);
+
+        }
+
+
+        @keyframes updateGlow {
+
+            0% {
+
+                transform:
+                    scale(1);
+
+                box-shadow:
+                    0 0 0 rgba(45,139,92,0);
+
+            }
+
+            45% {
+
+                transform:
+                    scale(1.015);
+
+                box-shadow:
+                    0 0 0 7px rgba(45,139,92,.06);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+                box-shadow:
+                    0 0 0 rgba(45,139,92,0);
+
+            }
+
+        }
+
+
+        /* =========================================================
+           NEW RESULT ANIMATION
+        ========================================================= */
+
+        .detection-result.updated {
+
+            animation:
+                resultReceived
+                .8s
+                cubic-bezier(.22,1,.36,1);
+
+        }
+
+
+        @keyframes resultReceived {
+
+            0% {
+
+                opacity:
+                    .65;
+
+                transform:
+                    scale(.985)
+                    translateY(4px);
+
+            }
+
+            45% {
+
+                opacity:
+                    1;
+
+                transform:
+                    scale(1.015)
+                    translateY(0);
+
+                box-shadow:
+                    0 0 0 7px rgba(45,139,92,.07);
+
+            }
+
+            100% {
+
+                opacity:
+                    1;
+
+                transform:
+                    scale(1)
+                    translateY(0);
+
+                box-shadow:
+                    0 0 0 rgba(45,139,92,0);
+
+            }
+
+        }
+
+
+        .detection-result.updated
+        #disease-result {
+
+            animation:
+                diseaseTextEnter
+                .65s
+                cubic-bezier(.22,1,.36,1);
+
+        }
+
+
+        @keyframes diseaseTextEnter {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(8px);
+
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* =========================================================
+           INSTALL APP
+        ========================================================= */
+
+        .install-app-button {
+
+            display:
+                none;
+
+            position:
+                fixed;
+
+            left:
+                50%;
+
+            bottom:
+                82px;
+
+            transform:
+                translateX(-50%);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2d8b5c,
+                    #226e49
+                );
+
+            color:
+                white;
+
+            border:
+                none;
+
+            border-radius:
+                25px;
+
+            padding:
+                11px 18px;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.18);
+
+            z-index:
+                10000;
+
+            cursor:
+                pointer;
+
+            transition:
+                transform .3s
+                cubic-bezier(.22,1,.36,1),
+                box-shadow .3s ease;
+
+        }
+
+
+        .install-app-button:hover {
+
+            transform:
+                translateX(-50%)
+                translateY(-4px)
+                scale(1.025);
+
+            box-shadow:
+                0 14px 32px rgba(0,0,0,.22);
+
+        }
+
+
+        .install-app-button:active {
+
+            transform:
+                translateX(-50%)
+                translateY(-1px)
+                scale(.98);
+
+        }
+
+
+        /* =========================================================
+           MOBILE NAV
+        ========================================================= */
+
+        .mobile-nav {
+
+            display:
+                none;
+
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        footer {
+
+            text-align:
+                center;
+
+            color:
+                #98a69f;
+
+            font-size:
+                9px;
+
+            padding:
+                28px 20px;
+
+            animation:
+                contentEnter
+                .7s
+                ease-out
+                .55s
+                both;
+
+        }
+
+
+        /* =========================================================
+           TABLET
+        ========================================================= */
+
+        @media(max-width:1000px) {
+
+            .sidebar {
+
+                width:
+                    72px;
+
+                padding:
+                    18px 8px;
+
+            }
+
+
+            .logo {
+
+                padding:
+                    5px 0 20px;
+
+            }
+
+
+            .logo-icon {
+
+                margin:
+                    auto auto 12px;
+
+            }
+
+
+            .logo h1,
+            .logo p,
+            .menu-title,
+            .connection-box {
+
+                display:
+                    none;
+
+            }
+
+
+            .menu a {
+
+                justify-content:
+                    center;
+
+                padding:
+                    13px 5px;
+
+            }
+
+
+            .menu-icon {
+
+                font-size:
+                    20px;
+
+            }
+
+
+            .main {
+
+                margin-left:
+                    72px;
+
+                width:
+                    calc(100% - 72px);
+
+            }
+
+
+            .topbar {
+
+                padding:
+                    15px 22px;
+
+            }
+
+
+            .content {
+
+                padding:
+                    26px 20px;
+
+            }
+
+
+            .statistics-grid,
+            .status-grid,
+            .quick-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .detection-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media(max-width:550px) {
+
+            body {
+
+                padding-bottom:
+                    70px;
+
+            }
+
+
+            .sidebar {
+
+                display:
+                    none;
+
+            }
+
+
+            .main {
+
+                margin-left:
+                    0;
+
+                width:
+                    100%;
+
+            }
+
+
+            .topbar {
+
+                min-height:
+                    66px;
+
+                padding:
+                    10px 15px;
+
+            }
+
+
+            .topbar-title h2 {
+
+                font-size:
+                    14px;
+
+            }
+
+
+            .topbar-title p {
+
+                display:
+                    none;
+
+            }
+
+
+            .system-badge {
+
+                padding:
+                    7px 10px;
+
+                font-size:
+                    9px;
+
+            }
+
+
+            .content {
+
+                padding:
+                    21px 14px;
+
+            }
+
+
+            .welcome {
+
+                margin-bottom:
+                    21px;
+
+            }
+
+
+            .welcome h1 {
+
+                font-size:
+                    21px;
+
+            }
+
+
+            .welcome p {
+
+                font-size:
+                    10px;
+
+            }
+
+
+            .statistics-grid {
+
+                gap:
+                    12px;
+
+                margin-bottom:
+                    25px;
+
+            }
+
+
+            .stat-card {
+
+                padding:
+                    17px;
+
+            }
+
+
+            .stat-number {
+
+                font-size:
+                    28px;
+
+            }
+
+
+            .image-card,
+            .result-card {
+
+                padding:
+                    16px;
+
+            }
+
+
+            .image-box {
+
+                height:
+                    280px;
+
+            }
+
+
+            .detection-result h1 {
+
+                font-size:
+                    21px;
+
+            }
+
+
+            .status-card {
+
+                padding:
+                    16px;
+
+            }
+
+
+            .quick-card {
+
+                padding:
+                    16px;
+
+            }
+
+
+            .live-update {
+
+                right:
+                    10px;
+
+                bottom:
+                    80px;
+
+                font-size:
+                    8px;
+
+                padding:
+                    8px 11px;
+
+            }
+
+
+            .mobile-nav {
+
+                position:
+                    fixed;
+
+                left:
+                    0;
+
+                right:
+                    0;
+
+                bottom:
+                    0;
+
+                height:
+                    68px;
+
+                background:
+                    rgba(255,255,255,0.96);
+
+                border-top:
+                    1px solid #dfe7e2;
+
+                display:
+                    flex;
+
+                justify-content:
+                    space-around;
+
+                align-items:
+                    center;
+
+                z-index:
+                    9998;
+
+                box-shadow:
+                    0 -6px 25px rgba(0,0,0,0.08);
+
+                backdrop-filter:
+                    blur(12px);
+
+                animation:
+                    mobileNavEnter
+                    .6s
+                    ease-out
+                    both;
+
+            }
+
+
+            @keyframes mobileNavEnter {
+
+                from {
+
+                    opacity:
+                        0;
+
+                    transform:
+                        translateY(20px);
+
+                }
+
+                to {
+
+                    opacity:
+                        1;
+
+                    transform:
+                        translateY(0);
+
+                }
+
+            }
+
+
+            .mobile-nav a {
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                gap:
+                    3px;
+
+                color:
+                    #789088;
+
+                font-size:
+                    8px;
+
+                font-weight:
+                    750;
+
+                min-width:
+                    50px;
+
+                transition:
+                    color .25s ease,
+                    transform .25s ease;
+
+            }
+
+
+            .mobile-nav a span {
+
+                font-size:
+                    19px;
+
+                transition:
+                    transform .3s
+                    cubic-bezier(.22,1,.36,1);
+
+            }
+
+
+            .mobile-nav a:hover {
+
+                transform:
+                    translateY(-3px);
+
+            }
+
+
+            .mobile-nav a:hover span,
+            .mobile-nav a.active span {
+
+                transform:
+                    translateY(-2px)
+                    scale(1.08);
+
+            }
+
+
+            .mobile-nav a.active {
+
+                color:
+                    #28734e;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           EXTRA SMALL
+        ========================================================= */
+
+        @media(max-width:380px) {
+
+            .topbar-title h2 {
+
+                font-size:
+                    12px;
+
+            }
+
+
+            .system-badge {
+
+                padding:
+                    6px 8px;
+
+                font-size:
+                    8px;
+
+            }
+
+
+            .welcome h1 {
+
+                font-size:
+                    19px;
+
+            }
+
+
+            .image-box {
+
+                height:
+                    240px;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           ACCESSIBILITY
+        ========================================================= */
+
+        @media(prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+
+                scroll-behavior:
+                    auto !important;
+
+                animation-duration:
+                    0.01ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.01ms !important;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🌱
+            </div>
+
+            <h1>
+                Precision Agriculture
+                Smart Rover
+            </h1>
+
+            <p>
+                AI-Powered Plant Monitoring System
+            </p>
 
         </div>
 
 
-        <div class="progress">
+        <div class="menu-title">
+            Main Menu
+        </div>
+
+
+        <div class="menu">
+
+            <a href="/" class="active">
+
+                <span class="menu-icon">
+                    🏠
+                </span>
+
+                <span>
+                    Dashboard
+                </span>
+
+            </a>
+
+
+            <a href="/rover">
+
+                <span class="menu-icon">
+                    🚜
+                </span>
+
+                <span>
+                    Rover Control
+                </span>
+
+            </a>
+
+
+            <a href="/dataset">
+
+                <span class="menu-icon">
+                    📁
+                </span>
+
+                <span>
+                    Dataset
+                </span>
+
+            </a>
+
+
+            <a href="/analytics">
+
+                <span class="menu-icon">
+                    📊
+                </span>
+
+                <span>
+                    Analytics
+                </span>
+
+            </a>
+
+
+            <a href="/settings">
+
+                <span class="menu-icon">
+                    ⚙️
+                </span>
+
+                <span>
+                    Settings
+                </span>
+
+            </a>
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="connection-box">
+
+                <div class="connection-title">
+                    AI SYSTEM
+                </div>
+
+                <div class="connection-status">
+
+                    <span class="green-dot"></span>
+
+                    System Online
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ===================================================== -->
+
+    <div class="main">
+
+
+        <header class="topbar">
+
+            <div class="topbar-title">
+
+                <h2>
+                    Plant Leaf Detection Dashboard
+                </h2>
+
+                <p>
+                    Precision Agriculture Smart Rover
+                </p>
+
+            </div>
+
 
             <div
-                class="progress-bar"
-                id="confidence-bar"
-                style="width: {{ detection.confidence or 0 }}%;"
-            ></div>
+                class="system-badge online-mode"
+                id="system-badge"
+            >
 
-        </div>
+                <span class="green-dot"></span>
+
+                <span id="system-status-text">
+                    AI System Online
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <main class="content">
+
+
+            <!-- =================================================
+                 WELCOME
+            ================================================= -->
+
+            <section class="welcome">
+
+                <h1>
+                    Plant Leaf Detection 🌿
+                </h1>
+
+                <p>
+                    AI-based plant leaf disease detection
+                    and agricultural recommendation
+                </p>
+
+            </section>
+
+
+            <!-- =================================================
+                 STATISTICS
+            ================================================= -->
+
+            <section class="statistics-grid">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Total Predictions
+                        </div>
+
+                        <div class="stat-icon">
+                            🔍
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="total-predictions"
+                    >
+                        {{ statistics.total }}
+                    </div>
+
+                    <div class="stat-subtitle">
+                        Total AI analyses
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Healthy Leaves
+                        </div>
+
+                        <div class="stat-icon">
+                            🌿
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number healthy-number"
+                        id="healthy-predictions"
+                    >
+                        {{ statistics.healthy }}
+                    </div>
+
+                    <div
+                        class="stat-subtitle"
+                        id="healthy-percent"
+                    >
+
+                        {% if statistics.total > 0 %}
+
+                        {{ "%.1f"|format(
+                            (statistics.healthy /
+                            statistics.total) * 100
+                        ) }}% of all predictions
+
+                        {% else %}
+
+                        0.0% of all predictions
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Diseased Leaves
+                        </div>
+
+                        <div class="stat-icon">
+                            ⚠️
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number diseased-number"
+                        id="diseased-predictions"
+                    >
+                        {{ statistics.diseased }}
+                    </div>
+
+                    <div
+                        class="stat-subtitle"
+                        id="diseased-percent"
+                    >
+
+                        {% if statistics.total > 0 %}
+
+                        {{ "%.1f"|format(
+                            (statistics.diseased /
+                            statistics.total) * 100
+                        ) }}% of all predictions
+
+                        {% else %}
+
+                        0.0% of all predictions
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 AI DETECTION
+            ================================================= -->
+
+            <div class="section-heading">
+
+                <h3>
+                    🤖 AI Detection
+                </h3>
+
+                <span id="analysis-status">
+                    Live Monitoring
+                </span>
+
+            </div>
+
+
+            <section class="detection-grid">
+
+
+                <!-- IMAGE -->
+
+                <div class="card image-card">
+
+                    <div class="image-card-header">
+
+                        <h3>
+                            🌿 Latest Plant Leaf Image
+                        </h3>
+
+                        <span class="image-label">
+                            AI INPUT
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="image-box"
+                        id="image-box"
+                    >
+
+                        {% if detection.image %}
+
+                        <img
+                            id="latest-leaf-image"
+                            src="{{ url_for(
+                                'static',
+                                filename='images/' + detection.image
+                            ) }}?v={{ detection.timestamp }}"
+                            alt="Latest Plant Leaf"
+                        >
+
+                        {% else %}
+
+                        <div
+                            class="image-placeholder"
+                            id="image-placeholder"
+                        >
+                            🌿
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div
+                        class="image-name"
+                        id="image-name"
+                    >
+                        {{ detection.image or "No image available" }}
+                    </div>
+
+                </div>
+
+
+                <!-- RESULT -->
+
+                <div class="card result-card">
+
+                    <div class="result-header">
+
+                        <h3>
+                            🤖 Detection Result
+                        </h3>
+
+                        <span class="ai-badge">
+                            AI ANALYZED
+                        </span>
+
+                    </div>
+
+
+                    <div class="detection-result">
+
+                        <small>
+                            DETECTED DISEASE
+                        </small>
+
+                        <h1 id="disease-result">
+
+                            {{ detection.disease or "No prediction yet" }}
+
+                        </h1>
+
+                        <span
+                            class="result-status"
+                            id="result-status"
+                        >
+                            DETECTION COMPLETE
+                        </span>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-icon">
+                            💊
+                        </div>
+
+                        <div class="info-content">
+
+                            <span>
+                                RECOMMENDED CHEMICAL
+                            </span>
+
+                            <strong id="chemical-result">
+
+                                {{ detection.chemical or "Not available" }}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-box">
+
+                        <div class="info-icon">
+                            🌱
+                        </div>
+
+                        <div class="info-content">
+
+                            <span>
+                                RECOMMENDED FERTILIZER
+                            </span>
+
+                            <strong id="fertilizer-result">
+
+                                {{ detection.fertilizer or "Not available" }}
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="treatment-box">
+
+                        <span>
+                            RECOMMENDED TREATMENT
+                        </span>
+
+                        <p id="treatment-result">
+
+                            {{ detection.treatment or
+                               "No prediction has been processed yet." }}
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="confidence-box">
+
+                        <div class="confidence-header">
+
+                            <span>
+                                AI CONFIDENCE
+                            </span>
+
+                            <span id="confidence-value">
+
+                                {{ detection.confidence or 0 }}%
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar"
+                                id="confidence-bar"
+                                style="width: {{ detection.confidence or 0 }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 SYSTEM STATUS
+            ================================================= -->
+
+            <section class="status-section">
+
+                <div class="section-heading">
+
+                    <h3>
+                        ⚡ System Status
+                    </h3>
+
+                    <span id="status-time">
+                        Waiting for live data...
+                    </span>
+
+                </div>
+
+
+                <div class="status-grid">
+
+
+                    <div class="status-card">
+
+                        <div class="status-icon">
+                            🤖
+                        </div>
+
+                        <div class="status-info">
+
+                            <span>
+                                AI MODEL
+                            </span>
+
+                            <strong
+                                class="status-online"
+                                id="ai-status"
+                            >
+                                ONLINE
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-card">
+
+                        <div class="status-icon">
+                            🚜
+                        </div>
+
+                        <div class="status-info">
+
+                            <span>
+                                ROVER
+                            </span>
+
+                            <strong
+                                id="rover-status"
+                                class="status-offline"
+                            >
+                                NOT CONNECTED
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="status-card">
+
+                        <div class="status-icon">
+                            💧
+                        </div>
+
+                        <div class="status-info">
+
+                            <span>
+                                SPRAY PUMP
+                            </span>
+
+                            <strong
+                                id="pump-status"
+                                class="status-offline"
+                            >
+                                OFF
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 QUICK ACCESS
+            ================================================= -->
+
+            <section class="quick-section">
+
+                <div class="section-heading">
+
+                    <h3>
+                        🚀 Quick Access
+                    </h3>
+
+                    <span>
+                        Project Modules
+                    </span>
+
+                </div>
+
+
+                <div class="quick-grid">
+
+
+                    <div class="quick-card">
+
+                        <div class="quick-icon">
+                            🚜
+                        </div>
+
+                        <h4>
+                            Rover Control
+                        </h4>
+
+                        <p>
+                            Control rover movement and
+                            spray pump from the control panel.
+                        </p>
+
+                        <a href="/rover">
+                            Open Control →
+                        </a>
+
+                    </div>
+
+
+                    <div class="quick-card">
+
+                        <div class="quick-icon">
+                            📁
+                        </div>
+
+                        <h4>
+                            Prediction History
+                        </h4>
+
+                        <p>
+                            View previously analyzed plant
+                            leaf images and AI results.
+                        </p>
+
+                        <a href="/dataset">
+                            View Dataset →
+                        </a>
+
+                    </div>
+
+
+                    <div class="quick-card">
+
+                        <div class="quick-icon">
+                            📊
+                        </div>
+
+                        <h4>
+                            Analytics
+                        </h4>
+
+                        <p>
+                            View plant disease statistics
+                            and prediction graphs.
+                        </p>
+
+                        <a href="/analytics">
+                            View Analytics →
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </section>
+
+
+        </main>
+
+
+        <footer>
+
+            🌱 Precision Agriculture Smart Rover
+            &nbsp;•&nbsp;
+            AI-Based Plant Leaf Disease Detection System
+
+        </footer>
+
 
     </div>
 
 </div>
 
 
-</section>
-
-
-<!-- =====================================================
-     SYSTEM STATUS
-===================================================== -->
-
-<section class="status-section">
-
-<div class="section-heading">
-
-    <h3>
-        ⚡ System Status
-    </h3>
-
-    <span id="status-time">
-        Waiting for live data...
-    </span>
-
-</div>
-
-
-<div class="status-grid">
-
-
-<div class="status-card">
-
-    <div class="status-icon">
-        🤖
-    </div>
-
-    <div class="status-info">
-
-        <span>
-            AI MODEL
-        </span>
-
-        <strong
-            class="status-online"
-            id="ai-status"
-        >
-            ONLINE
-        </strong>
-
-    </div>
-
-</div>
-
-
-<div class="status-card">
-
-    <div class="status-icon">
-        🚜
-    </div>
-
-    <div class="status-info">
-
-        <span>
-            ROVER
-        </span>
-
-        <strong
-            id="rover-status"
-            class="status-offline"
-        >
-            NOT CONNECTED
-        </strong>
-
-    </div>
-
-</div>
-
-
-<div class="status-card">
-
-    <div class="status-icon">
-        💧
-    </div>
-
-    <div class="status-info">
-
-        <span>
-            SPRAY PUMP
-        </span>
-
-        <strong
-            id="pump-status"
-            class="status-offline"
-        >
-            OFF
-        </strong>
-
-    </div>
-
-</div>
-
-
-</div>
-
-</section>
-
-
-<!-- =====================================================
-     QUICK ACCESS
-===================================================== -->
-
-<section class="quick-section">
-
-<div class="section-heading">
-
-    <h3>
-        🚀 Quick Access
-    </h3>
-
-    <span>
-        Project Modules
-    </span>
-
-</div>
-
-
-<div class="quick-grid">
-
-
-<div class="quick-card">
-
-    <div class="quick-icon">
-        🚜
-    </div>
-
-    <h4>
-        Rover Control
-    </h4>
-
-    <p>
-        Control rover movement and
-        spray pump from the control panel.
-    </p>
-
-    <a href="/rover">
-        Open Control →
-    </a>
-
-</div>
-
-
-<div class="quick-card">
-
-    <div class="quick-icon">
-        📁
-    </div>
-
-    <h4>
-        Prediction History
-    </h4>
-
-    <p>
-        View previously analyzed plant
-        leaf images and AI results.
-    </p>
-
-    <a href="/dataset">
-        View Dataset →
-    </a>
-
-</div>
-
-
-<div class="quick-card">
-
-    <div class="quick-icon">
-        📊
-    </div>
-
-    <h4>
-        Analytics
-    </h4>
-
-    <p>
-        View plant disease statistics
-        and prediction graphs.
-    </p>
-
-    <a href="/analytics">
-        View Analytics →
-    </a>
-
-</div>
-
-
-</div>
-
-</section>
-
-
-</main>
-
-
-<footer>
-
-🌱 Precision Agriculture Smart Rover
-&nbsp;•&nbsp;
-AI-Based Plant Leaf Disease Detection System
-
-</footer>
-
-
-</div>
-
-</div>
-
-
-<!-- =====================================================
+<!-- =========================================================
      MOBILE NAV
-===================================================== -->
+========================================================= -->
 
 <nav class="mobile-nav">
 
@@ -8489,9 +12008,9 @@ AI-Based Plant Leaf Disease Detection System
 </nav>
 
 
-<!-- =====================================================
+<!-- =========================================================
      INSTALL APP
-===================================================== -->
+========================================================= -->
 
 <button
     id="install-app-button"
@@ -8503,9 +12022,9 @@ AI-Based Plant Leaf Disease Detection System
 </button>
 
 
-<!-- =====================================================
+<!-- =========================================================
      LIVE INDICATOR
-===================================================== -->
+========================================================= -->
 
 <div
     class="live-update"
@@ -8523,1135 +12042,1126 @@ AI-Based Plant Leaf Disease Detection System
 
 <script>
 
-/* =========================================================
-   DASHBOARD STATE
-========================================================= */
+    /* =========================================================
+       DASHBOARD STATE
+    ========================================================= */
 
-let lastResultKey = "";
+    let lastResultKey = "";
 
-let firstLoad = true;
+    let firstLoad = true;
 
-let dashboardRequestInProgress = false;
+    let dashboardRequestInProgress = false;
 
-let roverRequestInProgress = false;
+    let roverRequestInProgress = false;
 
-let consecutiveErrors = 0;
+    let consecutiveErrors = 0;
 
-let deferredInstallPrompt = null;
+    let deferredInstallPrompt = null;
 
-let resultMessageTimer = null;
+    let resultMessageTimer = null;
 
 
-/* =========================================================
-   HELPER
-========================================================= */
+    /* =========================================================
+       HELPER
+    ========================================================= */
 
-function setText(id, value) {
+    function setText(id, value) {
 
-    const element =
-        document.getElementById(id);
+        const element =
+            document.getElementById(id);
 
-    if (element) {
+        if (element) {
 
-        element.textContent =
-            value ?? "";
+            element.textContent =
+                value ?? "";
+
+        }
 
     }
 
-}
 
+    /* =========================================================
+       SAFE NUMBER
+    ========================================================= */
 
-/* =========================================================
-   SAFE NUMBER
-========================================================= */
+    function safeNumber(value, fallback = 0) {
 
-function safeNumber(value, fallback = 0) {
+        const number =
+            Number(value);
 
-    const number =
-        Number(value);
+        return Number.isFinite(number)
+            ? number
+            : fallback;
 
-    return Number.isFinite(number)
-        ? number
-        : fallback;
-
-}
-
-
-/* =========================================================
-   RESULT KEY
-========================================================= */
-
-function makeResultKey(result) {
-
-    if (!result) {
-        return "";
     }
 
-    return [
 
-        result.result_id ?? "",
-        result.timestamp ?? "",
-        result.image ?? "",
-        result.disease ?? "",
-        result.confidence ?? "",
-        result.chemical ?? "",
-        result.fertilizer ?? "",
-        result.treatment ?? ""
+    /* =========================================================
+       RESULT KEY
+    ========================================================= */
 
-    ].join("|");
+    function makeResultKey(result) {
 
-}
+        if (!result) {
 
+            return "";
 
-/* =========================================================
-   UPDATE STATISTICS
-========================================================= */
+        }
 
-function updateStatistics(statistics) {
+        return [
 
-    if (!statistics) {
-        return;
+            result.result_id ?? "",
+
+            result.timestamp ?? "",
+
+            result.image ?? "",
+
+            result.disease ?? "",
+
+            result.confidence ?? "",
+
+            result.chemical ?? "",
+
+            result.fertilizer ?? "",
+
+            result.treatment ?? ""
+
+        ].join("|");
+
     }
 
-    const total =
-        safeNumber(statistics.total);
 
-    const healthy =
-        safeNumber(statistics.healthy);
+    /* =========================================================
+       UPDATE STATISTICS
+    ========================================================= */
 
-    const diseased =
-        safeNumber(statistics.diseased);
+    function updateStatistics(statistics) {
 
-    setText(
-        "total-predictions",
-        total
-    );
+        if (!statistics) {
 
-    setText(
-        "healthy-predictions",
-        healthy
-    );
+            return;
 
-    setText(
-        "diseased-predictions",
-        diseased
-    );
-
-    const healthyPercentage =
-        total > 0
-        ? ((healthy / total) * 100).toFixed(1)
-        : "0.0";
-
-    const diseasedPercentage =
-        total > 0
-        ? ((diseased / total) * 100).toFixed(1)
-        : "0.0";
-
-    setText(
-        "healthy-percent",
-        healthyPercentage +
-        "% of all predictions"
-    );
-
-    setText(
-        "diseased-percent",
-        diseasedPercentage +
-        "% of all predictions"
-    );
-
-}
+        }
 
 
-/* =========================================================
-   UPDATE IMAGE
-========================================================= */
+        const total =
+            safeNumber(statistics.total);
 
-function updateImage(filename, timestamp = "") {
+        const healthy =
+            safeNumber(statistics.healthy);
 
-    const imageBox =
-        document.getElementById(
-            "image-box"
+        const diseased =
+            safeNumber(statistics.diseased);
+
+
+        setText(
+            "total-predictions",
+            total
         );
 
-    if (!imageBox) {
-        return;
+
+        setText(
+            "healthy-predictions",
+            healthy
+        );
+
+
+        setText(
+            "diseased-predictions",
+            diseased
+        );
+
+
+        const healthyPercentage =
+            total > 0
+                ? ((healthy / total) * 100).toFixed(1)
+                : "0.0";
+
+
+        const diseasedPercentage =
+            total > 0
+                ? ((diseased / total) * 100).toFixed(1)
+                : "0.0";
+
+
+        setText(
+            "healthy-percent",
+            healthyPercentage +
+            "% of all predictions"
+        );
+
+
+        setText(
+            "diseased-percent",
+            diseasedPercentage +
+            "% of all predictions"
+        );
+
     }
 
 
-    if (!filename) {
+    /* =========================================================
+       UPDATE IMAGE
+    ========================================================= */
 
-        const existingImage =
+    function updateImage(
+        filename,
+        timestamp = ""
+    ) {
+
+        const imageBox =
+            document.getElementById(
+                "image-box"
+            );
+
+
+        if (!imageBox) {
+
+            return;
+
+        }
+
+
+        if (!filename) {
+
+            const existingImage =
+                document.getElementById(
+                    "latest-leaf-image"
+                );
+
+
+            if (existingImage) {
+
+                existingImage.remove();
+
+            }
+
+
+            if (
+                !document.getElementById(
+                    "image-placeholder"
+                )
+            ) {
+
+                const placeholder =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                placeholder.id =
+                    "image-placeholder";
+
+
+                placeholder.className =
+                    "image-placeholder";
+
+
+                placeholder.textContent =
+                    "🌿";
+
+
+                imageBox.appendChild(
+                    placeholder
+                );
+
+            }
+
+
+            setText(
+                "image-name",
+                "No image available"
+            );
+
+
+            return;
+
+        }
+
+
+        const placeholder =
+            document.getElementById(
+                "image-placeholder"
+            );
+
+
+        if (placeholder) {
+
+            placeholder.remove();
+
+        }
+
+
+        let image =
             document.getElementById(
                 "latest-leaf-image"
             );
 
-        if (existingImage) {
-            existingImage.remove();
+
+        if (!image) {
+
+            image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.id =
+                "latest-leaf-image";
+
+
+            image.alt =
+                "Latest Plant Leaf";
+
+
+            imageBox.appendChild(
+                image
+            );
+
         }
 
 
+        const cacheValue =
+            timestamp ||
+            Date.now();
+
+
+        const imageURL =
+
+            "/static/images/" +
+
+            encodeURIComponent(
+                filename
+            ) +
+
+            "?v=" +
+
+            encodeURIComponent(
+                cacheValue
+            );
+
+
         if (
-            !document.getElementById(
-                "image-placeholder"
-            )
+            image.getAttribute("src") !==
+            imageURL
         ) {
 
-            const placeholder =
-                document.createElement(
-                    "div"
-                );
+            image.style.opacity =
+                "0";
 
-            placeholder.id =
-                "image-placeholder";
 
-            placeholder.className =
-                "image-placeholder";
+            image.src =
+                imageURL;
 
-            placeholder.textContent =
-                "🌿";
 
-            imageBox.appendChild(
-                placeholder
-            );
+            image.onload =
+                function() {
+
+                    image.style.opacity =
+                        "1";
+
+                };
 
         }
 
 
         setText(
             "image-name",
-            "No image available"
-        );
-
-        return;
-
-    }
-
-
-    const placeholder =
-        document.getElementById(
-            "image-placeholder"
-        );
-
-    if (placeholder) {
-        placeholder.remove();
-    }
-
-
-    let image =
-        document.getElementById(
-            "latest-leaf-image"
-        );
-
-
-    if (!image) {
-
-        image =
-            document.createElement(
-                "img"
-            );
-
-        image.id =
-            "latest-leaf-image";
-
-        image.alt =
-            "Latest Plant Leaf";
-
-        imageBox.appendChild(
-            image
-        );
-
-    }
-
-
-    const cacheValue =
-        timestamp ||
-        Date.now();
-
-
-    const imageURL =
-
-        "/static/images/" +
-
-        encodeURIComponent(
             filename
-        ) +
-
-        "?v=" +
-
-        encodeURIComponent(
-            cacheValue
         );
 
 
-    if (
-        image.getAttribute("src") !==
-        imageURL
-    ) {
-
-        image.style.opacity =
-            "0";
-
-        image.src =
-            imageURL;
-
-        image.onload =
+        image.onerror =
             function() {
 
+                console.warn(
+                    "Unable to load image:",
+                    filename
+                );
+
+
                 image.style.opacity =
-                    "1";
+                    "0";
 
             };
 
     }
 
 
-    setText(
-        "image-name",
-        filename
-    );
+    /* =========================================================
+       UPDATE RESULT
+    ========================================================= */
+
+    function updateResult(result) {
+
+        if (!result) {
+
+            return;
+
+        }
 
 
-    image.onerror =
-        function() {
-
-            console.warn(
-                "Unable to load image:",
-                filename
-            );
-
-            image.style.opacity =
-                "0";
-
-        };
-
-}
+        const disease =
+            result.disease ||
+            "No prediction yet";
 
 
-/* =========================================================
-   UPDATE RESULT
-========================================================= */
-
-function updateResult(result) {
-
-    if (!result) {
-        return;
-    }
+        const chemical =
+            result.chemical ||
+            "Not available";
 
 
-    const disease =
-        result.disease ||
-        "No prediction yet";
+        const fertilizer =
+            result.fertilizer ||
+            "Not available";
 
 
-    const chemical =
-        result.chemical ||
-        "Not available";
+        const treatment =
+            result.treatment ||
+            "No prediction has been processed yet.";
 
 
-    const fertilizer =
-        result.fertilizer ||
-        "Not available";
-
-
-    const treatment =
-        result.treatment ||
-        "No prediction has been processed yet.";
-
-
-    const confidence =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                safeNumber(
-                    result.confidence
+        const confidence =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    safeNumber(
+                        result.confidence
+                    )
                 )
-            )
-        );
-
-
-    setText(
-        "disease-result",
-        disease
-    );
-
-
-    setText(
-        "chemical-result",
-        chemical
-    );
-
-
-    setText(
-        "fertilizer-result",
-        fertilizer
-    );
-
-
-    setText(
-        "treatment-result",
-        treatment
-    );
-
-
-    setText(
-        "confidence-value",
-        confidence.toFixed(2) +
-        "%"
-    );
-
-
-    const confidenceBar =
-        document.getElementById(
-            "confidence-bar"
-        );
-
-
-    if (confidenceBar) {
-
-        confidenceBar.style.width =
-            confidence + "%";
-
-    }
-
-
-    updateImage(
-        result.image,
-        result.timestamp
-    );
-
-
-    /* =====================================================
-       RESULT ANIMATION
-    ===================================================== */
-
-    const cards =
-        document.querySelectorAll(
-            ".detection-result, .stat-card"
-        );
-
-
-    cards.forEach(
-        function(card) {
-
-            card.classList.remove(
-                "updated"
             );
 
-            void card.offsetWidth;
 
-            card.classList.add(
-                "updated"
+        setText(
+            "disease-result",
+            disease
+        );
+
+
+        setText(
+            "chemical-result",
+            chemical
+        );
+
+
+        setText(
+            "fertilizer-result",
+            fertilizer
+        );
+
+
+        setText(
+            "treatment-result",
+            treatment
+        );
+
+
+        setText(
+            "confidence-value",
+            confidence.toFixed(2) +
+            "%"
+        );
+
+
+        const confidenceBar =
+            document.getElementById(
+                "confidence-bar"
+            );
+
+
+        if (confidenceBar) {
+
+            confidenceBar.style.width =
+                confidence + "%";
+
+        }
+
+
+        updateImage(
+            result.image,
+            result.timestamp
+        );
+
+
+        /* RESULT ANIMATION */
+
+        const cards =
+            document.querySelectorAll(
+                ".detection-result, .stat-card"
+            );
+
+
+        cards.forEach(
+            function(card) {
+
+                card.classList.remove(
+                    "updated"
+                );
+
+
+                void card.offsetWidth;
+
+
+                card.classList.add(
+                    "updated"
+                );
+
+            }
+        );
+
+
+        setText(
+            "analysis-status",
+            "✨ NEW AI RESULT RECEIVED"
+        );
+
+
+        setText(
+            "result-status",
+            "✓ DETECTION COMPLETE"
+        );
+
+
+        setText(
+            "live-update-text",
+            "✨ NEW AI RESULT RECEIVED"
+        );
+
+
+        const indicator =
+            document.getElementById(
+                "live-indicator"
+            );
+
+
+        if (indicator) {
+
+            indicator.classList.remove(
+                "live-flash"
+            );
+
+
+            void indicator.offsetWidth;
+
+
+            indicator.classList.add(
+                "live-flash"
             );
 
         }
-    );
 
 
-    setText(
-        "analysis-status",
-        "✨ NEW AI RESULT RECEIVED"
-    );
+        if (resultMessageTimer) {
+
+            clearTimeout(
+                resultMessageTimer
+            );
+
+        }
 
 
-    setText(
-        "result-status",
-        "✓ DETECTION COMPLETE"
-    );
+        resultMessageTimer =
+            setTimeout(
+                function() {
+
+                    setText(
+                        "analysis-status",
+                        "Live Monitoring"
+                    );
 
 
-    setText(
-        "live-update-text",
-        "✨ NEW AI RESULT RECEIVED"
-    );
+                    setText(
+                        "live-update-text",
+                        "Live Monitoring"
+                    );
 
-
-    const indicator =
-        document.getElementById(
-            "live-indicator"
-        );
-
-
-    if (indicator) {
-
-        indicator.classList.remove(
-            "live-flash"
-        );
-
-        void indicator.offsetWidth;
-
-        indicator.classList.add(
-            "live-flash"
-        );
+                },
+                3000
+            );
 
     }
 
 
-    if (resultMessageTimer) {
+    /* =========================================================
+       UPDATE ROVER STATUS
+    ========================================================= */
 
-        clearTimeout(
-            resultMessageTimer
-        );
+    async function updateRoverStatus() {
+
+        if (roverRequestInProgress) {
+
+            return;
+
+        }
+
+
+        roverRequestInProgress =
+            true;
+
+
+        try {
+
+            const url =
+
+                "/api/rover/status" +
+                "?v=" +
+                Date.now();
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method:
+                            "GET",
+
+                        cache:
+                            "no-store",
+
+                        credentials:
+                            "same-origin",
+
+                        headers: {
+
+                            "Cache-Control":
+                                "no-cache, no-store, must-revalidate",
+
+                            "Pragma":
+                                "no-cache",
+
+                            "Accept":
+                                "application/json"
+
+                        }
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Rover status HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data ||
+                data.success !== true ||
+                !data.rover
+            ) {
+
+                throw new Error(
+                    "Invalid rover response"
+                );
+
+            }
+
+
+            const rover =
+                data.rover;
+
+
+            const roverStatus =
+                document.getElementById(
+                    "rover-status"
+                );
+
+
+            if (roverStatus) {
+
+                if (
+                    Boolean(
+                        rover.connected
+                    )
+                ) {
+
+                    roverStatus.textContent =
+                        "CONNECTED";
+
+
+                    roverStatus.className =
+                        "status-online";
+
+                }
+
+                else {
+
+                    roverStatus.textContent =
+                        "NOT CONNECTED";
+
+
+                    roverStatus.className =
+                        "status-offline";
+
+                }
+
+            }
+
+
+            const pumpStatus =
+                document.getElementById(
+                    "pump-status"
+                );
+
+
+            if (pumpStatus) {
+
+                if (
+                    Boolean(
+                        rover.pump
+                    )
+                ) {
+
+                    pumpStatus.textContent =
+                        "ON";
+
+
+                    pumpStatus.className =
+                        "status-online";
+
+                }
+
+                else {
+
+                    pumpStatus.textContent =
+                        "OFF";
+
+
+                    pumpStatus.className =
+                        "status-offline";
+
+                }
+
+            }
+
+        }
+
+        catch(error) {
+
+            console.log(
+                "Rover status error:",
+                error
+            );
+
+
+            const roverStatus =
+                document.getElementById(
+                    "rover-status"
+                );
+
+
+            if (roverStatus) {
+
+                roverStatus.textContent =
+                    "NOT CONNECTED";
+
+
+                roverStatus.className =
+                    "status-offline";
+
+            }
+
+
+            const pumpStatus =
+                document.getElementById(
+                    "pump-status"
+                );
+
+
+            if (pumpStatus) {
+
+                pumpStatus.textContent =
+                    "OFF";
+
+
+                pumpStatus.className =
+                    "status-offline";
+
+            }
+
+        }
+
+        finally {
+
+            roverRequestInProgress =
+                false;
+
+        }
 
     }
 
 
-    resultMessageTimer =
-        setTimeout(
-            function() {
+    /* =========================================================
+       DASHBOARD API
+    ========================================================= */
+
+    async function checkDashboard() {
+
+        if (dashboardRequestInProgress) {
+
+            return;
+
+        }
+
+
+        dashboardRequestInProgress =
+            true;
+
+
+        try {
+
+            const url =
+
+                "/api/dashboard-state" +
+                "?_=" +
+                Date.now();
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method:
+                            "GET",
+
+                        cache:
+                            "no-store",
+
+                        credentials:
+                            "same-origin",
+
+                        headers: {
+
+                            "Cache-Control":
+                                "no-cache, no-store, must-revalidate",
+
+                            "Pragma":
+                                "no-cache",
+
+                            "Accept":
+                                "application/json"
+
+                        }
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data ||
+                data.success !== true
+            ) {
+
+                throw new Error(
+                    "Invalid dashboard response"
+                );
+
+            }
+
+
+            consecutiveErrors =
+                0;
+
+
+            /* SYSTEM ONLINE */
+
+            setText(
+                "system-status-text",
+                "AI System Online"
+            );
+
+
+            const systemBadge =
+                document.getElementById(
+                    "system-badge"
+                );
+
+
+            if (systemBadge) {
+
+                systemBadge.classList.remove(
+                    "offline-mode"
+                );
+
+
+                systemBadge.classList.add(
+                    "online-mode"
+                );
+
+            }
+
+
+            /* STATISTICS */
+
+            updateStatistics(
+                data.statistics
+            );
+
+
+            /* SERVER TIME */
+
+            if (data.server_time) {
 
                 setText(
-                    "analysis-status",
-                    "Live Monitoring"
+                    "status-time",
+                    "Last checked: " +
+                    data.server_time
                 );
+
+            }
+
+
+            /* RESULT */
+
+            const result =
+                data.result || {};
+
+
+            const currentKey =
+                makeResultKey(
+                    result
+                );
+
+
+            if (firstLoad) {
+
+                lastResultKey =
+                    currentKey;
+
+
+                firstLoad =
+                    false;
+
+
+                updateResult(
+                    result
+                );
+
+
+                console.log(
+                    "LIVE MONITORING STARTED"
+                );
+
+            }
+
+            else if (
+                currentKey !==
+                lastResultKey
+            ) {
+
+                console.log(
+                    "NEW AI RESULT DETECTED"
+                );
+
+
+                lastResultKey =
+                    currentKey;
+
+
+                updateResult(
+                    result
+                );
+
+            }
+
+
+            if (!resultMessageTimer) {
 
                 setText(
                     "live-update-text",
                     "Live Monitoring"
                 );
 
-            },
-            3000
-        );
-
-}
-
-
-/* =========================================================
-   UPDATE ROVER STATUS
-========================================================= */
-
-async function updateRoverStatus() {
-
-    if (roverRequestInProgress) {
-        return;
-    }
-
-
-    roverRequestInProgress =
-        true;
-
-
-    try {
-
-        const url =
-
-            "/api/rover/status" +
-            "?v=" +
-            Date.now();
-
-
-        const response =
-            await fetch(
-                url,
-                {
-                    method: "GET",
-
-                    cache: "no-store",
-
-                    credentials:
-                        "same-origin",
-
-                    headers: {
-
-                        "Cache-Control":
-                            "no-cache, no-store, must-revalidate",
-
-                        "Pragma":
-                            "no-cache",
-
-                        "Accept":
-                            "application/json"
-
-                    }
-
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Rover status HTTP " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (
-            !data ||
-            data.success !== true ||
-            !data.rover
-        ) {
-
-            throw new Error(
-                "Invalid rover response"
-            );
-
-        }
-
-
-        const rover =
-            data.rover;
-
-
-        const roverStatus =
-            document.getElementById(
-                "rover-status"
-            );
-
-
-        if (roverStatus) {
-
-            if (
-                Boolean(
-                    rover.connected
-                )
-            ) {
-
-                roverStatus.textContent =
-                    "CONNECTED";
-
-                roverStatus.className =
-                    "status-online";
-
-            }
-
-            else {
-
-                roverStatus.textContent =
-                    "NOT CONNECTED";
-
-                roverStatus.className =
-                    "status-offline";
-
             }
 
         }
 
+        catch(error) {
 
-        const pumpStatus =
-            document.getElementById(
-                "pump-status"
+            consecutiveErrors++;
+
+
+            console.log(
+                "Dashboard connection error:",
+                error
             );
 
-
-        if (pumpStatus) {
-
-            if (
-                Boolean(
-                    rover.pump
-                )
-            ) {
-
-                pumpStatus.textContent =
-                    "ON";
-
-                pumpStatus.className =
-                    "status-online";
-
-            }
-
-            else {
-
-                pumpStatus.textContent =
-                    "OFF";
-
-                pumpStatus.className =
-                    "status-offline";
-
-            }
-
-        }
-
-    }
-
-    catch(error) {
-
-        console.log(
-            "Rover status error:",
-            error
-        );
-
-
-        const roverStatus =
-            document.getElementById(
-                "rover-status"
-            );
-
-
-        if (roverStatus) {
-
-            roverStatus.textContent =
-                "NOT CONNECTED";
-
-            roverStatus.className =
-                "status-offline";
-
-        }
-
-
-        const pumpStatus =
-            document.getElementById(
-                "pump-status"
-            );
-
-
-        if (pumpStatus) {
-
-            pumpStatus.textContent =
-                "OFF";
-
-            pumpStatus.className =
-                "status-offline";
-
-        }
-
-    }
-
-    finally {
-
-        roverRequestInProgress =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   DASHBOARD API
-========================================================= */
-
-async function checkDashboard() {
-
-    if (dashboardRequestInProgress) {
-        return;
-    }
-
-
-    dashboardRequestInProgress =
-        true;
-
-
-    try {
-
-        const url =
-
-            "/api/dashboard-state" +
-            "?_=" +
-            Date.now();
-
-
-        const response =
-            await fetch(
-                url,
-                {
-                    method: "GET",
-
-                    cache: "no-store",
-
-                    credentials:
-                        "same-origin",
-
-                    headers: {
-
-                        "Cache-Control":
-                            "no-cache, no-store, must-revalidate",
-
-                        "Pragma":
-                            "no-cache",
-
-                        "Accept":
-                            "application/json"
-
-                    }
-
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (
-            !data ||
-            data.success !== true
-        ) {
-
-            throw new Error(
-                "Invalid dashboard response"
-            );
-
-        }
-
-
-        consecutiveErrors =
-            0;
-
-
-        /* SYSTEM ONLINE */
-
-        setText(
-            "system-status-text",
-            "AI System Online"
-        );
-
-
-        const systemBadge =
-            document.getElementById(
-                "system-badge"
-            );
-
-
-        if (systemBadge) {
-
-            systemBadge.classList.remove(
-                "offline-mode"
-            );
-
-            systemBadge.classList.add(
-                "online-mode"
-            );
-
-        }
-
-
-        setText(
-            "live-update-text",
-            "Live Monitoring"
-        );
-
-
-        /* STATISTICS */
-
-        updateStatistics(
-            data.statistics
-        );
-
-
-        /* SERVER TIME */
-
-        if (data.server_time) {
 
             setText(
-                "status-time",
-                "Last checked: " +
-                data.server_time
+                "system-status-text",
+                consecutiveErrors >= 3
+                    ? "Server Offline"
+                    : "Connecting..."
             );
+
+
+            const systemBadge =
+                document.getElementById(
+                    "system-badge"
+                );
+
+
+            if (systemBadge) {
+
+                systemBadge.classList.remove(
+                    "online-mode"
+                );
+
+
+                systemBadge.classList.add(
+                    "offline-mode"
+                );
+
+            }
+
+
+            if (
+                consecutiveErrors >= 3
+            ) {
+
+                setText(
+                    "live-update-text",
+                    "Reconnecting..."
+                );
+
+            }
 
         }
 
+        finally {
 
-        /* RESULT */
-
-        const result =
-            data.result || {};
-
-
-        const currentKey =
-            makeResultKey(
-                result
-            );
-
-
-        if (firstLoad) {
-
-            lastResultKey =
-                currentKey;
-
-            firstLoad =
+            dashboardRequestInProgress =
                 false;
 
-
-            updateResult(
-                result
-            );
-
-
-            console.log(
-                "LIVE MONITORING STARTED"
-            );
-
-        }
-
-        else if (
-            currentKey !==
-            lastResultKey
-        ) {
-
-            console.log(
-                "NEW AI RESULT DETECTED"
-            );
-
-
-            lastResultKey =
-                currentKey;
-
-
-            updateResult(
-                result
-            );
-
         }
 
     }
 
-    catch(error) {
 
-        consecutiveErrors++;
-
-
-        console.log(
-            "Dashboard connection error:",
-            error
-        );
-
-
-        setText(
-            "system-status-text",
-            consecutiveErrors >= 3
-                ? "Server Offline"
-                : "Connecting..."
-        );
-
-
-        const systemBadge =
-            document.getElementById(
-                "system-badge"
-            );
-
-
-        if (systemBadge) {
-
-            systemBadge.classList.remove(
-                "online-mode"
-            );
-
-            systemBadge.classList.add(
-                "offline-mode"
-            );
-
-        }
-
-
-        if (
-            consecutiveErrors >= 3
-        ) {
-
-            setText(
-                "live-update-text",
-                "Reconnecting..."
-            );
-
-        }
-
-    }
-
-    finally {
-
-        dashboardRequestInProgress =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   PWA INSTALL PROMPT
-========================================================= */
-
-window.addEventListener(
-    "beforeinstallprompt",
-    function(event) {
-
-        event.preventDefault();
-
-        deferredInstallPrompt =
-            event;
-
-
-        const installButton =
-            document.getElementById(
-                "install-app-button"
-            );
-
-
-        if (installButton) {
-
-            installButton.style.display =
-                "block";
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   INSTALL APP
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        const installButton =
-            document.getElementById(
-                "install-app-button"
-            );
-
-
-        if (!installButton) {
-            return;
-        }
-
-
-        installButton.addEventListener(
-            "click",
-            async function() {
-
-                if (!deferredInstallPrompt) {
-
-                    console.log(
-                        "Install prompt not available."
-                    );
-
-                    return;
-
-                }
-
-
-                deferredInstallPrompt.prompt();
-
-
-                try {
-
-                    const choice =
-                        await deferredInstallPrompt.userChoice;
-
-
-                    console.log(
-                        "Install result:",
-                        choice.outcome
-                    );
-
-                }
-
-                catch(error) {
-
-                    console.log(
-                        "Install prompt error:",
-                        error
-                    );
-
-                }
-
-
-                deferredInstallPrompt =
-                    null;
-
-
-                installButton.style.display =
-                    "none";
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
-   APP INSTALLED
-========================================================= */
-
-window.addEventListener(
-    "appinstalled",
-    function() {
-
-        console.log(
-            "Precision Agriculture Smart Rover installed."
-        );
-
-
-        const installButton =
-            document.getElementById(
-                "install-app-button"
-            );
-
-
-        if (installButton) {
-
-            installButton.style.display =
-                "none";
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   SERVICE WORKER
-========================================================= */
-
-if (
-    "serviceWorker" in navigator
-) {
+    /* =========================================================
+       PWA INSTALL PROMPT
+    ========================================================= */
 
     window.addEventListener(
-        "load",
+        "beforeinstallprompt",
+        function(event) {
+
+            event.preventDefault();
+
+
+            deferredInstallPrompt =
+                event;
+
+
+            const installButton =
+                document.getElementById(
+                    "install-app-button"
+                );
+
+
+            if (installButton) {
+
+                installButton.style.display =
+                    "block";
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       INSTALL APP
+    ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
         function() {
 
-            navigator.serviceWorker.register(
+            const installButton =
+                document.getElementById(
+                    "install-app-button"
+                );
 
-                "{{ url_for(
-                    'static',
-                    filename='service-worker.js'
-                ) }}"
 
-            )
+            if (!installButton) {
 
-            .then(
-                function(registration) {
+                return;
 
-                    console.log(
-                        "SMART ROVER SERVICE WORKER REGISTERED"
-                    );
+            }
 
-                    console.log(
-                        "Scope:",
-                        registration.scope
-                    );
 
-                }
-            )
+            installButton.addEventListener(
+                "click",
+                async function() {
 
-            .catch(
-                function(error) {
+                    if (!deferredInstallPrompt) {
 
-                    console.error(
-                        "Service worker registration failed:",
-                        error
-                    );
+                        console.log(
+                            "Install prompt not available."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    deferredInstallPrompt.prompt();
+
+
+                    try {
+
+                        const choice =
+                            await deferredInstallPrompt.userChoice;
+
+
+                        console.log(
+                            "Install result:",
+                            choice.outcome
+                        );
+
+                    }
+
+                    catch(error) {
+
+                        console.log(
+                            "Install prompt error:",
+                            error
+                        );
+
+                    }
+
+
+                    deferredInstallPrompt =
+                        null;
+
+
+                    installButton.style.display =
+                        "none";
 
                 }
             );
@@ -9659,67 +13169,179 @@ if (
         }
     );
 
-}
 
+    /* =========================================================
+       APP INSTALLED
+    ========================================================= */
 
-/* =========================================================
-   START SYSTEM
-========================================================= */
-
-console.log(
-    "=========================================="
-);
-
-console.log(
-    "PRECISION AGRICULTURE SMART ROVER"
-);
-
-console.log(
-    "LIVE DASHBOARD STARTING"
-);
-
-console.log(
-    "=========================================="
-);
-
-
-checkDashboard();
-
-updateRoverStatus();
-
-
-/* =========================================================
-   LIVE REFRESH
-========================================================= */
-
-setInterval(
-    checkDashboard,
-    1000
-);
-
-
-setInterval(
-    updateRoverStatus,
-    1000
-);
-
-
-/* =========================================================
-   VISIBILITY CHANGE
-========================================================= */
-
-document.addEventListener(
-    "visibilitychange",
-    function() {
-
-        if (
-            document.visibilityState ===
-            "visible"
-        ) {
+    window.addEventListener(
+        "appinstalled",
+        function() {
 
             console.log(
-                "App became visible. Updating data..."
+                "Precision Agriculture Smart Rover installed."
             );
+
+
+            const installButton =
+                document.getElementById(
+                    "install-app-button"
+                );
+
+
+            if (installButton) {
+
+                installButton.style.display =
+                    "none";
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       SERVICE WORKER
+    ========================================================= */
+
+    if (
+        "serviceWorker" in navigator
+    ) {
+
+        window.addEventListener(
+            "load",
+            function() {
+
+                navigator.serviceWorker.register(
+
+                    "{{ url_for(
+                        'static',
+                        filename='service-worker.js'
+                    ) }}"
+
+                )
+
+                .then(
+                    function(registration) {
+
+                        console.log(
+                            "SMART ROVER SERVICE WORKER REGISTERED"
+                        );
+
+
+                        console.log(
+                            "Scope:",
+                            registration.scope
+                        );
+
+                    }
+                )
+
+                .catch(
+                    function(error) {
+
+                        console.error(
+                            "Service worker registration failed:",
+                            error
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       START SYSTEM
+    ========================================================= */
+
+    console.log(
+        "=========================================="
+    );
+
+
+    console.log(
+        "PRECISION AGRICULTURE SMART ROVER"
+    );
+
+
+    console.log(
+        "LIVE DASHBOARD STARTING"
+    );
+
+
+    console.log(
+        "=========================================="
+    );
+
+
+    checkDashboard();
+
+    updateRoverStatus();
+
+
+    /* =========================================================
+       LIVE REFRESH
+    ========================================================= */
+
+    setInterval(
+        checkDashboard,
+        1000
+    );
+
+
+    setInterval(
+        updateRoverStatus,
+        1000
+    );
+
+
+    /* =========================================================
+       VISIBILITY CHANGE
+    ========================================================= */
+
+    document.addEventListener(
+        "visibilitychange",
+        function() {
+
+            if (
+                document.visibilityState ===
+                "visible"
+            ) {
+
+                console.log(
+                    "App became visible. Updating data..."
+                );
+
+
+                checkDashboard();
+
+                updateRoverStatus();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       INTERNET RESTORED
+    ========================================================= */
+
+    window.addEventListener(
+        "online",
+        function() {
+
+            console.log(
+                "Internet connection restored."
+            );
+
+
+            consecutiveErrors =
+                0;
 
 
             checkDashboard();
@@ -9727,81 +13349,55 @@ document.addEventListener(
             updateRoverStatus();
 
         }
-
-    }
-);
+    );
 
 
-/* =========================================================
-   INTERNET RESTORED
-========================================================= */
+    /* =========================================================
+       INTERNET LOST
+    ========================================================= */
 
-window.addEventListener(
-    "online",
-    function() {
+    window.addEventListener(
+        "offline",
+        function() {
 
-        console.log(
-            "Internet connection restored."
-        );
-
-
-        consecutiveErrors =
-            0;
-
-
-        checkDashboard();
-
-        updateRoverStatus();
-
-    }
-);
-
-
-/* =========================================================
-   INTERNET LOST
-========================================================= */
-
-window.addEventListener(
-    "offline",
-    function() {
-
-        console.log(
-            "Internet connection lost."
-        );
-
-
-        setText(
-            "system-status-text",
-            "Offline"
-        );
-
-
-        setText(
-            "live-update-text",
-            "No Internet Connection"
-        );
-
-
-        const systemBadge =
-            document.getElementById(
-                "system-badge"
+            console.log(
+                "Internet connection lost."
             );
 
 
-        if (systemBadge) {
-
-            systemBadge.classList.remove(
-                "online-mode"
+            setText(
+                "system-status-text",
+                "Offline"
             );
 
-            systemBadge.classList.add(
-                "offline-mode"
+
+            setText(
+                "live-update-text",
+                "No Internet Connection"
             );
+
+
+            const systemBadge =
+                document.getElementById(
+                    "system-badge"
+                );
+
+
+            if (systemBadge) {
+
+                systemBadge.classList.remove(
+                    "online-mode"
+                );
+
+
+                systemBadge.classList.add(
+                    "offline-mode"
+                );
+
+            }
 
         }
-
-    }
-);
+    );
 
 </script>
 
