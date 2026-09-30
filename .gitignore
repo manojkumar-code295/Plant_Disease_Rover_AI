@@ -15,3 +15,15 @@ __pycache__/
 # Virtual environments
 venv/
 .env/
+ai_env/
+
+# Build and Android artifacts
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.keystore
+*.idsig
+camera_predictions/
+detected_leaves/

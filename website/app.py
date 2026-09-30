@@ -123,6 +123,39 @@ rover_settings = {
 
 
 # ============================================================
+# GPIO PIN MAPPINGS (Raspberry Pi 4 B - Smart Rover)
+# ============================================================
+
+GPIO_MAPPING = {
+    "left_motor": {
+        "title": "Left Motor Driver (L298N Channel A)",
+        "in1": {"bcm": 17, "pin": 11, "name": "LEFT_IN1", "desc": "Forward Direction"},
+        "in2": {"bcm": 27, "pin": 13, "name": "LEFT_IN2", "desc": "Reverse Direction"},
+        "ena": {"bcm": 12, "pin": 32, "name": "LEFT_EN", "desc": "PWM Speed (PWM0)"}
+    },
+    "right_motor": {
+        "title": "Right Motor Driver (L298N Channel B)",
+        "in3": {"bcm": 22, "pin": 15, "name": "RIGHT_IN1", "desc": "Forward Direction"},
+        "in4": {"bcm": 23, "pin": 16, "name": "RIGHT_IN2", "desc": "Reverse Direction"},
+        "enb": {"bcm": 13, "pin": 33, "name": "RIGHT_EN", "desc": "PWM Speed (PWM1)"}
+    },
+    "spray_pump": {
+        "title": "Pesticide Spray Pump (5V Relay)",
+        "pump_pin": {"bcm": 26, "pin": 37, "name": "PUMP_PIN", "desc": "Relay Trigger (IN)"}
+    },
+    "ultrasonic": {
+        "title": "Obstacle Sensor (HC-SR04 Ultrasonic)",
+        "trig": {"bcm": 24, "pin": 18, "name": "TRIG_PIN", "desc": "Trigger 10us Pulse"},
+        "echo": {"bcm": 25, "pin": 22, "name": "ECHO_PIN", "desc": "Echo Input (via 1k/2k Divider)"}
+    },
+    "camera": {
+        "title": "CSI Camera Sensor",
+        "interface": {"bcm": "CSI-2", "pin": "15-Pin Ribbon", "name": "CAM_PORT", "desc": "OmniVision OV5647 / Sony IMX708"}
+    }
+}
+
+
+# ============================================================
 # JSON HELPERS
 # ============================================================
 
@@ -497,7 +530,8 @@ def rover():
         statistics=get_analytics(),
         rover=rover_state,
         rover_state=rover_state,
-        settings=rover_settings
+        settings=rover_settings,
+        gpio_mapping=GPIO_MAPPING
     )
 
 
@@ -513,7 +547,8 @@ def settings():
         latest_result=result,
         statistics=get_analytics(),
         rover=rover_state,
-        settings=rover_settings
+        settings=rover_settings,
+        gpio_mapping=GPIO_MAPPING
     )
 
 
@@ -1150,6 +1185,23 @@ def rover_heartbeat():
                 str(e)
 
         }), 500
+
+
+# ============================================================
+# GPIO PIN CONFIGURATION API
+# ============================================================
+
+@app.route(
+    "/api/rover/gpio-config",
+    methods=["GET"]
+)
+def rover_gpio_config():
+
+    return jsonify({
+        "success": True,
+        "board": "Raspberry Pi 4 Model B",
+        "gpio_mapping": GPIO_MAPPING
+    })
 
 
 # ============================================================

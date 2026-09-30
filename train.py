@@ -266,6 +266,47 @@ history = model.fit(
 )
 
 # ============================================================
+
+# ============================================================
+# STAGE 2 - FINE TUNING MOBILENETV2
+# ============================================================
+
+print("\n" + "=" * 60)
+print("STAGE 2: FINE-TUNING MOBILENETV2")
+print("=" * 60)
+
+# Unfreeze MobileNetV2
+base_model.trainable = True
+
+# Keep only the last 30 layers trainable
+for layer in base_model.layers[:-30]:
+    layer.trainable = False
+
+# Keep BatchNormalization layers frozen for stable fine-tuning
+for layer in base_model.layers:
+    if isinstance(layer, tf.keras.layers.BatchNormalization):
+        layer.trainable = False
+
+# Recompile with a very small learning rate
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),
+    loss="sparse_categorical_crossentropy",
+    metrics=["accuracy"]
+)
+
+FINE_TUNE_EPOCHS = 8
+
+history_fine = model.fit(
+    train_dataset,
+    validation_data=validation_dataset,
+    epochs=FINE_TUNE_EPOCHS,
+    callbacks=[
+        model_checkpoint,
+        early_stopping,
+        reduce_learning_rate
+    ]
+)
+
 # LOAD BEST MODEL
 # ============================================================
 
