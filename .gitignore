@@ -1,31 +1,44 @@
-# Training dataset
-dataset/
-
-# AI model files
-*.keras
-
-# Training graphs
-accuracy_graph.png
-loss_graph.png
-
 # Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Virtual environments & secrets
 venv/
 .env/
 ai_env/
+.venv/
+env/
 .env
 *.env
 
-# Build and Android artifacts
+# VS Code
+.vscode/
+
+# Android / Gradle build files
 .gradle/
 build/
 app/build/
 *.apk
 *.aab
-*.keystore
 *.idsig
+*.keystore
+*.jks
+
+# Training dataset & models
+dataset/
+*.keras
+
+# Generated/runtime camera data
+captured_leaves/
+cropped_leaves/
 camera_predictions/
 detected_leaves/
+
+# Temporary files & OS
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db

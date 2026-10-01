@@ -1,327 +1,1810 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#073b2a">
 
-    <meta charset="UTF-8">
+<title>Dataset | Precision Agriculture Smart Rover</title>
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<style>
 
-    <title>Dataset & History | Precision Agriculture</title>
+:root{
+    --green-950:#05271d;
+    --green-900:#073b2a;
+    --green-800:#0b513a;
+    --green-700:#176b45;
+    --green-600:#26965f;
+    --green-500:#42c477;
+    --green-100:#e9f8ef;
+    --green-50:#f4fcf7;
 
-    <style>
+    --text:#17231d;
+    --muted:#718078;
+    --border:#e4ece7;
+    --bg:#f3f7f5;
+    --white:#ffffff;
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    --red:#dc3545;
+    --red-bg:#fff0f1;
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f5;
-            color: #1f2937;
-        }
+    --yellow:#d99524;
+    --yellow-bg:#fff7e8;
 
-        /* HEADER */
+    --purple:#7047d9;
+    --purple-bg:#f1edff;
 
-        header {
-            background: #12372a;
-            color: white;
-            padding: 22px 40px;
-        }
+    --shadow:0 10px 35px rgba(7,59,42,.08);
+    --shadow-hover:0 18px 45px rgba(7,59,42,.13);
+}
 
-        header h1 {
-            font-size: 26px;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        header p {
-            margin-top: 6px;
-            color: #cbded3;
-        }
+html{
+    scroll-behavior:smooth;
+}
 
-        /* NAVIGATION */
+body{
+    font-family:Inter,"Segoe UI",Arial,sans-serif;
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(66,196,119,.12),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(38,150,95,.06),
+            transparent 25%
+        ),
+        var(--bg);
+    color:var(--text);
+    min-height:100vh;
+}
 
-        nav {
-            background: white;
-            padding: 15px 40px;
-            display: flex;
-            gap: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
+a{
+    text-decoration:none;
+    color:inherit;
+}
 
-        nav a {
-            text-decoration: none;
-            color: #374151;
-            font-weight: bold;
-        }
+button{
+    font-family:inherit;
+}
 
-        nav a:hover {
-            color: #2f7d57;
-        }
 
-        /* MAIN */
+/* =========================================================
+   SIDEBAR
+========================================================= */
 
-        main {
-            max-width: 1400px;
-            margin: auto;
-            padding: 35px 40px;
-        }
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
 
-        .page-title {
-            margin-bottom: 25px;
-        }
+    width:265px;
 
-        .page-title h2 {
-            color: #12372a;
-            font-size: 24px;
-        }
+    background:
+        linear-gradient(
+            180deg,
+            #073b2a 0%,
+            #052c21 100%
+        );
 
-        .page-title p {
-            color: #6b7280;
-            margin-top: 6px;
-        }
+    color:white;
 
-        /* SUMMARY */
+    padding:22px 14px;
 
-        .summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+    z-index:1000;
 
-        .summary-card {
-            background: white;
-            padding: 22px;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
+    overflow-y:auto;
 
-        .summary-card span {
-            color: #6b7280;
-            font-size: 13px;
-        }
+    box-shadow:
+        8px 0 30px rgba(0,0,0,.08);
 
-        .summary-card h2 {
-            margin-top: 8px;
-            color: #12372a;
-            font-size: 28px;
-        }
+    transition:
+        width .35s ease,
+        transform .35s ease;
+}
 
-        /* HISTORY */
 
-        .history-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
+/* =========================================================
+   LOGO
+========================================================= */
 
-        .history-card h3 {
-            color: #12372a;
-            margin-bottom: 20px;
-        }
+.logo{
+    padding:8px 14px 25px;
 
-        /* TABLE */
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.10);
+}
 
-        .table-container {
-            overflow-x: auto;
-        }
+.logo-icon{
+    width:54px;
+    height:54px;
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1000px;
-        }
+    border-radius:16px;
 
-        th {
-            background: #edf7ef;
-            color: #12372a;
-            padding: 14px;
-            text-align: left;
-            font-size: 13px;
-        }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-        td {
-            padding: 14px;
-            border-bottom: 1px solid #eeeeee;
-            vertical-align: middle;
-            font-size: 14px;
-        }
+    background:
+        linear-gradient(
+            135deg,
+            #2d9d66,
+            #176b45
+        );
 
-        tr:hover {
-            background: #fafdfb;
-        }
+    font-size:29px;
 
-        /* IMAGE */
+    margin-bottom:14px;
 
-        .history-image {
-            width: 80px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: #eaf2ec;
-        }
+    box-shadow:
+        0 10px 30px
+        rgba(0,0,0,.18);
 
-        /* DISEASE */
+    transition:
+        transform .35s ease,
+        box-shadow .35s ease;
+}
 
-        .disease {
-            font-weight: bold;
-            color: #23613e;
-        }
+.logo-icon:hover{
+    transform:
+        rotate(-5deg)
+        scale(1.05);
 
-        /* EMPTY */
+    box-shadow:
+        0 15px 35px
+        rgba(0,0,0,.25);
+}
 
-        .empty-history {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-        }
+.logo h1{
+    font-size:18px;
+    line-height:1.35;
+    font-weight:800;
+}
 
-        .empty-history h3 {
-            color: #12372a;
-            margin-bottom: 10px;
-        }
+.logo p{
+    color:#9fc1b1;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:7px;
+}
 
-        /* RESPONSIVE */
 
-        @media(max-width: 800px) {
+/* =========================================================
+   MENU
+========================================================= */
 
-            main {
-                padding: 25px 20px;
-            }
+.menu-title{
+    color:#709789;
+    font-size:10px;
+    font-weight:800;
 
-            .summary {
-                grid-template-columns: 1fr;
-            }
+    letter-spacing:1.5px;
 
-            nav {
-                padding: 15px 20px;
-                flex-wrap: wrap;
-            }
+    margin:
+        27px 12px 11px;
 
-        }
+    text-transform:uppercase;
+}
 
-    </style>
+.menu a{
+    display:flex;
+    align-items:center;
 
+    gap:13px;
+
+    color:#c5d7cf;
+
+    padding:
+        13px 14px;
+
+    border-radius:13px;
+
+    margin-bottom:5px;
+
+    font-size:13px;
+    font-weight:650;
+
+    position:relative;
+
+    overflow:hidden;
+
+    transition:
+        background .25s ease,
+        color .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+.menu a::before{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+    bottom:0;
+
+    width:3px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #64df91,
+            #2d9d66
+        );
+
+    transform:
+        scaleY(0);
+
+    transform-origin:center;
+
+    transition:
+        transform .25s ease;
+}
+
+.menu a:hover{
+    background:
+        rgba(255,255,255,.08);
+
+    color:#ffffff;
+
+    transform:
+        translateX(4px);
+}
+
+.menu a.active{
+    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2b9360,
+            #176b45
+        );
+
+    box-shadow:
+        0 10px 25px
+        rgba(0,0,0,.20);
+}
+
+.menu a.active::before{
+    transform:
+        scaleY(1);
+}
+
+.menu-icon{
+    width:24px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    flex:0 0 24px;
+
+    transition:
+        transform .25s ease;
+}
+
+.menu a:hover .menu-icon{
+    transform:
+        scale(1.12);
+}
+
+.menu a.active .menu-icon{
+    transform:
+        scale(1.08);
+}
+
+
+/* =========================================================
+   SIDEBAR BOTTOM
+========================================================= */
+
+.sidebar-bottom{
+    position:absolute;
+
+    left:15px;
+    right:15px;
+    bottom:22px;
+}
+
+.connection-box{
+    padding:14px;
+
+    border-radius:14px;
+
+    background:
+        rgba(255,255,255,.06);
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+}
+
+.connection-title{
+    color:#769b8b;
+
+    font-size:9px;
+
+    font-weight:800;
+
+    letter-spacing:1px;
+
+    margin-bottom:9px;
+}
+
+.connection-status{
+    display:flex;
+    align-items:center;
+
+    gap:8px;
+
+    color:#dcebe4;
+
+    font-size:11px;
+
+    font-weight:700;
+}
+
+.green-dot{
+    width:8px;
+    height:8px;
+
+    flex:0 0 8px;
+
+    background:#36d57b;
+
+    border-radius:50%;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(54,213,123,.10),
+
+        0 0 12px
+        rgba(54,213,123,.75);
+
+    animation:
+        pulseDot 2s infinite;
+}
+
+@keyframes pulseDot{
+
+    0%,
+    100%{
+        box-shadow:
+            0 0 0 4px
+            rgba(54,213,123,.10),
+            0 0 12px
+            rgba(54,213,123,.75);
+    }
+
+    50%{
+        box-shadow:
+            0 0 0 7px
+            rgba(54,213,123,.04),
+            0 0 18px
+            rgba(54,213,123,.95);
+    }
+
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main{
+    margin-left:265px;
+
+    width:
+        calc(100% - 265px);
+
+    min-height:100vh;
+
+    transition:
+        margin-left .35s ease,
+        width .35s ease;
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar{
+    min-height:80px;
+
+    padding:
+        15px 40px;
+
+    background:
+        rgba(255,255,255,.88);
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:100;
+
+    backdrop-filter:
+        blur(18px);
+}
+
+.topbar-title h2{
+    color:var(--green-900);
+
+    font-size:19px;
+
+    font-weight:800;
+}
+
+.topbar-title p{
+    color:#9aa79f;
+
+    font-size:11px;
+
+    margin-top:5px;
+}
+
+.system-badge{
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    padding:
+        9px 15px;
+
+    border-radius:30px;
+
+    background:
+        var(--green-100);
+
+    border:
+        1px solid
+        #ccebd8;
+
+    color:#147341;
+
+    font-size:11px;
+
+    font-weight:800;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.content{
+    max-width:1550px;
+
+    margin:auto;
+
+    padding:
+        38px 40px 30px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+    position:relative;
+
+    overflow:hidden;
+
+    padding:30px;
+
+    border-radius:24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #073b2a,
+            #176b45 65%,
+            #26965f
+        );
+
+    color:white;
+
+    box-shadow:
+        var(--shadow);
+
+    margin-bottom:25px;
+}
+
+.hero::before{
+    content:"";
+
+    position:absolute;
+
+    width:220px;
+    height:220px;
+
+    border-radius:50%;
+
+    right:-70px;
+    top:-90px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    animation:
+        floatCircle 7s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+
+    position:absolute;
+
+    width:140px;
+    height:140px;
+
+    border-radius:50%;
+
+    right:110px;
+    bottom:-90px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    animation:
+        floatCircle 9s ease-in-out infinite reverse;
+}
+
+@keyframes floatCircle{
+
+    0%,
+    100%{
+        transform:
+            translateY(0)
+            rotate(0deg);
+    }
+
+    50%{
+        transform:
+            translateY(-12px)
+            rotate(8deg);
+    }
+
+}
+
+.hero-content{
+    position:relative;
+
+    z-index:2;
+}
+
+.hero-label{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    padding:
+        7px 12px;
+
+    border-radius:30px;
+
+    background:
+        rgba(255,255,255,.11);
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    font-size:10px;
+
+    font-weight:800;
+
+    letter-spacing:.5px;
+
+    margin-bottom:15px;
+}
+
+.hero h1{
+    font-size:31px;
+
+    font-weight:850;
+
+    letter-spacing:-.8px;
+}
+
+.hero p{
+    margin-top:9px;
+
+    color:#c8e2d5;
+
+    font-size:13px;
+
+    max-width:650px;
+
+    line-height:1.6;
+}
+
+.hero-mini{
+    margin-top:19px;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:9px;
+}
+
+.hero-mini span{
+    padding:
+        8px 12px;
+
+    border-radius:10px;
+
+    background:
+        rgba(255,255,255,.10);
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    color:#e6f4ed;
+
+    font-size:10px;
+
+    font-weight:700;
+
+    transition:
+        transform .25s ease,
+        background .25s ease;
+}
+
+.hero-mini span:hover{
+    transform:
+        translateY(-2px);
+
+    background:
+        rgba(255,255,255,.16);
+}
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+.statistics-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:17px;
+
+    margin-bottom:30px;
+}
+
+.stat-card{
+    position:relative;
+
+    overflow:hidden;
+
+    background:
+        rgba(255,255,255,.96);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:18px;
+
+    padding:22px;
+
+    box-shadow:
+        var(--shadow);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+.stat-card:hover{
+    transform:
+        translateY(-4px);
+
+    box-shadow:
+        var(--shadow-hover);
+}
+
+.stat-card::before{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+    bottom:0;
+
+    width:4px;
+
+    background:
+        var(--green-500);
+}
+
+.stat-card:nth-child(2)::before{
+    background:#4f8f70;
+}
+
+.stat-card:nth-child(3)::before{
+    background:#25b76a;
+}
+
+.stat-top{
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+}
+
+.stat-icon{
+    width:45px;
+    height:45px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    border-radius:13px;
+
+    background:
+        var(--green-100);
+
+    font-size:20px;
+}
+
+.stat-label{
+    color:#829089;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    text-transform:uppercase;
+
+    letter-spacing:.7px;
+
+    margin-top:16px;
+}
+
+.stat-number{
+    color:var(--green-900);
+
+    font-size:30px;
+
+    font-weight:850;
+
+    margin-top:6px;
+}
+
+.stat-number.latest{
+    font-size:21px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+.stat-number.online{
+    color:#159447;
+}
+
+.stat-subtitle{
+    color:#9aa69f;
+
+    font-size:10px;
+
+    margin-top:5px;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.section-heading{
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:15px;
+}
+
+.section-heading h3{
+    color:var(--green-900);
+
+    font-size:17px;
+
+    font-weight:800;
+}
+
+.section-heading span{
+    color:#96a29b;
+
+    font-size:10px;
+
+    font-weight:700;
+}
+
+
+/* =========================================================
+   DATASET CARD
+========================================================= */
+
+.dataset-card{
+    background:
+        rgba(255,255,255,.97);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:
+        var(--shadow);
+}
+
+.dataset-header{
+    padding:
+        22px 24px;
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    gap:15px;
+
+    flex-wrap:wrap;
+
+    border-bottom:
+        1px solid
+        var(--border);
+}
+
+.dataset-title{
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+}
+
+.dataset-title-icon{
+    width:43px;
+    height:43px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    border-radius:12px;
+
+    background:
+        var(--green-100);
+
+    font-size:20px;
+}
+
+.dataset-header h3{
+    color:var(--green-900);
+
+    font-size:15px;
+
+    font-weight:800;
+}
+
+.dataset-header p{
+    color:#829089;
+
+    font-size:10px;
+
+    margin-top:5px;
+}
+
+.record-count{
+    background:
+        var(--green-100);
+
+    color:#1b7047;
+
+    border:
+        1px solid
+        #cde8d7;
+
+    padding:
+        8px 14px;
+
+    border-radius:30px;
+
+    font-size:10px;
+
+    font-weight:800;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-container{
+    width:100%;
+
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+
+    min-width:1180px;
+
+    border-collapse:collapse;
+}
+
+thead{
+    background:
+        linear-gradient(
+            135deg,
+            #073b2a,
+            #176b45
+        );
+}
+
+th{
+    color:white;
+
+    text-align:left;
+
+    padding:
+        15px 14px;
+
+    font-size:9px;
+
+    font-weight:800;
+
+    letter-spacing:.7px;
+
+    text-transform:uppercase;
+
+    white-space:nowrap;
+}
+
+td{
+    padding:
+        15px 14px;
+
+    border-bottom:
+        1px solid
+        #edf1ee;
+
+    vertical-align:middle;
+
+    font-size:11px;
+}
+
+tbody tr{
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+tbody tr:hover{
+    background:#f7fbf8;
+}
+
+tbody tr:last-child td{
+    border-bottom:none;
+}
+
+
+/* =========================================================
+   RECORD ID
+========================================================= */
+
+.record-id{
+    color:#7d8983;
+
+    font-weight:800;
+
+    font-family:
+        "Courier New",
+        monospace;
+}
+
+
+/* =========================================================
+   IMAGE
+========================================================= */
+
+.image-wrapper{
+    position:relative;
+
+    width:78px;
+    height:65px;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    background:#edf5ef;
+
+    border:
+        1px solid
+        #dce8e0;
+
+    cursor:pointer;
+}
+
+.history-image{
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+    display:block;
+
+    transition:
+        transform .35s ease;
+}
+
+.image-wrapper::after{
+    content:"🔍";
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    background:
+        rgba(7,59,42,.60);
+
+    color:white;
+
+    opacity:0;
+
+    transition:
+        opacity .25s ease;
+
+    font-size:17px;
+}
+
+.image-wrapper:hover .history-image{
+    transform:
+        scale(1.08);
+}
+
+.image-wrapper:hover::after{
+    opacity:1;
+}
+
+
+/* =========================================================
+   DISEASE
+========================================================= */
+
+.disease-badge{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:
+        7px 11px;
+
+    border-radius:30px;
+
+    font-size:10px;
+
+    font-weight:800;
+
+    white-space:nowrap;
+}
+
+.disease-healthy{
+    color:#15803d;
+
+    background:#dcfce7;
+
+    border:
+        1px solid
+        #c5efd2;
+}
+
+.disease-bacterial{
+    color:#b91c1c;
+
+    background:#fee2e2;
+
+    border:
+        1px solid
+        #f8caca;
+}
+
+.disease-cercospora{
+    color:#b45309;
+
+    background:#fef3c7;
+
+    border:
+        1px solid
+        #f6e5a8;
+}
+
+.disease-curl{
+    color:#6d28d9;
+
+    background:#ede9fe;
+
+    border:
+        1px solid
+        #ddd5fe;
+}
+
+.disease-other{
+    color:#374151;
+
+    background:#e5e7eb;
+
+    border:
+        1px solid
+        #d1d5db;
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+.recommendation{
+    max-width:210px;
+
+    color:#44514a;
+
+    line-height:1.55;
+}
+
+.date-text{
+    color:#33413a;
+
+    white-space:nowrap;
+
+    font-weight:700;
+}
+
+.time-text{
+    color:#7b8781;
+
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.dataset-footer{
+    padding:
+        14px 24px;
+
+    background:#fafcfb;
+
+    border-top:
+        1px solid
+        var(--border);
+
+    color:#85918b;
+
+    font-size:9px;
+}
+
+footer{
+    text-align:center;
+
+    color:#9aa69f;
+
+    font-size:9px;
+
+    padding:
+        28px 20px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-history{
+    padding:
+        85px 25px;
+
+    text-align:center;
+}
+
+.empty-icon{
+    width:78px;
+    height:78px;
+
+    margin:
+        0 auto 20px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:22px;
+
+    background:
+        var(--green-100);
+
+    border:
+        1px solid
+        #d5e9dc;
+
+    font-size:37px;
+}
+
+.empty-history h3{
+    color:var(--green-900);
+
+    font-size:20px;
+
+    margin-bottom:9px;
+}
+
+.empty-history p{
+    max-width:430px;
+
+    margin:auto;
+
+    color:#7a8780;
+
+    font-size:11px;
+
+    line-height:1.7;
+}
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+.mobile-nav{
+    display:none;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1100px){
+
+    .content{
+        padding:
+            30px 25px;
+    }
+
+    .statistics-grid{
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+
+@media(max-width:800px){
+
+    .sidebar{
+        width:72px;
+
+        padding:
+            20px 8px;
+    }
+
+    .logo{
+        text-align:center;
+
+        padding:
+            5px 0 20px;
+    }
+
+    .logo-icon{
+        margin:auto;
+    }
+
+    .logo h1,
+    .logo p,
+    .menu-title,
+    .connection-box{
+        display:none;
+    }
+
+    .menu a{
+        justify-content:center;
+
+        padding:
+            13px 5px;
+    }
+
+    .menu-icon{
+        font-size:20px;
+    }
+
+    .main{
+        margin-left:72px;
+
+        width:
+            calc(100% - 72px);
+    }
+
+    .topbar{
+        padding:
+            14px 22px;
+    }
+
+    .hero h1{
+        font-size:27px;
+    }
+
+}
+
+
+@media(max-width:550px){
+
+    body{
+        padding-bottom:70px;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    .main{
+        margin-left:0;
+
+        width:100%;
+    }
+
+    .topbar{
+        min-height:65px;
+
+        padding:
+            10px 15px;
+    }
+
+    .topbar-title h2{
+        font-size:14px;
+    }
+
+    .topbar-title p{
+        display:none;
+    }
+
+    .system-badge{
+        padding:
+            7px 10px;
+
+        font-size:9px;
+    }
+
+    .content{
+        padding:
+            18px 13px 25px;
+    }
+
+    .hero{
+        padding:
+            23px 20px;
+
+        border-radius:19px;
+    }
+
+    .hero h1{
+        font-size:23px;
+    }
+
+    .hero p{
+        font-size:11px;
+    }
+
+    .hero-mini span{
+        font-size:9px;
+    }
+
+    .stat-card{
+        padding:18px;
+    }
+
+    .dataset-card{
+        border-radius:18px;
+    }
+
+    .dataset-header{
+        padding:17px;
+    }
+
+    .dataset-footer{
+        padding:
+            13px 17px;
+    }
+
+    .mobile-nav{
+        position:fixed;
+
+        display:flex;
+
+        left:0;
+        right:0;
+        bottom:0;
+
+        height:68px;
+
+        background:
+            rgba(255,255,255,.96);
+
+        border-top:
+            1px solid
+            #dfe7e2;
+
+        justify-content:
+            space-around;
+
+        align-items:center;
+
+        z-index:9998;
+
+        box-shadow:
+            0 -6px 25px
+            rgba(0,0,0,.08);
+
+        backdrop-filter:
+            blur(14px);
+    }
+
+    .mobile-nav a{
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        gap:3px;
+
+        color:#789088;
+
+        font-size:8px;
+
+        font-weight:750;
+
+        min-width:48px;
+
+        transition:
+            transform .2s ease,
+            color .2s ease;
+    }
+
+    .mobile-nav a span{
+        font-size:19px;
+    }
+
+    .mobile-nav a.active{
+        color:#28734e;
+    }
+
+    .mobile-nav a:hover{
+        transform:
+            translateY(-2px);
+    }
+
+}
+
+
+@media(prefers-reduced-motion:reduce){
+
+    *,
+    *::before,
+    *::after{
+        animation:none!important;
+
+        transition:none!important;
+
+        scroll-behavior:auto!important;
+    }
+
+}
+
+</style>
 </head>
 
 
 <body>
 
 
-<!-- HEADER -->
-
-<header>
-
-    <h1>
-        🌱 Precision Agriculture Smart Rover
-    </h1>
-
-    <p>
-        Prediction Dataset & History
-    </p>
-
-</header>
+<div class="app">
 
 
-<!-- NAVIGATION -->
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-<nav>
-
-    <a href="/">
-        Dashboard
-    </a>
-
-    <a href="/rover">
-        Rover Control
-    </a>
-
-    <a href="/dataset">
-        Dataset
-    </a>
-
-    <a href="/analytics">
-        Analytics
-    </a>
-
-    <a href="/settings">
-        Settings
-    </a>
-
-</nav>
+<aside class="sidebar">
 
 
-<!-- MAIN -->
+    <div class="logo">
 
-<main>
+        <div class="logo-icon">
+            🌱
+        </div>
 
-
-    <div class="page-title">
-
-        <h2>
-            Prediction History
-        </h2>
+        <h1>
+            Precision Agriculture
+            Smart Rover
+        </h1>
 
         <p>
-            All AI detection results stored by the system
+            AI-Powered Plant Monitoring System
         </p>
 
     </div>
 
 
-    <!-- SUMMARY -->
+    <div class="menu-title">
+        Main Menu
+    </div>
 
-    <div class="summary">
+
+    <div class="menu">
 
 
-        <div class="summary-card">
+        <!-- DASHBOARD -->
 
-            <span>
-                Total Predictions
+        <a href="/">
+
+            <span class="menu-icon">
+                🏠
             </span>
 
-            <h2>
-                {{ history|length }}
-            </h2>
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- ROVER -->
+
+        <a href="/rover">
+
+            <span class="menu-icon">
+                🚜
+            </span>
+
+            <span>
+                Rover Control
+            </span>
+
+        </a>
+
+
+        <!-- DATASET -->
+
+        <a
+            href="/dataset"
+            class="active"
+        >
+
+            <span class="menu-icon">
+                📁
+            </span>
+
+            <span>
+                Dataset
+            </span>
+
+        </a>
+
+
+        <!-- ANALYTICS -->
+
+        <a href="/analytics">
+
+            <span class="menu-icon">
+                📊
+            </span>
+
+            <span>
+                Analytics
+            </span>
+
+        </a>
+
+
+        <!-- DAILY DATA -->
+
+        <a href="/daily-data">
+
+            <span class="menu-icon">
+                📅
+            </span>
+
+            <span>
+                Daily Data
+            </span>
+
+        </a>
+
+
+        <!-- SETTINGS -->
+
+        <a href="/settings">
+
+            <span class="menu-icon">
+                ⚙️
+            </span>
+
+            <span>
+                Settings
+            </span>
+
+        </a>
+
+
+    </div>
+
+
+    <div class="sidebar-bottom">
+
+        <div class="connection-box">
+
+            <div class="connection-title">
+                AI SYSTEM
+            </div>
+
+            <div class="connection-status">
+
+                <span class="green-dot"></span>
+
+                System Online
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<div class="main">
+
+
+<header class="topbar">
+
+
+    <div class="topbar-title">
+
+        <h2>
+            Prediction Dataset
+        </h2>
+
+        <p>
+            Precision Agriculture Smart Rover
+        </p>
+
+    </div>
+
+
+    <div class="system-badge">
+
+        <span class="green-dot"></span>
+
+        AI System Online
+
+    </div>
+
+
+</header>
+
+
+
+<main class="content">
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+
+    <div class="hero-content">
+
+
+        <div class="hero-label">
+
+            🌿 AI DATA INTELLIGENCE
 
         </div>
 
 
-        <div class="summary-card">
+        <h1>
+            Prediction Dataset
+        </h1>
+
+
+        <p>
+            Explore all leaf disease detection results,
+            AI confidence information and agricultural
+            treatment recommendations collected by
+            your smart rover.
+        </p>
+
+
+        <div class="hero-mini">
 
             <span>
-                Latest Detection
+                🔬 AI Detection
             </span>
-
-            <h2>
-
-                {% if history %}
-
-                    {{ history[0]["disease"] }}
-
-                {% else %}
-
-                    None
-
-                {% endif %}
-
-            </h2>
-
-        </div>
-
-
-        <div class="summary-card">
 
             <span>
-                System
+                🌱 Plant Health
             </span>
 
-            <h2>
-                ONLINE
-            </h2>
+            <span>
+                💊 Treatment Advice
+            </span>
+
+            <span>
+                💾 Automatic Storage
+            </span>
 
         </div>
 
@@ -329,172 +1812,924 @@
     </div>
 
 
-    <!-- HISTORY TABLE -->
-
-    <div class="history-card">
-
-        <h3>
-            Saved Predictions
-        </h3>
+</section>
 
 
-        {% if history %}
+
+<!-- =========================================================
+     STATISTICS
+========================================================= -->
+
+<section class="statistics-grid">
 
 
-        <div class="table-container">
+    <!-- TOTAL -->
 
-            <table>
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            ID
-                        </th>
-
-                        <th>
-                            Image
-                        </th>
-
-                        <th>
-                            Disease
-                        </th>
-
-                        <th>
-                            Chemical
-                        </th>
-
-                        <th>
-                            Fertilizer
-                        </th>
-
-                        <th>
-                            Treatment
-                        </th>
-
-                        <th>
-                            Date
-                        </th>
-
-                        <th>
-                            Time
-                        </th>
-
-                    </tr>
-
-                </thead>
+    <div class="stat-card">
 
 
-                <tbody>
+        <div class="stat-top">
+
+            <div class="stat-icon">
+                🔍
+            </div>
+
+        </div>
 
 
-                    {% for item in history %}
+        <div class="stat-label">
+            Total Predictions
+        </div>
 
 
-                    <tr>
+        <div class="stat-number">
+
+            {{ history|length }}
+
+        </div>
 
 
-                        <td>
-                            {{ item["id"] }}
-                        </td>
+        <div class="stat-subtitle">
+            Total AI analyses stored
+        </div>
 
 
-                        <td>
+    </div>
+
+
+
+    <!-- LATEST -->
+
+    <div class="stat-card">
+
+
+        <div class="stat-top">
+
+            <div class="stat-icon">
+                🌿
+            </div>
+
+        </div>
+
+
+        <div class="stat-label">
+            Latest Detection
+        </div>
+
+
+        <div class="stat-number latest">
+
+
+            {% if history %}
+
+                {{ history[0].get("disease", "Unknown") }}
+
+            {% else %}
+
+                No prediction
+
+            {% endif %}
+
+
+        </div>
+
+
+        <div class="stat-subtitle">
+            Most recent AI result
+        </div>
+
+
+    </div>
+
+
+
+    <!-- STATUS -->
+
+    <div class="stat-card">
+
+
+        <div class="stat-top">
+
+            <div class="stat-icon">
+                ⚡
+            </div>
+
+        </div>
+
+
+        <div class="stat-label">
+            System Status
+        </div>
+
+
+        <div class="stat-number online">
+            ● ONLINE
+        </div>
+
+
+        <div class="stat-subtitle">
+            AI detection system active
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     SECTION HEADING
+========================================================= -->
+
+<div class="section-heading">
+
+
+    <h3>
+        📁 Prediction History
+    </h3>
+
+
+    <span>
+        STORED AI RESULTS
+    </span>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     DATASET CARD
+========================================================= -->
+
+<div class="dataset-card">
+
+
+    <div class="dataset-header">
+
+
+        <div class="dataset-title">
+
+
+            <div class="dataset-title-icon">
+                📊
+            </div>
+
+
+            <div>
+
+                <h3>
+                    Saved Prediction Records
+                </h3>
+
+                <p>
+                    Complete history of AI leaf disease
+                    predictions and recommendations.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <span class="record-count">
+
+            {{ history|length }}
+
+            Record{% if history|length != 1 %}s{% endif %}
+
+        </span>
+
+
+    </div>
+
+
+
+    {% if history %}
+
+
+    <div class="table-container">
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        ID
+                    </th>
+
+                    <th>
+                        Leaf Image
+                    </th>
+
+                    <th>
+                        Disease
+                    </th>
+
+                    <th>
+                        Confidence
+                    </th>
+
+                    <th>
+                        Chemical
+                    </th>
+
+                    <th>
+                        Fertilizer
+                    </th>
+
+                    <th>
+                        Treatment
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Time
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+
+            <tbody>
+
+
+            {% for item in history %}
+
+
+                <tr>
+
+
+                    <!-- =====================================
+                         ID
+                    ====================================== -->
+
+                    <td class="record-id">
+
+                        {% if item.get("result_id") %}
+
+                            #{{ item.get("result_id")[:8] }}
+
+                        {% else %}
+
+                            #{{ loop.index }}
+
+                        {% endif %}
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         IMAGE
+                    ====================================== -->
+
+                    <td>
+
+
+                        {% if item.get("image") %}
+
+
+                        <div
+                            class="image-wrapper"
+                            onclick="openImage(
+                                '{{ url_for(
+                                    'static',
+                                    filename='images/' + item.get('image')
+                                ) }}'
+                            )"
+                        >
+
 
                             <img
                                 class="history-image"
+
                                 src="{{ url_for(
                                     'static',
-                                    filename='images/' + item['image']
+                                    filename='images/' + item.get('image')
                                 ) }}"
-                                alt="Chili leaf image"
+
+                                alt="Detected chili leaf"
+
+                                loading="lazy"
+
+                                onerror="
+                                    this.style.display='none';
+                                "
                             >
 
-                        </td>
+
+                        </div>
 
 
-                        <td class="disease">
-
-                            {{ item["disease"] }}
-
-                        </td>
+                        {% else %}
 
 
-                        <td>
+                        <div
+                            class="image-wrapper"
+                            style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                cursor:default;
+                            "
+                        >
 
-                            {{ item["chemical"] }}
+                            🌿
 
-                        </td>
-
-
-                        <td>
-
-                            {{ item["fertilizer"] }}
-
-                        </td>
-
-
-                        <td>
-
-                            {{ item["treatment"] }}
-
-                        </td>
+                        </div>
 
 
-                        <td>
-
-                            {{ item["date"] }}
-
-                        </td>
+                        {% endif %}
 
 
-                        <td>
-
-                            {{ item["time"] }}
-
-                        </td>
+                    </td>
 
 
-                    </tr>
+
+                    <!-- =====================================
+                         DISEASE
+                    ====================================== -->
+
+                    <td>
 
 
-                    {% endfor %}
+                        {% set disease =
+                            item.get(
+                                "disease",
+                                "Unknown"
+                            )
+                            | lower
+                        %}
 
 
-                </tbody>
-
-            </table>
-
-        </div>
+                        {% if "healthy" in disease %}
 
 
-        {% else %}
+                            <span
+                                class="
+                                    disease-badge
+                                    disease-healthy
+                                "
+                            >
+                                ● Healthy
+                            </span>
 
 
-        <div class="empty-history">
-
-            <h3>
-                No Predictions Yet
-            </h3>
-
-            <p>
-                Run your AI prediction program to create
-                the first history record.
-            </p>
-
-        </div>
+                        {% elif "bacterial" in disease %}
 
 
-        {% endif %}
+                            <span
+                                class="
+                                    disease-badge
+                                    disease-bacterial
+                                "
+                            >
+                                ● Bacterial Spot
+                            </span>
+
+
+                        {% elif "cercospora" in disease %}
+
+
+                            <span
+                                class="
+                                    disease-badge
+                                    disease-cercospora
+                                "
+                            >
+                                ● Cercospora Leaf Spot
+                            </span>
+
+
+                        {% elif "curl" in disease %}
+
+
+                            <span
+                                class="
+                                    disease-badge
+                                    disease-curl
+                                "
+                            >
+                                ● Curl Virus
+                            </span>
+
+
+                        {% else %}
+
+
+                            <span
+                                class="
+                                    disease-badge
+                                    disease-other
+                                "
+                            >
+
+                                ●
+                                {{ item.get(
+                                    "disease",
+                                    "Unknown"
+                                ) }}
+
+                            </span>
+
+
+                        {% endif %}
+
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         CONFIDENCE
+                    ====================================== -->
+
+                    <td>
+
+
+                        <div
+                            style="
+                                font-weight:800;
+                                color:#176b45;
+                                white-space:nowrap;
+                            "
+                        >
+
+                            {{ item.get(
+                                "confidence",
+                                0
+                            ) }}%
+
+                        </div>
+
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         CHEMICAL
+                    ====================================== -->
+
+                    <td>
+
+                        <div class="recommendation">
+
+                            {{ item.get(
+                                "chemical",
+                                "Not available"
+                            ) }}
+
+                        </div>
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         FERTILIZER
+                    ====================================== -->
+
+                    <td>
+
+                        <div class="recommendation">
+
+                            {{ item.get(
+                                "fertilizer",
+                                "Not available"
+                            ) }}
+
+                        </div>
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         TREATMENT
+                    ====================================== -->
+
+                    <td>
+
+                        <div class="recommendation">
+
+                            {{ item.get(
+                                "treatment",
+                                "Not available"
+                            ) }}
+
+                        </div>
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         DATE
+                    ====================================== -->
+
+                    <td class="date-text">
+
+
+                        {% set timestamp =
+                            item.get(
+                                "timestamp",
+                                ""
+                            )
+                        %}
+
+
+                        {% if timestamp|length >= 10 %}
+
+                            {{ timestamp[:10] }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+
+                    </td>
+
+
+
+                    <!-- =====================================
+                         TIME
+                    ====================================== -->
+
+                    <td class="time-text">
+
+
+                        {% set timestamp =
+                            item.get(
+                                "timestamp",
+                                ""
+                            )
+                        %}
+
+
+                        {% if timestamp|length >= 19 %}
+
+                            {{ timestamp[11:19] }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+
+                    </td>
+
+
+                </tr>
+
+
+            {% endfor %}
+
+
+            </tbody>
+
+
+        </table>
 
 
     </div>
+
+
+
+    <div class="dataset-footer">
+
+        💾
+        Prediction records are automatically stored
+        whenever an AI detection is completed.
+
+        &nbsp;&nbsp;•&nbsp;&nbsp;
+
+        Maximum 100 history records are retained.
+
+    </div>
+
+
+
+    {% else %}
+
+
+    <!-- =====================================================
+         EMPTY
+    ====================================================== -->
+
+    <div class="empty-history">
+
+
+        <div class="empty-icon">
+            📊
+        </div>
+
+
+        <h3>
+            No Predictions Yet
+        </h3>
+
+
+        <p>
+            Run your AI prediction program to create
+            the first dataset record. Once the rover
+            detects a leaf, the result will appear here
+            automatically.
+        </p>
+
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+
+<footer>
+
+    🌱 Precision Agriculture Smart Rover
+
+    &nbsp; • &nbsp;
+
+    AI-Based Plant Leaf Disease Detection System
+
+</footer>
 
 
 </main>
 
 
-</body>
+</div>
 
+
+</div>
+
+
+
+<!-- =========================================================
+     MOBILE NAV
+========================================================= -->
+
+<nav class="mobile-nav">
+
+
+    <a href="/">
+
+        <span>
+            🏠
+        </span>
+
+        Dashboard
+
+    </a>
+
+
+    <a href="/rover">
+
+        <span>
+            🚜
+        </span>
+
+        Rover
+
+    </a>
+
+
+    <a
+        href="/dataset"
+        class="active"
+    >
+
+        <span>
+            📁
+        </span>
+
+        Dataset
+
+    </a>
+
+
+    <a href="/analytics">
+
+        <span>
+            📊
+        </span>
+
+        Analytics
+
+    </a>
+
+
+    <a href="/settings">
+
+        <span>
+            ⚙️
+        </span>
+
+        Settings
+
+    </a>
+
+
+</nav>
+
+
+
+<!-- =========================================================
+     IMAGE VIEWER
+========================================================= -->
+
+<div
+    id="imageModal"
+
+    style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.82);
+        z-index:10000;
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:30px;
+        backdrop-filter:blur(8px);
+    "
+>
+
+
+    <div
+        style="
+            position:relative;
+            max-width:1000px;
+            max-height:90vh;
+        "
+    >
+
+
+        <button
+            onclick="closeImage()"
+
+            style="
+                position:absolute;
+                right:-15px;
+                top:-15px;
+                width:38px;
+                height:38px;
+                border:0;
+                border-radius:50%;
+                background:white;
+                color:#073b2a;
+                font-size:20px;
+                font-weight:800;
+                cursor:pointer;
+                box-shadow:0 8px 25px rgba(0,0,0,.3);
+                z-index:2;
+            "
+        >
+            ×
+        </button>
+
+
+        <img
+            id="modalImage"
+
+            src=""
+
+            alt="Prediction image"
+
+            style="
+                display:block;
+                max-width:90vw;
+                max-height:85vh;
+                object-fit:contain;
+                border-radius:18px;
+                box-shadow:0 20px 60px rgba(0,0,0,.4);
+            "
+        >
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   IMAGE VIEWER
+========================================================= */
+
+function openImage(src){
+
+    const modal =
+        document.getElementById(
+            "imageModal"
+        );
+
+    const image =
+        document.getElementById(
+            "modalImage"
+        );
+
+    if(!modal || !image){
+        return;
+    }
+
+    image.src = src;
+
+    modal.style.display = "flex";
+
+    document.body.style.overflow = "hidden";
+}
+
+
+function closeImage(){
+
+    const modal =
+        document.getElementById(
+            "imageModal"
+        );
+
+    const image =
+        document.getElementById(
+            "modalImage"
+        );
+
+    if(!modal){
+        return;
+    }
+
+    modal.style.display = "none";
+
+    document.body.style.overflow = "";
+
+    if(image){
+        image.src = "";
+    }
+}
+
+
+/* =========================================================
+   CLOSE IMAGE WITH ESC
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Escape"){
+
+            closeImage();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CLOSE WHEN CLICKING BACKDROP
+========================================================= */
+
+document.getElementById(
+    "imageModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(event.target === this){
+
+            closeImage();
+
+        }
+
+    }
+);
+
+
+</script>
+
+
+</body>
 </html>
