@@ -12,10 +12,12 @@ loss_graph.png
 __pycache__/
 *.pyc
 
-# Virtual environments
+# Virtual environments & secrets
 venv/
 .env/
 ai_env/
+.env
+*.env
 
 # Build and Android artifacts
 .gradle/
