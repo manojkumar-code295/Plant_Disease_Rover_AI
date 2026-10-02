@@ -1438,7 +1438,7 @@
             display: grid;
 
             grid-template-columns:
-                repeat(3, minmax(0, 1fr));
+                repeat(auto-fit, minmax(200px, 1fr));
 
             gap: 18px;
         }
@@ -3160,6 +3160,29 @@
 
                 <div class="status-grid">
 
+                    <div class="status-card">
+
+                        <div class="status-icon" style="background: rgba(239, 68, 68, 0.1);">
+                            🍓
+                        </div>
+
+                        <div class="status-info">
+
+                            <span>
+                                RASPBERRY PI 4
+                            </span>
+
+                            <strong
+                                class="status-offline"
+                                id="pi-status"
+                            >
+                                NOT CONNECTED
+                            </strong>
+
+                        </div>
+
+                    </div>
+
 
                     <div class="status-card">
 
@@ -3170,20 +3193,19 @@
                         <div class="status-info">
 
                             <span>
-                                AI MODEL
+                                ROVER AI MODEL
                             </span>
 
                             <strong
-                                class="status-online"
-                                id="ai-status"
+                                class="status-offline"
+                                id="ai-model-status"
                             >
-                                ONLINE
+                                STANDBY
                             </strong>
 
                         </div>
 
                     </div>
-
 
 
                     <div class="status-card">
@@ -3195,20 +3217,19 @@
                         <div class="status-info">
 
                             <span>
-                                ROVER
+                                ROVER MOTION
                             </span>
 
                             <strong
                                 id="rover-status"
                                 class="status-offline"
                             >
-                                NOT CONNECTED
+                                STOPPED
                             </strong>
 
                         </div>
 
                     </div>
-
 
 
                     <div class="status-card">
@@ -3233,7 +3254,6 @@
                         </div>
 
                     </div>
-
 
                 </div>
 
@@ -4070,74 +4090,58 @@
             const rover =
                 data.rover;
 
+            const piOnline = Boolean(rover.pi_online ?? rover.connected);
+            const modelOnline = Boolean(rover.model_online && piOnline);
 
-            const roverStatus =
-                document.getElementById(
-                    "rover-status"
-                );
-
-
-            if (roverStatus) {
-
-                if (
-                    Boolean(
-                        rover.connected
-                    )
-                ) {
-
-                    roverStatus.textContent =
-                        "CONNECTED";
-
-                    roverStatus.className =
-                        "status-online";
-
+            // 1. Raspberry Pi 4 Status
+            const piStatus = document.getElementById("pi-status");
+            if (piStatus) {
+                if (piOnline) {
+                    piStatus.textContent = "ONLINE";
+                    piStatus.className = "status-online";
+                } else {
+                    piStatus.textContent = "NOT CONNECTED";
+                    piStatus.className = "status-offline";
                 }
-
-                else {
-
-                    roverStatus.textContent =
-                        "NOT CONNECTED";
-
-                    roverStatus.className =
-                        "status-offline";
-
-                }
-
             }
 
+            // 2. AI Model Status
+            const aiModelStatus = document.getElementById("ai-model-status");
+            if (aiModelStatus) {
+                if (modelOnline) {
+                    const fpsStr = rover.fps ? ` (${rover.fps} FPS)` : "";
+                    aiModelStatus.textContent = `ONLINE${fpsStr}`;
+                    aiModelStatus.className = "status-online";
+                } else {
+                    aiModelStatus.textContent = "STANDBY";
+                    aiModelStatus.className = "status-offline";
+                }
+            }
 
-            const pumpStatus =
-                document.getElementById(
-                    "pump-status"
-                );
+            // 3. Rover Motion
+            const roverStatus = document.getElementById("rover-status");
+            if (roverStatus) {
+                const dir = (rover.direction || "STOPPED").toUpperCase();
+                roverStatus.textContent = dir;
+                if (dir !== "STOPPED" && dir !== "STOP") {
+                    roverStatus.className = "status-online";
+                } else if (piOnline) {
+                    roverStatus.className = "status-online";
+                } else {
+                    roverStatus.className = "status-offline";
+                }
+            }
 
-
+            // 4. Spray Pump
+            const pumpStatus = document.getElementById("pump-status");
             if (pumpStatus) {
-
-                if (
-                    Boolean(
-                        rover.pump
-                    )
-                ) {
-
-                    pumpStatus.textContent =
-                        "ON";
-
-                    pumpStatus.className =
-                        "status-online";
-
+                if (Boolean(rover.pump)) {
+                    pumpStatus.textContent = "ON (SPRAYING)";
+                    pumpStatus.className = "status-online";
+                } else {
+                    pumpStatus.textContent = "OFF";
+                    pumpStatus.className = "status-offline";
                 }
-
-                else {
-
-                    pumpStatus.textContent =
-                        "OFF";
-
-                    pumpStatus.className =
-                        "status-offline";
-
-                }
-
             }
 
         }
@@ -4149,38 +4153,28 @@
                 error
             );
 
-
-            const roverStatus =
-                document.getElementById(
-                    "rover-status"
-                );
-
-
-            if (roverStatus) {
-
-                roverStatus.textContent =
-                    "NOT CONNECTED";
-
-                roverStatus.className =
-                    "status-offline";
-
+            const piStatus = document.getElementById("pi-status");
+            if (piStatus) {
+                piStatus.textContent = "NOT CONNECTED";
+                piStatus.className = "status-offline";
             }
 
+            const aiModelStatus = document.getElementById("ai-model-status");
+            if (aiModelStatus) {
+                aiModelStatus.textContent = "STANDBY";
+                aiModelStatus.className = "status-offline";
+            }
 
-            const pumpStatus =
-                document.getElementById(
-                    "pump-status"
-                );
+            const roverStatus = document.getElementById("rover-status");
+            if (roverStatus) {
+                roverStatus.textContent = "STOPPED";
+                roverStatus.className = "status-offline";
+            }
 
-
+            const pumpStatus = document.getElementById("pump-status");
             if (pumpStatus) {
-
-                pumpStatus.textContent =
-                    "OFF";
-
-                pumpStatus.className =
-                    "status-offline";
-
+                pumpStatus.textContent = "OFF";
+                pumpStatus.className = "status-offline";
             }
 
         }
@@ -4281,10 +4275,19 @@
                SYSTEM ONLINE
             ============================================== */
 
-            setText(
-                "system-status-text",
-                "AI System Online"
-            );
+            if (data.rover) {
+                const piIsOnline = Boolean(data.rover.pi_online ?? data.rover.connected);
+                const modelIsOnline = Boolean(data.rover.model_online && piIsOnline);
+                if (piIsOnline && modelIsOnline) {
+                    setText("system-status-text", "Pi & AI Model Online");
+                } else if (piIsOnline) {
+                    setText("system-status-text", "Pi Online (AI Standby)");
+                } else {
+                    setText("system-status-text", "Rover Pi Offline");
+                }
+            } else {
+                setText("system-status-text", "AI System Online");
+            }
 
 
             const systemBadge =

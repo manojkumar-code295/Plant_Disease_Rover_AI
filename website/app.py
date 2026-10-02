@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+import time
 from datetime import datetime
 
 from flask import (
@@ -85,23 +86,38 @@ DEFAULT_RESULT = {
 # ============================================================
 
 rover_state = {
-
     "connected": False,
-
+    "pi_online": False,
+    "model_online": False,
+    "device": "Raspberry Pi 4 Model B",
+    "ai_status": "Standby",
+    "model_name": "MobileNetV2 (99% Acc) Chili Disease AI",
+    "fps": 0.0,
+    "last_detection": "NO LEAF DETECTED",
+    "last_confidence": 0.0,
     "direction": "Stopped",
-
     "speed": 50,
-
     "pump": False,
-
     "mode": "Manual",
-
     "last_command": "stop",
-
     "command_id": 0,
-
-    "last_seen": None
+    "last_seen": None,
+    "last_seen_epoch": 0.0
 }
+
+
+def refresh_rover_connection_state():
+    """Dynamically determine if the Raspberry Pi and AI Model are online based on heartbeat timestamp."""
+    epoch = rover_state.get("last_seen_epoch", 0.0)
+    now = time.time()
+    # Heartbeat is sent every 4s by the Pi; if seen within 15 seconds, consider online
+    is_alive = bool(epoch and (now - epoch < 15.0))
+    rover_state["connected"] = is_alive
+    rover_state["pi_online"] = is_alive
+    if not is_alive:
+        rover_state["model_online"] = False
+        rover_state["ai_status"] = "Offline / Standby"
+    return is_alive
 
 
 # ============================================================
@@ -713,6 +729,8 @@ def api_result():
 )
 def api_dashboard_state():
 
+    refresh_rover_connection_state()
+
     response = jsonify({
 
         "success": True,
@@ -1153,27 +1171,45 @@ def rover_command():
 def rover_heartbeat():
 
     try:
+        data = request.get_json(silent=True) or request.form or {}
+        now_epoch = time.time()
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        rover_state["last_seen_epoch"] = now_epoch
+        rover_state["last_seen"] = now_str
         rover_state["connected"] = True
+        rover_state["pi_online"] = True
 
-        rover_state["last_seen"] = \
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+        if data:
+            if "model_online" in data:
+                rover_state["model_online"] = bool(data.get("model_online"))
+            else:
+                rover_state["model_online"] = True
 
+            if "device" in data:
+                rover_state["device"] = str(data.get("device"))
+            if "ai_status" in data:
+                rover_state["ai_status"] = str(data.get("ai_status"))
+            if "model_name" in data:
+                rover_state["model_name"] = str(data.get("model_name"))
+            if "fps" in data:
+                try:
+                    rover_state["fps"] = round(float(data.get("fps")), 1)
+                except Exception:
+                    pass
+            if "last_detection" in data:
+                rover_state["last_detection"] = str(data.get("last_detection"))
+            if "last_confidence" in data:
+                try:
+                    rover_state["last_confidence"] = round(float(data.get("last_confidence")), 1)
+                except Exception:
+                    pass
 
         return jsonify({
-
             "success": True,
-
-            "message":
-                "Raspberry Pi connected",
-
-            "rover":
-                rover_state
-
+            "message": "Raspberry Pi & AI Model heartbeat acknowledged",
+            "rover": rover_state
         })
-
 
     except Exception as e:
 
@@ -1213,6 +1249,8 @@ def rover_gpio_config():
     methods=["GET"]
 )
 def rover_status():
+
+    refresh_rover_connection_state()
 
     return jsonify({
 
@@ -1270,6 +1308,8 @@ def rover_speed():
         rover_state["speed"] = speed
 
         rover_settings["speed"] = speed
+
+        rover_state["command_id"] += 1
 
 
         return jsonify({

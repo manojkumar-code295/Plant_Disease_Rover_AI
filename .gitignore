@@ -42,3 +42,12 @@ detected_leaves/
 *.temp
 .DS_Store
 Thumbs.db
+
+# Local test & backup scripts
+*_backup.*
+camera_test.py
+camera_ai_fixed.py
+pi_predict.py
+pi_rover_link.py
+train_model.py
+

@@ -193,14 +193,31 @@ def set_pump(state):
 stop_motors()
 set_pump(False)
 
+shared_telemetry = {
+    "device": "Raspberry Pi 4 Model B",
+    "pi_online": True,
+    "model_online": True,
+    "ai_status": "Ready",
+    "model_name": "MobileNetV2 (99% Acc) Chili Disease AI",
+    "fps": 0.0,
+    "last_detection": "NO LEAF DETECTED",
+    "last_confidence": 0.0,
+    "direction": "Stopped",
+    "pump": False
+}
+
 def apply_rover_command(direction, speed, pump):
     direction = str(direction).lower().strip()
-    set_pump(bool(pump))
+    is_pump = bool(pump)
+    set_pump(is_pump)
+    shared_telemetry["pump"] = is_pump
 
     if direction in ("stop", "emergency_stop", "stopped", ""):
+        shared_telemetry["direction"] = "Stopped"
         stop_motors()
         return
 
+    shared_telemetry["direction"] = direction.capitalize()
     is_moving = speed > 0
     if direction == "forward":
         gpio_write(LEFT_IN1, 1); gpio_write(LEFT_IN2, 0)
@@ -521,20 +538,20 @@ def upload_worker():
 last_command_id = -1
 
 def rover_telemetry_worker():
-    """Background thread polling commands from Render web dashboard."""
+    """Background thread polling commands from Render web dashboard and reporting telemetry."""
     global last_command_id
     poll_session = requests.Session()
     last_hb = 0.0
 
     while running:
         now = time.time()
-        # Send Heartbeat every 5 seconds
-        if now - last_hb >= 5.0:
+        # Send Heartbeat with rich telemetry payload every 4 seconds
+        if now - last_hb >= 4.0:
             try:
-                headers = {}
+                headers = {"Content-Type": "application/json"}
                 if RENDER_API_TOKEN:
                     headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-                poll_session.post(HEARTBEAT_URL, headers=headers, timeout=8)
+                poll_session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=6)
                 last_hb = now
             except Exception:
                 pass
@@ -647,6 +664,7 @@ def main():
                 fps_display = fps_counter / (now - fps_timer)
                 fps_counter = 0
                 fps_timer = now
+                shared_telemetry["fps"] = round(fps_display, 1)
 
             # 2. Strict Leaf Identification (Rejects faces, hands, walls)
             crop, box, mode = detect_leaf(frame)
@@ -660,6 +678,10 @@ def main():
                     curr_disease_code = disease_code
                     curr_display_label = display_label
                     curr_conf = conf
+
+                    shared_telemetry["last_detection"] = curr_display_label
+                    shared_telemetry["last_confidence"] = round(curr_conf, 1)
+                    shared_telemetry["ai_status"] = f"Classified: {curr_display_label}"
 
                     # Upload to Render if confidence threshold met and cooldown elapsed
                     if conf >= CONFIDENCE_THRESHOLD and (now - last_upload_time >= UPLOAD_INTERVAL):
@@ -681,6 +703,9 @@ def main():
                 curr_disease_code = "NO_LEAF"
                 curr_display_label = "NO LEAF DETECTED"
                 curr_conf = 0.0
+                shared_telemetry["last_detection"] = "NO LEAF DETECTED"
+                shared_telemetry["last_confidence"] = 0.0
+                shared_telemetry["ai_status"] = "Scanning (No leaf in view)"
 
             # 4. Display Window Overlays (GUI mode only)
             if not HEADLESS:
