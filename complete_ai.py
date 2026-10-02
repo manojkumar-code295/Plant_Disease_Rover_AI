@@ -49,7 +49,7 @@ IMAGE_SIZE = 224
 
 # AI Confidence & Classification Thresholds
 # If confidence < CONFIDENCE_THRESHOLD, reported as UNCERTAIN
-CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.70))
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.60))
 
 # Leaf Filtering Thresholds
 MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 4000))           # Min pixels to qualify as a leaf
@@ -424,32 +424,16 @@ def detect_leaf(frame_bgr):
 
             if score > best_score:
                 best_score = score
-                pad = 8
+                pad = 14
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
                 cx2 = min(w, bx + bw + pad); cy2 = min(h, by + bh + pad)
-                best_candidate = (cx1, cy1, cx2, cy2, c)
+                best_candidate = (cx1, cy1, cx2, cy2)
 
     if best_candidate is not None:
-        x1, y1, x2, y2, c = best_candidate
-        raw_crop = frame_bgr[y1:y2, x1:x2].copy()
-        if raw_crop.size > 0:
-            # Segment leaf contour inside crop coordinate space
-            cw = x2 - x1
-            ch = y2 - y1
-            mask = np.zeros((ch, cw), dtype=np.uint8)
-            c_shifted = c - np.array([x1, y1])
-            cv2.drawContours(mask, [c_shifted], -1, 255, -1)
-            # Morphological fill to include any internal spots or lesions
-            k_fill = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, k_fill)
-            # Dilate slightly to retain leaf border margins and disease edges
-            k_dil = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-            mask = cv2.dilate(mask, k_dil)
-
-            # Mask out non-leaf background to clean white [255, 255, 255]
-            # This perfectly reproduces the training dataset domain!
-            clean_crop = np.where(mask[:, :, None] == 255, raw_crop, [255, 255, 255]).astype(np.uint8)
-            return clean_crop, (x1, y1, x2, y2), "LEAF_DETECTED"
+        x1, y1, x2, y2 = best_candidate
+        crop = frame_bgr[y1:y2, x1:x2].copy()
+        if crop.size > 0:
+            return crop, (x1, y1, x2, y2), "LEAF_DETECTED"
 
     return None, None, "NO_LEAF"
 
@@ -459,7 +443,7 @@ def detect_leaf(frame_bgr):
 
 def predict_crop(crop_bgr):
     """
-    Runs model inference on raw [0, 255] float RGB values with aspect-ratio preservation.
+    Runs model inference on raw [0, 255] float RGB values.
     CRITICAL: MobileNetV2 has an internal preprocess_input layer.
     DO NOT divide by 255.0 (dividing causes solid-black mode collapse).
     """
@@ -467,10 +451,10 @@ def predict_crop(crop_bgr):
         return "NO_LEAF", "No Leaf Detected", 0.0, None
 
     try:
-        # Aspect-ratio preserving letterbox into (IMAGE_SIZE, IMAGE_SIZE)
-        lb_img = letterbox(crop_bgr, target_size=IMAGE_SIZE, bg_color=(255, 255, 255))
+        # Resize to standard model input dimensions (IMAGE_SIZE, IMAGE_SIZE)
+        resized = cv2.resize(crop_bgr, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_AREA)
         # Convert BGR to RGB (model expects RGB)
-        img = cv2.cvtColor(lb_img, cv2.COLOR_BGR2RGB).astype(np.float32)
+        img = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB).astype(np.float32)
         img = np.expand_dims(img, axis=0)
 
         if use_tflite:
