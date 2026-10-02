@@ -49,10 +49,10 @@ IMAGE_SIZE = 224
 
 # AI Confidence & Classification Thresholds
 # If confidence < CONFIDENCE_THRESHOLD, reported as UNCERTAIN
-CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.65))
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.70))
 
 # Leaf Filtering Thresholds
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 3200))           # Min pixels to qualify as a leaf
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 4000))           # Min pixels to qualify as a leaf
 MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.65)) # Max 65% of frame (rejects room/ceiling)
 MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.38))   # At least 38% of bounding box must be foliage
 MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.30))       # Skin tone ratio threshold for rejecting full face/hands
@@ -62,7 +62,7 @@ MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 50.0))     # Laplacian
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
 CAMERA_ROTATION = os.environ.get("CAMERA_ROTATION", "90_CCW")
 PREDICT_EVERY_N_FRAMES = int(os.environ.get("PREDICT_EVERY_N_FRAMES", 2))
-UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 2.0))      # Minimum seconds between cloud uploads
+UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 4.0))      # Minimum seconds between cloud uploads
 
 # Render Cloud Synchronization (Configurable via Environment)
 RENDER_URL = os.environ.get("RENDER_URL", "https://precision-agriculture-smart-rover.onrender.com").rstrip("/")
@@ -327,10 +327,10 @@ def detect_leaf(frame_bgr):
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination:
     # Real plant leaves have active chlorophyll where Green strictly dominates Red and Blue.
     # Eliminates beige walls, wooden tables, grey computer cases, vent grilles, and blue reflections.
-    foliage_bool = (hsv[:,:,0] >= 30) & (hsv[:,:,0] <= 90) & (hsv[:,:,1] >= 38) & \
+    foliage_bool = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 90) & (hsv[:,:,1] >= 45) & \
                    (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 245) & \
-                   (g_full > r_full + 3.0) & (g_full > b_full + 6.0) & \
-                   (2.0 * g_full - r_full - b_full >= 12.0)
+                   (g_full > r_full + 6.0) & (g_full > b_full + 8.0) & \
+                   (2.0 * g_full - r_full - b_full >= 18.0)
     foliage_mask = np.uint8(foliage_bool) * 255
 
     # 2. Human Skin Tone Mask: catches faces, hands, arms holding leaves
@@ -355,14 +355,14 @@ def detect_leaf(frame_bgr):
     if contours:
         for c in contours:
             area = cv2.contourArea(c)
-            # Area must be between minimum leaf size (3200px) and maximum leaf ratio
+            # Area must be between minimum leaf size (4000px) and maximum leaf ratio
             if area < MIN_LEAF_AREA or area > max_leaf_area:
                 continue
 
             bx, by, bw, bh = cv2.boundingRect(c)
 
             # Real leaves close to camera must have substantial width and height
-            if bw < 65 or bh < 65:
+            if bw < 70 or bh < 70:
                 continue
 
             # Reject contours spanning almost full width or height (room walls, ceiling, desk width)
@@ -376,7 +376,7 @@ def detect_leaf(frame_bgr):
             box_area = float(bw * bh)
             crop_foliage = foliage_clean[by:by+bh, bx:bx+bw]
             foliage_px = cv2.countNonZero(crop_foliage)
-            if foliage_px < 2200:
+            if foliage_px < 2800:
                 continue
             leaf_ratio = foliage_px / box_area
 
@@ -416,7 +416,7 @@ def detect_leaf(frame_bgr):
             foliage_mask_crop = crop_foliage > 0
             mean_exg = float(np.mean(exg[foliage_mask_crop])) if foliage_px > 0 else 0.0
 
-            if mean_exg < 12.0:
+            if mean_exg < 20.0:
                 continue
 
             # Botanical score: prioritizes true green foliage density, Excess Green, and organic solidity
@@ -649,6 +649,8 @@ def main():
     curr_conf = 0.0
     curr_box = None
     curr_mode = "NO_LEAF"
+    consec_class = None
+    consec_count = 0
 
     log(f"AgriRover AI System Active. Headless mode: {HEADLESS}")
     if not HEADLESS:
@@ -701,14 +703,21 @@ def main():
                     curr_display_label = display_label
                     curr_conf = conf
 
+                    if curr_disease_code == consec_class:
+                        consec_count += 1
+                    else:
+                        consec_class = curr_disease_code
+                        consec_count = 1
+
                     shared_telemetry["last_detection"] = curr_display_label
                     shared_telemetry["last_confidence"] = round(curr_conf * 100.0 if curr_conf <= 1.0 else curr_conf, 1)
                     shared_telemetry["ai_status"] = f"Classified: {curr_display_label}"
 
                     # Only upload CONFIRMED classifications (HEALTHY, Bacterial_Spot, Cercospora_Leaf_Spot, Curl_Virus)
+                    # Require at least 2 consecutive confirmations to prevent transient flickers
                     # Never upload UNCERTAIN or NO_LEAF guesses to the web dashboard
                     valid_disease_classes = ("HEALTHY", "Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus")
-                    if (curr_disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (now - last_upload_time >= UPLOAD_INTERVAL):
+                    if (curr_disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2) and (now - last_upload_time >= UPLOAD_INTERVAL):
                         snap_path = os.path.join(SAVE_FOLDER, f"leaf_{int(now)}.jpg")
                         cv2.imwrite(snap_path, crop)
                         try:
@@ -724,6 +733,8 @@ def main():
                         except Exception:
                             pass
             else:
+                consec_class = None
+                consec_count = 0
                 curr_disease_code = "NO_LEAF"
                 curr_display_label = "NO LEAF DETECTED"
                 curr_conf = 0.0
