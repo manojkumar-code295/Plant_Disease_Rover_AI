@@ -16,7 +16,8 @@ BATCH_SIZE = 32
 EPOCHS = 12
 SEED = 42
 
-MODEL_NAME = "chili_disease_model.keras"
+MODEL_NAME = "best_chili_model.keras"
+TFLITE_NAME = "best_chili_model.tflite"
 CLASS_FILE = "class_names.txt"
 
 # ============================================================
@@ -130,10 +131,11 @@ validation_dataset = validation_dataset.prefetch(
 
 data_augmentation = keras.Sequential(
     [
-        layers.RandomFlip("horizontal"),
-        layers.RandomRotation(0.08),
-        layers.RandomZoom(0.10),
-        layers.RandomContrast(0.10),
+        layers.RandomFlip("horizontal_and_vertical"),
+        layers.RandomRotation(0.12),
+        layers.RandomZoom(0.12),
+        layers.RandomContrast(0.15),
+        layers.RandomBrightness(0.15),
     ],
     name="data_augmentation"
 )
@@ -433,6 +435,30 @@ plt.savefig(
 plt.show()
 
 # ============================================================
+# EXPORT TO TENSORFLOW LITE
+# ============================================================
+
+print("\n======================================")
+print("EXPORTING TFLITE MODEL")
+print("======================================")
+
+try:
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    tflite_model = converter.convert()
+    with open(TFLITE_NAME, "wb") as f:
+        f.write(tflite_model)
+    print(f"TensorFlow Lite model exported: {TFLITE_NAME} ({len(tflite_model):,} bytes)")
+except Exception as e:
+    print(f"Warning: TFLite export failed ({e})")
+
+# Also save copy as chili_disease_model.keras for backward compatibility
+try:
+    model.save("chili_disease_model.keras")
+    print("Saved backward compatibility model: chili_disease_model.keras")
+except Exception as e:
+    pass
+
+# ============================================================
 # FINISHED
 # ============================================================
 
@@ -443,8 +469,9 @@ print("======================================")
 print("\nGenerated files:")
 
 print("1.", MODEL_NAME)
-print("2.", CLASS_FILE)
-print("3. accuracy_graph.png")
-print("4. loss_graph.png")
+print("2.", TFLITE_NAME)
+print("3.", CLASS_FILE)
+print("4. accuracy_graph.png")
+print("5. loss_graph.png")
 
 print("\nYour trained model is ready for prediction.")
