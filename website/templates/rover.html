@@ -1185,6 +1185,12 @@ main {
             <div class="control-interaction-row">
                 <!-- TACTILE D-PAD -->
                 <div>
+                    <div style="display:flex; justify-content:center; margin-bottom:12px;">
+                        <button id="btn-drive-mode" onclick="toggleDriveMode()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #86efac; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                            Mode: 🟢 Tap to Drive (Continuous)
+                        </button>
+                    </div>
+
                     <div class="dpad-container">
                         <button class="dpad-btn fwd" id="btn-forward"
                             onmousedown="startMove('forward')" onmouseup="stopMove()" onmouseleave="stopMove()"
@@ -1289,12 +1295,12 @@ main {
                 </div>
                 
                 <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #020c07; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center;">
-                    <img id="live-camera-feed" src="http://192.168.14.18:8080/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="handleStreamError(this)" onload="handleStreamLoaded(this)">
+                    <img id="live-camera-feed" src="/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="handleStreamError(this)" onload="handleStreamLoaded(this)">
                     
                     <div id="camera-feed-fallback" style="display: none; position: absolute; inset: 0; background: rgba(3, 10, 7, 0.95); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
-                        <div style="font-weight: 700; color: #f0fdf4; margin-bottom: 4px;">Local Camera Stream Standby</div>
-                        <div style="font-size: 12px; color: #94a3b8; max-width: 320px; margin-bottom: 12px;">Connecting to Raspberry Pi CSI stream (<span id="fallback-ip-text">192.168.14.18:8080</span>)...</div>
+                        <div style="font-weight: 700; color: #f0fdf4; margin-bottom: 4px;">Camera Stream Standby</div>
+                        <div style="font-size: 12px; color: #94a3b8; max-width: 320px; margin-bottom: 12px;">Connecting to camera stream (<span id="fallback-ip-text">/video_feed</span>)...</div>
                         <button onclick="retryStream()" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">🔄 Reconnect Feed</button>
                     </div>
 
@@ -1303,7 +1309,7 @@ main {
                         🔴 LIVE <span id="hud-cam-fps">--</span>
                     </div>
                     <div style="position: absolute; top: 10px; right: 10px;">
-                        <a id="stream-direct-link" href="http://192.168.14.18:8080/video_feed" target="_blank" style="background: rgba(0,0,0,0.65); color: #38bdf8; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                        <a id="stream-direct-link" href="/video_feed" target="_blank" style="background: rgba(0,0,0,0.65); color: #38bdf8; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.3);">
                             ↗ Fullscreen
                         </a>
                     </div>
@@ -1534,13 +1540,25 @@ async function sendCommand(command) {
 }
 
 /* Start / Stop Movement Handlers */
+let driveMode = 'latch'; // 'latch' = tap to drive until STOP, 'momentary' = hold to move
+
+function toggleDriveMode() {
+    driveMode = (driveMode === 'latch') ? 'momentary' : 'latch';
+    const btn = document.getElementById("btn-drive-mode");
+    if (btn) {
+        btn.textContent = (driveMode === 'latch') ? "Mode: 🟢 Tap to Drive (Continuous)" : "Mode: 🔵 Hold to Move (Momentary)";
+        btn.style.borderColor = (driveMode === 'latch') ? "rgba(16, 185, 129, 0.4)" : "rgba(6, 182, 212, 0.4)";
+        btn.style.color = (driveMode === 'latch') ? "#86efac" : "#67e8f9";
+    }
+    showToast(`Switched to ${driveMode === 'latch' ? 'Tap to Drive' : 'Hold to Move'} mode`);
+}
+
 function startMove(command, event) {
     if (event) event.preventDefault();
-    if (movementActive && currentDirection === command) return;
-
     movementActive = true;
     currentDirection = command;
 
+    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
     const btn = document.getElementById("btn-" + command);
     if (btn) btn.classList.add("active");
 
@@ -1549,6 +1567,11 @@ function startMove(command, event) {
 
 function stopMove(event) {
     if (event) event.preventDefault();
+    if (driveMode === 'latch') {
+        // In Tap to Drive mode, releasing the finger does NOT immediately stop
+        // The rover keeps moving until STOP or another command is tapped
+        return;
+    }
     if (!movementActive) return;
 
     movementActive = false;
@@ -1806,14 +1829,17 @@ async function getRoverStatus() {
     }
 }
 
-/* =========================================================
-   LIVE CAMERA STREAM HANDLERS
-========================================================= */
-let currentStreamUrl = "http://192.168.14.18:8080/video_feed";
+let isHttps = window.location.protocol === "https:";
+let currentStreamUrl = isHttps ? "/video_feed" : "http://192.168.14.18:8080/video_feed";
 let streamActive = false;
+let snapshotInterval = null;
 
 function handleStreamLoaded(img) {
     streamActive = true;
+    if (snapshotInterval) {
+        clearInterval(snapshotInterval);
+        snapshotInterval = null;
+    }
     const fb = document.getElementById("camera-feed-fallback");
     if (fb) fb.style.display = "none";
     const badge = document.getElementById("camera-feed-badge");
@@ -1825,12 +1851,16 @@ function handleStreamLoaded(img) {
 
 function handleStreamError(img) {
     streamActive = false;
-    const fb = document.getElementById("camera-feed-fallback");
-    if (fb) fb.style.display = "flex";
     const badge = document.getElementById("camera-feed-badge");
     if (badge) {
-        badge.textContent = "STREAM STANDBY";
-        badge.style.color = "#f59e0b";
+        badge.textContent = "SNAPSHOT RELAY";
+        badge.style.color = "#38bdf8";
+    }
+    // Automatically poll snapshot every 300ms if direct MJPEG fails
+    if (!snapshotInterval) {
+        snapshotInterval = setInterval(() => {
+            img.src = "/api/camera/snapshot?t=" + Date.now();
+        }, 300);
     }
 }
 

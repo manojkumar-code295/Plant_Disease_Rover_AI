@@ -658,55 +658,44 @@ def upload_worker():
 # ============================================================
 # ROVER TELEMETRY & COMMAND WORKER
 # ============================================================
+# DECOUPLED COMMAND & CLOUD RELAY WORKERS
+# ============================================================
 
 last_command_id = -1
 last_local_command_id = -1
 
-def rover_telemetry_worker():
-    """Background thread polling commands from both local Flask server and Render cloud."""
-    global last_command_id, last_local_command_id
-    poll_session = requests.Session()
-    last_hb = 0.0
-
+def local_command_worker():
+    """Ultra-responsive worker for local web dashboard commands (sub-50ms latency)."""
+    global last_local_command_id
+    session = requests.Session()
     while running:
-        now = time.time()
-        # Send Heartbeat with rich telemetry payload every 4 seconds to both Render and Local server
-        if now - last_hb >= 4.0:
-            headers = {"Content-Type": "application/json"}
-            if RENDER_API_TOKEN:
-                headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-            try:
-                poll_session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=4)
-            except Exception:
-                pass
-            try:
-                poll_session.post("http://127.0.0.1:5000/api/rover/heartbeat", json=shared_telemetry, headers={"Content-Type": "application/json"}, timeout=1)
-            except Exception:
-                pass
-            last_hb = now
-
-        # 1. Poll Local Server (Instant zero-latency response on local Wi-Fi / Pi screen)
         try:
-            r_loc = poll_session.get("http://127.0.0.1:5000/api/rover/command", timeout=0.25)
-            if r_loc.ok:
-                data_loc = r_loc.json()
-                cid_loc = data_loc.get("command_id", 0)
-                if cid_loc != last_local_command_id and cid_loc > 0:
-                    direction = data_loc.get("direction", "Stopped")
-                    speed = int(data_loc.get("speed", 50))
-                    pump = bool(data_loc.get("pump", False))
+            r = session.get("http://127.0.0.1:5000/api/rover/command", timeout=0.15)
+            if r.ok:
+                data = r.json()
+                cid = data.get("command_id", 0)
+                if cid != last_local_command_id and cid > 0:
+                    direction = data.get("direction", "Stopped")
+                    speed = int(data.get("speed", 50))
+                    pump = bool(data.get("pump", False))
                     log(f"ROVER COMMAND (Local Web) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
-                    last_local_command_id = cid_loc
+                    last_local_command_id = cid
         except Exception:
             pass
+        time.sleep(0.04)
 
-        # 2. Poll Render Cloud (Remote web dashboard)
+def cloud_command_worker():
+    """Dedicated cloud command polling thread for Render / Android App."""
+    global last_command_id
+    session = requests.Session()
+    headers = {}
+    if RENDER_API_TOKEN:
+        headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
+
+    while running:
         try:
-            headers = {}
-            if RENDER_API_TOKEN:
-                headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-            r = poll_session.get(COMMAND_URL, headers=headers, timeout=4)
+            r = session.get(COMMAND_URL, headers=headers, timeout=1.2)
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
@@ -719,8 +708,43 @@ def rover_telemetry_worker():
                     last_command_id = cid
         except Exception:
             pass
+        time.sleep(0.08)
 
-        time.sleep(0.35)
+def cloud_frame_streamer_worker():
+    """Streams live camera frames to Render so the Android app & remote dashboard see live video."""
+    session = requests.Session()
+    headers = {"Content-Type": "image/jpeg"}
+    if RENDER_API_TOKEN:
+        headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
+    stream_url = RENDER_URL + "/api/camera/stream_frame"
+
+    while running:
+        try:
+            with latest_jpeg_lock:
+                frame = latest_jpeg_frame
+            if frame is not None:
+                session.post(stream_url, data=frame, headers=headers, timeout=1.8)
+            time.sleep(0.20)  # ~5 FPS cloud relay
+        except Exception:
+            time.sleep(0.8)
+
+def telemetry_heartbeat_worker():
+    """Periodic telemetry heartbeat sender to both cloud and local server."""
+    session = requests.Session()
+    headers = {"Content-Type": "application/json"}
+    if RENDER_API_TOKEN:
+        headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
+
+    while running:
+        try:
+            session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=2.5)
+        except Exception:
+            pass
+        try:
+            session.post("http://127.0.0.1:5000/api/rover/heartbeat", json=shared_telemetry, headers={"Content-Type": "application/json"}, timeout=1.0)
+        except Exception:
+            pass
+        time.sleep(3.5)
 
 # ============================================================
 # MAIN ENTRY POINT
@@ -733,8 +757,17 @@ def main():
     upload_thread = threading.Thread(target=upload_worker, daemon=True)
     upload_thread.start()
 
-    telemetry_thread = threading.Thread(target=rover_telemetry_worker, daemon=True)
-    telemetry_thread.start()
+    local_cmd_thread = threading.Thread(target=local_command_worker, daemon=True, name="LocalCmdWorker")
+    local_cmd_thread.start()
+
+    cloud_cmd_thread = threading.Thread(target=cloud_command_worker, daemon=True, name="CloudCmdWorker")
+    cloud_cmd_thread.start()
+
+    frame_stream_thread = threading.Thread(target=cloud_frame_streamer_worker, daemon=True, name="CloudFrameStreamer")
+    frame_stream_thread.start()
+
+    heartbeat_thread = threading.Thread(target=telemetry_heartbeat_worker, daemon=True, name="HeartbeatWorker")
+    heartbeat_thread.start()
 
     # Camera initialization
     picam2 = None

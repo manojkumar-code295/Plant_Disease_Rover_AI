@@ -606,41 +606,89 @@ def api_clear_daily_data():
     })
 
 
+# Global in-memory cloud frame buffer for remote viewing
+latest_cloud_frame = None
+latest_cloud_frame_time = 0.0
+
+
+@app.route("/api/camera/stream_frame", methods=["POST"])
+def api_camera_stream_frame():
+    """Receives live JPEG frame from Raspberry Pi to relay to cloud clients."""
+    global latest_cloud_frame, latest_cloud_frame_time
+    file = request.files.get("frame")
+    if file:
+        latest_cloud_frame = file.read()
+        latest_cloud_frame_time = time.time()
+        return jsonify({"success": True})
+    if request.data:
+        latest_cloud_frame = request.data
+        latest_cloud_frame_time = time.time()
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "No frame data"}), 400
+
+
 @app.route("/video_feed")
 def video_feed():
-    """Proxies the local MJPEG camera stream from port 8080 or redirects."""
+    """Proxies the local MJPEG camera stream from port 8080 or streams relayed cloud frames."""
     import requests
 
-    def generate():
-        try:
-            r = requests.get("http://127.0.0.1:8080/video_feed", stream=True, timeout=5)
-            for chunk in r.iter_content(chunk_size=4096):
-                if chunk:
-                    yield chunk
-        except Exception:
-            pass
-
+    # 1. If on Raspberry Pi, proxy direct 8080 stream
     try:
-        return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+        r = requests.get("http://127.0.0.1:8080/video_feed", stream=True, timeout=0.8)
+        if r.ok:
+            def generate_local():
+                try:
+                    for chunk in r.iter_content(chunk_size=4096):
+                        if chunk:
+                            yield chunk
+                except Exception:
+                    pass
+            return Response(generate_local(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
     except Exception:
-        host_ip = request.host.split(":")[0]
-        return redirect(f"http://{host_ip}:8080/video_feed")
+        pass
+
+    # 2. If running on Cloud (Render), stream frames pushed by the Raspberry Pi
+    if latest_cloud_frame is not None:
+        def generate_cloud():
+            boundary = b'--FRAME\r\n'
+            last_sent = 0.0
+            while True:
+                if latest_cloud_frame is not None and latest_cloud_frame_time > last_sent:
+                    frame = latest_cloud_frame
+                    last_sent = latest_cloud_frame_time
+                    yield (boundary +
+                           b'Content-Type: image/jpeg\r\n' +
+                           b'Content-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' +
+                           frame + b'\r\n')
+                time.sleep(0.06)
+        return Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+
+    # 3. Fallback to snapshot redirect or static fallback
+    return redirect("/api/camera/snapshot")
 
 
 @app.route("/api/camera/snapshot")
 def camera_snapshot():
     import requests
+    # 1. Try local port 8080 snapshot
     try:
-        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=2)
+        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=1.0)
         if r.ok:
             return Response(r.content, mimetype="image/jpeg")
     except Exception:
         pass
 
+    # 2. Try latest uploaded cloud frame
+    if latest_cloud_frame is not None:
+        return Response(latest_cloud_frame, mimetype="image/jpeg")
+
+    # 3. Fallback to latest detection image
     latest = db.get_latest_detection()
     img_name = latest.get("image")
     if img_name:
-        return send_from_directory(IMAGE_FOLDER, img_name)
+        img_path = os.path.join(IMAGE_FOLDER, img_name)
+        if os.path.exists(img_path):
+            return send_from_directory(IMAGE_FOLDER, img_name)
     return jsonify({"error": "No camera frame available"}), 404
 
 
@@ -1224,9 +1272,11 @@ def rover_control():
 
 @app.route(
     "/api/rover/command",
-    methods=["GET"]
+    methods=["GET", "POST"]
 )
 def rover_command():
+    if request.method == "POST":
+        return rover_control()
 
     return jsonify({
 
