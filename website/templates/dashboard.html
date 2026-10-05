@@ -908,11 +908,9 @@
                 <div class="camera-stream-wrapper">
                     <!-- Dynamic Live Stream Image -->
                     <img id="live-camera-img" 
-                         src="/video_feed" 
+                         src="/api/camera/snapshot" 
                          alt="AgriRover Live Camera Stream" 
-                         class="camera-stream-img"
-                         onerror="handleStreamError(this)" 
-                         onload="handleStreamLoaded(this)">
+                         class="camera-stream-img">
 
                     <!-- Camera Stream HUD Overlays -->
                     <div class="hud-overlay-live">
@@ -1114,53 +1112,52 @@
         if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
         if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
 
-        // Camera Feed Fallback & Auto-Reconnect
+        // Resilient Double-Buffered Live Camera Feed Engine
         const cameraImg = document.getElementById("live-camera-img");
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
-        let streamRetryCount = 0;
-        let snapshotRelayTimer = null;
+        let streamActive = true;
+        let isFetching = false;
+        const bufferImg = new Image();
 
-        function handleStreamLoaded(img) {
-            if (cameraFallback) cameraFallback.style.display = "none";
-            if (streamIndicator) streamIndicator.style.background = "#10b981";
-            if (streamStatus) streamStatus.textContent = "Streaming active concurrently";
-            streamRetryCount = 0;
-            if (snapshotRelayTimer) {
-                clearInterval(snapshotRelayTimer);
-                snapshotRelayTimer = null;
-            }
+        function pumpLiveFrame() {
+            if (!streamActive || isFetching) return;
+            isFetching = true;
+            bufferImg.src = "/api/camera/snapshot?t=" + Date.now();
         }
 
-        function handleStreamError(img) {
-            if (streamRetryCount < 2) {
-                streamRetryCount++;
-                setTimeout(() => {
-                    img.src = "/video_feed?t=" + Date.now();
-                }, 1000);
-            } else {
-                // Seamlessly fall back to continuous snapshot polling for mobile / HTTPS
-                if (streamIndicator) streamIndicator.style.background = "#38bdf8";
-                if (streamStatus) streamStatus.textContent = "Live Snapshot Relay Active";
-                if (!snapshotRelayTimer) {
-                    snapshotRelayTimer = setInterval(() => {
-                        img.src = "/api/camera/snapshot?t=" + Date.now();
-                    }, 300);
-                }
+        bufferImg.onload = function() {
+            isFetching = false;
+            if (cameraImg && bufferImg.src) {
+                cameraImg.src = bufferImg.src;
+                if (cameraFallback) cameraFallback.style.display = "none";
+                if (streamIndicator) streamIndicator.style.background = "#10b981";
+                if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
             }
-        }
+            // Stream smoothly at ~10 FPS
+            setTimeout(pumpLiveFrame, 100);
+        };
+
+        bufferImg.onerror = function() {
+            isFetching = false;
+            if (streamIndicator) streamIndicator.style.background = "#f59e0b";
+            if (streamStatus) streamStatus.textContent = "Connecting to camera stream...";
+            setTimeout(pumpLiveFrame, 600);
+        };
 
         function retryStreamConnection() {
             if (cameraFallback) cameraFallback.style.display = "none";
-            if (streamStatus) streamStatus.textContent = "Reconnecting stream...";
-            streamRetryCount = 0;
-            cameraImg.src = "/video_feed?t=" + Date.now();
+            isFetching = false;
+            pumpLiveFrame();
         }
 
         function takeSnapshot() {
             window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
         }
+
+        // Start live camera stream immediately on page load
+        pumpLiveFrame();
 
         // Quick Rover Movement Command Handler
         async function sendQuickCommand(cmd) {

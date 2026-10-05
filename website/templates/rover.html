@@ -1408,7 +1408,7 @@ main {
                 </div>
                 
                 <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #020c07; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center;">
-                    <img id="live-camera-feed" src="/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="handleStreamError(this)" onload="handleStreamLoaded(this)">
+                    <img id="live-camera-feed" src="/api/camera/snapshot" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;">
                     
                     <div id="camera-feed-fallback" style="display: none; position: absolute; inset: 0; background: rgba(3, 10, 7, 0.95); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
@@ -1982,49 +1982,50 @@ async function getRoverStatus() {
     }
 }
 
-let isHttps = window.location.protocol === "https:";
-let currentStreamUrl = isHttps ? "/video_feed" : "http://192.168.14.18:8080/video_feed";
-let streamActive = false;
-let snapshotInterval = null;
+let streamActive = true;
+let isRoverFetching = false;
+const roverBufferImg = new Image();
+const liveCameraImg = document.getElementById("live-camera-feed");
+const cameraBadge = document.getElementById("camera-feed-badge");
 
-function handleStreamLoaded(img) {
-    streamActive = true;
-    if (snapshotInterval) {
-        clearInterval(snapshotInterval);
-        snapshotInterval = null;
-    }
-    const fb = document.getElementById("camera-feed-fallback");
-    if (fb) fb.style.display = "none";
-    const badge = document.getElementById("camera-feed-badge");
-    if (badge) {
-        badge.textContent = "CSI STREAM LIVE";
-        badge.style.color = "#34d399";
-    }
+function pumpRoverFrame() {
+    if (!streamActive || isRoverFetching) return;
+    isRoverFetching = true;
+    roverBufferImg.src = "/api/camera/snapshot?t=" + Date.now();
 }
 
-function handleStreamError(img) {
-    streamActive = false;
-    const badge = document.getElementById("camera-feed-badge");
-    if (badge) {
-        badge.textContent = "SNAPSHOT RELAY";
-        badge.style.color = "#38bdf8";
+roverBufferImg.onload = function() {
+    isRoverFetching = false;
+    if (liveCameraImg && roverBufferImg.src) {
+        liveCameraImg.src = roverBufferImg.src;
+        const fb = document.getElementById("camera-feed-fallback");
+        if (fb) fb.style.display = "none";
+        if (cameraBadge) {
+            cameraBadge.textContent = "LIVE CSI STREAM";
+            cameraBadge.style.color = "#34d399";
+        }
     }
-    // Automatically poll snapshot every 300ms if direct MJPEG fails
-    if (!snapshotInterval) {
-        snapshotInterval = setInterval(() => {
-            img.src = "/api/camera/snapshot?t=" + Date.now();
-        }, 300);
+    setTimeout(pumpRoverFrame, 100);
+};
+
+roverBufferImg.onerror = function() {
+    isRoverFetching = false;
+    if (cameraBadge) {
+        cameraBadge.textContent = "RECONNECTING...";
+        cameraBadge.style.color = "#f59e0b";
     }
-}
+    setTimeout(pumpRoverFrame, 600);
+};
 
 function retryStream() {
-    const img = document.getElementById("live-camera-feed");
-    if (img) {
-        img.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "retry=" + Date.now();
-    }
     const fb = document.getElementById("camera-feed-fallback");
     if (fb) fb.style.display = "none";
+    isRoverFetching = false;
+    pumpRoverFrame();
 }
+
+// Start live camera stream immediately
+pumpRoverFrame();
 
 function updateStreamUrl(url) {
     currentStreamUrl = url.trim();

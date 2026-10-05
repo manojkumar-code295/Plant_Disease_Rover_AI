@@ -672,38 +672,43 @@ def video_feed():
     def generate_cloud():
         boundary = b'--FRAME\r\n'
         last_mtime = 0.0
+        current_frame = None
+
+        # Pre-load existing frame if on disk
+        if os.path.exists(live_path):
+            try:
+                with open(live_path, "rb") as f:
+                    current_frame = f.read()
+                last_mtime = os.path.getmtime(live_path)
+            except Exception:
+                pass
+
         while True:
-            sent_frame = False
             try:
                 if os.path.exists(live_path):
                     mtime = os.path.getmtime(live_path)
-                    if mtime > last_mtime:
+                    if mtime > last_mtime or current_frame is None:
                         last_mtime = mtime
                         with open(live_path, "rb") as f:
-                            frame = f.read()
-                        sent_frame = True
-                        yield (boundary +
-                               b'Content-Type: image/jpeg\r\n' +
-                               b'Content-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' +
-                               frame + b'\r\n')
+                            current_frame = f.read()
                 elif latest_cloud_frame is not None:
-                    sent_frame = True
-                    yield (boundary +
-                           b'Content-Type: image/jpeg\r\n' +
-                           b'Content-Length: ' + str(len(latest_cloud_frame)).encode() + b'\r\n\r\n' +
-                           latest_cloud_frame + b'\r\n')
+                    current_frame = latest_cloud_frame
             except Exception:
                 pass
-            if not sent_frame:
-                yield (boundary +
-                       b'Content-Type: image/jpeg\r\n' +
-                       b'Content-Length: ' + str(len(PLACEHOLDER_JPEG)).encode() + b'\r\n\r\n' +
-                       PLACEHOLDER_JPEG + b'\r\n')
-                time.sleep(1.0)
-            else:
-                time.sleep(0.08)
 
-    return Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+            frame_to_send = current_frame if current_frame else PLACEHOLDER_JPEG
+            yield (boundary +
+                   b'Content-Type: image/jpeg\r\n' +
+                   b'Content-Length: ' + str(len(frame_to_send)).encode() + b'\r\n\r\n' +
+                   frame_to_send + b'\r\n')
+            time.sleep(0.10)
+
+    response = Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    response.headers['X-Accel-Buffering'] = 'no'
+    return response
 
 
 @app.route("/api/camera/snapshot")
@@ -714,18 +719,35 @@ def camera_snapshot():
         req = urllib.request.Request("http://127.0.0.1:8080/snapshot")
         with urllib.request.urlopen(req, timeout=0.8) as resp:
             if resp.status == 200:
-                return Response(resp.read(), mimetype="image/jpeg")
+                r = Response(resp.read(), mimetype="image/jpeg")
+                r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                r.headers['Pragma'] = 'no-cache'
+                r.headers['Expires'] = '0'
+                return r
     except Exception:
         pass
 
     # 2. Try disk-persisted live frame
     live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
     if os.path.exists(live_path):
-        return send_from_directory(IMAGE_FOLDER, "latest_live_frame.jpg")
+        try:
+            with open(live_path, "rb") as f:
+                data = f.read()
+            r = Response(data, mimetype="image/jpeg")
+            r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            r.headers['Pragma'] = 'no-cache'
+            r.headers['Expires'] = '0'
+            return r
+        except Exception:
+            pass
 
     # 3. Try in-memory buffer
     if latest_cloud_frame is not None:
-        return Response(latest_cloud_frame, mimetype="image/jpeg")
+        r = Response(latest_cloud_frame, mimetype="image/jpeg")
+        r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        r.headers['Pragma'] = 'no-cache'
+        r.headers['Expires'] = '0'
+        return r
 
     # 4. Fallback to latest detection image
     try:
@@ -734,12 +756,22 @@ def camera_snapshot():
         if img_name:
             img_path = os.path.join(IMAGE_FOLDER, img_name)
             if os.path.exists(img_path):
-                return send_from_directory(IMAGE_FOLDER, img_name)
+                with open(img_path, "rb") as f:
+                    data = f.read()
+                r = Response(data, mimetype="image/jpeg")
+                r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                r.headers['Pragma'] = 'no-cache'
+                r.headers['Expires'] = '0'
+                return r
     except Exception:
         pass
 
     # 5. Resilient 1x1 black JPEG fallback
-    return Response(PLACEHOLDER_JPEG, mimetype="image/jpeg")
+    r = Response(PLACEHOLDER_JPEG, mimetype="image/jpeg")
+    r.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    r.headers['Pragma'] = 'no-cache'
+    r.headers['Expires'] = '0'
+    return r
 
 
 @app.route("/settings")
