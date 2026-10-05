@@ -101,6 +101,8 @@ rover_state = {
     "mode": "Manual",
     "last_command": "stop",
     "command_id": 0,
+    "pi_ip": "",
+    "stream_url": "",
     "last_seen": None,
     "last_seen_epoch": 0.0
 }
@@ -1204,6 +1206,10 @@ def rover_heartbeat():
                     rover_state["last_confidence"] = round(float(data.get("last_confidence")), 1)
                 except Exception:
                     pass
+            if "pi_ip" in data:
+                rover_state["pi_ip"] = str(data.get("pi_ip"))
+            if "stream_url" in data:
+                rover_state["stream_url"] = str(data.get("stream_url"))
 
         return jsonify({
             "success": True,

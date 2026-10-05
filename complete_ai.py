@@ -27,6 +27,9 @@ import time
 import queue
 import signal
 import threading
+import socket
+import socketserver
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import cv2
 import numpy as np
 import requests
@@ -73,6 +76,20 @@ COMMAND_URL = RENDER_URL + "/api/rover/command"
 
 # Headless mode detection (systemd or no display)
 HEADLESS = ("--headless" in sys.argv) or (not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"))
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+LOCAL_IP = get_local_ip()
+STREAM_PORT = int(os.environ.get("STREAM_PORT", 8080))
+STREAM_URL = f"http://{LOCAL_IP}:{STREAM_PORT}/video_feed"
 
 # Verified Raspberry Pi 4 B GPIO Pin Mapping (BCM Numbers)
 GPIO_ENABLED = os.environ.get("GPIO_ENABLED", "1") == "1"
@@ -203,8 +220,87 @@ shared_telemetry = {
     "last_detection": "NO LEAF DETECTED",
     "last_confidence": 0.0,
     "direction": "Stopped",
-    "pump": False
+    "pump": False,
+    "pi_ip": LOCAL_IP,
+    "stream_url": STREAM_URL
 }
+
+# ============================================================
+# LIVE MJPEG VIDEO STREAMING SERVER (HTTP PORT 8080)
+# ============================================================
+
+latest_jpeg_frame = None
+latest_jpeg_lock = threading.Lock()
+
+class StreamingHandler(BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        self.do_GET()
+
+    def do_GET(self):
+        global latest_jpeg_frame
+        if self.path in ('/video_feed', '/stream', '/'):
+            self.send_response(200)
+            self.send_header('Age', '0')
+            self.send_header('Cache-Control', 'no-cache, private, no-store, must-revalidate')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            try:
+                while running:
+                    with latest_jpeg_lock:
+                        frame_bytes = latest_jpeg_frame
+                    if frame_bytes is not None:
+                        self.wfile.write(b'--FRAME\r\n')
+                        self.send_header('Content-Type', 'image/jpeg')
+                        self.send_header('Content-Length', str(len(frame_bytes)))
+                        self.end_headers()
+                        self.wfile.write(frame_bytes)
+                        self.wfile.write(b'\r\n')
+                    time.sleep(0.04)
+            except Exception:
+                pass
+        elif self.path in ('/snapshot', '/current.jpg'):
+            with latest_jpeg_lock:
+                frame_bytes = latest_jpeg_frame
+            if frame_bytes is not None:
+                self.send_response(200)
+                self.send_header('Content-Type', 'image/jpeg')
+                self.send_header('Content-Length', str(len(frame_bytes)))
+                self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(frame_bytes)
+            else:
+                self.send_error(404, "No frame captured yet")
+        elif self.path == '/status':
+            import json
+            payload = json.dumps(shared_telemetry).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(payload)
+        else:
+            self.send_error(404)
+
+    def log_message(self, format, *args):
+        pass
+
+class ThreadedHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+def start_streaming_server(port=8080):
+    try:
+        server = ThreadedHTTPServer(('0.0.0.0', port), StreamingHandler)
+        srv_thread = threading.Thread(target=server.serve_forever, daemon=True, name="VideoStreamServer")
+        srv_thread.start()
+        log(f"Live Video Stream Server listening on http://{LOCAL_IP}:{port}/video_feed")
+        return server
+    except Exception as e:
+        log(f"Warning: Could not start streaming server on port {port}: {e}")
+        return None
 
 def apply_rover_command(direction, speed, pump):
     direction = str(direction).lower().strip()
@@ -588,7 +684,7 @@ def rover_telemetry_worker():
 # ============================================================
 
 def main():
-    global running
+    global running, HEADLESS, latest_jpeg_frame
 
     # Start background workers
     upload_thread = threading.Thread(target=upload_worker, daemon=True)
@@ -635,6 +731,8 @@ def main():
     curr_mode = "NO_LEAF"
     consec_class = None
     consec_count = 0
+
+    stream_server = start_streaming_server(STREAM_PORT)
 
     log(f"AgriRover AI System Active. Headless mode: {HEADLESS}")
     if not HEADLESS:
@@ -726,36 +824,50 @@ def main():
                 shared_telemetry["last_confidence"] = 0.0
                 shared_telemetry["ai_status"] = "Active Scanning (No Leaf in View)"
 
-            # 4. Display Window Overlays (GUI mode only)
+            # 4. Generate HUD Overlay Frame (for both Live Stream & Preview Window)
+            display_frame = frame.copy()
+
+            if curr_mode == "LEAF_DETECTED" and curr_box is not None:
+                x1, y1, x2, y2 = curr_box
+                box_color = (0, 255, 0) if curr_disease_code == "HEALTHY" else (0, 69, 255)
+                if curr_disease_code == "UNCERTAIN":
+                    box_color = (0, 215, 255)
+
+                cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
+                cv2.putText(display_frame, curr_display_label, (x1, max(28, y1 - 10)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
+            else:
+                # Clear, unambiguous state when no leaf is in view
+                cv2.putText(display_frame, "NO LEAF DETECTED", (20, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 140, 255), 2)
+                cv2.putText(display_frame, "Point camera at chili plant leaf", (20, 80),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
+
+            # Telemetry status bar
+            status_bar = f"AgriRover AI | Camera: {camera_type} | FPS: {fps_display:.1f} | State: {curr_mode}"
+            cv2.putText(display_frame, status_bar, (10, 22),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
+            # Encode JPEG for live HTTP stream
+            try:
+                ret_enc, enc_jpeg = cv2.imencode('.jpg', display_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
+                if ret_enc:
+                    with latest_jpeg_lock:
+                        latest_jpeg_frame = enc_jpeg.tobytes()
+            except Exception:
+                pass
+
+            # 5. Display Window Overlays (GUI mode only)
             if not HEADLESS:
-                display_frame = frame.copy()
-
-                if curr_mode == "LEAF_DETECTED" and curr_box is not None:
-                    x1, y1, x2, y2 = curr_box
-                    box_color = (0, 255, 0) if curr_disease_code == "HEALTHY" else (0, 69, 255)
-                    if curr_disease_code == "UNCERTAIN":
-                        box_color = (0, 215, 255)
-
-                    cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
-                    cv2.putText(display_frame, curr_display_label, (x1, max(28, y1 - 10)),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
-                else:
-                    # Clear, unambiguous state when no leaf is in view
-                    cv2.putText(display_frame, "NO LEAF DETECTED", (20, 50),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 140, 255), 2)
-                    cv2.putText(display_frame, "Point camera at chili plant leaf", (20, 80),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
-
-                # Telemetry status bar
-                status_bar = f"AgriRover AI | Camera: {camera_type} | FPS: {fps_display:.1f} | State: {curr_mode}"
-                cv2.putText(display_frame, status_bar, (10, 22),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-
-                cv2.imshow("AgriRover - Continuous Chili Disease Detection", display_frame)
-                key = cv2.waitKey(1) & 0xFF
-                if key == ord('q'):
-                    log("User pressed 'q'. Exiting...")
-                    break
+                try:
+                    cv2.imshow("AgriRover - Continuous Chili Disease Detection", display_frame)
+                    key = cv2.waitKey(1) & 0xFF
+                    if key == ord('q'):
+                        log("User pressed 'q'. Exiting...")
+                        break
+                except Exception as gui_err:
+                    log(f"GUI display error: {gui_err}. Switching to headless mode.")
+                    HEADLESS = True
             else:
                 time.sleep(0.005)
 
@@ -768,6 +880,12 @@ def main():
         running = False
         stop_motors()
         set_pump(False)
+
+        if stream_server is not None:
+            try:
+                stream_server.shutdown()
+            except Exception:
+                pass
 
         if gpio_available and gpio_chip is not None:
             try:
@@ -786,7 +904,10 @@ def main():
             cap.release()
 
         if not HEADLESS:
-            cv2.destroyAllWindows()
+            try:
+                cv2.destroyAllWindows()
+            except Exception:
+                pass
 
         try:
             upload_queue.put(None)

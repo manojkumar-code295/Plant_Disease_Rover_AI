@@ -1278,58 +1278,101 @@ main {
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: TELEMETRY, LOG & AI FEED -->
-        <div class="panel-card telemetry-row">
-            <div class="panel-title">
-                <h3>📡 Real-Time Telemetry & Health</h3>
-                <span class="panel-badge" style="background: rgba(6, 182, 212, 0.15); color: #38bdf8;">LIVE STREAM</span>
+        <!-- RIGHT COLUMN: AI STREAM & TELEMETRY -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- LIVE AI CAMERA STREAM HUD CARD -->
+            <div class="panel-card">
+                <div class="panel-title">
+                    <h3>📹 Real-Time Edge AI Camera Stream</h3>
+                    <span class="panel-badge" id="camera-feed-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">CSI STREAM</span>
+                </div>
+                
+                <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #020c07; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center;">
+                    <img id="live-camera-feed" src="http://192.168.14.18:8080/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;" onerror="handleStreamError(this)" onload="handleStreamLoaded(this)">
+                    
+                    <div id="camera-feed-fallback" style="display: none; position: absolute; inset: 0; background: rgba(3, 10, 7, 0.95); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
+                        <div style="font-weight: 700; color: #f0fdf4; margin-bottom: 4px;">Local Camera Stream Standby</div>
+                        <div style="font-size: 12px; color: #94a3b8; max-width: 320px; margin-bottom: 12px;">Connecting to Raspberry Pi CSI stream (<span id="fallback-ip-text">192.168.14.18:8080</span>)...</div>
+                        <button onclick="retryStream()" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">🔄 Reconnect Feed</button>
+                    </div>
+
+                    <!-- HUD Overlays -->
+                    <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.65); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 11px; color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3);">
+                        🔴 LIVE <span id="hud-cam-fps">--</span>
+                    </div>
+                    <div style="position: absolute; top: 10px; right: 10px;">
+                        <a id="stream-direct-link" href="http://192.168.14.18:8080/video_feed" target="_blank" style="background: rgba(0,0,0,0.65); color: #38bdf8; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                            ↗ Fullscreen
+                        </a>
+                    </div>
+                </div>
+
+                <!-- STREAM CONTROLS & MANUAL IP OVERRIDE -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>Stream URL:</span>
+                        <input type="text" id="stream-url-input" value="http://192.168.14.18:8080/video_feed" style="background: rgba(14, 38, 28, 0.9); border: 1px solid var(--border-card); color: #86efac; border-radius: 6px; padding: 4px 8px; font-size: 11px; width: 210px;" onchange="updateStreamUrl(this.value)">
+                    </div>
+                    <button onclick="takeSnapshot()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 11px;">
+                        📸 Snapshot
+                    </button>
+                </div>
             </div>
 
-            <!-- METRIC CHIPS -->
-            <div class="stat-chip-grid">
-                <div class="stat-chip">
-                    <div class="stat-chip-label">AI Inference FPS</div>
-                    <div class="stat-chip-val" id="metric-fps" style="color: #38bdf8;">-- FPS</div>
+            <!-- TELEMETRY & HEALTH CARD -->
+            <div class="panel-card telemetry-row">
+                <div class="panel-title">
+                    <h3>📡 Real-Time Telemetry & Health</h3>
+                    <span class="panel-badge" style="background: rgba(6, 182, 212, 0.15); color: #38bdf8;">LIVE STREAM</span>
                 </div>
 
-                <div class="stat-chip">
-                    <div class="stat-chip-label">Latency to Cloud</div>
-                    <div class="stat-chip-val" id="metric-ping" style="color: #34d399;">-- ms</div>
+                <!-- METRIC CHIPS -->
+                <div class="stat-chip-grid">
+                    <div class="stat-chip">
+                        <div class="stat-chip-label">AI Inference FPS</div>
+                        <div class="stat-chip-val" id="metric-fps" style="color: #38bdf8;">-- FPS</div>
+                    </div>
+
+                    <div class="stat-chip">
+                        <div class="stat-chip-label">Latency to Cloud</div>
+                        <div class="stat-chip-val" id="metric-ping" style="color: #34d399;">-- ms</div>
+                    </div>
+
+                    <div class="stat-chip">
+                        <div class="stat-chip-label">Active Disease Mode</div>
+                        <div class="stat-chip-val" id="metric-disease" style="font-size: 13px; color: #fde047;">Scanning</div>
+                    </div>
+
+                    <div class="stat-chip">
+                        <div class="stat-chip-label">Confidence</div>
+                        <div class="stat-chip-val" id="metric-conf" style="color: #6ee7b7;">--%</div>
+                    </div>
                 </div>
 
-                <div class="stat-chip">
-                    <div class="stat-chip-label">Active Disease Mode</div>
-                    <div class="stat-chip-val" id="metric-disease" style="font-size: 13px; color: #fde047;">Scanning</div>
+                <!-- LIVE COMMAND CONSOLE TERMINAL -->
+                <div>
+                    <div class="terminal-header">
+                        <span>⚡ TRANSMISSION LOG</span>
+                        <span id="terminal-clock">00:00:00</span>
+                    </div>
+                    <div class="terminal-card" id="terminal-log">
+                        <div class="terminal-line ack">[INIT] AgriRover Web Telemetry System initialized.</div>
+                        <div class="terminal-line">[SYNC] Polling Raspberry Pi 4 telemetry loop...</div>
+                    </div>
                 </div>
 
-                <div class="stat-chip">
-                    <div class="stat-chip-label">Confidence</div>
-                    <div class="stat-chip-val" id="metric-conf" style="color: #6ee7b7;">--%</div>
-                </div>
-            </div>
-
-            <!-- LIVE COMMAND CONSOLE TERMINAL -->
-            <div>
-                <div class="terminal-header">
-                    <span>⚡ TRANSMISSION LOG</span>
-                    <span id="terminal-clock">00:00:00</span>
-                </div>
-                <div class="terminal-card" id="terminal-log">
-                    <div class="terminal-line ack">[INIT] AgriRover Web Telemetry System initialized.</div>
-                    <div class="terminal-line">[SYNC] Polling Raspberry Pi 4 telemetry loop...</div>
-                </div>
-            </div>
-
-            <!-- DETECTION SUMMARY CARD -->
-            <div style="background: rgba(6, 20, 14, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 14px;">
-                <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 6px;">
-                    Targeted Disease Spectrum
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                    <span style="font-size: 11px; background: rgba(239, 68, 68, 0.15); color: #fca5a5; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">Bacterial Spot</span>
-                    <span style="font-size: 11px; background: rgba(245, 158, 11, 0.15); color: #fcd34d; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">Cercospora Leaf Spot</span>
-                    <span style="font-size: 11px; background: rgba(168, 85, 247, 0.15); color: #d8b4fe; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);">Curl Virus</span>
-                    <span style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">Healthy Leaf</span>
+                <!-- DETECTION SUMMARY CARD -->
+                <div style="background: rgba(6, 20, 14, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 14px;">
+                    <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 6px;">
+                        Targeted Disease Spectrum
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        <span style="font-size: 11px; background: rgba(239, 68, 68, 0.15); color: #fca5a5; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">Bacterial Spot</span>
+                        <span style="font-size: 11px; background: rgba(245, 158, 11, 0.15); color: #fcd34d; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">Cercospora Leaf Spot</span>
+                        <span style="font-size: 11px; background: rgba(168, 85, 247, 0.15); color: #d8b4fe; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);">Curl Virus</span>
+                        <span style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">Healthy Leaf</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1736,9 +1779,87 @@ async function getRoverStatus() {
             applyPumpUI(pumpState);
         }
 
+        // Live AI Video Stream URL Auto-Sync
+        if (r.stream_url) {
+            const streamInput = document.getElementById("stream-url-input");
+            if (streamInput && !streamInput.dataset.userModified && currentStreamUrl !== r.stream_url) {
+                currentStreamUrl = r.stream_url;
+                streamInput.value = r.stream_url;
+                const link = document.getElementById("stream-direct-link");
+                if (link) link.href = r.stream_url;
+                const fbText = document.getElementById("fallback-ip-text");
+                if (fbText) fbText.textContent = r.stream_url;
+                const img = document.getElementById("live-camera-feed");
+                if (img && !streamActive) {
+                    img.src = r.stream_url;
+                }
+            }
+        }
+        if (r.fps !== undefined) {
+            const hudFps = document.getElementById("hud-cam-fps");
+            if (hudFps) hudFps.textContent = `${r.fps} FPS`;
+        }
+
     } catch (e) {
         // network error handled silently
     }
+}
+
+/* =========================================================
+   LIVE CAMERA STREAM HANDLERS
+========================================================= */
+let currentStreamUrl = "http://192.168.14.18:8080/video_feed";
+let streamActive = false;
+
+function handleStreamLoaded(img) {
+    streamActive = true;
+    const fb = document.getElementById("camera-feed-fallback");
+    if (fb) fb.style.display = "none";
+    const badge = document.getElementById("camera-feed-badge");
+    if (badge) {
+        badge.textContent = "CSI STREAM LIVE";
+        badge.style.color = "#34d399";
+    }
+}
+
+function handleStreamError(img) {
+    streamActive = false;
+    const fb = document.getElementById("camera-feed-fallback");
+    if (fb) fb.style.display = "flex";
+    const badge = document.getElementById("camera-feed-badge");
+    if (badge) {
+        badge.textContent = "STREAM STANDBY";
+        badge.style.color = "#f59e0b";
+    }
+}
+
+function retryStream() {
+    const img = document.getElementById("live-camera-feed");
+    if (img) {
+        img.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "retry=" + Date.now();
+    }
+    const fb = document.getElementById("camera-feed-fallback");
+    if (fb) fb.style.display = "none";
+}
+
+function updateStreamUrl(url) {
+    currentStreamUrl = url.trim();
+    const streamInput = document.getElementById("stream-url-input");
+    if (streamInput) streamInput.dataset.userModified = "true";
+    const img = document.getElementById("live-camera-feed");
+    if (img) img.src = currentStreamUrl;
+    const link = document.getElementById("stream-direct-link");
+    if (link) link.href = currentStreamUrl;
+    const fbText = document.getElementById("fallback-ip-text");
+    if (fbText) fbText.textContent = currentStreamUrl;
+}
+
+function takeSnapshot() {
+    let snapUrl = currentStreamUrl.replace("/video_feed", "/snapshot");
+    if (!snapUrl.includes("/snapshot")) {
+        snapUrl = currentStreamUrl + "/snapshot";
+    }
+    window.open(snapUrl + (snapUrl.includes("?") ? "&" : "?") + "t=" + Date.now(), "_blank");
 }
 
 // Clock ticker
