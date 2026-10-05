@@ -578,6 +578,102 @@ main {
     box-shadow: 0 0 15px rgba(52, 211, 153, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
+/* Primary Engine Start/Stop Bar */
+.primary-engine-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 14px;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.engine-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.engine-start {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: 1px solid #34d399;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.engine-start:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+.engine-start:active, .engine-start.running {
+    background: linear-gradient(135deg, #047857, #064e3b);
+    border-color: #6ee7b7;
+    animation: enginePulse 1.6s infinite ease-in-out;
+}
+
+.engine-stop {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border: 1px solid #f87171;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.engine-stop:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+
+.engine-stop:active {
+    transform: scale(0.96);
+    background: #7f1d1d;
+}
+
+@keyframes enginePulse {
+    0%, 100% {
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
+        border-color: #34d399;
+    }
+    50% {
+        box-shadow: 0 0 25px rgba(52, 211, 153, 0.95);
+        border-color: #a7f3d0;
+    }
+}
+
+.dpad-btn.strt {
+    grid-column: 1;
+    grid-row: 1;
+    background: linear-gradient(145deg, #065f46, #064e3b);
+    border-color: #10b981;
+    color: #ecfdf5;
+}
+.dpad-btn.strt span { color: #6ee7b7; font-weight: 800; }
+.dpad-btn.strt:hover {
+    background: linear-gradient(145deg, #047857, #065f46);
+    border-color: #34d399;
+}
+.dpad-btn.strt:active, .dpad-btn.strt.active {
+    background: #022c22;
+    border-color: #34d399;
+    box-shadow: 0 0 15px rgba(52, 211, 153, 0.8);
+}
+
 .dpad-btn.fwd { grid-column: 2; grid-row: 1; }
 .dpad-btn.lft { grid-column: 1; grid-row: 2; }
 .dpad-btn.stp {
@@ -1183,8 +1279,20 @@ main {
 
             <!-- CONTROLS: D-PAD & STEERING WHEEL -->
             <div class="control-interaction-row">
-                <!-- TACTILE D-PAD -->
+                <!-- TACTILE D-PAD & ENGINE CONTROLS -->
                 <div>
+                    <!-- PRIMARY ENGINE START / STOP -->
+                    <div class="primary-engine-bar">
+                        <button id="btn-start-rover" class="engine-btn engine-start" onclick="startRover()">
+                            <span class="engine-icon">▶</span>
+                            <span class="engine-text">START ROVER</span>
+                        </button>
+                        <button id="btn-stop-rover" class="engine-btn engine-stop" onclick="emergencyStop()">
+                            <span class="engine-icon">■</span>
+                            <span class="engine-text">STOP</span>
+                        </button>
+                    </div>
+
                     <div style="display:flex; justify-content:center; margin-bottom:12px;">
                         <button id="btn-drive-mode" onclick="toggleDriveMode()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #86efac; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer;">
                             Mode: 🟢 Tap to Drive (Continuous)
@@ -1192,6 +1300,11 @@ main {
                     </div>
 
                     <div class="dpad-container">
+                        <button class="dpad-btn strt" id="btn-dpad-start" onclick="startRover()" title="Start Rover Forward">
+                            ▶
+                            <span>START</span>
+                        </button>
+
                         <button class="dpad-btn fwd" id="btn-forward"
                             onmousedown="startMove('forward')" onmouseup="stopMove()" onmouseleave="stopMove()"
                             ontouchstart="startMove('forward', event)" ontouchend="stopMove(event)">
@@ -1553,10 +1666,48 @@ function toggleDriveMode() {
     showToast(`Switched to ${driveMode === 'latch' ? 'Tap to Drive' : 'Hold to Move'} mode`);
 }
 
+function startRover() {
+    movementActive = true;
+    currentDirection = "forward";
+
+    // Highlight Primary Engine Start button with running pulse
+    const startBtn = document.getElementById("btn-start-rover");
+    if (startBtn) {
+        startBtn.classList.add("running");
+        startBtn.innerHTML = '<span class="engine-icon" style="color:#34d399;">⚙️</span><span class="engine-text">ROVER RUNNING</span>';
+    }
+
+    // Highlight D-pad Start and Fwd buttons
+    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
+    const dpadStartBtn = document.getElementById("btn-dpad-start");
+    if (dpadStartBtn) dpadStartBtn.classList.add("active");
+    const fwdBtn = document.getElementById("btn-forward");
+    if (fwdBtn) fwdBtn.classList.add("active");
+
+    updateSchematicAnimation("forward", pumpState);
+    sendCommand("start");
+    showToast("▶ ROVER ENGINE STARTED (FORWARD)");
+}
+
+function resetStartButton() {
+    const startBtn = document.getElementById("btn-start-rover");
+    if (startBtn) {
+        startBtn.classList.remove("running");
+        startBtn.innerHTML = '<span class="engine-icon">▶</span><span class="engine-text">START ROVER</span>';
+    }
+    const dpadStartBtn = document.getElementById("btn-dpad-start");
+    if (dpadStartBtn) dpadStartBtn.classList.remove("active");
+}
+
 function startMove(command, event) {
     if (event) event.preventDefault();
+    if (command === "forward" || command === "start") {
+        startRover();
+        return;
+    }
     movementActive = true;
     currentDirection = command;
+    resetStartButton();
 
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
     const btn = document.getElementById("btn-" + command);
@@ -1576,6 +1727,7 @@ function stopMove(event) {
 
     movementActive = false;
     currentDirection = "stop";
+    resetStartButton();
 
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
     sendCommand("stop");
@@ -1584,6 +1736,7 @@ function stopMove(event) {
 function emergencyStop() {
     movementActive = false;
     currentDirection = "stop";
+    resetStartButton();
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
     sendCommand("stop");
     showToast("EMERGENCY STOP EXECUTED");

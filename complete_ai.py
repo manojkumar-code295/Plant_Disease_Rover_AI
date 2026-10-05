@@ -314,10 +314,10 @@ def apply_rover_command(direction, speed, pump):
         stop_motors()
         return
 
-    shared_telemetry["direction"] = direction.capitalize()
+    shared_telemetry["direction"] = "Forward" if direction == "start" else direction.capitalize()
     is_moving = speed > 0
     in1, in2, in3, in4 = 0, 0, 0, 0
-    if direction == "forward":
+    if direction in ("forward", "start"):
         in1, in2 = 1, 0
         in3, in4 = 1, 0
     elif direction in ("backward", "reverse"):

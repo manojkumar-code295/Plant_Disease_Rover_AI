@@ -952,6 +952,13 @@
                         <span>🏎️ Quick Motion Controls</span>
                         <span id="quick-motion-status" style="color: #94a3b8; font-weight: normal; font-size: 11px;">STOPPED</span>
                     </div>
+
+                    <!-- Primary START / STOP Buttons -->
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
+                        <button id="quick-start-btn" class="btn-stream-action" onclick="sendQuickCommand('start')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(4, 120, 87, 0.5)); border: 1px solid #10b981; color: #ecfdf5; box-shadow: 0 0 14px rgba(16, 185, 129, 0.35); flex: 1; max-width: 130px; cursor: pointer;">▶ START</button>
+                        <button id="quick-stop-btn" class="btn-stream-action" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.4)); border: 1px solid #ef4444; color: #fee2e2; box-shadow: 0 0 14px rgba(239, 68, 68, 0.3); flex: 1; max-width: 130px; cursor: pointer;">■ STOP</button>
+                    </div>
+
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 250px; margin: 0 auto;">
                         <div></div>
                         <button class="btn-stream-action" onclick="sendQuickCommand('forward')" style="justify-content: center; padding: 10px 4px; font-size: 13px;">▲ FWD</button>
@@ -1158,6 +1165,7 @@
         // Quick Rover Movement Command Handler
         async function sendQuickCommand(cmd) {
             const statusText = document.getElementById("quick-motion-status");
+            const startBtn = document.getElementById("quick-start-btn");
             if (statusText) statusText.textContent = cmd.toUpperCase() + "...";
             try {
                 const res = await fetch("/api/rover/control", {
@@ -1167,8 +1175,18 @@
                 });
                 const data = await res.json();
                 if (data.success && statusText) {
-                    statusText.textContent = cmd.toUpperCase();
+                    const isFwd = (cmd === 'start' || cmd === 'forward');
+                    statusText.textContent = isFwd ? 'RUNNING (FWD)' : cmd.toUpperCase();
                     statusText.style.color = (cmd === 'stop') ? '#94a3b8' : '#34d399';
+                    if (startBtn) {
+                        if (isFwd) {
+                            startBtn.style.boxShadow = '0 0 22px rgba(52, 211, 153, 0.9)';
+                            startBtn.innerHTML = '⚙️ RUNNING';
+                        } else {
+                            startBtn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.35)';
+                            startBtn.innerHTML = '▶ START';
+                        }
+                    }
                 }
             } catch (e) {
                 if (statusText) statusText.textContent = "ERR: NO LINK";

@@ -1207,45 +1207,31 @@ def rover_control():
 
 
         valid_commands = [
-
             "forward",
             "backward",
             "left",
             "right",
-            "stop"
-
+            "stop",
+            "start"
         ]
 
-
         if command not in valid_commands:
-
             return jsonify({
-
                 "success": False,
-
                 "message":
                     "Invalid rover command",
-
                 "command":
                     command
-
             }), 400
 
-
         direction_names = {
-
             "forward": "Forward",
-
+            "start": "Forward",
             "backward": "Backward",
-
             "left": "Left",
-
             "right": "Right",
-
             "stop": "Stopped"
-
         }
-
 
         rover_state[
             "direction"
