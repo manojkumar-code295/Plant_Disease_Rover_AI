@@ -10,8 +10,11 @@ from flask import (
     request,
     jsonify,
     make_response,
-    send_from_directory
+    send_from_directory,
+    Response,
+    redirect
 )
+import db
 
 
 # ============================================================
@@ -229,6 +232,12 @@ def save_json_file(file_path, data):
 # ============================================================
 
 def get_latest_result():
+    try:
+        latest = db.get_latest_detection()
+        if latest and latest.get("disease") and latest.get("disease") != "No prediction yet":
+            return latest
+    except Exception:
+        pass
 
     result = load_json_file(
         RESULT_FILE,
@@ -239,7 +248,6 @@ def get_latest_result():
         result = DEFAULT_RESULT.copy()
 
     for key, value in DEFAULT_RESULT.items():
-
         if key not in result:
             result[key] = value
 
@@ -247,6 +255,10 @@ def get_latest_result():
 
 
 def save_latest_result(result):
+    try:
+        db.save_detection(result)
+    except Exception as e:
+        print("[DB SAVE WARNING]", e)
 
     return save_json_file(
         RESULT_FILE,
@@ -259,6 +271,12 @@ def save_latest_result(result):
 # ============================================================
 
 def get_history():
+    try:
+        hist = db.get_recent_history(limit=100)
+        if hist and len(hist) > 0:
+            return hist
+    except Exception:
+        pass
 
     history = load_json_file(
         HISTORY_FILE,
@@ -272,7 +290,6 @@ def get_history():
 
 
 def save_history(history):
-
     return save_json_file(
         HISTORY_FILE,
         history
@@ -280,18 +297,13 @@ def save_history(history):
 
 
 def add_history_record(result):
+    try:
+        db.save_detection(result)
+    except Exception as e:
+        print("[DB ADD HISTORY WARNING]", e)
 
     history = get_history()
-
-    history.insert(
-        0,
-        result
-    )
-
-    history = history[:100]
-
     save_history(history)
-
     return history
 
 
@@ -551,6 +563,85 @@ def rover():
         settings=rover_settings,
         gpio_mapping=GPIO_MAPPING
     )
+
+
+@app.route("/daily-data")
+@app.route("/daily_data")
+def daily_data():
+
+    result = get_latest_result()
+    daily_list = db.get_daily_grouped_data()
+    stats = db.get_analytics_summary()
+
+    return render_template(
+        "daily_data.html",
+        daily_data=daily_list,
+        statistics=stats,
+        result=result,
+        detection=result,
+        latest_result=result,
+        rover=rover_state,
+        settings=rover_settings
+    )
+
+
+@app.route("/api/daily-data", methods=["GET"])
+def api_daily_data():
+
+    return jsonify({
+        "success": True,
+        "daily_data": db.get_daily_grouped_data(),
+        "statistics": db.get_analytics_summary()
+    })
+
+
+@app.route("/api/daily-data/clear", methods=["POST"])
+def api_clear_daily_data():
+
+    success = db.clear_all_detections()
+
+    return jsonify({
+        "success": success,
+        "message": "Daily detection records cleared successfully." if success else "Error clearing database."
+    })
+
+
+@app.route("/video_feed")
+def video_feed():
+    """Proxies the local MJPEG camera stream from port 8080 or redirects."""
+    import requests
+
+    def generate():
+        try:
+            r = requests.get("http://127.0.0.1:8080/video_feed", stream=True, timeout=5)
+            for chunk in r.iter_content(chunk_size=4096):
+                if chunk:
+                    yield chunk
+        except Exception:
+            pass
+
+    try:
+        return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+    except Exception:
+        host_ip = request.host.split(":")[0]
+        return redirect(f"http://{host_ip}:8080/video_feed")
+
+
+@app.route("/api/camera/snapshot")
+def camera_snapshot():
+    import requests
+    try:
+        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=2)
+        if r.ok:
+            return Response(r.content, mimetype="image/jpeg")
+    except Exception:
+        pass
+
+    latest = db.get_latest_detection()
+    img_name = latest.get("image")
+    if img_name:
+        return send_from_directory(IMAGE_FOLDER, img_name)
+    return jsonify({"error": "No camera frame available"}), 404
 
 
 @app.route("/settings")

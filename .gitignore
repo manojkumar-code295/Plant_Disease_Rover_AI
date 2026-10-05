@@ -51,3 +51,7 @@ pi_predict.py
 pi_rover_link.py
 train_model.py
 
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal

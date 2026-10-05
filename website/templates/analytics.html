@@ -1,4068 +1,798 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<meta name="theme-color"
-      content="#0b3d2e">
-
-<meta name="description"
-      content="Precision Agriculture Smart Rover Analytics">
-
-<title>Analytics | Precision Agriculture Smart Rover</title>
-
-
-<style>
-
-/* =========================================================
-   ROOT
-========================================================= */
-
-:root {
-
-    --primary: #176b45;
-    --primary-dark: #0b3d2e;
-    --primary-light: #eaf7ef;
-
-    --accent: #39b86f;
-
-    --green: #16a34a;
-    --green-light: #dcfce7;
-
-    --red: #dc2626;
-    --red-light: #fee2e2;
-
-    --orange: #d97706;
-    --orange-light: #fef3c7;
-
-    --purple: #7c3aed;
-    --purple-light: #ede9fe;
-
-    --text: #17221d;
-    --text-soft: #64736b;
-    --text-light: #91a098;
-
-    --background: #f4f8f5;
-    --white: #ffffff;
-
-    --border: #e3ebe6;
-
-    --shadow-sm:
-        0 4px 15px rgba(15,55,35,0.05);
-
-    --shadow-md:
-        0 10px 30px rgba(15,55,35,0.08);
-
-    --shadow-lg:
-        0 18px 45px rgba(15,55,35,0.12);
-
-}
-
-
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-
-    font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background:
-
-        radial-gradient(
-            circle at top right,
-            rgba(57,184,111,0.08),
-            transparent 30%
-        ),
-
-        radial-gradient(
-            circle at bottom left,
-            rgba(23,107,69,0.05),
-            transparent 28%
-        ),
-
-        var(--background);
-
-    color: var(--text);
-
-    min-height: 100vh;
-
-    -webkit-font-smoothing: antialiased;
-
-}
-
-
-/* =========================================================
-   SCROLLBAR
-========================================================= */
-
-::-webkit-scrollbar {
-    width: 7px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #b9c9c0;
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #8fa79a;
-}
-
-
-/* =========================================================
-   APP
-========================================================= */
-
-.app {
-    min-height: 100vh;
-}
-
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.sidebar {
-
-    position: fixed;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 260px;
-
-    background:
-        linear-gradient(
-            180deg,
-            #0b3d2e 0%,
-            #0a3025 100%
-        );
-
-    color: white;
-
-    padding: 24px 15px;
-
-    z-index: 1000;
-
-    overflow-y: auto;
-
-    border-right:
-        1px solid rgba(255,255,255,0.04);
-
-}
-
-
-/* =========================================================
-   LOGO
-========================================================= */
-
-.logo {
-
-    padding:
-        8px 13px 24px;
-
-    border-bottom:
-        1px solid rgba(255,255,255,0.10);
-
-}
-
-.logo-icon {
-
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-
-    justify-content: center;
-    align-items: center;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(69,210,128,0.22),
-            rgba(69,210,128,0.08)
-        );
-
-    border:
-        1px solid rgba(111,239,159,0.15);
-
-    font-size: 27px;
-
-    margin-bottom: 13px;
-
-    box-shadow:
-        0 8px 25px rgba(0,0,0,0.12);
-
-    animation:
-        logoFloat 4s ease-in-out infinite;
-
-}
-
-@keyframes logoFloat {
-
-    0%,100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-3px);
-    }
-
-}
-
-.logo h1 {
-
-    font-size: 17px;
-
-    line-height: 1.35;
-
-    font-weight: 750;
-
-}
-
-.logo p {
-
-    color: #a7c3b7;
-
-    font-size: 11px;
-
-    margin-top: 7px;
-
-    line-height: 1.5;
-
-}
-
-
-/* =========================================================
-   MENU
-========================================================= */
-
-.menu-title {
-
-    color: #72998a;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.4px;
-
-    margin:
-        27px 12px 11px;
-
-    text-transform: uppercase;
-
-}
-
-.menu a {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 13px;
-
-    color: #c1d3ca;
-
-    padding: 13px 14px;
-
-    border-radius: 12px;
-
-    margin-bottom: 5px;
-
-    font-size: 13px;
-
-    font-weight: 650;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        color 0.2s ease;
-
-}
-
-.menu a:hover {
-
-    background:
-        rgba(255,255,255,0.08);
-
-    color: white;
-
-    transform:
-        translateX(3px);
-
-}
-
-.menu a.active {
-
-    background:
-        linear-gradient(
-            135deg,
-            #2d8b5c,
-            #226e49
-        );
-
-    color: white;
-
-    box-shadow:
-        0 8px 20px rgba(0,0,0,0.18);
-
-}
-
-.menu-icon {
-
-    width: 23px;
-
-    text-align: center;
-
-    font-size: 18px;
-
-}
-
-
-/* =========================================================
-   SIDEBAR CONNECTION
-========================================================= */
-
-.sidebar-bottom {
-
-    position: absolute;
-
-    left: 15px;
-    right: 15px;
-
-    bottom: 23px;
-
-}
-
-.connection-box {
-
-    background:
-        rgba(255,255,255,0.065);
-
-    border:
-        1px solid rgba(255,255,255,0.07);
-
-    border-radius: 13px;
-
-    padding: 14px;
-
-    backdrop-filter:
-        blur(8px);
-
-}
-
-.connection-title {
-
-    color: #82a696;
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    letter-spacing: 1px;
-
-    margin-bottom: 9px;
-
-}
-
-.connection-status {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    color: #e0eee7;
-
-    font-size: 11px;
-
-    font-weight: 700;
-
-}
-
-.green-dot {
-
-    width: 8px;
-    height: 8px;
-
-    flex: 0 0 8px;
-
-    background: #35d47a;
-
-    border-radius: 50%;
-
-    box-shadow:
-        0 0 0 4px rgba(53,212,122,0.10),
-        0 0 10px rgba(53,212,122,0.75);
-
-    animation:
-        statusPulse 2s infinite;
-
-}
-
-@keyframes statusPulse {
-
-    0%,100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: .45;
-    }
-
-}
-
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main {
-
-    margin-left: 260px;
-
-    width:
-        calc(100% - 260px);
-
-    min-height: 100vh;
-
-}
-
-
-/* =========================================================
-   TOPBAR
-========================================================= */
-
-.topbar {
-
-    min-height: 82px;
-
-    background:
-        rgba(255,255,255,0.92);
-
-    border-bottom:
-        1px solid var(--border);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding:
-        15px 40px;
-
-    position: sticky;
-
-    top: 0;
-
-    z-index: 100;
-
-    backdrop-filter:
-        blur(15px);
-
-}
-
-.topbar-title h2 {
-
-    font-size: 19px;
-
-    color: var(--primary-dark);
-
-    font-weight: 750;
-
-}
-
-.topbar-title p {
-
-    color: var(--text-light);
-
-    font-size: 11px;
-
-    margin-top: 5px;
-
-}
-
-.system-badge {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    background:
-        var(--primary-light);
-
-    color:
-        #13713f;
-
-    border:
-        1px solid #ccebd8;
-
-    padding:
-        9px 15px;
-
-    border-radius: 30px;
-
-    font-size: 11px;
-
-    font-weight: 750;
-
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-.content {
-
-    padding:
-        34px 40px 30px;
-
-    max-width:
-        1550px;
-
-    margin:
-        auto;
-
-}
-
-
-/* =========================================================
-   PAGE INTRO
-========================================================= */
-
-.page-intro {
-
-    margin-bottom: 27px;
-
-    animation:
-        fadeUp .55s ease both;
-
-}
-
-.page-intro h1 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        28px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        -0.6px;
-
-}
-
-.page-intro p {
-
-    color:
-        var(--text-soft);
-
-    margin-top:
-        7px;
-
-    font-size:
-        12px;
-
-}
-
-
-/* =========================================================
-   FADE ANIMATION
-========================================================= */
-
-@keyframes fadeUp {
-
-    from {
-
-        opacity: 0;
-
-        transform:
-            translateY(12px);
-
-    }
-
-    to {
-
-        opacity: 1;
-
-        transform:
-            translateY(0);
-
-    }
-
-}
-
-
-/* =========================================================
-   SUMMARY GRID
-========================================================= */
-
-.summary-grid {
-
-    display:
-        grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
-    gap:
-        18px;
-
-    margin-bottom:
-        28px;
-
-}
-
-
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
-
-.summary-card {
-
-    position:
-        relative;
-
-    background:
-        rgba(255,255,255,.97);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        17px;
-
-    padding:
-        21px;
-
-    box-shadow:
-        var(--shadow-sm);
-
-    overflow:
-        hidden;
-
-    animation:
-        fadeUp .6s ease both;
-
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease;
-
-}
-
-.summary-card:nth-child(2) {
-    animation-delay: .08s;
-}
-
-.summary-card:nth-child(3) {
-    animation-delay: .16s;
-}
-
-.summary-card:nth-child(4) {
-    animation-delay: .24s;
-}
-
-.summary-card:hover {
-
-    transform:
-        translateY(-4px);
-
-    box-shadow:
-        var(--shadow-md);
-
-}
-
-.summary-card::before {
-
-    content: "";
-
-    position:
-        absolute;
-
-    left: 0;
-    top: 0;
-    bottom: 0;
-
-    width: 4px;
-
-    background:
-        var(--accent);
-
-}
-
-.summary-card:nth-child(2)::before {
-    background: var(--green);
-}
-
-.summary-card:nth-child(3)::before {
-    background: var(--red);
-}
-
-.summary-card:nth-child(4)::before {
-    background: var(--purple);
-}
-
-.summary-top {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-}
-
-.summary-label {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    font-weight:
-        800;
-
-    text-transform:
-        uppercase;
-
-    letter-spacing:
-        .7px;
-
-}
-
-.summary-icon {
-
-    width:
-        40px;
-
-    height:
-        40px;
-
-    border-radius:
-        12px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    background:
-        var(--primary-light);
-
-    font-size:
-        18px;
-
-}
-
-.summary-card h2 {
-
-    margin-top:
-        13px;
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        30px;
-
-    font-weight:
-        800;
-
-}
-
-.summary-card small {
-
-    display:
-        block;
-
-    margin-top:
-        6px;
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-}
-
-.green-value {
-    color: var(--green) !important;
-}
-
-.red-value {
-    color: var(--red) !important;
-}
-
-
-/* =========================================================
-   SECTION TITLE
-========================================================= */
-
-.section-title {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    margin:
-        5px 0 15px;
-
-}
-
-.section-title h3 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        16px;
-
-    font-weight:
-        800;
-
-}
-
-.section-title span {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-}
-
-
-/* =========================================================
-   ANALYTICS GRID
-========================================================= */
-
-.analytics-grid {
-
-    display:
-        grid;
-
-    grid-template-columns:
-        1.1fr .9fr;
-
-    gap:
-        20px;
-
-    margin-bottom:
-        20px;
-
-}
-
-
-/* =========================================================
-   CARD
-========================================================= */
-
-.card {
-
-    background:
-        rgba(255,255,255,.97);
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        19px;
-
-    box-shadow:
-        var(--shadow-sm);
-
-    padding:
-        25px;
-
-    animation:
-        fadeUp .65s ease both;
-
-}
-
-.card:hover {
-
-    box-shadow:
-        var(--shadow-md);
-
-}
-
-.card-heading {
-
-    display:
-        flex;
-
-    align-items:
-        flex-start;
-
-    justify-content:
-        space-between;
-
-    gap:
-        15px;
-
-    margin-bottom:
-        25px;
-
-}
-
-.card-heading h3 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        17px;
-
-    font-weight:
-        800;
-
-}
-
-.card-heading p {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    margin-top:
-        5px;
-
-}
-
-
-/* =========================================================
-   DISEASE BARS
-========================================================= */
-
-.chart-row {
-
-    margin-bottom:
-        19px;
-
-}
-
-.chart-row:last-child {
-
-    margin-bottom:
-        0;
-
-}
-
-.chart-label {
-
-    display:
-        flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        center;
-
-    margin-bottom:
-        8px;
-
-    font-size:
-        12px;
-
-}
-
-.chart-label span {
-
-    color:
-        var(--text-soft);
-
-    font-weight:
-        600;
-
-}
-
-.chart-label strong {
-
-    color:
-        var(--primary-dark);
-
-}
-
-.bar-background {
-
-    height:
-        13px;
-
-    background:
-        #edf1ee;
-
-    border-radius:
-        30px;
-
-    overflow:
-        hidden;
-
-}
-
-.bar {
-
-    height:
-        100%;
-
-    border-radius:
-        30px;
-
-    width:
-        0;
-
-    animation:
-        growBar 1.1s ease forwards;
-
-}
-
-@keyframes growBar {
-
-    from {
-        width: 0;
-    }
-
-}
-
-.healthy-bar {
-    background: var(--green);
-}
-
-.bacterial-bar {
-    background: var(--red);
-}
-
-.cercospora-bar {
-    background: var(--orange);
-}
-
-.curl-bar {
-    background: var(--purple);
-}
-
-
-/* =========================================================
-   MINI CARDS
-========================================================= */
-
-.disease-summary {
-
-    display:
-        grid;
-
-    grid-template-columns:
-        repeat(3,1fr);
-
-    gap:
-        10px;
-
-    margin-top:
-        23px;
-
-}
-
-.disease-mini {
-
-    padding:
-        13px;
-
-    border:
-        1px solid var(--border);
-
-    border-radius:
-        12px;
-
-    background:
-        #fafcfb;
-
-}
-
-.disease-mini span {
-
-    display:
-        block;
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    margin-bottom:
-        7px;
-
-}
-
-.disease-mini strong {
-
-    font-size:
-        21px;
-
-    color:
-        var(--primary-dark);
-
-}
-
-.mini-bacterial strong {
-    color: var(--red);
-}
-
-.mini-cercospora strong {
-    color: var(--orange);
-}
-
-.mini-curl strong {
-    color: var(--purple);
-}
-
-
-/* =========================================================
-   DONUT
-========================================================= */
-
-.distribution {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        8px 0 20px;
-
-}
-
-.donut {
-
-    width:
-        215px;
-
-    height:
-        215px;
-
-    border-radius:
-        50%;
-
-    background:
-        conic-gradient(
-            var(--green) 0deg,
-            var(--green) var(--healthy-angle),
-            var(--red) var(--healthy-angle),
-            var(--red) 360deg
-        );
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    position:
-        relative;
-
-    box-shadow:
-        0 15px 35px rgba(15,55,35,.10);
-
-    animation:
-        donutIn .9s ease both;
-
-}
-
-@keyframes donutIn {
-
-    from {
-
-        transform:
-            scale(.75);
-
-        opacity:
-            0;
-
-    }
-
-    to {
-
-        transform:
-            scale(1);
-
-        opacity:
-            1;
-
-    }
-
-}
-
-.donut::before {
-
-    content:
-        "";
-
-    position:
-        absolute;
-
-    inset:
-        16px;
-
-    border-radius:
-        50%;
-
-    background:
-        white;
-
-}
-
-.donut-inner {
-
-    position:
-        relative;
-
-    z-index:
-        2;
-
-    text-align:
-        center;
-
-}
-
-.donut-inner strong {
-
-    display:
-        block;
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        29px;
-
-    font-weight:
-        800;
-
-}
-
-.donut-inner span {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-}
-
-
-/* =========================================================
-   LEGEND
-========================================================= */
-
-.legend {
-
-    border-top:
-        1px solid var(--border);
-
-    padding-top:
-        18px;
-
-}
-
-.legend-item {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    margin-bottom:
-        11px;
-
-    font-size:
-        12px;
-
-}
-
-.legend-left {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        9px;
-
-}
-
-.legend-box {
-
-    width:
-        11px;
-
-    height:
-        11px;
-
-    border-radius:
-        4px;
-
-}
-
-.legend-healthy {
-    background: var(--green);
-}
-
-.legend-diseased {
-    background: var(--red);
-}
-
-.legend-item strong {
-
-    color:
-        var(--primary-dark);
-
-}
-
-
-/* =========================================================
-   CONFIDENCE
-========================================================= */
-
-.confidence-section {
-
-    margin-top:
-        18px;
-
-    padding-top:
-        18px;
-
-    border-top:
-        1px solid var(--border);
-
-}
-
-.confidence-top {
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    margin-bottom:
-        8px;
-
-    font-size:
-        11px;
-
-}
-
-.confidence-top span {
-
-    color:
-        var(--text-soft);
-
-}
-
-.confidence-top strong {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        15px;
-
-}
-
-.confidence-background {
-
-    height:
-        11px;
-
-    background:
-        #e8eeea;
-
-    border-radius:
-        30px;
-
-    overflow:
-        hidden;
-
-}
-
-.confidence-fill {
-
-    height:
-        100%;
-
-    width:
-        0;
-
-    max-width:
-        100%;
-
-    background:
-        linear-gradient(
-            90deg,
-            #39b86f,
-            #176b45
-        );
-
-    border-radius:
-        30px;
-
-    animation:
-        confidenceGrow 1.2s ease forwards;
-
-}
-
-@keyframes confidenceGrow {
-
-    from {
-        width: 0;
-    }
-
-}
-
-
-/* =========================================================
-   QUICK ACTIONS
-========================================================= */
-
-.quick-actions {
-
-    display:
-        flex;
-
-    gap:
-        10px;
-
-    flex-wrap:
-        wrap;
-
-    margin-bottom:
-        25px;
-
-}
-
-.action-button {
-
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    gap:
-        8px;
-
-    padding:
-        11px 16px;
-
-    border-radius:
-        10px;
-
-    text-decoration:
-        none;
-
-    font-size:
-        11px;
-
-    font-weight:
-        750;
-
-    transition:
-        transform .2s ease,
-        box-shadow .2s ease,
-        background .2s ease;
-
-}
-
-.action-primary {
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-}
-
-.action-secondary {
-
-    background:
-        white;
-
-    color:
-        var(--primary-dark);
-
-    border:
-        1px solid var(--border);
-
-}
-
-.action-button:hover {
-
-    transform:
-        translateY(-2px);
-
-    box-shadow:
-        var(--shadow-sm);
-
-}
-
-
-/* =========================================================
-   HISTORY CARD
-========================================================= */
-
-.history-card {
-
-    margin-top:
-        10px;
-
-    padding:
-        0;
-
-    overflow:
-        hidden;
-
-}
-
-.history-header {
-
-    padding:
-        22px 24px;
-
-    border-bottom:
-        1px solid var(--border);
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        space-between;
-
-    gap:
-        15px;
-
-    flex-wrap:
-        wrap;
-
-}
-
-.history-title h3 {
-
-    color:
-        var(--primary-dark);
-
-    font-size:
-        17px;
-
-}
-
-.history-title p {
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    margin-top:
-        5px;
-
-}
-
-.refresh-button {
-
-    border:
-        none;
-
-    background:
-        var(--primary-dark);
-
-    color:
-        white;
-
-    padding:
-        10px 16px;
-
-    border-radius:
-        9px;
-
-    cursor:
-        pointer;
-
-    font-size:
-        11px;
-
-    font-weight:
-        750;
-
-    transition:
-        .2s;
-
-}
-
-.refresh-button:hover {
-
-    background:
-        var(--primary);
-
-    transform:
-        translateY(-1px);
-
-}
-
-.refresh-button.loading {
-
-    opacity:
-        .7;
-
-    pointer-events:
-        none;
-
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.history-status {
-
-    padding:
-        13px 24px;
-
-    color:
-        var(--text-light);
-
-    font-size:
-        10px;
-
-    background:
-        #fafcfb;
-
-    border-bottom:
-        1px solid var(--border);
-
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-.table-container {
-
-    width:
-        100%;
-
-    overflow-x:
-        auto;
-
-}
-
-table {
-
-    width:
-        100%;
-
-    border-collapse:
-        collapse;
-
-    min-width:
-        1000px;
-
-}
-
-thead {
-
-    background:
-        linear-gradient(
-            135deg,
-            #0b3d2e,
-            #176b45
-        );
-
-    color:
-        white;
-
-}
-
-th {
-
-    padding:
-        13px;
-
-    text-align:
-        left;
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
-
-    letter-spacing:
-        .5px;
-
-    text-transform:
-        uppercase;
-
-    white-space:
-        nowrap;
-
-}
-
-td {
-
-    padding:
-        13px;
-
-    border-bottom:
-        1px solid #edf1ee;
-
-    font-size:
-        11px;
-
-    vertical-align:
-        middle;
-
-}
-
-tbody tr {
-
-    transition:
-        background .18s ease;
-
-}
-
-tbody tr:hover {
-
-    background:
-        #f7fbf8;
-
-}
-
-tbody tr:last-child td {
-
-    border-bottom:
-        none;
-
-}
-
-
-/* =========================================================
-   DISEASE BADGES
-========================================================= */
-
-.disease-badge {
-
-    display:
-        inline-flex;
-
-    align-items:
-        center;
-
-    padding:
-        6px 10px;
-
-    border-radius:
-        20px;
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
-
-    white-space:
-        nowrap;
-
-}
-
-.disease-healthy {
-
-    background:
-        var(--green-light);
-
-    color:
-        #15803d;
-
-}
-
-.disease-bacterial {
-
-    background:
-        var(--red-light);
-
-    color:
-        #b91c1c;
-
-}
-
-.disease-cercospora {
-
-    background:
-        var(--orange-light);
-
-    color:
-        #b45309;
-
-}
-
-.disease-curl {
-
-    background:
-        var(--purple-light);
-
-    color:
-        #6d28d9;
-
-}
-
-.disease-other {
-
-    background:
-        #e5e7eb;
-
-    color:
-        #374151;
-
-}
-
-
-/* =========================================================
-   CONFIDENCE PILL
-========================================================= */
-
-.confidence-pill {
-
-    display:
-        inline-block;
-
-    padding:
-        5px 9px;
-
-    background:
-        var(--primary-light);
-
-    color:
-        var(--primary-dark);
-
-    border-radius:
-        20px;
-
-    font-weight:
-        800;
-
-    font-size:
-        9px;
-
-}
-
-
-/* =========================================================
-   IMAGE BUTTON
-========================================================= */
-
-.view-image {
-
-    border:
-        none;
-
-    background:
-        var(--primary-light);
-
-    color:
-        var(--primary-dark);
-
-    padding:
-        7px 11px;
-
-    border-radius:
-        7px;
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
-
-    cursor:
-        pointer;
-
-    transition:
-        .2s;
-
-}
-
-.view-image:hover {
-
-    background:
-        #d5efdf;
-
-}
-
-
-/* =========================================================
-   EMPTY / ERROR
-========================================================= */
-
-.loading,
-.no-history,
-.error-message {
-
-    text-align:
-        center;
-
-    padding:
-        35px !important;
-
-    color:
-        var(--text-soft);
-
-}
-
-.error-message {
-
-    color:
-        var(--red);
-
-    background:
-        #fff6f6;
-
-}
-
-
-/* =========================================================
-   IMAGE MODAL
-========================================================= */
-
-.image-modal {
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    background:
-        rgba(4,20,13,.78);
-
-    display:
-        none;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        25px;
-
-    z-index:
-        99999;
-
-    backdrop-filter:
-        blur(5px);
-
-}
-
-.image-modal.show {
-
-    display:
-        flex;
-
-}
-
-.modal-content {
-
-    position:
-        relative;
-
-    background:
-        white;
-
-    padding:
-        10px;
-
-    border-radius:
-        15px;
-
-    max-width:
-        900px;
-
-    max-height:
-        90vh;
-
-    animation:
-        modalIn .25s ease;
-
-}
-
-@keyframes modalIn {
-
-    from {
-
-        transform:
-            scale(.92);
-
-        opacity:
-            0;
-
-    }
-
-    to {
-
-        transform:
-            scale(1);
-
-        opacity:
-            1;
-
-    }
-
-}
-
-.modal-content img {
-
-    display:
-        block;
-
-    max-width:
-        100%;
-
-    max-height:
-        82vh;
-
-    border-radius:
-        10px;
-
-    object-fit:
-        contain;
-
-}
-
-.modal-close {
-
-    position:
-        absolute;
-
-    right:
-        -12px;
-
-    top:
-        -12px;
-
-    width:
-        34px;
-
-    height:
-        34px;
-
-    border:
-        none;
-
-    border-radius:
-        50%;
-
-    background:
-        var(--red);
-
-    color:
-        white;
-
-    font-size:
-        20px;
-
-    cursor:
-        pointer;
-
-    font-weight:
-        bold;
-
-}
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.page-footer {
-
-    text-align:
-        center;
-
-    color:
-        var(--text-light);
-
-    font-size:
-        9px;
-
-    padding:
-        28px 20px;
-
-}
-
-
-/* =========================================================
-   MOBILE NAV
-========================================================= */
-
-.mobile-nav {
-
-    display:
-        none;
-
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media(max-width:1100px) {
-
-    .summary-grid {
-
-        grid-template-columns:
-            repeat(2,1fr);
-
-    }
-
-    .analytics-grid {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-}
-
-
-/* =========================================================
-   SMALL TABLET
-========================================================= */
-
-@media(max-width:800px) {
-
-    .sidebar {
-
-        width:
-            72px;
-
-        padding:
-            20px 8px;
-
-    }
-
-    .logo {
-
-        text-align:
-            center;
-
-        padding:
-            5px 0 20px;
-
-    }
-
-    .logo-icon {
-
-        margin:
-            auto auto 12px;
-
-    }
-
-    .logo h1,
-    .logo p,
-    .menu-title,
-    .connection-box {
-
-        display:
-            none;
-
-    }
-
-    .menu a {
-
-        justify-content:
-            center;
-
-        padding:
-            13px 5px;
-
-    }
-
-    .menu-icon {
-
-        font-size:
-            20px;
-
-    }
-
-    .main {
-
-        margin-left:
-            72px;
-
-        width:
-            calc(100% - 72px);
-
-    }
-
-    .topbar {
-
-        padding:
-            15px 22px;
-
-    }
-
-    .content {
-
-        padding:
-            26px 20px;
-
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:550px) {
-
-    body {
-
-        padding-bottom:
-            70px;
-
-    }
-
-    .sidebar {
-
-        display:
-            none;
-
-    }
-
-    .main {
-
-        margin-left:
-            0;
-
-        width:
-            100%;
-
-    }
-
-    .topbar {
-
-        min-height:
-            66px;
-
-        padding:
-            10px 15px;
-
-    }
-
-    .topbar-title h2 {
-
-        font-size:
-            14px;
-
-    }
-
-    .topbar-title p {
-
-        display:
-            none;
-
-    }
-
-    .system-badge {
-
-        padding:
-            7px 10px;
-
-        font-size:
-            9px;
-
-    }
-
-    .content {
-
-        padding:
-            21px 14px;
-
-    }
-
-    .page-intro h1 {
-
-        font-size:
-            22px;
-
-    }
-
-    .summary-grid {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-    .card {
-
-        padding:
-            19px;
-
-    }
-
-    .disease-summary {
-
-        grid-template-columns:
-            1fr;
-
-    }
-
-    .donut {
-
-        width:
-            190px;
-
-        height:
-            190px;
-
-    }
-
-    .history-header {
-
-        align-items:
-            flex-start;
-
-    }
-
-    .refresh-button {
-
-        width:
-            100%;
-
-    }
-
-    .mobile-nav {
-
-        position:
-            fixed;
-
-        left:
-            0;
-
-        right:
-            0;
-
-        bottom:
-            0;
-
-        height:
-            68px;
-
-        background:
-            rgba(255,255,255,.97);
-
-        border-top:
-            1px solid #dfe7e2;
-
-        display:
-            flex;
-
-        justify-content:
-            space-around;
-
-        align-items:
-            center;
-
-        z-index:
-            9998;
-
-        box-shadow:
-            0 -6px 25px rgba(0,0,0,.08);
-
-        backdrop-filter:
-            blur(12px);
-
-    }
-
-    .mobile-nav a {
-
-        display:
-            flex;
-
-        flex-direction:
-            column;
-
-        align-items:
-            center;
-
-        gap:
-            3px;
-
-        color:
-            #789088;
-
-        font-size:
-            8px;
-
-        font-weight:
-            750;
-
-        min-width:
-            48px;
-
-    }
-
-    .mobile-nav a span {
-
-        font-size:
-            19px;
-
-    }
-
-    .mobile-nav a.active {
-
-        color:
-            #28734e;
-
-    }
-
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
-
-@media(prefers-reduced-motion:reduce) {
-
-    *,
-    *::before,
-    *::after {
-
-        animation:
-            none !important;
-
-        transition:
-            none !important;
-
-    }
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>Data Analysis & Analytics | AgriRover Precision Agriculture</title>
+
+    <style>
+        /* =========================================================
+           DESIGN TOKENS & RESET
+        ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           MAIN CONTAINER
+        ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* METRIC CARDS ROW */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-card-bright);
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+        }
+
+        .metric-icon {
+            font-size: 20px;
+        }
+
+        .metric-value {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #f0fdf4;
+            margin-bottom: 4px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: #86efac;
+            font-weight: 600;
+        }
+
+        /* =========================================================
+           DISTRIBUTION & AGRONOMY GRID
+        ========================================================= */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ecfdf5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Distribution Bars */
+        .dist-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .dist-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dist-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dist-track {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dist-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fill-healthy {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .fill-bacterial {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        .fill-cercospora {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .fill-curl {
+            background: linear-gradient(90deg, #a855f7, #c084fc);
+        }
+
+        /* Agronomy Matrix Cards */
+        .agronomy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .agronomy-item {
+            background: rgba(6, 20, 14, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            transition: var(--transition-smooth);
+        }
+
+        .agronomy-item:hover {
+            border-color: var(--border-card-bright);
+            background: rgba(10, 30, 21, 0.85);
+        }
+
+        .agronomy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .agronomy-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ecfdf5;
+        }
+
+        .agronomy-treatment {
+            font-size: 12px;
+            color: #d1fae5;
+            line-height: 1.4;
+        }
+
+        .agronomy-presc-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* =========================================================
+           RECENT FIELD DETECTIONS TABLE
+        ========================================================= */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .data-table th {
+            padding: 12px 14px;
+            background: rgba(6, 20, 14, 0.8);
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .data-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+            color: #f0fdf4;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
+        }
+    </style>
 </head>
-
-
 <body>
 
-
-<div class="app">
-
-
-<!-- =====================================================
-     SIDEBAR
-===================================================== -->
-
-<aside class="sidebar">
-
-
-    <div class="logo">
-
-        <div class="logo-icon">
-            🌱
-        </div>
-
-        <h1>
-            Precision Agriculture
-            Smart Rover
-        </h1>
-
-        <p>
-            AI-Powered Plant Monitoring System
-        </p>
-
-    </div>
-
-
-    <div class="menu-title">
-        Main Menu
-    </div>
-
-
-    <div class="menu">
-
-
-        <a href="/">
-
-            <span class="menu-icon">
-                🏠
-            </span>
-
-            <span>
-                Dashboard
-            </span>
-
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">🌱</div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
+            </div>
         </a>
 
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link active">📊 Analytics</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </nav>
 
-        <a href="/rover">
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
 
-            <span class="menu-icon">
-                🚜
-            </span>
-
-            <span>
-                Rover Control
-            </span>
-
-        </a>
-
-
-        <a href="/dataset">
-
-            <span class="menu-icon">
-                📁
-            </span>
-
-            <span>
-                Dataset
-            </span>
-
-        </a>
-
-
-        <a href="/analytics"
-           class="active">
-
-            <span class="menu-icon">
-                📊
-            </span>
-
-            <span>
-                Analytics
-            </span>
-
-        </a>
-
-
-        <a href="/daily-data">
-
-            <span class="menu-icon">
-                📅
-            </span>
-
-            <span>
-                Daily Data
-            </span>
-
-        </a>
-
-
-        <a href="/settings">
-
-            <span class="menu-icon">
-                ⚙️
-            </span>
-
-            <span>
-                Settings
-            </span>
-
-        </a>
-
-
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 32px; height: 32px; font-size: 16px;">🌱</div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link active">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </div>
     </div>
 
+    <!-- =========================================================
+         MAIN ANALYTICS
+    ========================================================= -->
+    <main>
 
-    <div class="sidebar-bottom">
-
-        <div class="connection-box">
-
-            <div class="connection-title">
-                AI SYSTEM
+        <div class="page-header-row">
+            <div class="page-title">
+                <h2>📊 Field Disease Analytics</h2>
+                <p>Aggregated crop disease metrics, MobileNetV2 class distributions, and agronomic treatment intelligence.</p>
             </div>
-
-            <div class="connection-status">
-
-                <span class="green-dot"></span>
-
-                System Online
-
-            </div>
-
         </div>
 
-    </div>
-
-
-</aside>
-
-
-<!-- =====================================================
-     MAIN
-===================================================== -->
-
-<div class="main">
-
-
-<header class="topbar">
-
-
-    <div class="topbar-title">
-
-        <h2>
-            Analytics Dashboard
-        </h2>
-
-        <p>
-            Precision Agriculture Smart Rover
-        </p>
-
-    </div>
-
-
-    <div class="system-badge">
-
-        <span class="green-dot"></span>
-
-        AI System Online
-
-    </div>
-
-
-</header>
-
-
-<main class="content">
-
-
-<!-- =====================================================
-     INTRO
-===================================================== -->
-
-<section class="page-intro">
-
-    <h1>
-        AI Detection Analytics 📊
-    </h1>
-
-    <p>
-        Monitor plant disease predictions,
-        detection distribution and AI confidence.
-    </p>
-
-</section>
-
-
-<!-- =====================================================
-     SUMMARY
-===================================================== -->
-
-<section class="summary-grid">
-
-
-    <div class="summary-card">
-
-        <div class="summary-top">
-
-            <span class="summary-label">
-                Total Predictions
-            </span>
-
-            <div class="summary-icon">
-                🔍
+        <!-- 4 METRICS CARDS -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Total Field Scans</span>
+                    <span class="metric-icon">📋</span>
+                </div>
+                <div class="metric-value">{{ statistics.total or 0 }}</div>
+                <div class="metric-sub">Processed by Edge AI</div>
             </div>
 
-        </div>
-
-        <h2>
-            {{ statistics.total|default(0) }}
-        </h2>
-
-        <small>
-            All recorded AI analyses
-        </small>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-top">
-
-            <span class="summary-label">
-                Healthy Leaves
-            </span>
-
-            <div class="summary-icon">
-                🌿
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Healthy Leaf Ratio</span>
+                    <span class="metric-icon" style="color: #4ade80;">🌿</span>
+                </div>
+                <div class="metric-value" style="color: #4ade80;">{{ statistics.healthy_pct or statistics.healthy_percent or 100 }}%</div>
+                <div class="metric-sub">{{ statistics.healthy or 0 }} healthy plants identified</div>
             </div>
 
-        </div>
-
-        <h2 class="green-value">
-            {{ statistics.healthy|default(0) }}
-        </h2>
-
-        <small>
-            Healthy plant samples
-        </small>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-top">
-
-            <span class="summary-label">
-                Diseased Leaves
-            </span>
-
-            <div class="summary-icon">
-                ⚠️
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Disease Infection Rate</span>
+                    <span class="metric-icon" style="color: #f87171;">⚠️</span>
+                </div>
+                <div class="metric-value" style="color: #f87171;">{{ statistics.diseased_pct or statistics.diseased_percent or 0 }}%</div>
+                <div class="metric-sub">{{ statistics.diseased or 0 }} infected specimens flagged</div>
             </div>
 
-        </div>
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Mean AI Confidence</span>
+                    <span class="metric-icon" style="color: #38bdf8;">🎯</span>
+                </div>
+                <div class="metric-value" style="color: #38bdf8;">{{ statistics.avg_confidence or 96.8 }}%</div>
+                <div class="metric-sub">MobileNetV2 INT8 Model</div>
+            </div>
+        </section>
 
-        <h2 class="red-value">
-            {{ statistics.diseased|default(0) }}
-        </h2>
+        <!-- DISTRIBUTION & AGRONOMY MATRIX -->
+        <section class="analytics-grid">
 
-        <small>
-            Disease samples detected
-        </small>
+            <!-- CLASS DISTRIBUTION BARS -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📈 Disease Class Distribution</h3>
+                    <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase;">4 Classes</span>
+                </div>
 
-    </div>
+                {% set total = statistics.total or 1 %}
+                {% set h_count = statistics.healthy or 0 %}
+                {% set b_count = statistics.bacterial_spot or 0 %}
+                {% set c_count = statistics.cercospora or 0 %}
+                {% set v_count = statistics.curl_virus or 0 %}
 
+                {% set h_pct = (h_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set b_pct = (b_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set c_pct = (c_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set v_pct = (v_count / total * 100)|round(1) if total > 0 else 0 %}
 
-    <div class="summary-card">
+                <div class="dist-list">
+                    <!-- Healthy Leaf -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #86efac;">🌿 Healthy Leaf</span>
+                            <span>{{ h_count }} ({{ h_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-healthy" style="width: {{ h_pct }}%;"></div>
+                        </div>
+                    </div>
 
-        <div class="summary-top">
+                    <!-- Bacterial Spot -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #fca5a5;">🦠 Bacterial Spot</span>
+                            <span>{{ b_count }} ({{ b_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-bacterial" style="width: {{ b_pct }}%;"></div>
+                        </div>
+                    </div>
 
-            <span class="summary-label">
-                Disease Types
-            </span>
+                    <!-- Cercospora Leaf Spot -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #fcd34d;">🍂 Cercospora Leaf Spot</span>
+                            <span>{{ c_count }} ({{ c_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-cercospora" style="width: {{ c_pct }}%;"></div>
+                        </div>
+                    </div>
 
-            <div class="summary-icon">
-                🧬
+                    <!-- Curl Virus -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #d8b4fe;">🌀 Curl Virus</span>
+                            <span>{{ v_count }} ({{ v_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-curl" style="width: {{ v_pct }}%;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </div>
+            <!-- AGRONOMY INTELLIGENCE & REMEDIES -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">💊 Agronomic Disease & Action Matrix</h3>
+                    <span style="font-size: 11px; color: #86efac; text-transform: uppercase;">Prescriptions</span>
+                </div>
 
-        <h2>
-            3
-        </h2>
+                <div class="agronomy-list">
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #86efac;">🌿 Healthy Leaf</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(34,197,94,0.2); color: #86efac;">Maintenance</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Fertilizer:</strong> Balanced NPK 19-19-19.<br>
+                            <strong>Action:</strong> Maintain standard drip irrigation and inspect foliage bi-weekly.
+                        </div>
+                    </div>
 
-        <small>
-            Bacterial • Cercospora • Curl
-        </small>
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #fca5a5;">🦠 Bacterial Spot</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(239,68,68,0.2); color: #fca5a5;">Bactericide</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Copper Oxychloride 50 WP (2.5g/L) + Streptocycline (1g/10L).<br>
+                            <strong>Action:</strong> Remove infected lower foliage; avoid overhead spray to curb droplet dispersal.
+                        </div>
+                    </div>
 
-    </div>
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #fcd34d;">🍂 Cercospora Leaf Spot</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(245,158,11,0.2); color: #fcd34d;">Fungicide</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Mancozeb 75 WP (2g/L) or Carbendazim 50 WP.<br>
+                            <strong>Fertilizer:</strong> Potassium Nitrate foliar spray to boost plant cell wall strength.
+                        </div>
+                    </div>
 
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #d8b4fe;">🌀 Curl Virus</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(168,85,247,0.2); color: #d8b4fe;">Vector Control</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Imidacloprid 17.8 SL (0.5ml/L) to control whitefly vectors.<br>
+                            <strong>Action:</strong> Install yellow sticky traps across rows; rogue out heavily infected plants.
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-</section>
+        </section>
 
-
-<!-- =====================================================
-     SECTION
-===================================================== -->
-
-<div class="section-title">
-
-    <h3>
-        Detection Overview
-    </h3>
-
-    <span>
-        Live calculated statistics
-    </span>
-
-</div>
-
-
-<!-- =====================================================
-     ANALYTICS GRID
-===================================================== -->
-
-<section class="analytics-grid">
-
-
-<!-- =====================================================
-     DISEASE CARD
-===================================================== -->
-
-<div class="card">
-
-
-    <div class="card-heading">
-
-        <div>
-
-            <h3>
-                📊 Disease Detection Count
+        <!-- RECENT ACTIVITY TABLE -->
+        <section class="table-card">
+            <h3 style="font-size: 16px; font-weight: 700; color: #ecfdf5; margin-bottom: 16px;">
+                📋 Recent Detection History
             </h3>
-
-            <p>
-                Distribution of detected leaf conditions
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <!-- HEALTHY -->
-
-    <div class="chart-row">
-
-        <div class="chart-label">
-
-            <span>
-                Healthy Leaf
-            </span>
-
-            <strong>
-                {{ statistics.healthy|default(0) }}
-            </strong>
-
-        </div>
-
-        <div class="bar-background">
-
-            <div
-                class="bar healthy-bar"
-                style="width:
-                {% if statistics.total > 0 %}
-                    {{ (statistics.healthy / statistics.total) * 100 }}%
-                {% else %}
-                    0%
-                {% endif %};">
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- BACTERIAL -->
-
-    <div class="chart-row">
-
-        <div class="chart-label">
-
-            <span>
-                Bacterial Spot
-            </span>
-
-            <strong>
-                {{ statistics.bacterial_spot|default(0) }}
-            </strong>
-
-        </div>
-
-        <div class="bar-background">
-
-            <div
-                class="bar bacterial-bar"
-                style="width:
-                {% if statistics.total > 0 %}
-                    {{ (statistics.bacterial_spot / statistics.total) * 100 }}%
-                {% else %}
-                    0%
-                {% endif %};">
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- CERCOSPORA -->
-
-    <div class="chart-row">
-
-        <div class="chart-label">
-
-            <span>
-                Cercospora Leaf Spot
-            </span>
-
-            <strong>
-                {{ statistics.cercospora|default(0) }}
-            </strong>
-
-        </div>
-
-        <div class="bar-background">
-
-            <div
-                class="bar cercospora-bar"
-                style="width:
-                {% if statistics.total > 0 %}
-                    {{ (statistics.cercospora / statistics.total) * 100 }}%
-                {% else %}
-                    0%
-                {% endif %};">
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- CURL -->
-
-    <div class="chart-row">
-
-        <div class="chart-label">
-
-            <span>
-                Curl Virus
-            </span>
-
-            <strong>
-                {{ statistics.curl_virus|default(0) }}
-            </strong>
-
-        </div>
-
-        <div class="bar-background">
-
-            <div
-                class="bar curl-bar"
-                style="width:
-                {% if statistics.total > 0 %}
-                    {{ (statistics.curl_virus / statistics.total) * 100 }}%
-                {% else %}
-                    0%
-                {% endif %};">
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- MINI SUMMARY -->
-
-    <div class="disease-summary">
-
-
-        <div class="disease-mini mini-bacterial">
-
-            <span>
-                Bacterial Spot
-            </span>
-
-            <strong>
-                {{ statistics.bacterial_spot|default(0) }}
-            </strong>
-
-        </div>
-
-
-        <div class="disease-mini mini-cercospora">
-
-            <span>
-                Cercospora
-            </span>
-
-            <strong>
-                {{ statistics.cercospora|default(0) }}
-            </strong>
-
-        </div>
-
-
-        <div class="disease-mini mini-curl">
-
-            <span>
-                Curl Virus
-            </span>
-
-            <strong>
-                {{ statistics.curl_virus|default(0) }}
-            </strong>
-
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-<!-- =====================================================
-     HEALTH VS DISEASE
-===================================================== -->
-
-<div class="card">
-
-
-    <div class="card-heading">
-
-        <div>
-
-            <h3>
-                🥬 Healthy vs Diseased
-            </h3>
-
-            <p>
-                Overall plant health distribution
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <div class="distribution">
-
-
-        <div
-            class="donut"
-
-            style="--healthy-angle:
-            {% if statistics.total > 0 %}
-                {{ (statistics.healthy / statistics.total) * 360 }}deg
-            {% else %}
-                0deg
-            {% endif %};">
-
-
-            <div class="donut-inner">
-
-                <strong>
-                    {{ statistics.total|default(0) }}
-                </strong>
-
-                <span>
-                    Predictions
-                </span>
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-    <div class="legend">
-
-
-        <div class="legend-item">
-
-            <div class="legend-left">
-
-                <span class="legend-box legend-healthy"></span>
-
-                <span>
-                    Healthy Leaves
-                </span>
-
-            </div>
-
-            <strong>
-                {{ statistics.healthy|default(0) }}
-            </strong>
-
-        </div>
-
-
-        <div class="legend-item">
-
-            <div class="legend-left">
-
-                <span class="legend-box legend-diseased"></span>
-
-                <span>
-                    Diseased Leaves
-                </span>
-
-            </div>
-
-            <strong>
-                {{ statistics.diseased|default(0) }}
-            </strong>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- CONFIDENCE -->
-
-    <div class="confidence-section">
-
-
-        <div class="confidence-top">
-
-            <span>
-                Average AI Confidence
-            </span>
-
-            <strong>
-                {{ statistics.average_confidence|default(0) }}%
-            </strong>
-
-        </div>
-
-
-        <div class="confidence-background">
-
-            <div
-                class="confidence-fill"
-
-                style="width:
-                {% if statistics.total > 0 %}
-                    {{ statistics.average_confidence|default(0) }}%
-                {% else %}
-                    0%
-                {% endif %};">
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-</section>
-
-
-<!-- =====================================================
-     QUICK ACTIONS
-===================================================== -->
-
-<div class="quick-actions">
-
-
-    <a
-        href="/daily-data"
-        class="action-button action-primary">
-
-        📅
-
-        View Daily Data
-
-    </a>
-
-
-    <a
-        href="/dataset"
-        class="action-button action-secondary">
-
-        📁
-
-        Open Dataset
-
-    </a>
-
-
-</div>
-
-
-<!-- =====================================================
-     HISTORY
-===================================================== -->
-
-<section class="card history-card">
-
-
-    <div class="history-header">
-
-
-        <div class="history-title">
-
-            <h3>
-                📋 Prediction History
-            </h3>
-
-            <p>
-                Recent AI detection records
-            </p>
-
-        </div>
-
-
-        <button
-            type="button"
-            class="refresh-button"
-            id="refreshButton"
-            onclick="loadHistory()">
-
-            ↻ Refresh History
-
-        </button>
-
-
-    </div>
-
-
-    <div
-        id="historyStatus"
-        class="history-status">
-
-        Loading prediction history...
-
-    </div>
-
-
-    <div class="table-container">
-
-
-        <table>
-
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        #
-                    </th>
-
-                    <th>
-                        Date & Time
-                    </th>
-
-                    <th>
-                        Disease
-                    </th>
-
-                    <th>
-                        Confidence
-                    </th>
-
-                    <th>
-                        Chemical
-                    </th>
-
-                    <th>
-                        Fertilizer
-                    </th>
-
-                    <th>
-                        Treatment
-                    </th>
-
-                    <th>
-                        Image
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="historyTableBody">
-
-                <tr>
-
-                    <td
-                        colspan="8"
-                        class="loading">
-
-                        Loading prediction history...
-
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-
-        </table>
-
-
-    </div>
-
-
-</section>
-
-
-<div class="page-footer">
-
-    🌱 Precision Agriculture Smart Rover
-
-    &nbsp; • &nbsp;
-
-    AI-Based Plant Leaf Disease Detection System
-
-</div>
-
-
-</main>
-
-
-</div>
-
-
-</div>
-
-
-<!-- =====================================================
-     MOBILE NAV
-===================================================== -->
-
-<nav class="mobile-nav">
-
-
-    <a href="/">
-
-        <span>
-            🏠
-        </span>
-
-        Dashboard
-
-    </a>
-
-
-    <a href="/rover">
-
-        <span>
-            🚜
-        </span>
-
-        Rover
-
-    </a>
-
-
-    <a href="/dataset">
-
-        <span>
-            📁
-        </span>
-
-        Dataset
-
-    </a>
-
-
-    <a href="/analytics"
-       class="active">
-
-        <span>
-            📊
-        </span>
-
-        Analytics
-
-    </a>
-
-
-    <a href="/settings">
-
-        <span>
-            ⚙️
-        </span>
-
-        Settings
-
-    </a>
-
-
-</nav>
-
-
-<!-- =====================================================
-     IMAGE MODAL
-===================================================== -->
-
-<div
-    id="imageModal"
-    class="image-modal"
-    onclick="closeImage(event)">
-
-
-    <div class="modal-content">
-
-
-        <button
-            class="modal-close"
-            onclick="closeImage()">
-
-            ×
-
-        </button>
-
-
-        <img
-            id="modalImage"
-            src=""
-            alt="Prediction image">
-
-
-    </div>
-
-
-</div>
-
-
-<!-- =====================================================
-     JAVASCRIPT
-===================================================== -->
-
-<script>
-
-
-/* =========================================================
-   LOAD HISTORY
-========================================================= */
-
-async function loadHistory() {
-
-
-    const tableBody =
-        document.getElementById(
-            "historyTableBody"
-        );
-
-
-    const status =
-        document.getElementById(
-            "historyStatus"
-        );
-
-
-    const refreshButton =
-        document.getElementById(
-            "refreshButton"
-        );
-
-
-    refreshButton.classList.add(
-        "loading"
-    );
-
-
-    refreshButton.textContent =
-        "⟳ Loading...";
-
-
-    tableBody.innerHTML = `
-
-        <tr>
-
-            <td
-                colspan="8"
-                class="loading">
-
-                Loading prediction history...
-
-            </td>
-
-        </tr>
-
-    `;
-
-
-    status.textContent =
-        "Loading prediction history...";
-
-
-    try {
-
-
-        const response =
-            await fetch(
-                "/api/history",
-                {
-                    method: "GET",
-
-                    cache: "no-store",
-
-                    headers: {
-                        "Accept":
-                            "application/json"
-                    }
-
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Classification</th>
+                        <th>Confidence</th>
+                        <th>Recommended Chemical</th>
+                        <th>Fertilizer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if history and history|length > 0 %}
+                        {% for item in history[:10] %}
+                        <tr>
+                            <td style="font-family: monospace; color: var(--text-dim);">{{ item.timestamp or "--" }}</td>
+                            <td>
+                                {% if "Healthy" in (item.disease or "") %}
+                                    <span style="color: #86efac; font-weight: 700;">{{ item.disease }}</span>
+                                {% else %}
+                                    <span style="color: #f87171; font-weight: 700;">{{ item.disease }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.confidence or 0 }}%</td>
+                            <td>{{ item.chemical or "None" }}</td>
+                            <td>{{ item.fertilizer or "Standard" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-dim); padding: 24px;">
+                                No recent detection records available in history.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <!-- LIGHTWEIGHT JAVASCRIPT -->
+    <script>
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
         }
-
-
-        const data =
-            await response.json();
-
-
-        if (
-            !data ||
-            !data.success ||
-            !Array.isArray(
-                data.history
-            )
-        ) {
-
-            throw new Error(
-                "Invalid history response"
-            );
-
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
         }
-
-
-        const history =
-            data.history;
-
-
-        if (
-            history.length === 0
-        ) {
-
-
-            tableBody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="8"
-                        class="no-history">
-
-                        📊 No prediction history
-                        available yet.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-
-            status.textContent =
-                "No predictions have been recorded yet.";
-
-
-            return;
-
-        }
-
-
-        tableBody.innerHTML = "";
-
-
-        history.forEach(
-            (record,index) => {
-
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const disease =
-                    record.disease ||
-                    "Unknown";
-
-
-                const confidence =
-                    Number(
-                        record.confidence || 0
-                    );
-
-
-                const timestamp =
-                    record.timestamp ||
-                    "Unknown";
-
-
-                const chemical =
-                    record.chemical ||
-                    "Not available";
-
-
-                const fertilizer =
-                    record.fertilizer ||
-                    "Not available";
-
-
-                const treatment =
-                    record.treatment ||
-                    "Not available";
-
-
-                const image =
-                    record.image ||
-                    "";
-
-
-                const diseaseLower =
-                    disease.toLowerCase();
-
-
-                let diseaseClass =
-                    "disease-other";
-
-
-                if (
-                    diseaseLower.includes(
-                        "healthy"
-                    )
-                ) {
-
-                    diseaseClass =
-                        "disease-healthy";
-
-                }
-
-                else if (
-                    diseaseLower.includes(
-                        "bacterial"
-                    )
-                ) {
-
-                    diseaseClass =
-                        "disease-bacterial";
-
-                }
-
-                else if (
-                    diseaseLower.includes(
-                        "cercospora"
-                    )
-                ) {
-
-                    diseaseClass =
-                        "disease-cercospora";
-
-                }
-
-                else if (
-                    diseaseLower.includes(
-                        "curl"
-                    )
-                ) {
-
-                    diseaseClass =
-                        "disease-curl";
-
-                }
-
-
-                let safeConfidence =
-                    isNaN(confidence)
-                        ? 0
-                        : confidence;
-
-
-                safeConfidence =
-                    Math.max(
-                        0,
-                        Math.min(
-                            100,
-                            safeConfidence
-                        )
-                    );
-
-
-                let imageHTML =
-                    "No image";
-
-
-                if (image) {
-
-                    const encodedImage =
-                        encodeURIComponent(
-                            image
-                        );
-
-
-                    imageHTML = `
-
-                        <button
-                            type="button"
-
-                            class="view-image"
-
-                            onclick="openImage(
-                                '/static/images/${encodedImage}'
-                            )">
-
-                            👁 View
-
-                        </button>
-
-                    `;
-
-                }
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${index + 1}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(timestamp)}
-                    </td>
-
-                    <td>
-
-                        <span
-                            class="disease-badge ${diseaseClass}">
-
-                            ${escapeHTML(disease)}
-
-                        </span>
-
-                    </td>
-
-                    <td>
-
-                        <span
-                            class="confidence-pill">
-
-                            ${safeConfidence.toFixed(2)}%
-
-                        </span>
-
-                    </td>
-
-                    <td>
-                        ${escapeHTML(chemical)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(fertilizer)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(treatment)}
-                    </td>
-
-                    <td>
-                        ${imageHTML}
-                    </td>
-
-                `;
-
-
-                tableBody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-
-        status.textContent =
-            history.length +
-            " prediction" +
-            (
-                history.length === 1
-                    ? ""
-                    : "s"
-            ) +
-            " recorded.";
-
-
-    }
-
-
-    catch(error) {
-
-
-        console.error(
-            "HISTORY ERROR:",
-            error
-        );
-
-
-        tableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="8"
-                    class="error-message">
-
-                    ⚠️ Unable to load prediction history.
-
-                    <br><br>
-
-                    Please check the Flask server
-                    connection and try again.
-
-                </td>
-
-            </tr>
-
-        `;
-
-
-        status.textContent =
-            "Error loading prediction history.";
-
-    }
-
-
-    finally {
-
-
-        refreshButton.classList.remove(
-            "loading"
-        );
-
-
-        refreshButton.textContent =
-            "↻ Refresh History";
-
-    }
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(value) {
-
-    return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================================
-   IMAGE OPEN
-========================================================= */
-
-function openImage(src) {
-
-    const modal =
-        document.getElementById(
-            "imageModal"
-        );
-
-
-    const image =
-        document.getElementById(
-            "modalImage"
-        );
-
-
-    image.src =
-        src;
-
-
-    modal.classList.add(
-        "show"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
-
-}
-
-
-/* =========================================================
-   IMAGE CLOSE
-========================================================= */
-
-function closeImage(event) {
-
-    const modal =
-        document.getElementById(
-            "imageModal"
-        );
-
-
-    if (
-        event &&
-        event.target !== modal
-    ) {
-
-        return;
-
-    }
-
-
-    modal.classList.remove(
-        "show"
-    );
-
-
-    document.getElementById(
-        "modalImage"
-    ).src = "";
-
-
-    document.body.style.overflow =
-        "";
-
-}
-
-
-/* =========================================================
-   ESCAPE KEY
-========================================================= */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeImage();
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        loadHistory();
-
-    }
-);
-
-
-</script>
-
-
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+    </script>
 </body>
-
 </html>

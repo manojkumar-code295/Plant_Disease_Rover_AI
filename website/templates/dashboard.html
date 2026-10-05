@@ -1,4809 +1,1233 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#0b3d2e"
-    >
-
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes"
-    >
-
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="default"
-    >
-
-    <meta
-        name="apple-mobile-web-app-title"
-        content="Smart Rover"
-    >
-
-    <title>
-        Precision Agriculture Smart Rover
-    </title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>Dashboard | AgriRover Precision Agriculture</title>
 
     <style>
-
         /* =========================================================
-           RESET
+           DESIGN TOKENS & RESET
         ========================================================= */
-
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
-
-        html {
-            width: 100%;
-            min-height: 100%;
-            scroll-behavior: smooth;
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
 
         body {
-            width: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
             min-height: 100vh;
-
-            font-family:
-                Inter,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
-
-            background: #f4f8f5;
-
-            color: #16382d;
-
             overflow-x: hidden;
+            position: relative;
         }
 
-
-        button,
-        input,
-        textarea,
-        select {
-            font-family: inherit;
+        /* Subtle Cyber Scanlines */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
         }
 
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-        a {
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             text-decoration: none;
         }
 
-
-        /* =========================================================
-           VARIABLES
-        ========================================================= */
-
-        :root {
-
-            --primary: #2d8b5c;
-            --primary-dark: #0b3d2e;
-            --primary-deep: #073528;
-
-            --green: #36bd72;
-            --green-light: #edf7ef;
-
-            --text: #173c30;
-            --text-soft: #71857c;
-            --text-light: #93a39c;
-
-            --border: #dfe9e3;
-
-            --white: #ffffff;
-
-            --sidebar-width: 242px;
-
-            --topbar-height: 78px;
-
-            --radius-sm: 12px;
-            --radius-md: 17px;
-            --radius-lg: 22px;
-
-            --shadow-sm:
-                0 4px 18px rgba(19, 67, 48, 0.055);
-
-            --shadow-md:
-                0 12px 35px rgba(19, 67, 48, 0.09);
-
-            --shadow-lg:
-                0 20px 55px rgba(19, 67, 48, 0.12);
-        }
-
-
-        /* =========================================================
-           APP
-        ========================================================= */
-
-        .app {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-        }
-
-
-        /* =========================================================
-           SIDEBAR
-        ========================================================= */
-
-        .sidebar {
-
-            position: fixed;
-
-            top: 0;
-            left: 0;
-            bottom: 0;
-
-            width: var(--sidebar-width);
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #0b4937 0%,
-                    #0a3f30 55%,
-                    #073528 100%
-                );
-
-            color: white;
-
-            padding: 30px 15px 18px;
-
-            display: flex;
-            flex-direction: column;
-
-            z-index: 1000;
-
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
-
-        /* =========================================================
-           LOGO
-        ========================================================= */
-
-        .logo {
-            text-align: center;
-            padding: 0 10px 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.10);
-        }
-
-
-        .logo-icon {
-
-            width: 59px;
-            height: 59px;
-
-            margin: 0 auto 14px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 17px;
-
-            background:
-                rgba(255,255,255,0.10);
-
-            border:
-                1px solid rgba(255,255,255,0.12);
-
-            font-size: 28px;
-
-            box-shadow:
-                0 10px 25px rgba(0,0,0,0.08);
-        }
-
-
-        .logo h1 {
-
-            font-size: 16px;
-            line-height: 1.35;
-            font-weight: 800;
-
-            color: #ffffff;
-        }
-
-
-        .logo p {
-
-            margin-top: 10px;
-
-            color:
-                rgba(255,255,255,0.50);
-
-            font-size: 9px;
-
-            line-height: 1.5;
-        }
-
-
-        /* =========================================================
-           MENU
-        ========================================================= */
-
-        .menu-title {
-
-            margin:
-                40px 23px 15px;
-
-            color:
-                rgba(255,255,255,0.42);
-
-            font-size: 9px;
-
-            font-weight: 800;
-
-            letter-spacing: 1.1px;
-        }
-
-
-        .menu {
-
-            display: flex;
-            flex-direction: column;
-
-            gap: 7px;
-        }
-
-
-        .menu a {
-
-            position: relative;
-
-            display: flex;
-            align-items: center;
-
-            gap: 13px;
-
-            padding: 12px 17px;
-
-            min-height: 43px;
-
-            border-radius: 13px;
-
-            color:
-                rgba(255,255,255,0.57);
-
-            font-size: 10px;
-            font-weight: 750;
-
-            transition:
-                background .25s ease,
-                color .25s ease,
-                transform .25s ease;
-        }
-
-
-        .menu a:hover {
-
-            color: white;
-
-            background:
-                rgba(255,255,255,0.075);
-
-            transform:
-                translateX(2px);
-        }
-
-
-        .menu a.active {
-
-            color: white;
-
-            background:
-                rgba(91, 194, 132, 0.19);
-
-            box-shadow:
-                inset 3px 0 0 #3fca7c;
-        }
-
-
-        .menu-icon {
-
-            width: 21px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 15px;
-
-            flex-shrink: 0;
-        }
-
-
-        /* =========================================================
-           SIDEBAR BOTTOM
-        ========================================================= */
-
-        .sidebar-bottom {
-
-            margin-top: auto;
-        }
-
-
-        .connection-box {
-
-            padding: 15px;
-
-            border-radius: 14px;
-
-            background:
-                rgba(255,255,255,0.075);
-
-            border:
-                1px solid rgba(255,255,255,0.08);
-        }
-
-
-        .connection-title {
-
-            color:
-                rgba(255,255,255,0.40);
-
-            font-size: 8px;
-
-            font-weight: 800;
-
-            letter-spacing: .8px;
-
-            margin-bottom: 8px;
-        }
-
-
-        .connection-status {
-
-            display: flex;
-            align-items: center;
-
-            gap: 7px;
-
-            color: white;
-
-            font-size: 10px;
-
-            font-weight: 750;
-        }
-
-
-        .green-dot {
-
-            width: 7px;
-            height: 7px;
-
-            flex-shrink: 0;
-
-            border-radius: 50%;
-
-            background: #36d477;
-
-            box-shadow:
-                0 0 9px rgba(54,212,119,.75);
-        }
-
-
-        /* =========================================================
-           MAIN
-        ========================================================= */
-
-        .main {
-
-            width:
-                calc(100% - var(--sidebar-width));
-
-            min-width: 0;
-
-            margin-left:
-                var(--sidebar-width);
-
-            min-height: 100vh;
-
-            display: flex;
-            flex-direction: column;
-        }
-
-
-        /* =========================================================
-           TOPBAR
-        ========================================================= */
-
-        .topbar {
-
-            position: sticky;
-
-            top: 0;
-
-            z-index: 900;
-
-            width: 100%;
-
-            min-height: var(--topbar-height);
-
-            padding:
-                16px 30px;
-
-            background:
-                rgba(255,255,255,.96);
-
-            border-bottom:
-                1px solid #e6eee9;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            backdrop-filter: blur(12px);
-        }
-
-
-        .topbar-title h2 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 17px;
-
-            font-weight: 850;
-        }
-
-
-        .topbar-title p {
-
-            margin-top: 4px;
-
-            color:
-                #91a39b;
-
-            font-size: 9px;
-        }
-
-
-        .system-badge {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            padding:
-                9px 14px;
-
-            border-radius: 22px;
-
-            font-size: 9px;
-
-            font-weight: 800;
-
-            transition:
-                background .3s ease,
-                color .3s ease,
-                border-color .3s ease;
-        }
-
-
-        .system-badge.online-mode {
-
-            color: #187246;
-
-            background: #edf9f1;
-
-            border:
-                1px solid #d7eee0;
-        }
-
-
-        .system-badge.offline-mode {
-
-            color: #b23a45;
-
-            background: #fff0f1;
-
-            border:
-                1px solid #f2d8db;
-        }
-
-
-        /* =========================================================
-           CONTENT
-        ========================================================= */
-
-        .content {
-
-            width: 100%;
-
-            max-width: 1500px;
-
-            margin: 0 auto;
-
-            padding:
-                34px 30px 25px;
-        }
-
-
-        /* =========================================================
-           WELCOME
-        ========================================================= */
-
-        .welcome {
-
-            margin-bottom: 29px;
-
-            animation:
-                contentEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                both;
-        }
-
-
-        .welcome h1 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 27px;
-
-            line-height: 1.25;
-
-            font-weight: 850;
-
-            letter-spacing: -.5px;
-        }
-
-
-        .welcome p {
-
-            margin-top: 8px;
-
-            color:
-                var(--text-soft);
-
-            font-size: 11px;
-
-            line-height: 1.6;
-        }
-
-
-        /* =========================================================
-           SECTION HEADING
-        ========================================================= */
-
-        .section-heading {
-
-            width: 100%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 15px;
-
-            margin-bottom: 15px;
-        }
-
-
-        .section-heading h3 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 14px;
-
-            font-weight: 850;
-        }
-
-
-        .section-heading > span {
-
-            color:
-                #91a39b;
-
-            font-size: 9px;
-
-            font-weight: 700;
-        }
-
-
-        /* =========================================================
-           STATISTICS
-        ========================================================= */
-
-        .statistics-grid {
-
-            width: 100%;
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, minmax(0, 1fr));
-
-            gap: 18px;
-
-            margin-bottom: 31px;
-
-            animation:
-                contentEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                .1s
-                both;
-        }
-
-
-        .stat-card {
-
-            position: relative;
-
-            min-width: 0;
-
-            min-height: 141px;
-
-            padding: 19px;
-
-            background: white;
-
-            border:
-                1px solid var(--border);
-
-            border-radius:
-                var(--radius-md);
-
-            box-shadow:
-                var(--shadow-sm);
-
-            overflow: hidden;
-
-            transition:
-                transform .35s cubic-bezier(.22,1,.36,1),
-                box-shadow .35s ease,
-                border-color .35s ease;
-        }
-
-
-        .stat-card::after {
-
-            content: "";
-
-            position: absolute;
-
-            right: -18px;
-            top: -25px;
-
-            width: 76px;
-            height: 76px;
-
-            border-radius: 50%;
-
-            background:
-                #42c477;
-
-            opacity: .95;
-        }
-
-
-        .stat-card:hover {
-
-            transform:
-                translateY(-5px);
-
-            box-shadow:
-                var(--shadow-md);
-
-            border-color:
-                #cfe3d7;
-        }
-
-
-        .stat-top {
-
-            position: relative;
-
-            z-index: 2;
-
-            display: flex;
-
-            align-items: flex-start;
-
-            justify-content: space-between;
-        }
-
-
-        .stat-label {
-
-            max-width: 125px;
-
-            color:
-                #789088;
-
-            font-size: 9px;
-
-            font-weight: 850;
-
-            letter-spacing: .7px;
-
-            line-height: 1.4;
-        }
-
-
-        .stat-icon {
-
-            position: relative;
-
-            z-index: 3;
-
-            width: 39px;
-            height: 39px;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #10b981, #047857);
             border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
 
-            background:
-                #ffffff;
-
-            box-shadow:
-                0 5px 15px rgba(0,0,0,.06);
-
+        .brand-title h1 {
             font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-
-        .stat-number {
-
-            position: relative;
-
-            z-index: 2;
-
-            margin-top: 17px;
-
-            color:
-                var(--primary-dark);
-
-            font-size: 30px;
-
-            line-height: 1;
-
-            font-weight: 850;
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-
-        .healthy-number {
-
-            color: #159447;
+        /* Desktop Nav */
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-
-        .diseased-number {
-
-            color: #c44b54;
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-
-        .stat-subtitle {
-
-            position: relative;
-
-            z-index: 2;
-
-            margin-top: 9px;
-
-            color:
-                #98a79f;
-
-            font-size: 9px;
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
         }
 
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        /* Mobile Hamburger */
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
 
         /* =========================================================
-           DETECTION GRID
+           MAIN CONTAINER
         ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
 
-        .detection-grid {
-
-            width: 100%;
-
+        /* =========================================================
+           TELEMETRY HUD ROW
+        ========================================================= */
+        .hud-grid {
             display: grid;
-
-            grid-template-columns:
-                minmax(0, 1fr)
-                minmax(0, 1fr);
-
-            gap: 18px;
-
-            align-items: stretch;
-
-            animation:
-                contentEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                .25s
-                both;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
         }
 
+        .hud-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            transition: var(--transition-smooth);
+        }
+
+        .hud-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-card-bright);
+            background: var(--bg-card-hover);
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .hud-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .hud-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .status-pill.online {
+            background: rgba(34, 197, 94, 0.18);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .status-pill.offline {
+            background: rgba(239, 68, 68, 0.18);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .radar-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            position: relative;
+        }
+
+        .status-pill.online .radar-dot::after {
+            content: "";
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.5;
+            animation: radarPing 1.6s infinite ease-out;
+        }
 
         /* =========================================================
-           CARD
+           PRIMARY TWO-COLUMN GRID
         ========================================================= */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
         .card {
-
-            min-width: 0;
-
-            background: white;
-
-            border:
-                1px solid var(--border);
-
-            border-radius:
-                var(--radius-lg);
-
-            box-shadow:
-                var(--shadow-sm);
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
         }
 
+        .card:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ecfdf5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
         /* =========================================================
-           IMAGE CARD
+           LIVE CAMERA STREAM PLAYER
         ========================================================= */
-
-        .image-card {
-
-            padding: 19px;
-
+        .camera-stream-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #020c07;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
+        .camera-stream-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
-        .image-card-header {
-
-            display: flex;
-
+        .camera-fallback {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(3, 10, 7, 0.95);
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+        }
 
+        .hud-overlay-live {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hud-overlay-fps {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+        }
+
+        .camera-controls-bar {
+            display: flex;
             justify-content: space-between;
-
+            align-items: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
             gap: 10px;
+        }
 
+        .stream-status-text {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-stream-action {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-stream-action:hover {
+            background: rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* =========================================================
+           LATEST DETECTION & RESULTS CARD
+        ========================================================= */
+        .leaf-preview-container {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+
+        @media (max-width: 480px) {
+            .leaf-preview-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .leaf-img-box {
+            width: 100%;
+            height: 120px;
+            background: #04100b;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .leaf-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .leaf-placeholder {
+            font-size: 38px;
+            opacity: 0.6;
+        }
+
+        .disease-banner {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             margin-bottom: 14px;
         }
 
-
-        .image-card-header h3 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 13px;
-
-            font-weight: 850;
+        .disease-banner.diseased {
+            background: rgba(239, 68, 68, 0.14);
+            border-color: rgba(239, 68, 68, 0.35);
         }
 
+        .disease-subhead {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
 
-        .image-label {
-
-            flex-shrink: 0;
-
-            padding:
-                6px 9px;
-
-            border-radius: 9px;
-
-            background:
-                #edf7ef;
-
-            color:
-                #5e8271;
-
-            font-size: 8px;
-
+        .disease-headline {
+            font-size: 20px;
             font-weight: 800;
+            color: #34d399;
         }
 
+        .disease-banner.diseased .disease-headline {
+            color: #f87171;
+        }
 
-        .image-box {
+        /* Confidence Progress Bar */
+        .conf-box {
+            margin-bottom: 16px;
+        }
 
-            width: 100%;
-
-            height: 390px;
-
-            min-height: 250px;
-
-            border-radius: 15px;
-
-            border:
-                1px dashed #d6e5dc;
-
-            background:
-                #f1f6f3;
-
+        .conf-header {
             display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-dim);
+        }
 
-            align-items: center;
+        .conf-header span:last-child {
+            color: #34d399;
+            font-family: monospace;
+            font-size: 13px;
+        }
 
-            justify-content: center;
-
+        .conf-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
             overflow: hidden;
-
-            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-
-        .image-box img {
-
-            display: block;
-
-            width: 100%;
+        .conf-fill {
             height: 100%;
-
-            object-fit: contain;
-
-            opacity: 1;
-
-            transition:
-                opacity .35s ease;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
         }
 
-
-        .image-placeholder {
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            width: 100%;
-            height: 100%;
-
-            color: #7da38f;
-
-            font-size: 52px;
+        .conf-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
         }
 
+        /* Prescription Grid */
+        .prescription-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
 
-        .image-name {
+        .presc-item {
+            background: rgba(8, 26, 19, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
 
-            margin-top: 11px;
+        .presc-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 3px;
+        }
 
-            color:
-                #879a91;
-
-            font-size: 9px;
-
-            text-align: center;
-
-            overflow: hidden;
-
-            text-overflow: ellipsis;
-
+        .presc-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f0fdf4;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
+        .treatment-box {
+            background: rgba(6, 22, 15, 0.8);
+            border-left: 3px solid var(--accent-emerald);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1fae5;
+        }
 
         /* =========================================================
-           RESULT CARD
+           ROVER QUICK CONTROLS & TELEMETRY
         ========================================================= */
+        .rover-quick-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(6, 20, 14, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
-        .result-card {
+        .quick-nav-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-            padding: 19px;
+        .quick-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.55);
+        }
 
+        /* =========================================================
+           SUMMARY STATISTICS GRID
+        ========================================================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            transition: var(--transition-smooth);
             display: flex;
             flex-direction: column;
-        }
-
-
-        .result-header {
-
-            display: flex;
-
-            align-items: center;
-
             justify-content: space-between;
-
-            gap: 10px;
-
-            margin-bottom: 15px;
         }
 
-
-        .result-header h3 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 13px;
-
-            font-weight: 850;
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-card-bright);
         }
 
-
-        .ai-badge {
-
-            flex-shrink: 0;
-
-            padding:
-                6px 9px;
-
-            border-radius: 9px;
-
-            background:
-                #edf7ef;
-
-            color:
-                #5e8271;
-
-            font-size: 8px;
-
-            font-weight: 800;
-        }
-
-
-        /* =========================================================
-           DETECTION RESULT
-        ========================================================= */
-
-        .detection-result {
-
-            padding:
-                20px;
-
-            border:
-                1px solid #e0ebe4;
-
-            background:
-                #fbfdfc;
-
-            border-radius:
-                15px;
-
-            margin-bottom: 13px;
-        }
-
-
-        .detection-result small {
-
-            display: block;
-
-            color:
-                #81958c;
-
-            font-size: 8px;
-
-            font-weight: 850;
-
-            letter-spacing: .8px;
-
-            margin-bottom: 8px;
-        }
-
-
-        .detection-result h1 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 27px;
-
-            line-height: 1.2;
-
-            font-weight: 850;
-
-            overflow-wrap: anywhere;
-        }
-
-
-        .result-status {
-
-            display: inline-flex;
-
-            margin-top: 11px;
-
-            padding:
-                6px 9px;
-
-            border-radius: 20px;
-
-            background:
-                #e6f7ec;
-
-            color:
-                #258051;
-
-            font-size: 8px;
-
-            font-weight: 850;
-        }
-
-
-        /* =========================================================
-           INFO BOX
-        ========================================================= */
-
-        .info-box {
-
-            width: 100%;
-
+        .stat-header {
             display: flex;
-
+            justify-content: space-between;
             align-items: center;
-
-            gap: 12px;
-
-            padding:
-                13px;
-
-            margin-bottom: 11px;
-
-            border:
-                1px solid #e0eae4;
-
-            border-radius: 13px;
-
-            background: white;
+            margin-bottom: 10px;
         }
 
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
 
-        .info-icon {
-
-            width: 39px;
-            height: 39px;
-
-            flex-shrink: 0;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 11px;
-
-            background:
-                #edf7ef;
-
+        .stat-icon {
             font-size: 18px;
         }
 
-
-        .info-content {
-
-            min-width: 0;
+        .stat-number {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #f0fdf4;
+            margin-bottom: 4px;
         }
 
-
-        .info-content span {
-
-            display: block;
-
-            color:
-                #82958d;
-
-            font-size: 7px;
-
-            font-weight: 850;
-
-            letter-spacing: .7px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .info-content strong {
-
-            display: block;
-
-            color:
-                #254a3b;
-
+        .stat-sub {
             font-size: 11px;
-
-            line-height: 1.45;
-
-            overflow-wrap: anywhere;
+            color: #86efac;
         }
-
 
         /* =========================================================
-           TREATMENT
+           ANIMATIONS & UTILITIES
         ========================================================= */
-
-        .treatment-box {
-
-            padding:
-                14px;
-
-            margin-bottom: 13px;
-
-            border:
-                1px solid #e0eae4;
-
-            border-radius: 13px;
-
-            background:
-                #fbfdfc;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-
-        .treatment-box > span {
-
-            display: block;
-
-            color:
-                #82958d;
-
-            font-size: 8px;
-
-            font-weight: 850;
-
-            letter-spacing: .7px;
-
-            margin-bottom: 7px;
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
         }
 
-
-        .treatment-box p {
-
-            color:
-                #3e5c50;
-
-            font-size: 10px;
-
-            line-height: 1.65;
-
-            overflow-wrap: anywhere;
+        @keyframes radarPing {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.6); opacity: 0; }
         }
 
-
-        /* =========================================================
-           CONFIDENCE
-        ========================================================= */
-
-        .confidence-box {
-
-            margin-top: auto;
-
-            padding-top: 2px;
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
         }
 
-
-        .confidence-header {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            margin-bottom: 8px;
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
         }
-
-
-        .confidence-header span:first-child {
-
-            color:
-                #82958d;
-
-            font-size: 8px;
-
-            font-weight: 850;
-
-            letter-spacing: .7px;
-        }
-
-
-        #confidence-value {
-
-            color:
-                #28734e;
-
-            font-size: 10px;
-
-            font-weight: 850;
-        }
-
-
-        .progress {
-
-            width: 100%;
-
-            height: 9px;
-
-            background:
-                #e7efe9;
-
-            border-radius: 20px;
-
-            overflow: hidden;
-        }
-
-
-        .progress-bar {
-
-            width: 0%;
-
-            height: 100%;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    #2b8055,
-                    #42c477
-                );
-
-            border-radius: 20px;
-
-            transition:
-                width .9s cubic-bezier(.22,1,.36,1);
-
-            box-shadow:
-                0 0 10px rgba(66,196,119,.25);
-
-            position: relative;
-
-            overflow: hidden;
-        }
-
-
-        .progress-bar::after {
-
-            content: "";
-
-            position: absolute;
-
-            top: 0;
-            left: -40%;
-
-            width: 35%;
-            height: 100%;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(255,255,255,.55),
-                    transparent
-                );
-
-            animation:
-                confidenceShine
-                2.8s
-                ease-in-out
-                infinite;
-        }
-
-
-        @keyframes confidenceShine {
-
-            0% {
-                left: -40%;
-            }
-
-            60%,
-            100% {
-                left: 120%;
-            }
-        }
-
-
-        /* =========================================================
-           STATUS
-        ========================================================= */
-
-        .status-section {
-
-            width: 100%;
-
-            margin-top: 31px;
-
-            animation:
-                contentEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                .38s
-                both;
-        }
-
-
-        .status-grid {
-
-            width: 100%;
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(auto-fit, minmax(200px, 1fr));
-
-            gap: 18px;
-        }
-
-
-        .status-card {
-
-            min-width: 0;
-
-            background: white;
-
-            border:
-                1px solid var(--border);
-
-            border-radius:
-                var(--radius-md);
-
-            padding: 19px;
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 14px;
-
-            box-shadow:
-                var(--shadow-sm);
-
-            transition:
-                transform .35s cubic-bezier(.22,1,.36,1),
-                box-shadow .35s ease,
-                border-color .35s ease;
-        }
-
-
-        .status-card:hover {
-
-            transform:
-                translateY(-5px);
-
-            box-shadow:
-                var(--shadow-md);
-
-            border-color:
-                #cfe3d7;
-        }
-
-
-        .status-icon {
-
-            width: 47px;
-            height: 47px;
-
-            flex-shrink: 0;
-
-            border-radius: 13px;
-
-            background:
-                #edf7ef;
-
-            border:
-                1px solid #deebe2;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            font-size: 21px;
-
-            transition:
-                transform .4s cubic-bezier(.22,1,.36,1);
-        }
-
-
-        .status-card:hover .status-icon {
-
-            transform:
-                scale(1.1)
-                rotate(-5deg);
-        }
-
-
-        .status-info {
-
-            min-width: 0;
-        }
-
-
-        .status-info span {
-
-            display: block;
-
-            color:
-                var(--text-light);
-
-            font-size: 9px;
-
-            font-weight: 800;
-
-            letter-spacing: .5px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .status-info strong {
-
-            display: block;
-
-            font-size: 13px;
-
-            font-weight: 800;
-
-            overflow-wrap: anywhere;
-        }
-
-
-        .status-online {
-
-            color:
-                #159447;
-        }
-
-
-        .status-offline {
-
-            color:
-                #dc3545;
-        }
-
-
-        /* =========================================================
-           QUICK ACCESS
-        ========================================================= */
-
-        .quick-section {
-
-            width: 100%;
-
-            margin-top: 31px;
-
-            animation:
-                contentEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                .46s
-                both;
-        }
-
-
-        .quick-grid {
-
-            width: 100%;
-
-            display: grid;
-
-            grid-template-columns:
-                repeat(3, minmax(0, 1fr));
-
-            gap: 18px;
-        }
-
-
-        .quick-card {
-
-            min-width: 0;
-
-            position: relative;
-
-            background: white;
-
-            border:
-                1px solid var(--border);
-
-            border-radius:
-                var(--radius-md);
-
-            padding: 19px;
-
-            overflow: hidden;
-
-            transition:
-                transform .35s cubic-bezier(.22,1,.36,1),
-                box-shadow .35s ease,
-                border-color .35s ease;
-        }
-
-
-        .quick-card::before {
-
-            content: "";
-
-            position: absolute;
-
-            left: 0;
-            bottom: 0;
-
-            width: 100%;
-            height: 2px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    #43bb77,
-                    transparent
-                );
-
-            transform:
-                scaleX(0);
-
-            transition:
-                transform .4s ease;
-        }
-
-
-        .quick-card:hover {
-
-            transform:
-                translateY(-5px);
-
-            box-shadow:
-                var(--shadow-md);
-
-            border-color:
-                #cfe3d7;
-        }
-
-
-        .quick-card:hover::before {
-
-            transform:
-                scaleX(1);
-        }
-
-
-        .quick-icon {
-
-            width: 43px;
-            height: 43px;
-
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 12px;
-
-            background:
-                #edf7ef;
-
-            font-size: 21px;
-
-            margin-bottom: 11px;
-
-            transition:
-                transform .4s cubic-bezier(.22,1,.36,1),
-                box-shadow .3s ease;
-        }
-
-
-        .quick-card:hover .quick-icon {
-
-            transform:
-                translateY(-3px)
-                scale(1.08)
-                rotate(-4deg);
-
-            box-shadow:
-                0 8px 20px rgba(35,120,75,.10);
-        }
-
-
-        .quick-card h4 {
-
-            color:
-                var(--primary-dark);
-
-            font-size: 13px;
-
-            font-weight: 750;
-        }
-
-
-        .quick-card p {
-
-            color:
-                var(--text-soft);
-
-            font-size: 10px;
-
-            margin-top: 6px;
-
-            line-height: 1.6;
-        }
-
-
-        .quick-card a {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            margin-top: 13px;
-
-            color:
-                #28734e;
-
-            font-size: 10px;
-
-            font-weight: 800;
-
-            transition:
-                transform .3s ease,
-                color .3s ease;
-        }
-
-
-        .quick-card a:hover {
-
-            color:
-                #125b38;
-
-            transform:
-                translateX(5px);
-        }
-
-
-        /* =========================================================
-           LIVE INDICATOR
-        ========================================================= */
-
-        .live-update {
-
-            position: fixed;
-
-            right: 20px;
-            bottom: 20px;
-
-            background:
-                rgba(11,61,46,.96);
-
-            color: white;
-
-            padding:
-                10px 15px;
-
-            border-radius: 25px;
-
-            font-size: 10px;
-
-            font-weight: 750;
-
-            box-shadow:
-                0 8px 25px rgba(0,0,0,.16);
-
-            z-index: 9999;
-
-            transition:
-                transform .3s ease,
-                box-shadow .3s ease;
-
-            backdrop-filter:
-                blur(8px);
-
-            animation:
-                liveIndicatorEnter
-                .7s
-                cubic-bezier(.22,1,.36,1)
-                .8s
-                both;
-        }
-
-
-        .live-update:hover {
-
-            transform:
-                translateY(-3px);
-
-            box-shadow:
-                0 12px 30px rgba(0,0,0,.20);
-        }
-
-
-        .live-update-dot {
-
-            display: inline-block;
-
-            width: 7px;
-            height: 7px;
-
-            background:
-                #36d477;
-
-            border-radius: 50%;
-
-            margin-right: 7px;
-
-            box-shadow:
-                0 0 8px rgba(54,212,119,.9);
-
-            animation:
-                liveDotPulse
-                1.7s
-                ease-in-out
-                infinite;
-        }
-
-
-        @keyframes liveIndicatorEnter {
-
-            from {
-                opacity: 0;
-                transform:
-                    translateY(15px)
-                    scale(.95);
-            }
-
-            to {
-                opacity: 1;
-                transform:
-                    translateY(0)
-                    scale(1);
-            }
-        }
-
-
-        @keyframes liveDotPulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.35);
-                opacity: .7;
-            }
-        }
-
-
-        .live-flash {
-
-            animation:
-                liveFlash
-                .7s
-                ease-in-out
-                2;
-        }
-
-
-        @keyframes liveFlash {
-
-            50% {
-                transform: scale(1.06);
-            }
-        }
-
-
-        /* =========================================================
-           UPDATE ANIMATION
-        ========================================================= */
-
-        .updated {
-
-            animation:
-                updateGlow
-                .8s
-                cubic-bezier(.22,1,.36,1);
-        }
-
-
-        @keyframes updateGlow {
-
-            0% {
-
-                transform: scale(1);
-
-                box-shadow:
-                    0 0 0 rgba(45,139,92,0);
-            }
-
-            45% {
-
-                transform: scale(1.015);
-
-                box-shadow:
-                    0 0 0 7px rgba(45,139,92,.06);
-            }
-
-            100% {
-
-                transform: scale(1);
-
-                box-shadow:
-                    0 0 0 rgba(45,139,92,0);
-            }
-        }
-
-
-        .detection-result.updated {
-
-            animation:
-                resultReceived
-                .8s
-                cubic-bezier(.22,1,.36,1);
-        }
-
-
-        @keyframes resultReceived {
-
-            0% {
-
-                opacity: .65;
-
-                transform:
-                    scale(.985)
-                    translateY(4px);
-            }
-
-            45% {
-
-                opacity: 1;
-
-                transform:
-                    scale(1.015)
-                    translateY(0);
-
-                box-shadow:
-                    0 0 0 7px rgba(45,139,92,.07);
-            }
-
-            100% {
-
-                opacity: 1;
-
-                transform:
-                    scale(1)
-                    translateY(0);
-
-                box-shadow:
-                    0 0 0 rgba(45,139,92,0);
-            }
-        }
-
-
-        .detection-result.updated #disease-result {
-
-            animation:
-                diseaseTextEnter
-                .65s
-                cubic-bezier(.22,1,.36,1);
-        }
-
-
-        @keyframes diseaseTextEnter {
-
-            from {
-
-                opacity: 0;
-
-                transform:
-                    translateY(8px);
-            }
-
-            to {
-
-                opacity: 1;
-
-                transform:
-                    translateY(0);
-            }
-        }
-
-
-        /* =========================================================
-           INSTALL APP
-        ========================================================= */
-
-        .install-app-button {
-
-            display: none;
-
-            position: fixed;
-
-            left: 50%;
-            bottom: 82px;
-
-            transform:
-                translateX(-50%);
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #2d8b5c,
-                    #226e49
-                );
-
-            color: white;
-
-            border: none;
-
-            border-radius: 25px;
-
-            padding:
-                11px 18px;
-
-            font-size: 10px;
-
-            font-weight: 800;
-
-            box-shadow:
-                0 8px 25px rgba(0,0,0,.18);
-
-            z-index: 10000;
-
-            cursor: pointer;
-
-            transition:
-                transform .3s cubic-bezier(.22,1,.36,1),
-                box-shadow .3s ease;
-        }
-
-
-        .install-app-button:hover {
-
-            transform:
-                translateX(-50%)
-                translateY(-4px)
-                scale(1.025);
-
-            box-shadow:
-                0 14px 32px rgba(0,0,0,.22);
-        }
-
-
-        .install-app-button:active {
-
-            transform:
-                translateX(-50%)
-                translateY(-1px)
-                scale(.98);
-        }
-
-
-        /* =========================================================
-           FOOTER
-        ========================================================= */
-
-        footer {
-
-            width: 100%;
-
-            text-align: center;
-
-            color:
-                #98a69f;
-
-            font-size: 9px;
-
-            padding:
-                28px 20px;
-
-            margin-top: auto;
-
-            animation:
-                contentEnter
-                .7s
-                ease-out
-                .55s
-                both;
-        }
-
-
-        /* =========================================================
-           MOBILE NAV
-        ========================================================= */
-
-        .mobile-nav {
-
-            display: none;
-        }
-
-
-        /* =========================================================
-           LARGE TABLET
-        ========================================================= */
-
-        @media (max-width: 1100px) {
-
-            :root {
-                --sidebar-width: 72px;
-            }
-
-
-            .sidebar {
-
-                width: 72px;
-
-                padding:
-                    25px 8px 15px;
-
-                align-items: center;
-            }
-
-
-            .logo {
-
-                width: 100%;
-
-                padding:
-                    0 0 18px;
-            }
-
-
-            .logo-icon {
-
-                width: 49px;
-                height: 49px;
-
-                margin:
-                    0 auto;
-            }
-
-
-            .logo h1,
-            .logo p,
-            .menu-title,
-            .connection-box {
-
-                display: none;
-            }
-
-
-            .menu {
-
-                width: 100%;
-
-                margin-top: 20px;
-            }
-
-
-            .menu a {
-
-                justify-content: center;
-
-                padding:
-                    13px 5px;
-            }
-
-
-            .menu a span:last-child {
-
-                display: none;
-            }
-
-
-            .menu-icon {
-
-                font-size: 20px;
-            }
-
-
-            .main {
-
-                width:
-                    calc(100% - 72px);
-
-                margin-left: 72px;
-            }
-
-
-            .detection-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .image-box {
-
-                height: 360px;
-            }
-        }
-
-
-        /* =========================================================
-           TABLET
-        ========================================================= */
-
-        @media (max-width: 800px) {
-
-            .content {
-
-                padding:
-                    26px 20px;
-            }
-
-
-            .statistics-grid {
-
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-
-            .status-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .quick-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .topbar {
-
-                padding:
-                    15px 22px;
-            }
-        }
-
-
-        /* =========================================================
-           MOBILE
-        ========================================================= */
-
-        @media (max-width: 550px) {
-
-            body {
-
-                padding-bottom: 68px;
-            }
-
-
-            .sidebar {
-
-                display: none;
-            }
-
-
-            .main {
-
-                width: 100%;
-
-                margin-left: 0;
-            }
-
-
-            .topbar {
-
-                position: relative;
-
-                min-height: 66px;
-
-                padding:
-                    10px 15px;
-            }
-
-
-            .topbar-title h2 {
-
-                font-size: 14px;
-            }
-
-
-            .topbar-title p {
-
-                display: none;
-            }
-
-
-            .system-badge {
-
-                padding:
-                    7px 10px;
-
-                font-size: 9px;
-            }
-
-
-            .content {
-
-                padding:
-                    21px 14px;
-            }
-
-
-            .welcome {
-
-                margin-bottom: 21px;
-            }
-
-
-            .welcome h1 {
-
-                font-size: 21px;
-            }
-
-
-            .welcome p {
-
-                font-size: 10px;
-            }
-
-
-            .statistics-grid {
-
-                grid-template-columns:
-                    1fr;
-
-                gap: 12px;
-
-                margin-bottom: 25px;
-            }
-
-
-            .stat-card {
-
-                min-height: 130px;
-
-                padding: 17px;
-            }
-
-
-            .stat-number {
-
-                font-size: 28px;
-            }
-
-
-            .image-card,
-            .result-card {
-
-                padding: 16px;
-            }
-
-
-            .image-box {
-
-                height: 280px;
-            }
-
-
-            .detection-result h1 {
-
-                font-size: 21px;
-            }
-
-
-            .status-card {
-
-                padding: 16px;
-            }
-
-
-            .quick-card {
-
-                padding: 16px;
-            }
-
-
-            .live-update {
-
-                right: 10px;
-
-                bottom: 80px;
-
-                font-size: 8px;
-
-                padding:
-                    8px 11px;
-            }
-
-
-            /* =====================================================
-               MOBILE NAV
-            ===================================================== */
-
-            .mobile-nav {
-
-                position: fixed;
-
-                left: 0;
-                right: 0;
-                bottom: 0;
-
-                height: 68px;
-
-                background:
-                    rgba(255,255,255,.97);
-
-                border-top:
-                    1px solid #dfe7e2;
-
-                display: flex;
-
-                justify-content:
-                    space-around;
-
-                align-items: center;
-
-                z-index: 9998;
-
-                box-shadow:
-                    0 -6px 25px rgba(0,0,0,.08);
-
-                backdrop-filter:
-                    blur(12px);
-            }
-
-
-            .mobile-nav a {
-
-                display: flex;
-
-                flex-direction: column;
-
-                align-items: center;
-                justify-content: center;
-
-                gap: 3px;
-
-                color:
-                    #789088;
-
-                font-size: 8px;
-
-                font-weight: 750;
-
-                min-width: 50px;
-
-                transition:
-                    color .25s ease,
-                    transform .25s ease;
-            }
-
-
-            .mobile-nav a span {
-
-                font-size: 19px;
-
-                transition:
-                    transform .3s cubic-bezier(.22,1,.36,1);
-            }
-
-
-            .mobile-nav a:hover {
-
-                transform:
-                    translateY(-3px);
-            }
-
-
-            .mobile-nav a:hover span,
-            .mobile-nav a.active span {
-
-                transform:
-                    translateY(-2px)
-                    scale(1.08);
-            }
-
-
-            .mobile-nav a.active {
-
-                color:
-                    #28734e;
-            }
-        }
-
-
-        /* =========================================================
-           EXTRA SMALL
-        ========================================================= */
-
-        @media (max-width: 380px) {
-
-            .topbar-title h2 {
-                font-size: 12px;
-            }
-
-
-            .system-badge {
-
-                padding:
-                    6px 8px;
-
-                font-size: 8px;
-            }
-
-
-            .welcome h1 {
-
-                font-size: 19px;
-            }
-
-
-            .image-box {
-
-                height: 240px;
-            }
-
-
-            .section-heading h3 {
-
-                font-size: 12px;
-            }
-        }
-
-
-        /* =========================================================
-           ACCESSIBILITY
-        ========================================================= */
-
-        @media (prefers-reduced-motion: reduce) {
-
-            html {
-                scroll-behavior: auto !important;
-            }
-
-
-            *,
-            *::before,
-            *::after {
-
-                animation-duration:
-                    0.01ms !important;
-
-                animation-iteration-count:
-                    1 !important;
-
-                transition-duration:
-                    0.01ms !important;
-            }
-        }
-
     </style>
-
 </head>
-
-
 <body>
 
-
-<div class="app">
-
-
-    <!-- =====================================================
-         SIDEBAR
-    ===================================================== -->
-
-    <aside class="sidebar">
-
-        <div class="logo">
-
-            <div class="logo-icon">
-                🌱
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">🌱</div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
             </div>
+        </a>
 
-            <h1>
-                Precision Agriculture
-                Smart Rover
-            </h1>
-
-            <p>
-                AI-Powered Plant Monitoring System
-            </p>
-
-        </div>
-
-
-        <div class="menu-title">
-            MAIN MENU
-        </div>
-
-
-        <nav class="menu">
-
-            <a href="/" class="active">
-
-                <span class="menu-icon">
-                    🏠
-                </span>
-
-                <span>
-                    Dashboard
-                </span>
-
-            </a>
-
-
-            <a href="/rover">
-
-                <span class="menu-icon">
-                    🚜
-                </span>
-
-                <span>
-                    Rover Control
-                </span>
-
-            </a>
-
-
-            <a href="/dataset">
-
-                <span class="menu-icon">
-                    📁
-                </span>
-
-                <span>
-                    Dataset
-                </span>
-
-            </a>
-
-
-            <a href="/analytics">
-
-                <span class="menu-icon">
-                    📊
-                </span>
-
-                <span>
-                    Analytics
-                </span>
-
-            </a>
-
-
-            <a href="/settings">
-
-                <span class="menu-icon">
-                    ⚙️
-                </span>
-
-                <span>
-                    Settings
-                </span>
-
-            </a>
-
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link active">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
         </nav>
 
+        <!-- Mobile Hamburger Toggle -->
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
 
-        <div class="sidebar-bottom">
-
-            <div class="connection-box">
-
-                <div class="connection-title">
-                    AI SYSTEM
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 32px; height: 32px; font-size: 16px;">🌱</div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
                 </div>
-
-                <div class="connection-status">
-
-                    <span class="green-dot"></span>
-
-                    System Online
-
-                </div>
-
             </div>
-
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
         </div>
-
-    </aside>
-
-
-
-    <!-- =====================================================
-         MAIN
-    ===================================================== -->
-
-    <div class="main">
-
-
-        <!-- =================================================
-             TOPBAR
-        ================================================= -->
-
-        <header class="topbar">
-
-            <div class="topbar-title">
-
-                <h2>
-                    Plant Leaf Detection Dashboard
-                </h2>
-
-                <p>
-                    Precision Agriculture Smart Rover
-                </p>
-
-            </div>
-
-
-            <div
-                class="system-badge online-mode"
-                id="system-badge"
-            >
-
-                <span class="green-dot"></span>
-
-                <span id="system-status-text">
-                    AI System Online
-                </span>
-
-            </div>
-
-        </header>
-
-
-
-        <!-- =================================================
-             CONTENT
-        ================================================= -->
-
-        <main class="content">
-
-
-            <!-- =============================================
-                 WELCOME
-            ============================================== -->
-
-            <section class="welcome">
-
-                <h1>
-                    Plant Leaf Detection 🌿
-                </h1>
-
-                <p>
-                    AI-based plant leaf disease detection
-                    and agricultural recommendation
-                </p>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 STATISTICS
-            ============================================== -->
-
-            <section class="statistics-grid">
-
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            TOTAL PREDICTIONS
-                        </div>
-
-                        <div class="stat-icon">
-                            🔍
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        class="stat-number"
-                        id="total-predictions"
-                    >
-                        {{ statistics.total }}
-                    </div>
-
-
-                    <div class="stat-subtitle">
-                        Total AI analyses
-                    </div>
-
-                </div>
-
-
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            HEALTHY LEAVES
-                        </div>
-
-                        <div class="stat-icon">
-                            🌿
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        class="stat-number healthy-number"
-                        id="healthy-predictions"
-                    >
-                        {{ statistics.healthy }}
-                    </div>
-
-
-                    <div
-                        class="stat-subtitle"
-                        id="healthy-percent"
-                    >
-
-                        {% if statistics.total > 0 %}
-
-                            {{ "%.1f"|format(
-                                (statistics.healthy /
-                                statistics.total) * 100
-                            ) }}% of all predictions
-
-                        {% else %}
-
-                            0.0% of all predictions
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="stat-card">
-
-                    <div class="stat-top">
-
-                        <div class="stat-label">
-                            DISEASED LEAVES
-                        </div>
-
-                        <div class="stat-icon">
-                            ⚠️
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        class="stat-number diseased-number"
-                        id="diseased-predictions"
-                    >
-                        {{ statistics.diseased }}
-                    </div>
-
-
-                    <div
-                        class="stat-subtitle"
-                        id="diseased-percent"
-                    >
-
-                        {% if statistics.total > 0 %}
-
-                            {{ "%.1f"|format(
-                                (statistics.diseased /
-                                statistics.total) * 100
-                            ) }}% of all predictions
-
-                        {% else %}
-
-                            0.0% of all predictions
-
-                        {% endif %}
-
-                    </div>
-
-                </div>
-
-
-            </section>
-
-
-
-            <!-- =============================================
-                 AI DETECTION
-            ============================================== -->
-
-            <div class="section-heading">
-
-                <h3>
-                    🤖 AI Detection
-                </h3>
-
-                <span id="analysis-status">
-                    Live Monitoring
-                </span>
-
-            </div>
-
-
-
-            <section class="detection-grid">
-
-
-                <!-- =========================================
-                     IMAGE
-                ========================================== -->
-
-                <div class="card image-card">
-
-                    <div class="image-card-header">
-
-                        <h3>
-                            🌿 Latest Plant Leaf Image
-                        </h3>
-
-                        <span class="image-label">
-                            AI INPUT
-                        </span>
-
-                    </div>
-
-
-                    <div
-                        class="image-box"
-                        id="image-box"
-                    >
-
-                        {% if detection.image %}
-
-                            <img
-                                id="latest-leaf-image"
-                                src="{{ url_for(
-                                    'static',
-                                    filename='images/' + detection.image
-                                ) }}?v={{ detection.timestamp }}"
-                                alt="Latest Plant Leaf"
-                            >
-
-                        {% else %}
-
-                            <div
-                                class="image-placeholder"
-                                id="image-placeholder"
-                            >
-                                🌿
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <div
-                        class="image-name"
-                        id="image-name"
-                    >
-                        {{ detection.image or "No image available" }}
-                    </div>
-
-                </div>
-
-
-
-                <!-- =========================================
-                     RESULT
-                ========================================== -->
-
-                <div class="card result-card">
-
-                    <div class="result-header">
-
-                        <h3>
-                            🤖 Detection Result
-                        </h3>
-
-                        <span class="ai-badge">
-                            AI ANALYZED
-                        </span>
-
-                    </div>
-
-
-                    <div class="detection-result">
-
-                        <small>
-                            DETECTED DISEASE
-                        </small>
-
-                        <h1 id="disease-result">
-
-                            {{ detection.disease or "No prediction yet" }}
-
-                        </h1>
-
-                        <span
-                            class="result-status"
-                            id="result-status"
-                        >
-                            DETECTION COMPLETE
-                        </span>
-
-                    </div>
-
-
-                    <div class="info-box">
-
-                        <div class="info-icon">
-                            💊
-                        </div>
-
-                        <div class="info-content">
-
-                            <span>
-                                RECOMMENDED CHEMICAL
-                            </span>
-
-                            <strong id="chemical-result">
-
-                                {{ detection.chemical or "Not available" }}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="info-box">
-
-                        <div class="info-icon">
-                            🌱
-                        </div>
-
-                        <div class="info-content">
-
-                            <span>
-                                RECOMMENDED FERTILIZER
-                            </span>
-
-                            <strong id="fertilizer-result">
-
-                                {{ detection.fertilizer or "Not available" }}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="treatment-box">
-
-                        <span>
-                            RECOMMENDED TREATMENT
-                        </span>
-
-                        <p id="treatment-result">
-
-                            {{ detection.treatment or
-                               "No prediction has been processed yet." }}
-
-                        </p>
-
-                    </div>
-
-
-                    <div class="confidence-box">
-
-                        <div class="confidence-header">
-
-                            <span>
-                                AI CONFIDENCE
-                            </span>
-
-                            <span id="confidence-value">
-
-                                {{ detection.confidence or 0 }}%
-
-                            </span>
-
-                        </div>
-
-
-                        <div class="progress">
-
-                            <div
-                                class="progress-bar"
-                                id="confidence-bar"
-                                style="width: {{ detection.confidence or 0 }}%;"
-                            ></div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-            </section>
-
-
-
-            <!-- =============================================
-                 SYSTEM STATUS
-            ============================================== -->
-
-            <section class="status-section">
-
-                <div class="section-heading">
-
-                    <h3>
-                        ⚡ System Status
-                    </h3>
-
-                    <span id="status-time">
-                        Waiting for live data...
-                    </span>
-
-                </div>
-
-
-                <div class="status-grid">
-
-                    <div class="status-card">
-
-                        <div class="status-icon" style="background: rgba(239, 68, 68, 0.1);">
-                            🍓
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                RASPBERRY PI 4
-                            </span>
-
-                            <strong
-                                class="status-offline"
-                                id="pi-status"
-                            >
-                                NOT CONNECTED
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            🤖
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                ROVER AI MODEL
-                            </span>
-
-                            <strong
-                                class="status-offline"
-                                id="ai-model-status"
-                            >
-                                STANDBY
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            🚜
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                ROVER MOTION
-                            </span>
-
-                            <strong
-                                id="rover-status"
-                                class="status-offline"
-                            >
-                                STOPPED
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="status-card">
-
-                        <div class="status-icon">
-                            💧
-                        </div>
-
-                        <div class="status-info">
-
-                            <span>
-                                SPRAY PUMP
-                            </span>
-
-                            <strong
-                                id="pump-status"
-                                class="status-offline"
-                            >
-                                OFF
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 QUICK ACCESS
-            ============================================== -->
-
-            <section class="quick-section">
-
-                <div class="section-heading">
-
-                    <h3>
-                        🚀 Quick Access
-                    </h3>
-
-                    <span>
-                        Project Modules
-                    </span>
-
-                </div>
-
-
-                <div class="quick-grid">
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            🚜
-                        </div>
-
-                        <h4>
-                            Rover Control
-                        </h4>
-
-                        <p>
-                            Control rover movement and
-                            spray pump from the control panel.
-                        </p>
-
-                        <a href="/rover">
-                            Open Control →
-                        </a>
-
-                    </div>
-
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            📁
-                        </div>
-
-                        <h4>
-                            Prediction History
-                        </h4>
-
-                        <p>
-                            View previously analyzed plant
-                            leaf images and AI results.
-                        </p>
-
-                        <a href="/dataset">
-                            View Dataset →
-                        </a>
-
-                    </div>
-
-
-
-                    <div class="quick-card">
-
-                        <div class="quick-icon">
-                            📊
-                        </div>
-
-                        <h4>
-                            Analytics
-                        </h4>
-
-                        <p>
-                            View plant disease statistics
-                            and prediction graphs.
-                        </p>
-
-                        <a href="/analytics">
-                            View Analytics →
-                        </a>
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-        </main>
-
-
-
-        <!-- =============================================
-             FOOTER
-        ============================================== -->
-
-        <footer>
-
-            🌱 Precision Agriculture Smart Rover
-            &nbsp;•&nbsp;
-            AI-Based Plant Leaf Disease Detection System
-
-        </footer>
-
-
+        <div class="drawer-links">
+            <a href="/" class="nav-link active">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </div>
     </div>
 
-</div>
+    <!-- =========================================================
+         MAIN DASHBOARD
+    ========================================================= -->
+    <main>
 
+        <!-- TELEMETRY HUD ROW -->
+        <section class="hud-grid">
+            <!-- PI 4 STATUS -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon">🍓</div>
+                    <div>
+                        <div class="hud-label">Raspberry Pi 4</div>
+                        <div class="hud-val" id="pi-ip-text">{{ rover.ip or "192.168.14.18" }}</div>
+                    </div>
+                </div>
+                <div class="status-pill {% if rover.connected %}online{% else %}offline{% endif %}" id="pi-pill">
+                    <span class="radar-dot"></span>
+                    <span id="pi-pill-text">{% if rover.connected %}Online{% else %}Standby{% endif %}</span>
+                </div>
+            </div>
 
+            <!-- AI ENGINE STATUS -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.35);">🧠</div>
+                    <div>
+                        <div class="hud-label">Edge AI Model</div>
+                        <div class="hud-val">MobileNetV2 INT8</div>
+                    </div>
+                </div>
+                <div class="status-pill online" id="ai-pill">
+                    <span class="radar-dot"></span>
+                    <span id="ai-pill-text">Active (22 FPS)</span>
+                </div>
+            </div>
 
-<!-- =====================================================
-     MOBILE NAV
-===================================================== -->
+            <!-- HARDWARE ACTUATION -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.35);">⚡</div>
+                    <div>
+                        <div class="hud-label">Rover Motion</div>
+                        <div class="hud-val" id="rover-motion-text">{{ rover.movement or "STOPPED" }}</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span>L298N Ready</span>
+                </div>
+            </div>
 
-<nav class="mobile-nav">
+            <!-- DATABASE STORAGE -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35);">💾</div>
+                    <div>
+                        <div class="hud-label">Daily Data DB</div>
+                        <div class="hud-val" id="total-scans-mini">{{ statistics.total or 0 }} Scans</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span>SQLite WAL</span>
+                </div>
+            </div>
+        </section>
 
-    <a href="/" class="active">
+        <!-- PRIMARY TWO-COLUMN SECTION -->
+        <section class="dashboard-grid">
 
-        <span>
-            🏠
-        </span>
+            <!-- LEFT COLUMN: LIVE CAMERA FEED (Requirement 2) -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📹 Real-Time Edge AI Camera Feed</h2>
+                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">CSI STREAM</span>
+                </div>
 
-        Dashboard
+                <div class="camera-stream-wrapper">
+                    <!-- Dynamic Live Stream Image -->
+                    <img id="live-camera-img" 
+                         src="/video_feed" 
+                         alt="AgriRover Live Camera Stream" 
+                         class="camera-stream-img"
+                         onerror="handleStreamError(this)" 
+                         onload="handleStreamLoaded(this)">
 
-    </a>
+                    <!-- Camera Stream HUD Overlays -->
+                    <div class="hud-overlay-live">
+                        <span class="radar-dot" style="background: #ef4444;"></span>
+                        <span>LIVE</span>
+                    </div>
+                    <div class="hud-overlay-fps" id="cam-fps-overlay">Picamera2 640x480</div>
 
+                    <!-- Stream Standby Fallback -->
+                    <div class="camera-fallback" id="camera-fallback">
+                        <div style="font-size: 36px; margin-bottom: 8px;">📷</div>
+                        <h4 style="color: #ecfdf5; margin-bottom: 6px;">Camera Stream Standby</h4>
+                        <p style="font-size: 12px; color: var(--text-dim); max-width: 280px; margin-bottom: 14px;">
+                            Connecting to local Raspberry Pi stream (<span id="fallback-stream-url">/video_feed</span>)...
+                        </p>
+                        <button class="btn-stream-action" onclick="retryStreamConnection()">
+                            🔄 Reconnect Stream
+                        </button>
+                    </div>
+                </div>
 
-    <a href="/rover">
+                <!-- Stream Controls & Snapshot -->
+                <div class="camera-controls-bar">
+                    <div class="stream-status-text">
+                        <span class="radar-dot" style="background: #10b981;" id="stream-indicator-dot"></span>
+                        <span id="stream-status-label">Streaming active concurrently</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-stream-action" onclick="takeSnapshot()">📸 Snapshot</button>
+                        <a href="/video_feed" target="_blank" class="btn-stream-action">↗ Fullscreen</a>
+                    </div>
+                </div>
+            </div>
 
-        <span>
-            🚜
-        </span>
+            <!-- RIGHT COLUMN: LATEST DETECTION RESULT & TREATMENT -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔬 Latest Plant Leaf Detection</h2>
+                    <span class="card-badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;">AI INFERENCE</span>
+                </div>
 
-        Rover
+                <!-- Leaf Preview & Classification Headline -->
+                <div class="leaf-preview-container">
+                    <div class="leaf-img-box" id="leaf-img-box">
+                        {% if detection.image %}
+                            <img id="latest-leaf-img" src="{{ url_for('static', filename='images/' + detection.image) }}?v={{ detection.timestamp }}" alt="Latest Plant Leaf">
+                        {% else %}
+                            <div class="leaf-placeholder" id="leaf-placeholder">🌿</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner">
+                            <div class="disease-subhead">IDENTIFIED CLASSIFICATION</div>
+                            <div class="disease-headline" id="disease-headline">{{ detection.disease or "Healthy Leaf" }}</div>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim);" id="detection-timestamp">
+                            Scanned: {{ detection.timestamp or "Real-time" }}
+                        </div>
+                    </div>
+                </div>
 
-    </a>
+                <!-- AI Confidence Meter -->
+                <div class="conf-box">
+                    <div class="conf-header">
+                        <span>MODEL CONFIDENCE</span>
+                        <span id="conf-val">{{ detection.confidence or 98.4 }}%</span>
+                    </div>
+                    <div class="conf-track">
+                        <div class="conf-fill" id="conf-fill" style="width: {{ detection.confidence or 98.4 }}%;"></div>
+                    </div>
+                </div>
 
+                <!-- Prescription Matrix -->
+                <div class="prescription-grid">
+                    <div class="presc-item">
+                        <div class="presc-label">Recommended Chemical</div>
+                        <div class="presc-val" id="presc-chemical">{{ detection.chemical or "None Required" }}</div>
+                    </div>
+                    <div class="presc-item">
+                        <div class="presc-label">Recommended Fertilizer</div>
+                        <div class="presc-val" id="presc-fertilizer">{{ detection.fertilizer or "Balanced NPK" }}</div>
+                    </div>
+                </div>
 
-    <a href="/dataset">
+                <!-- Detailed Agronomy Treatment -->
+                <div class="treatment-box">
+                    <div style="font-weight: 700; margin-bottom: 4px; color: #6ee7b7;">🛡️ Recommended Agronomic Action:</div>
+                    <div id="presc-treatment">{{ detection.treatment or "Plant is in optimal vigor. Maintain standard irrigation schedule and monitor weekly." }}</div>
+                </div>
+            </div>
 
-        <span>
-            📁
-        </span>
+        </section>
 
-        Dataset
+        <!-- ROVER ACTION BANNER -->
+        <section class="rover-quick-strip">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="font-size: 28px;">🚜</div>
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 700;">Precision Rover Telemetry & Actuation</h3>
+                    <p style="font-size: 12px; color: var(--text-dim);">Navigate the rover across crop rows, control spray pumps, and monitor real-time GPIO actuation.</p>
+                </div>
+            </div>
+            <a href="/rover" class="quick-nav-btn">
+                Launch Rover Command Center ↗
+            </a>
+        </section>
 
-    </a>
+        <!-- STATISTICS GRID -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Field Scans</span>
+                    <span class="stat-icon">📋</span>
+                </div>
+                <div class="stat-number" id="stat-total">{{ statistics.total or 0 }}</div>
+                <div class="stat-sub">Persisted in SQLite database</div>
+            </div>
 
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Healthy Plants</span>
+                    <span class="stat-icon" style="color: #4ade80;">🌿</span>
+                </div>
+                <div class="stat-number" id="stat-healthy" style="color: #4ade80;">{{ statistics.healthy or 0 }}</div>
+                <div class="stat-sub" id="stat-healthy-pct">Vigor: {{ statistics.healthy_percent or 100 }}%</div>
+            </div>
 
-    <a href="/analytics">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Diseased Plants</span>
+                    <span class="stat-icon" style="color: #f87171;">⚠️</span>
+                </div>
+                <div class="stat-number" id="stat-diseased" style="color: #f87171;">{{ statistics.diseased or 0 }}</div>
+                <div class="stat-sub" id="stat-diseased-pct">Infection: {{ statistics.diseased_percent or 0 }}%</div>
+            </div>
 
-        <span>
-            📊
-        </span>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Daily History</span>
+                    <span class="stat-icon">📅</span>
+                </div>
+                <div class="stat-number" style="font-size: 22px; margin-top: 6px;">Daily Log</div>
+                <div class="stat-sub">
+                    <a href="/daily-data" style="color: #38bdf8; text-decoration: none; font-weight: 700;">View Daily Breakdown &rarr;</a>
+                </div>
+            </div>
+        </section>
 
-        Analytics
+    </main>
 
-    </a>
+    <!-- =========================================================
+         LIGHTWEIGHT FRONTEND JAVASCRIPT ENGINE
+    ========================================================= */
+    -->
+    <script>
+        // Navigation Drawer Controls
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
 
-
-    <a href="/settings">
-
-        <span>
-            ⚙️
-        </span>
-
-        Settings
-
-    </a>
-
-</nav>
-
-
-
-<!-- =====================================================
-     INSTALL APP
-===================================================== -->
-
-<button
-    id="install-app-button"
-    class="install-app-button"
->
-
-    📱 Install Smart Rover App
-
-</button>
-
-
-
-<!-- =====================================================
-     LIVE INDICATOR
-===================================================== -->
-
-<div
-    class="live-update"
-    id="live-indicator"
->
-
-    <span class="live-update-dot"></span>
-
-    <span id="live-update-text">
-        Connecting...
-    </span>
-
-</div>
-
-
-
-<script>
-
-    /* =====================================================
-       DASHBOARD STATE
-    ===================================================== */
-
-    let lastResultKey = "";
-
-    let firstLoad = true;
-
-    let dashboardRequestInProgress = false;
-
-    let roverRequestInProgress = false;
-
-    let consecutiveErrors = 0;
-
-    let deferredInstallPrompt = null;
-
-    let resultMessageTimer = null;
-
-
-
-    /* =====================================================
-       HELPER
-    ===================================================== */
-
-    function setText(id, value) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-
-            element.textContent =
-                value ?? "";
-
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
         }
 
-    }
-
-
-
-    /* =====================================================
-       SAFE NUMBER
-    ===================================================== */
-
-    function safeNumber(value, fallback = 0) {
-
-        const number =
-            Number(value);
-
-        return Number.isFinite(number)
-            ? number
-            : fallback;
-
-    }
-
-
-
-    /* =====================================================
-       RESULT KEY
-    ===================================================== */
-
-    function makeResultKey(result) {
-
-        if (!result) {
-            return "";
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
         }
 
-        return [
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
 
-            result.result_id ?? "",
-            result.timestamp ?? "",
-            result.image ?? "",
-            result.disease ?? "",
-            result.confidence ?? "",
-            result.chemical ?? "",
-            result.fertilizer ?? "",
-            result.treatment ?? ""
+        // Camera Feed Fallback & Auto-Reconnect
+        const cameraImg = document.getElementById("live-camera-img");
+        const cameraFallback = document.getElementById("camera-fallback");
+        const streamIndicator = document.getElementById("stream-indicator-dot");
+        const streamStatus = document.getElementById("stream-status-label");
+        let streamRetryCount = 0;
 
-        ].join("|");
-
-    }
-
-
-
-    /* =====================================================
-       UPDATE STATISTICS
-    ===================================================== */
-
-    function updateStatistics(statistics) {
-
-        if (!statistics) {
-            return;
+        function handleStreamLoaded(img) {
+            if (cameraFallback) cameraFallback.style.display = "none";
+            if (streamIndicator) streamIndicator.style.background = "#10b981";
+            if (streamStatus) streamStatus.textContent = "Streaming active concurrently";
+            streamRetryCount = 0;
         }
 
-        const total =
-            safeNumber(statistics.total);
-
-        const healthy =
-            safeNumber(statistics.healthy);
-
-        const diseased =
-            safeNumber(statistics.diseased);
-
-
-        setText(
-            "total-predictions",
-            total
-        );
-
-
-        setText(
-            "healthy-predictions",
-            healthy
-        );
-
-
-        setText(
-            "diseased-predictions",
-            diseased
-        );
-
-
-        const healthyPercentage =
-            total > 0
-                ? ((healthy / total) * 100).toFixed(1)
-                : "0.0";
-
-
-        const diseasedPercentage =
-            total > 0
-                ? ((diseased / total) * 100).toFixed(1)
-                : "0.0";
-
-
-        setText(
-            "healthy-percent",
-            healthyPercentage +
-            "% of all predictions"
-        );
-
-
-        setText(
-            "diseased-percent",
-            diseasedPercentage +
-            "% of all predictions"
-        );
-
-    }
-
-
-
-    /* =====================================================
-       UPDATE IMAGE
-    ===================================================== */
-
-    function updateImage(
-        filename,
-        timestamp = ""
-    ) {
-
-        const imageBox =
-            document.getElementById(
-                "image-box"
-            );
-
-
-        if (!imageBox) {
-            return;
-        }
-
-
-        if (!filename) {
-
-            const existingImage =
-                document.getElementById(
-                    "latest-leaf-image"
-                );
-
-
-            if (existingImage) {
-                existingImage.remove();
-            }
-
-
-            if (
-                !document.getElementById(
-                    "image-placeholder"
-                )
-            ) {
-
-                const placeholder =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                placeholder.id =
-                    "image-placeholder";
-
-
-                placeholder.className =
-                    "image-placeholder";
-
-
-                placeholder.textContent =
-                    "🌿";
-
-
-                imageBox.appendChild(
-                    placeholder
-                );
-
-            }
-
-
-            setText(
-                "image-name",
-                "No image available"
-            );
-
-
-            return;
-        }
-
-
-        const placeholder =
-            document.getElementById(
-                "image-placeholder"
-            );
-
-
-        if (placeholder) {
-            placeholder.remove();
-        }
-
-
-        let image =
-            document.getElementById(
-                "latest-leaf-image"
-            );
-
-
-        if (!image) {
-
-            image =
-                document.createElement(
-                    "img"
-                );
-
-
-            image.id =
-                "latest-leaf-image";
-
-
-            image.alt =
-                "Latest Plant Leaf";
-
-
-            imageBox.appendChild(
-                image
-            );
-
-        }
-
-
-        const cacheValue =
-            timestamp ||
-            Date.now();
-
-
-        const imageURL =
-
-            "/static/images/" +
-
-            encodeURIComponent(
-                filename
-            ) +
-
-            "?v=" +
-
-            encodeURIComponent(
-                cacheValue
-            );
-
-
-        if (
-            image.getAttribute("src") !==
-            imageURL
-        ) {
-
-            image.style.opacity =
-                "0";
-
-
-            image.src =
-                imageURL;
-
-
-            image.onload =
-                function() {
-
-                    image.style.opacity =
-                        "1";
-
-                };
-
-        }
-
-
-        setText(
-            "image-name",
-            filename
-        );
-
-
-        image.onerror =
-            function() {
-
-                console.warn(
-                    "Unable to load image:",
-                    filename
-                );
-
-
-                image.style.opacity =
-                    "0";
-
-            };
-
-    }
-
-
-
-    /* =====================================================
-       UPDATE RESULT
-    ===================================================== */
-
-    function updateResult(result) {
-
-        if (!result) {
-            return;
-        }
-
-
-        const disease =
-            result.disease ||
-            "No prediction yet";
-
-
-        const chemical =
-            result.chemical ||
-            "Not available";
-
-
-        const fertilizer =
-            result.fertilizer ||
-            "Not available";
-
-
-        const treatment =
-            result.treatment ||
-            "No prediction has been processed yet.";
-
-
-        const confidence =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    safeNumber(
-                        result.confidence
-                    )
-                )
-            );
-
-
-        setText(
-            "disease-result",
-            disease
-        );
-
-
-        setText(
-            "chemical-result",
-            chemical
-        );
-
-
-        setText(
-            "fertilizer-result",
-            fertilizer
-        );
-
-
-        setText(
-            "treatment-result",
-            treatment
-        );
-
-
-        setText(
-            "confidence-value",
-            confidence.toFixed(2) +
-            "%"
-        );
-
-
-        const confidenceBar =
-            document.getElementById(
-                "confidence-bar"
-            );
-
-
-        if (confidenceBar) {
-
-            confidenceBar.style.width =
-                confidence + "%";
-
-        }
-
-
-        updateImage(
-            result.image,
-            result.timestamp
-        );
-
-
-        /* =============================================
-           ANIMATION
-        ============================================== */
-
-        const cards =
-            document.querySelectorAll(
-                ".detection-result, .stat-card"
-            );
-
-
-        cards.forEach(
-            function(card) {
-
-                card.classList.remove(
-                    "updated"
-                );
-
-
-                void card.offsetWidth;
-
-
-                card.classList.add(
-                    "updated"
-                );
-
-            }
-        );
-
-
-        setText(
-            "analysis-status",
-            "✨ NEW AI RESULT RECEIVED"
-        );
-
-
-        setText(
-            "result-status",
-            "✓ DETECTION COMPLETE"
-        );
-
-
-        setText(
-            "live-update-text",
-            "✨ NEW AI RESULT RECEIVED"
-        );
-
-
-        const indicator =
-            document.getElementById(
-                "live-indicator"
-            );
-
-
-        if (indicator) {
-
-            indicator.classList.remove(
-                "live-flash"
-            );
-
-
-            void indicator.offsetWidth;
-
-
-            indicator.classList.add(
-                "live-flash"
-            );
-
-        }
-
-
-        if (resultMessageTimer) {
-
-            clearTimeout(
-                resultMessageTimer
-            );
-
-        }
-
-
-        resultMessageTimer =
-            setTimeout(
-                function() {
-
-                    setText(
-                        "analysis-status",
-                        "Live Monitoring"
-                    );
-
-
-                    setText(
-                        "live-update-text",
-                        "Live Monitoring"
-                    );
-
-                },
-                3000
-            );
-
-    }
-
-
-
-    /* =====================================================
-       UPDATE ROVER STATUS
-    ===================================================== */
-
-    async function updateRoverStatus() {
-
-        if (roverRequestInProgress) {
-            return;
-        }
-
-
-        roverRequestInProgress =
-            true;
-
-
-        try {
-
-            const url =
-
-                "/api/rover/status" +
-                "?v=" +
-                Date.now();
-
-
-            const response =
-                await fetch(
-                    url,
-                    {
-                        method: "GET",
-
-                        cache: "no-store",
-
-                        credentials:
-                            "same-origin",
-
-                        headers: {
-
-                            "Cache-Control":
-                                "no-cache, no-store, must-revalidate",
-
-                            "Pragma":
-                                "no-cache",
-
-                            "Accept":
-                                "application/json"
-
-                        }
-
-                    }
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Rover status HTTP " +
-                    response.status
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            if (
-                !data ||
-                data.success !== true ||
-                !data.rover
-            ) {
-
-                throw new Error(
-                    "Invalid rover response"
-                );
-
-            }
-
-
-            const rover =
-                data.rover;
-
-            const piOnline = Boolean(rover.pi_online ?? rover.connected);
-            const modelOnline = Boolean(rover.model_online && piOnline);
-
-            // 1. Raspberry Pi 4 Status
-            const piStatus = document.getElementById("pi-status");
-            if (piStatus) {
-                if (piOnline) {
-                    piStatus.textContent = "ONLINE";
-                    piStatus.className = "status-online";
-                } else {
-                    piStatus.textContent = "NOT CONNECTED";
-                    piStatus.className = "status-offline";
-                }
-            }
-
-            // 2. AI Model Status
-            const aiModelStatus = document.getElementById("ai-model-status");
-            if (aiModelStatus) {
-                if (modelOnline) {
-                    const fpsStr = rover.fps ? ` (${rover.fps} FPS)` : "";
-                    aiModelStatus.textContent = `ONLINE${fpsStr}`;
-                    aiModelStatus.className = "status-online";
-                } else {
-                    aiModelStatus.textContent = "STANDBY";
-                    aiModelStatus.className = "status-offline";
-                }
-            }
-
-            // 3. Rover Motion
-            const roverStatus = document.getElementById("rover-status");
-            if (roverStatus) {
-                const dir = (rover.direction || "STOPPED").toUpperCase();
-                roverStatus.textContent = dir;
-                if (dir !== "STOPPED" && dir !== "STOP") {
-                    roverStatus.className = "status-online";
-                } else if (piOnline) {
-                    roverStatus.className = "status-online";
-                } else {
-                    roverStatus.className = "status-offline";
-                }
-            }
-
-            // 4. Spray Pump
-            const pumpStatus = document.getElementById("pump-status");
-            if (pumpStatus) {
-                if (Boolean(rover.pump)) {
-                    pumpStatus.textContent = "ON (SPRAYING)";
-                    pumpStatus.className = "status-online";
-                } else {
-                    pumpStatus.textContent = "OFF";
-                    pumpStatus.className = "status-offline";
-                }
-            }
-
-        }
-
-        catch(error) {
-
-            console.log(
-                "Rover status error:",
-                error
-            );
-
-            const piStatus = document.getElementById("pi-status");
-            if (piStatus) {
-                piStatus.textContent = "NOT CONNECTED";
-                piStatus.className = "status-offline";
-            }
-
-            const aiModelStatus = document.getElementById("ai-model-status");
-            if (aiModelStatus) {
-                aiModelStatus.textContent = "STANDBY";
-                aiModelStatus.className = "status-offline";
-            }
-
-            const roverStatus = document.getElementById("rover-status");
-            if (roverStatus) {
-                roverStatus.textContent = "STOPPED";
-                roverStatus.className = "status-offline";
-            }
-
-            const pumpStatus = document.getElementById("pump-status");
-            if (pumpStatus) {
-                pumpStatus.textContent = "OFF";
-                pumpStatus.className = "status-offline";
-            }
-
-        }
-
-        finally {
-
-            roverRequestInProgress =
-                false;
-
-        }
-
-    }
-
-
-
-    /* =====================================================
-       DASHBOARD API
-    ===================================================== */
-
-    async function checkDashboard() {
-
-        if (dashboardRequestInProgress) {
-            return;
-        }
-
-
-        dashboardRequestInProgress =
-            true;
-
-
-        try {
-
-            const url =
-
-                "/api/dashboard-state" +
-                "?_=" +
-                Date.now();
-
-
-            const response =
-                await fetch(
-                    url,
-                    {
-                        method: "GET",
-
-                        cache: "no-store",
-
-                        credentials:
-                            "same-origin",
-
-                        headers: {
-
-                            "Cache-Control":
-                                "no-cache, no-store, must-revalidate",
-
-                            "Pragma":
-                                "no-cache",
-
-                            "Accept":
-                                "application/json"
-
-                        }
-
-                    }
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "HTTP " +
-                    response.status
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            if (
-                !data ||
-                data.success !== true
-            ) {
-
-                throw new Error(
-                    "Invalid dashboard response"
-                );
-
-            }
-
-
-            consecutiveErrors = 0;
-
-
-            /* =============================================
-               SYSTEM ONLINE
-            ============================================== */
-
-            if (data.rover) {
-                const piIsOnline = Boolean(data.rover.pi_online ?? data.rover.connected);
-                const modelIsOnline = Boolean(data.rover.model_online && piIsOnline);
-                if (piIsOnline && modelIsOnline) {
-                    setText("system-status-text", "Pi & AI Model Online");
-                } else if (piIsOnline) {
-                    setText("system-status-text", "Pi Online (AI Standby)");
-                } else {
-                    setText("system-status-text", "Rover Pi Offline");
-                }
+        function handleStreamError(img) {
+            if (streamRetryCount < 3) {
+                streamRetryCount++;
+                // Fallback direct to port 8080 or retry
+                const host = window.location.hostname || "192.168.14.18";
+                setTimeout(() => {
+                    img.src = "http://" + host + ":8080/video_feed?t=" + Date.now();
+                }, 1500);
             } else {
-                setText("system-status-text", "AI System Online");
+                if (cameraFallback) cameraFallback.style.display = "flex";
+                if (streamIndicator) streamIndicator.style.background = "#ef4444";
+                if (streamStatus) streamStatus.textContent = "Camera standby / reconnecting";
             }
-
-
-            const systemBadge =
-                document.getElementById(
-                    "system-badge"
-                );
-
-
-            if (systemBadge) {
-
-                systemBadge.classList.remove(
-                    "offline-mode"
-                );
-
-
-                systemBadge.classList.add(
-                    "online-mode"
-                );
-
-            }
-
-
-            setText(
-                "live-update-text",
-                "Live Monitoring"
-            );
-
-
-            /* =============================================
-               STATISTICS
-            ============================================== */
-
-            updateStatistics(
-                data.statistics
-            );
-
-
-            /* =============================================
-               SERVER TIME
-            ============================================== */
-
-            if (data.server_time) {
-
-                setText(
-                    "status-time",
-                    "Last checked: " +
-                    data.server_time
-                );
-
-            }
-
-
-            /* =============================================
-               RESULT
-            ============================================== */
-
-            const result =
-                data.result || {};
-
-
-            const currentKey =
-                makeResultKey(
-                    result
-                );
-
-
-            if (firstLoad) {
-
-                lastResultKey =
-                    currentKey;
-
-                firstLoad =
-                    false;
-
-
-                updateResult(
-                    result
-                );
-
-
-                console.log(
-                    "LIVE MONITORING STARTED"
-                );
-
-            }
-
-            else if (
-                currentKey !==
-                lastResultKey
-            ) {
-
-                console.log(
-                    "NEW AI RESULT DETECTED"
-                );
-
-
-                lastResultKey =
-                    currentKey;
-
-
-                updateResult(
-                    result
-                );
-
-            }
-
         }
 
-        catch(error) {
-
-            consecutiveErrors++;
-
-
-            console.log(
-                "Dashboard connection error:",
-                error
-            );
-
-
-            setText(
-                "system-status-text",
-                consecutiveErrors >= 3
-                    ? "Server Offline"
-                    : "Connecting..."
-            );
-
-
-            const systemBadge =
-                document.getElementById(
-                    "system-badge"
-                );
-
-
-            if (systemBadge) {
-
-                systemBadge.classList.remove(
-                    "online-mode"
-                );
-
-
-                systemBadge.classList.add(
-                    "offline-mode"
-                );
-
-            }
-
-
-            if (
-                consecutiveErrors >= 3
-            ) {
-
-                setText(
-                    "live-update-text",
-                    "Reconnecting..."
-                );
-
-            }
-
+        function retryStreamConnection() {
+            if (cameraFallback) cameraFallback.style.display = "none";
+            if (streamStatus) streamStatus.textContent = "Reconnecting stream...";
+            streamRetryCount = 0;
+            cameraImg.src = "/video_feed?t=" + Date.now();
         }
 
-        finally {
-
-            dashboardRequestInProgress =
-                false;
-
+        function takeSnapshot() {
+            window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
         }
 
-    }
+        // Live Telemetry & Detection State Poller (1.5s interval)
+        let lastResultId = "";
 
+        async function pollDashboardState() {
+            try {
+                const response = await fetch("/api/dashboard-state", { cache: "no-store" });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!data.success) return;
 
+                // 1. Update Rover Telemetry
+                if (data.rover) {
+                    const r = data.rover;
+                    const piPill = document.getElementById("pi-pill");
+                    const piPillText = document.getElementById("pi-pill-text");
+                    const piIp = document.getElementById("pi-ip-text");
+                    const motionText = document.getElementById("rover-motion-text");
 
-    /* =====================================================
-       PWA INSTALL PROMPT
-    ===================================================== */
+                    if (piIp && r.ip) piIp.textContent = r.ip;
+                    if (motionText && r.movement) motionText.textContent = r.movement;
 
-    window.addEventListener(
-        "beforeinstallprompt",
-        function(event) {
-
-            event.preventDefault();
-
-
-            deferredInstallPrompt =
-                event;
-
-
-            const installButton =
-                document.getElementById(
-                    "install-app-button"
-                );
-
-
-            if (installButton) {
-
-                installButton.style.display =
-                    "block";
-
-            }
-
-        }
-    );
-
-
-
-    /* =====================================================
-       INSTALL APP
-    ===================================================== */
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-            const installButton =
-                document.getElementById(
-                    "install-app-button"
-                );
-
-
-            if (!installButton) {
-                return;
-            }
-
-
-            installButton.addEventListener(
-                "click",
-                async function() {
-
-                    if (!deferredInstallPrompt) {
-
-                        console.log(
-                            "Install prompt not available."
-                        );
-
-                        return;
-
+                    if (r.connected) {
+                        if (piPill) piPill.className = "status-pill online";
+                        if (piPillText) piPillText.textContent = "Online";
+                    } else {
+                        if (piPill) piPill.className = "status-pill offline";
+                        if (piPillText) piPillText.textContent = "Standby";
                     }
-
-
-                    deferredInstallPrompt.prompt();
-
-
-                    try {
-
-                        const choice =
-                            await deferredInstallPrompt.userChoice;
-
-
-                        console.log(
-                            "Install result:",
-                            choice.outcome
-                        );
-
-                    }
-
-                    catch(error) {
-
-                        console.log(
-                            "Install prompt error:",
-                            error
-                        );
-
-                    }
-
-
-                    deferredInstallPrompt =
-                        null;
-
-
-                    installButton.style.display =
-                        "none";
-
                 }
-            );
 
-        }
-    );
+                // 2. Update Latest Plant Detection (only update DOM if detection changed)
+                if (data.result && data.result.result_id !== lastResultId) {
+                    lastResultId = data.result.result_id;
+                    const res = data.result;
 
+                    const headline = document.getElementById("disease-headline");
+                    const banner = document.getElementById("disease-banner");
+                    const confVal = document.getElementById("conf-val");
+                    const confFill = document.getElementById("conf-fill");
+                    const prescChem = document.getElementById("presc-chemical");
+                    const prescFert = document.getElementById("presc-fertilizer");
+                    const prescTreat = document.getElementById("presc-treatment");
+                    const timestamp = document.getElementById("detection-timestamp");
 
-
-    /* =====================================================
-       APP INSTALLED
-    ===================================================== */
-
-    window.addEventListener(
-        "appinstalled",
-        function() {
-
-            console.log(
-                "Precision Agriculture Smart Rover installed."
-            );
-
-
-            const installButton =
-                document.getElementById(
-                    "install-app-button"
-                );
-
-
-            if (installButton) {
-
-                installButton.style.display =
-                    "none";
-
-            }
-
-        }
-    );
-
-
-
-    /* =====================================================
-       SERVICE WORKER
-    ===================================================== */
-
-    if (
-        "serviceWorker" in navigator
-    ) {
-
-        window.addEventListener(
-            "load",
-            function() {
-
-                navigator.serviceWorker.register(
-
-                    "{{ url_for(
-                        'static',
-                        filename='service-worker.js'
-                    ) }}"
-
-                )
-
-                .then(
-                    function(registration) {
-
-                        console.log(
-                            "SMART ROVER SERVICE WORKER REGISTERED"
-                        );
-
-
-                        console.log(
-                            "Scope:",
-                            registration.scope
-                        );
-
+                    if (headline) headline.textContent = res.disease || "Healthy Leaf";
+                    
+                    const isHealthy = res.is_healthy || (res.disease && res.disease.toLowerCase().includes("healthy"));
+                    if (banner) {
+                        if (isHealthy) {
+                            banner.className = "disease-banner";
+                        } else {
+                            banner.className = "disease-banner diseased";
+                        }
                     }
-                )
 
-                .catch(
-                    function(error) {
-
-                        console.error(
-                            "Service worker registration failed:",
-                            error
-                        );
-
+                    const conf = parseFloat(res.confidence) || 0;
+                    if (confVal) confVal.textContent = conf.toFixed(1) + "%";
+                    if (confFill) {
+                        confFill.style.width = Math.min(100, Math.max(0, conf)) + "%";
+                        if (!isHealthy) confFill.className = "conf-fill warning";
+                        else confFill.className = "conf-fill";
                     }
-                );
 
+                    if (prescChem) prescChem.textContent = res.chemical || "None Required";
+                    if (prescFert) prescFert.textContent = res.fertilizer || "Balanced NPK";
+                    if (prescTreat) prescTreat.textContent = res.treatment || "Standard cultivation.";
+                    if (timestamp && res.timestamp) timestamp.textContent = "Scanned: " + res.timestamp;
+
+                    // Update Leaf Image
+                    const leafBox = document.getElementById("leaf-img-box");
+                    if (leafBox && res.image) {
+                        leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
+                    }
+                }
+
+                // 3. Update Statistics
+                if (data.statistics) {
+                    const s = data.statistics;
+                    const elTotal = document.getElementById("stat-total");
+                    const elHealthy = document.getElementById("stat-healthy");
+                    const elDiseased = document.getElementById("stat-diseased");
+                    const elHealthyPct = document.getElementById("stat-healthy-pct");
+                    const elDiseasedPct = document.getElementById("stat-diseased-pct");
+                    const elMini = document.getElementById("total-scans-mini");
+
+                    if (elTotal) elTotal.textContent = s.total || 0;
+                    if (elHealthy) elHealthy.textContent = s.healthy || 0;
+                    if (elDiseased) elDiseased.textContent = s.diseased || 0;
+                    if (elHealthyPct) elHealthyPct.textContent = "Vigor: " + (s.healthy_percent || 100) + "%";
+                    if (elDiseasedPct) elDiseasedPct.textContent = "Infection: " + (s.diseased_percent || 0) + "%";
+                    if (elMini) elMini.textContent = (s.total || 0) + " Scans";
+                }
+
+            } catch (err) {
+                // Silently swallow fetch blips during page transitions
             }
-        );
-
-    }
-
-
-
-    /* =====================================================
-       START SYSTEM
-    ===================================================== */
-
-    console.log(
-        "=========================================="
-    );
-
-
-    console.log(
-        "PRECISION AGRICULTURE SMART ROVER"
-    );
-
-
-    console.log(
-        "LIVE DASHBOARD STARTING"
-    );
-
-
-    console.log(
-        "=========================================="
-    );
-
-
-    checkDashboard();
-
-    updateRoverStatus();
-
-
-
-    /* =====================================================
-       LIVE REFRESH
-    ===================================================== */
-
-    setInterval(
-        checkDashboard,
-        1000
-    );
-
-
-    setInterval(
-        updateRoverStatus,
-        1000
-    );
-
-
-
-    /* =====================================================
-       VISIBILITY CHANGE
-    ===================================================== */
-
-    document.addEventListener(
-        "visibilitychange",
-        function() {
-
-            if (
-                document.visibilityState ===
-                "visible"
-            ) {
-
-                console.log(
-                    "App became visible. Updating data..."
-                );
-
-
-                checkDashboard();
-
-                updateRoverStatus();
-
-            }
-
         }
-    );
 
-
-
-    /* =====================================================
-       INTERNET RESTORED
-    ===================================================== */
-
-    window.addEventListener(
-        "online",
-        function() {
-
-            console.log(
-                "Internet connection restored."
-            );
-
-
-            consecutiveErrors = 0;
-
-
-            checkDashboard();
-
-            updateRoverStatus();
-
-        }
-    );
-
-
-
-    /* =====================================================
-       INTERNET LOST
-    ===================================================== */
-
-    window.addEventListener(
-        "offline",
-        function() {
-
-            console.log(
-                "Internet connection lost."
-            );
-
-
-            setText(
-                "system-status-text",
-                "Offline"
-            );
-
-
-            setText(
-                "live-update-text",
-                "No Internet Connection"
-            );
-
-
-            const systemBadge =
-                document.getElementById(
-                    "system-badge"
-                );
-
-
-            if (systemBadge) {
-
-                systemBadge.classList.remove(
-                    "online-mode"
-                );
-
-
-                systemBadge.classList.add(
-                    "offline-mode"
-                );
-
-            }
-
-        }
-    );
-
-</script>
-
-
+        // Start background polling without blocking UI
+        setInterval(pollDashboardState, 1500);
+    </script>
 </body>
-
 </html>

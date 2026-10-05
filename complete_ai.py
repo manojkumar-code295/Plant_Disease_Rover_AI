@@ -625,11 +625,26 @@ def upload_worker():
                     "fertilizer": info["fertilizer"],
                     "treatment": info["treatment"]
                 }
-                r = upload_session.post(UPDATE_URL, files=files, data=data, headers=headers, timeout=12)
-                if r.ok:
-                    log(f"CLOUD SYNC -> Render updated: {display_name}")
-                else:
-                    log(f"CLOUD SYNC -> HTTP {r.status_code}")
+                # 1. Immediate Local Web & SQLite Sync (RPi local Flask)
+                try:
+                    upload_session.post(
+                        "http://127.0.0.1:5000/api/update-result",
+                        files={"image": ("leaf.jpg", enc.tobytes(), "image/jpeg")},
+                        data=data,
+                        timeout=2.0
+                    )
+                except Exception as local_e:
+                    pass
+
+                # 2. Render Cloud Sync
+                try:
+                    r = upload_session.post(UPDATE_URL, files=files, data=data, headers=headers, timeout=10)
+                    if r.ok:
+                        log(f"CLOUD SYNC -> Render updated: {display_name}")
+                    else:
+                        log(f"CLOUD SYNC -> HTTP {r.status_code}")
+                except Exception as cloud_e:
+                    log(f"CLOUD SYNC ERROR -> {cloud_e}")
         except queue.Empty:
             continue
         except Exception as e:
