@@ -49,6 +49,15 @@ app.static_folder = STATIC_FOLDER
 
 os.makedirs(IMAGE_FOLDER, exist_ok=True)
 
+PLACEHOLDER_JPEG = (
+    b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xff\xdb\x00C\x00'
+    b'\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19'
+    b'\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9'
+    b'=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00'
+    b'\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03'
+    b'\x04\x05\x06\x07\x08\t\n\x0b\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xbf\x00\xff\xd9'
+)
+
 
 # ============================================================
 # NO CACHE
@@ -662,6 +671,7 @@ def video_feed():
         boundary = b'--FRAME\r\n'
         last_mtime = 0.0
         while True:
+            sent_frame = False
             try:
                 if os.path.exists(live_path):
                     mtime = os.path.getmtime(live_path)
@@ -669,18 +679,27 @@ def video_feed():
                         last_mtime = mtime
                         with open(live_path, "rb") as f:
                             frame = f.read()
+                        sent_frame = True
                         yield (boundary +
                                b'Content-Type: image/jpeg\r\n' +
                                b'Content-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' +
                                frame + b'\r\n')
                 elif latest_cloud_frame is not None:
+                    sent_frame = True
                     yield (boundary +
                            b'Content-Type: image/jpeg\r\n' +
                            b'Content-Length: ' + str(len(latest_cloud_frame)).encode() + b'\r\n\r\n' +
                            latest_cloud_frame + b'\r\n')
             except Exception:
                 pass
-            time.sleep(0.08)
+            if not sent_frame:
+                yield (boundary +
+                       b'Content-Type: image/jpeg\r\n' +
+                       b'Content-Length: ' + str(len(PLACEHOLDER_JPEG)).encode() + b'\r\n\r\n' +
+                       PLACEHOLDER_JPEG + b'\r\n')
+                time.sleep(1.0)
+            else:
+                time.sleep(0.08)
 
     return Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
 
@@ -716,16 +735,8 @@ def camera_snapshot():
     except Exception:
         pass
 
-    # 5. Resilient 1x1 black JPEG fallback (prevents 404/500 errors in browser and WebView)
-    placeholder = (
-        b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xff\xdb\x00C\x00'
-        b'\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19'
-        b'\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9'
-        b'=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00'
-        b'\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03'
-        b'\x04\x05\x06\x07\x08\t\n\x0b\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xbf\x00\xff\xd9'
-    )
-    return Response(placeholder, mimetype="image/jpeg")
+    # 5. Resilient 1x1 black JPEG fallback
+    return Response(PLACEHOLDER_JPEG, mimetype="image/jpeg")
 
 
 @app.route("/settings")
@@ -1863,14 +1874,11 @@ def page_not_found(error):
 
 @app.errorhandler(500)
 def internal_server_error(error):
-
+    import traceback
     return jsonify({
-
         "success": False,
-
-        "error":
-            "Internal server error"
-
+        "error": str(error),
+        "traceback": traceback.format_exc()
     }), 500
 
 
