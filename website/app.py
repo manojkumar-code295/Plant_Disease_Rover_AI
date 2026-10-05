@@ -648,17 +648,19 @@ def api_camera_stream_frame():
 @app.route("/video_feed")
 def video_feed():
     """Proxies the local MJPEG camera stream from port 8080 or streams relayed cloud frames."""
-    import requests
-
     # 1. If on Raspberry Pi, proxy direct 8080 stream
     try:
-        r = requests.get("http://127.0.0.1:8080/video_feed", stream=True, timeout=0.8)
-        if r.ok:
+        import urllib.request
+        req = urllib.request.Request("http://127.0.0.1:8080/video_feed")
+        resp = urllib.request.urlopen(req, timeout=0.8)
+        if resp.status == 200:
             def generate_local():
                 try:
-                    for chunk in r.iter_content(chunk_size=4096):
-                        if chunk:
-                            yield chunk
+                    while True:
+                        chunk = resp.read(4096)
+                        if not chunk:
+                            break
+                        yield chunk
                 except Exception:
                     pass
             return Response(generate_local(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
@@ -706,12 +708,13 @@ def video_feed():
 
 @app.route("/api/camera/snapshot")
 def camera_snapshot():
-    import requests
     # 1. Try local port 8080 snapshot
     try:
-        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=0.8)
-        if r.ok:
-            return Response(r.content, mimetype="image/jpeg")
+        import urllib.request
+        req = urllib.request.Request("http://127.0.0.1:8080/snapshot")
+        with urllib.request.urlopen(req, timeout=0.8) as resp:
+            if resp.status == 200:
+                return Response(resp.read(), mimetype="image/jpeg")
     except Exception:
         pass
 
