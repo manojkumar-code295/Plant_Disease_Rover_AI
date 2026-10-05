@@ -613,16 +613,25 @@ latest_cloud_frame_time = 0.0
 
 @app.route("/api/camera/stream_frame", methods=["POST"])
 def api_camera_stream_frame():
-    """Receives live JPEG frame from Raspberry Pi to relay to cloud clients."""
+    """Receives live JPEG frame from Raspberry Pi to relay to cloud clients across Gunicorn workers."""
     global latest_cloud_frame, latest_cloud_frame_time
     file = request.files.get("frame")
+    data = None
     if file:
-        latest_cloud_frame = file.read()
+        data = file.read()
+    elif request.data:
+        data = request.data
+
+    if data:
+        latest_cloud_frame = data
         latest_cloud_frame_time = time.time()
-        return jsonify({"success": True})
-    if request.data:
-        latest_cloud_frame = request.data
-        latest_cloud_frame_time = time.time()
+        # Save to disk so all Gunicorn worker processes can share the exact same live frame
+        live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+        try:
+            with open(live_path, "wb") as f:
+                f.write(data)
+        except Exception:
+            pass
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "No frame data"}), 400
 
@@ -647,24 +656,33 @@ def video_feed():
     except Exception:
         pass
 
-    # 2. If running on Cloud (Render), stream frames pushed by the Raspberry Pi
-    if latest_cloud_frame is not None:
-        def generate_cloud():
-            boundary = b'--FRAME\r\n'
-            last_sent = 0.0
-            while True:
-                if latest_cloud_frame is not None and latest_cloud_frame_time > last_sent:
-                    frame = latest_cloud_frame
-                    last_sent = latest_cloud_frame_time
+    # 2. Cloud MJPEG generator (reads from disk or memory)
+    live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+    def generate_cloud():
+        boundary = b'--FRAME\r\n'
+        last_mtime = 0.0
+        while True:
+            try:
+                if os.path.exists(live_path):
+                    mtime = os.path.getmtime(live_path)
+                    if mtime > last_mtime:
+                        last_mtime = mtime
+                        with open(live_path, "rb") as f:
+                            frame = f.read()
+                        yield (boundary +
+                               b'Content-Type: image/jpeg\r\n' +
+                               b'Content-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' +
+                               frame + b'\r\n')
+                elif latest_cloud_frame is not None:
                     yield (boundary +
                            b'Content-Type: image/jpeg\r\n' +
-                           b'Content-Length: ' + str(len(frame)).encode() + b'\r\n\r\n' +
-                           frame + b'\r\n')
-                time.sleep(0.06)
-        return Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+                           b'Content-Length: ' + str(len(latest_cloud_frame)).encode() + b'\r\n\r\n' +
+                           latest_cloud_frame + b'\r\n')
+            except Exception:
+                pass
+            time.sleep(0.08)
 
-    # 3. Fallback to snapshot redirect or static fallback
-    return redirect("/api/camera/snapshot")
+    return Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
 
 
 @app.route("/api/camera/snapshot")
@@ -672,24 +690,42 @@ def camera_snapshot():
     import requests
     # 1. Try local port 8080 snapshot
     try:
-        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=1.0)
+        r = requests.get("http://127.0.0.1:8080/snapshot", timeout=0.8)
         if r.ok:
             return Response(r.content, mimetype="image/jpeg")
     except Exception:
         pass
 
-    # 2. Try latest uploaded cloud frame
+    # 2. Try disk-persisted live frame
+    live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+    if os.path.exists(live_path):
+        return send_from_directory(IMAGE_FOLDER, "latest_live_frame.jpg")
+
+    # 3. Try in-memory buffer
     if latest_cloud_frame is not None:
         return Response(latest_cloud_frame, mimetype="image/jpeg")
 
-    # 3. Fallback to latest detection image
-    latest = db.get_latest_detection()
-    img_name = latest.get("image")
-    if img_name:
-        img_path = os.path.join(IMAGE_FOLDER, img_name)
-        if os.path.exists(img_path):
-            return send_from_directory(IMAGE_FOLDER, img_name)
-    return jsonify({"error": "No camera frame available"}), 404
+    # 4. Fallback to latest detection image
+    try:
+        latest = db.get_latest_detection()
+        img_name = latest.get("image")
+        if img_name:
+            img_path = os.path.join(IMAGE_FOLDER, img_name)
+            if os.path.exists(img_path):
+                return send_from_directory(IMAGE_FOLDER, img_name)
+    except Exception:
+        pass
+
+    # 5. Resilient 1x1 black JPEG fallback (prevents 404/500 errors in browser and WebView)
+    placeholder = (
+        b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00\xff\xdb\x00C\x00'
+        b'\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19'
+        b'\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9'
+        b'=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00'
+        b'\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03'
+        b'\x04\x05\x06\x07\x08\t\n\x0b\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xbf\x00\xff\xd9'
+    )
+    return Response(placeholder, mimetype="image/jpeg")
 
 
 @app.route("/settings")
