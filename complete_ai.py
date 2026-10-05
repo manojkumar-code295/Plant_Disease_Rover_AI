@@ -202,6 +202,7 @@ def stop_motors():
     gpio_write(RIGHT_IN1, 0)
     gpio_write(RIGHT_IN2, 0)
     gpio_write(RIGHT_EN, 0)
+    log("GPIO OUTPUT -> All motor pins driven LOW (0V - Stopped)")
 
 def set_pump(state):
     gpio_write(PUMP_PIN, state)
@@ -315,21 +316,27 @@ def apply_rover_command(direction, speed, pump):
 
     shared_telemetry["direction"] = direction.capitalize()
     is_moving = speed > 0
+    in1, in2, in3, in4 = 0, 0, 0, 0
     if direction == "forward":
-        gpio_write(LEFT_IN1, 1); gpio_write(LEFT_IN2, 0)
-        gpio_write(RIGHT_IN1, 1); gpio_write(RIGHT_IN2, 0)
+        in1, in2 = 1, 0
+        in3, in4 = 1, 0
     elif direction in ("backward", "reverse"):
-        gpio_write(LEFT_IN1, 0); gpio_write(LEFT_IN2, 1)
-        gpio_write(RIGHT_IN1, 0); gpio_write(RIGHT_IN2, 1)
+        in1, in2 = 0, 1
+        in3, in4 = 0, 1
     elif direction == "left":
-        gpio_write(LEFT_IN1, 0); gpio_write(LEFT_IN2, 1)
-        gpio_write(RIGHT_IN1, 1); gpio_write(RIGHT_IN2, 0)
+        in1, in2 = 0, 1
+        in3, in4 = 1, 0
     elif direction == "right":
-        gpio_write(LEFT_IN1, 1); gpio_write(LEFT_IN2, 0)
-        gpio_write(RIGHT_IN1, 0); gpio_write(RIGHT_IN2, 1)
+        in1, in2 = 1, 0
+        in3, in4 = 0, 1
 
+    gpio_write(LEFT_IN1, in1)
+    gpio_write(LEFT_IN2, in2)
+    gpio_write(RIGHT_IN1, in3)
+    gpio_write(RIGHT_IN2, in4)
     gpio_write(LEFT_EN, is_moving)
     gpio_write(RIGHT_EN, is_moving)
+    log(f"GPIO OUTPUT -> IN1(Pin 11)={in1} | IN2(Pin 13)={in2} | IN3(Pin 15)={in3} | IN4(Pin 16)={in4} | ENA(Pin 32)={int(is_moving)} | ENB(Pin 33)={int(is_moving)}")
 
 # ============================================================
 # LOAD CLASS NAMES
@@ -638,46 +645,67 @@ def upload_worker():
 # ============================================================
 
 last_command_id = -1
+last_local_command_id = -1
 
 def rover_telemetry_worker():
-    """Background thread polling commands from Render web dashboard and reporting telemetry."""
-    global last_command_id
+    """Background thread polling commands from both local Flask server and Render cloud."""
+    global last_command_id, last_local_command_id
     poll_session = requests.Session()
     last_hb = 0.0
 
     while running:
         now = time.time()
-        # Send Heartbeat with rich telemetry payload every 4 seconds
+        # Send Heartbeat with rich telemetry payload every 4 seconds to both Render and Local server
         if now - last_hb >= 4.0:
+            headers = {"Content-Type": "application/json"}
+            if RENDER_API_TOKEN:
+                headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
             try:
-                headers = {"Content-Type": "application/json"}
-                if RENDER_API_TOKEN:
-                    headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-                poll_session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=6)
-                last_hb = now
+                poll_session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=4)
             except Exception:
                 pass
+            try:
+                poll_session.post("http://127.0.0.1:5000/api/rover/heartbeat", json=shared_telemetry, headers={"Content-Type": "application/json"}, timeout=1)
+            except Exception:
+                pass
+            last_hb = now
 
-        # Poll movement / pump command every 0.4 seconds
+        # 1. Poll Local Server (Instant zero-latency response on local Wi-Fi / Pi screen)
+        try:
+            r_loc = poll_session.get("http://127.0.0.1:5000/api/rover/command", timeout=0.25)
+            if r_loc.ok:
+                data_loc = r_loc.json()
+                cid_loc = data_loc.get("command_id", 0)
+                if cid_loc != last_local_command_id and cid_loc > 0:
+                    direction = data_loc.get("direction", "Stopped")
+                    speed = int(data_loc.get("speed", 50))
+                    pump = bool(data_loc.get("pump", False))
+                    log(f"ROVER COMMAND (Local Web) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
+                    apply_rover_command(direction, speed, pump)
+                    last_local_command_id = cid_loc
+        except Exception:
+            pass
+
+        # 2. Poll Render Cloud (Remote web dashboard)
         try:
             headers = {}
             if RENDER_API_TOKEN:
                 headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-            r = poll_session.get(COMMAND_URL, headers=headers, timeout=8)
+            r = poll_session.get(COMMAND_URL, headers=headers, timeout=4)
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
-                if cid != last_command_id:
+                if cid != last_command_id and cid > 0:
                     direction = data.get("direction", "Stopped")
                     speed = int(data.get("speed", 50))
                     pump = bool(data.get("pump", False))
-                    log(f"ROVER COMMAND -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
+                    log(f"ROVER COMMAND (Cloud Render) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
                     last_command_id = cid
         except Exception:
             pass
 
-        time.sleep(0.4)
+        time.sleep(0.35)
 
 # ============================================================
 # MAIN ENTRY POINT
