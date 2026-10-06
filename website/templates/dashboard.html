@@ -2266,85 +2266,81 @@
                         if (piPillText) piPillText.textContent = "Standby";
                     }
 
-                    const headline = document.getElementById("disease-headline");
-                    const confVal = document.getElementById("conf-val");
-                    const confFill = document.getElementById("conf-fill");
-                    const banner = document.getElementById("disease-banner");
-                    const vigor = document.getElementById("leaf-biometric-vigor");
-                    const timestamp = document.getElementById("detection-timestamp");
-
-                    // Real-time synchronization of 3D leaf hologram with camera scan state
-                    if (r.last_detection === "NO LEAF DETECTED" || !r.last_detection) {
-                        updateLeaf3DState("NO LEAF DETECTED", 0, true, true);
-
-                        if (headline) headline.textContent = "Active Camera Scanning";
-                        if (banner) banner.className = "disease-banner";
-                        if (confVal) confVal.textContent = "0.0%";
-                        if (confFill) {
-                            confFill.style.width = "0%";
-                            confFill.className = "conf-fill";
-                        }
-                        if (vigor) {
-                            vigor.textContent = "Scanner: Live Searching Foliage";
-                            vigor.style.color = "#38bdf8";
-                        }
-                        if (timestamp) {
-                            timestamp.textContent = "Live Telemetry: " + nowTime + (lastResultId ? " · (Last Scan Stored)" : "");
-                        }
-                    } else {
-                        // Live active leaf biometrics (every second)
+                    // If live leaf actively in front of camera, update 3D state
+                    if (r.last_detection && r.last_detection !== "NO LEAF DETECTED") {
                         const dLive = r.last_detection;
                         const cLive = parseFloat(r.last_confidence) || 0;
                         const isLiveHealthy = dLive.toLowerCase().includes("healthy");
                         updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
-
-                        if (headline) headline.textContent = dLive;
-                        if (confVal) confVal.textContent = cLive.toFixed(1) + "%";
-                        if (confFill) {
-                            confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
-                            if (!isLiveHealthy) confFill.className = "conf-fill warning";
-                            else confFill.className = "conf-fill";
-                        }
-                        if (banner) {
-                            if (isLiveHealthy) banner.className = "disease-banner";
-                            else banner.className = "disease-banner diseased";
-                        }
-                        if (timestamp) {
-                            timestamp.textContent = "Live Biometrics: " + nowTime + " · " + (r.fps || 18) + " FPS";
-                        }
                     }
                 }
 
-                // 2. Update Persisted Plant Detection & Prescription Matrix
-                if (data.result && data.result.result_id !== lastResultId) {
-                    lastResultId = data.result.result_id;
+                // 2. ALWAYS Update Latest Plant Detection & Prescription Matrix in real-time
+                if (data.result) {
                     const res = data.result;
+                    const diseaseTitle = res.disease || "Healthy Leaf";
+                    const conf = parseFloat(res.confidence) || 0;
+                    const isHealthy = Boolean(res.is_healthy) || (res.disease && res.disease.toLowerCase().includes("healthy"));
 
+                    const headline = document.getElementById("disease-headline");
                     const headline2D = document.getElementById("disease-headline-2d");
+                    const banner = document.getElementById("disease-banner");
                     const banner2D = document.getElementById("disease-banner-2d");
+                    const confVal = document.getElementById("conf-val");
+                    const confFill = document.getElementById("conf-fill");
                     const prescChem = document.getElementById("presc-chemical");
                     const prescFert = document.getElementById("presc-fertilizer");
                     const prescTreat = document.getElementById("presc-treatment");
                     const timestamp = document.getElementById("detection-timestamp");
+                    const vigor = document.getElementById("leaf-biometric-vigor");
 
-                    const diseaseTitle = res.disease || "Healthy Leaf";
-                    if (headline2D) headline2D.textContent = diseaseTitle;
-                    
-                    const isHealthy = res.is_healthy || (res.disease && res.disease.toLowerCase().includes("healthy"));
-                    if (banner2D) {
-                        if (isHealthy) banner2D.className = "disease-banner";
-                        else banner2D.className = "disease-banner diseased";
+                    // Check if live camera has active leaf right now
+                    const hasLiveLeaf = data.rover && data.rover.last_detection && data.rover.last_detection !== "NO LEAF DETECTED";
+
+                    if (!hasLiveLeaf) {
+                        // Display latest persisted diagnosis record
+                        if (headline) headline.textContent = diseaseTitle;
+                        if (banner) banner.className = isHealthy ? "disease-banner" : "disease-banner diseased";
+                        if (confVal) confVal.textContent = conf.toFixed(1) + "%";
+                        if (confFill) {
+                            confFill.style.width = Math.min(100, Math.max(0, conf)) + "%";
+                            confFill.className = isHealthy ? "conf-fill" : "conf-fill warning";
+                        }
+                        if (timestamp) timestamp.textContent = "Scanned: " + (res.timestamp || "Real-time");
+                        if (vigor) {
+                            vigor.textContent = isHealthy ? "Chlorophyll: Optimal (Healthy)" : "Pathology Alert";
+                            vigor.style.color = isHealthy ? "#34d399" : "#f87171";
+                        }
+                    } else {
+                        // Live active leaf override
+                        const dLive = data.rover.last_detection;
+                        const cLive = parseFloat(data.rover.last_confidence) || 0;
+                        const isLiveHealthy = dLive.toLowerCase().includes("healthy");
+                        if (headline) headline.textContent = dLive;
+                        if (confVal) confVal.textContent = cLive.toFixed(1) + "%";
+                        if (confFill) {
+                            confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
+                            confFill.className = isLiveHealthy ? "conf-fill" : "conf-fill warning";
+                        }
+                        if (banner) banner.className = isLiveHealthy ? "disease-banner" : "disease-banner diseased";
                     }
 
+                    if (headline2D) headline2D.textContent = diseaseTitle;
+                    if (banner2D) banner2D.className = isHealthy ? "disease-banner" : "disease-banner diseased";
                     if (prescChem) prescChem.textContent = res.chemical || "None Required";
                     if (prescFert) prescFert.textContent = res.fertilizer || "Balanced NPK";
                     if (prescTreat) prescTreat.textContent = res.treatment || "Standard cultivation.";
-                    if (timestamp && res.timestamp) timestamp.textContent = "Scanned: " + res.timestamp;
 
-                    // Update Leaf Image in 2D View
-                    const leafBox = document.getElementById("leaf-img-box");
-                    if (leafBox && res.image) {
-                        leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
+                    // Update Leaf Image and 3D model when a new detection arrives
+                    if (res.result_id !== lastResultId) {
+                        lastResultId = res.result_id;
+                        const leafBox = document.getElementById("leaf-img-box");
+                        if (leafBox && res.image) {
+                            leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
+                        }
+                        if (!hasLiveLeaf) {
+                            updateLeaf3DState(diseaseTitle, conf, isHealthy, false);
+                        }
                     }
                 }
 

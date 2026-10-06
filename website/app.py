@@ -1169,6 +1169,8 @@ def update_result():
 
         add_history_record(result)
 
+        rover_state["last_detection"] = disease
+        rover_state["last_confidence"] = round(confidence_value, 1)
 
         print(
             "AI RESULT:",
@@ -1459,6 +1461,9 @@ def rover_status():
 
         "rover":
             rover_state,
+
+        "result":
+            get_latest_result(),
 
         "server_time":
             datetime.now().strftime(

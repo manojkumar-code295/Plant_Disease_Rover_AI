@@ -2299,13 +2299,24 @@ async function getRoverStatus() {
         if (r.fps !== undefined) {
             document.getElementById("metric-fps").textContent = `${r.fps} FPS`;
         }
-        if (r.last_detection) {
-            const isNoLeaf = r.last_detection === "NO LEAF DETECTED";
-            document.getElementById("metric-disease").textContent = isNoLeaf ? "SCANNING (NO LEAF)" : r.last_detection;
-            aiDetailsText.textContent = isNoLeaf ? "Active State: Searching for foliage..." : `Active State: ${r.last_detection}`;
-        }
-        if (r.last_confidence !== undefined) {
-            document.getElementById("metric-conf").textContent = `${r.last_confidence}%`;
+        if (data.result) {
+            const hasLiveLeaf = r.last_detection && r.last_detection !== "NO LEAF DETECTED";
+            if (hasLiveLeaf) {
+                document.getElementById("metric-disease").textContent = `LIVE: ${r.last_detection}`;
+                aiDetailsText.textContent = `Live Scanning: ${r.last_detection}`;
+                if (r.last_confidence !== undefined) {
+                    document.getElementById("metric-conf").textContent = `${r.last_confidence}%`;
+                }
+            } else {
+                document.getElementById("metric-disease").textContent = data.result.disease || "Healthy Leaf";
+                aiDetailsText.textContent = `Diagnosed: ${data.result.disease || "Healthy Leaf"}`;
+                if (data.result.confidence !== undefined) {
+                    document.getElementById("metric-conf").textContent = `${data.result.confidence}%`;
+                }
+            }
+        } else if (r.last_detection) {
+            document.getElementById("metric-disease").textContent = r.last_detection;
+            aiDetailsText.textContent = `Active State: ${r.last_detection}`;
         }
 
         // Sync Speed & Pump (Never overwrite user speed when rover is stopped)
