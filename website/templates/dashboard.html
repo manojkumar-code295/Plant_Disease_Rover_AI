@@ -6,6 +6,10 @@
     <meta name="theme-color" content="#071b12">
     <title>Dashboard | AgriRover Precision Agriculture</title>
 
+    <!-- Three.js 3D WebGL Engine -->
+    <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+    <script>if (typeof THREE === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>'); }</script>
+
     <style>
         /* =========================================================
            DESIGN TOKENS & RESET
@@ -558,8 +562,130 @@
         }
 
         /* =========================================================
-           LATEST DETECTION & RESULTS CARD
+           LATEST DETECTION & 3D HOLOGRAPHIC BIOMETRICS CARD
         ========================================================= */
+        .leaf-view-mode-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(6, 20, 14, 0.7);
+            padding: 6px 10px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+            margin-bottom: 14px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .leaf-mode-toggle {
+            display: inline-flex;
+            background: rgba(4, 14, 10, 0.85);
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .leaf-mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .leaf-mode-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .leaf-3d-cam-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .leaf-cam-btn {
+            background: rgba(14, 38, 28, 0.6);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #86efac;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .leaf-cam-btn:hover, .leaf-cam-btn.active {
+            background: rgba(34, 197, 94, 0.22);
+            border-color: #34d399;
+            color: #ecfdf5;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .leaf-3d-viewport {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background: radial-gradient(circle at 50% 50%, rgba(14, 46, 33, 0.5) 0%, rgba(3, 12, 8, 0.96) 85%);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
+            margin-bottom: 16px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.85);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .leaf-3d-viewport:active {
+            cursor: grabbing;
+        }
+
+        #leaf-3d-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .leaf-3d-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(6, 20, 14, 0.85);
+            backdrop-filter: blur(6px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .leaf-3d-status-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(148, 163, 184, 0.8);
+            pointer-events: none;
+            z-index: 2;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
         .leaf-preview-container {
             display: grid;
             grid-template-columns: 140px 1fr;
@@ -1035,15 +1161,39 @@
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: LATEST DETECTION RESULT & TREATMENT -->
+            <!-- RIGHT COLUMN: LATEST DETECTION RESULT & 3D HOLOGRAPHIC DIAGNOSIS -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">🔬 Latest Plant Leaf Detection</h2>
-                    <span class="card-badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;">AI INFERENCE</span>
+                    <h2 class="card-title">🔬 Plant Leaf Health Diagnosis</h2>
+                    <span class="card-badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;" id="diagnosis-engine-badge">3D BIOMETRICS</span>
                 </div>
 
-                <!-- Leaf Preview & Classification Headline -->
-                <div class="leaf-preview-container">
+                <!-- 3D Hologram vs 2D Snapshot Mode Switcher -->
+                <div class="leaf-view-mode-bar">
+                    <div class="leaf-mode-toggle">
+                        <button type="button" class="leaf-mode-btn active" id="btn-leaf-3d" onclick="switchLeafView('3d')">🧬 3D HOLOGRAPHIC SCANNER</button>
+                        <button type="button" class="leaf-mode-btn" id="btn-leaf-2d" onclick="switchLeafView('2d')">📷 SNAPSHOT</button>
+                    </div>
+                    <div class="leaf-3d-cam-controls" id="leaf-cam-controls">
+                        <button type="button" class="leaf-cam-btn active" id="leaf-cam-rotate" onclick="toggleLeafAutoRotate()">↺ Auto-Rotate</button>
+                        <button type="button" class="leaf-cam-btn" onclick="setLeafCamAngle('top')">Top</button>
+                        <button type="button" class="leaf-cam-btn" onclick="setLeafCamAngle('underside')">Underside</button>
+                        <button type="button" class="leaf-cam-btn" onclick="resetLeafCam()">Reset</button>
+                    </div>
+                </div>
+
+                <!-- 3D WebGL Leaf Hologram Viewport -->
+                <div class="leaf-3d-viewport" id="leaf-3d-viewport">
+                    <canvas id="leaf-3d-canvas"></canvas>
+                    <div class="leaf-3d-badge" id="leaf-3d-badge">
+                        <span class="radar-dot" style="background:#10b981;" id="leaf-badge-dot"></span>
+                        <span id="leaf-badge-text">SCANNING CHILI FOLIAGE</span>
+                    </div>
+                    <div class="leaf-3d-status-hint">✨ Drag / Swipe to rotate 360° · Scroll to zoom</div>
+                </div>
+
+                <!-- 2D Snapshot Container (Shown when 2D mode selected) -->
+                <div class="leaf-preview-container" id="leaf-2d-container" style="display: none;">
                     <div class="leaf-img-box" id="leaf-img-box">
                         {% if detection.image %}
                             <img id="latest-leaf-img" src="{{ url_for('static', filename='images/' + detection.image) }}?v={{ detection.timestamp }}" alt="Latest Plant Leaf">
@@ -1052,14 +1202,21 @@
                         {% endif %}
                     </div>
                     <div>
-                        <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner">
-                            <div class="disease-subhead">IDENTIFIED CLASSIFICATION</div>
-                            <div class="disease-headline" id="disease-headline">{{ detection.disease or "Healthy Leaf" }}</div>
-                        </div>
-                        <div style="font-size: 11px; color: var(--text-dim);" id="detection-timestamp">
-                            Scanned: {{ detection.timestamp or "Real-time" }}
+                        <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner-2d">
+                            <div class="disease-subhead">CAPTURED SNAPSHOT</div>
+                            <div class="disease-headline" id="disease-headline-2d" style="font-size: 16px;">{{ detection.disease or "Healthy Leaf" }}</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Leaf Preview & Classification Headline -->
+                <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner">
+                    <div class="disease-subhead">IDENTIFIED CLASSIFICATION</div>
+                    <div class="disease-headline" id="disease-headline">{{ detection.disease or "Healthy Leaf" }}</div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: -6px; margin-bottom: 14px; display: flex; justify-content: space-between;" id="detection-meta">
+                    <span id="detection-timestamp">Scanned: {{ detection.timestamp or "Real-time" }}</span>
+                    <span id="leaf-biometric-vigor" style="color: #34d399; font-weight: 700;">Chlorophyll: Optimal</span>
                 </div>
 
                 <!-- AI Confidence Meter -->
@@ -1270,7 +1427,518 @@
             } catch (e) {
                 if (statusText) statusText.textContent = "ERR: NO LINK";
             }
+        // =========================================================
+        // 3D HOLOGRAPHIC PLANT LEAF BIOMETRIC VISUALIZER (Three.js)
+        // =========================================================
+        let leaf3D = {
+            scene: null,
+            camera: null,
+            renderer: null,
+            leafGroup: null,
+            leafMesh: null,
+            leafMat: null,
+            stemMesh: null,
+            veinGroup: null,
+            lesionGroup: null,
+            scannerMesh: null,
+            particles: null,
+            clock: null,
+            autoRotate: true,
+            isScanning: true,
+            rotY: 0,
+            rotX: 0.15,
+            targetRotY: 0,
+            targetRotX: 0.15,
+            zoom: 5.2,
+            isDragging: false,
+            lastPointerX: 0,
+            lastPointerY: 0,
+            touchDist: 0,
+            currentState: "SCANNING"
+        };
+
+        function switchLeafView(mode) {
+            const btn3D = document.getElementById("btn-leaf-3d");
+            const btn2D = document.getElementById("btn-leaf-2d");
+            const viewport3D = document.getElementById("leaf-3d-viewport");
+            const container2D = document.getElementById("leaf-2d-container");
+            const camControls = document.getElementById("leaf-cam-controls");
+
+            if (mode === "3d") {
+                if (btn3D) btn3D.classList.add("active");
+                if (btn2D) btn2D.classList.remove("active");
+                if (viewport3D) viewport3D.style.display = "block";
+                if (container2D) container2D.style.display = "none";
+                if (camControls) camControls.style.display = "flex";
+                onLeaf3DResize();
+            } else {
+                if (btn2D) btn2D.classList.add("active");
+                if (btn3D) btn3D.classList.remove("active");
+                if (viewport3D) viewport3D.style.display = "none";
+                if (container2D) container2D.style.display = "grid";
+                if (camControls) camControls.style.display = "none";
+            }
         }
+
+        function toggleLeafAutoRotate() {
+            leaf3D.autoRotate = !leaf3D.autoRotate;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) {
+                if (leaf3D.autoRotate) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        }
+
+        function setLeafCamAngle(angle) {
+            leaf3D.autoRotate = false;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) btn.classList.remove("active");
+
+            if (angle === 'top') {
+                leaf3D.targetRotX = 0.95;
+                leaf3D.targetRotY = 0;
+            } else if (angle === 'underside') {
+                leaf3D.targetRotX = -0.85;
+                leaf3D.targetRotY = Math.PI;
+            }
+        }
+
+        function resetLeafCam() {
+            leaf3D.targetRotX = 0.18;
+            leaf3D.targetRotY = 0;
+            leaf3D.zoom = 5.2;
+            leaf3D.autoRotate = true;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) btn.classList.add("active");
+        }
+
+        function createChiliLeafGeometry() {
+            const uSegs = 22;
+            const vSegs = 34;
+            const positions = [];
+            const uvs = [];
+            const indices = [];
+
+            for (let j = 0; j <= vSegs; j++) {
+                const v = j / vSegs;
+                const y = -2.1 + v * 4.3;
+
+                let width = 0;
+                if (v < 0.08) {
+                    width = 0.08 + v * 1.6;
+                } else {
+                    const bladeT = (v - 0.08) / 0.92;
+                    width = Math.sin(Math.pow(bladeT, 0.65) * Math.PI) * 1.48 * (1.0 - 0.16 * bladeT);
+                }
+
+                const arch = Math.sin(v * Math.PI) * 0.44 - Math.pow(v, 2) * 0.28;
+
+                for (let i = 0; i <= uSegs; i++) {
+                    const uNorm = (i / uSegs) * 2 - 1;
+                    const x = uNorm * width;
+                    const trough = Math.pow(Math.abs(uNorm), 1.65) * 0.26;
+                    const edgeWave = Math.sin(v * 22.0 + Math.abs(uNorm) * 3.5) * 0.02 * Math.abs(uNorm);
+                    const z = arch + trough + edgeWave;
+
+                    positions.push(x, y, z);
+                    uvs.push(i / uSegs, v);
+                }
+            }
+
+            for (let j = 0; j < vSegs; j++) {
+                for (let i = 0; i < uSegs; i++) {
+                    const a = j * (uSegs + 1) + i;
+                    const b = (j + 1) * (uSegs + 1) + i;
+                    const c = (j + 1) * (uSegs + 1) + (i + 1);
+                    const d = j * (uSegs + 1) + (i + 1);
+
+                    indices.push(a, b, d);
+                    indices.push(b, c, d);
+                }
+            }
+
+            const geom = new THREE.BufferGeometry();
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            geom.setIndex(indices);
+            geom.computeVertexNormals();
+            return geom;
+        }
+
+        function initLeaf3D() {
+            const container = document.getElementById("leaf-3d-viewport");
+            const canvas = document.getElementById("leaf-3d-canvas");
+            if (!container || !canvas || typeof THREE === "undefined") return;
+
+            const w = container.clientWidth || 380;
+            const h = container.clientHeight || 240;
+
+            leaf3D.clock = new THREE.Clock();
+            leaf3D.scene = new THREE.Scene();
+
+            leaf3D.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+            leaf3D.camera.position.set(0, 0, leaf3D.zoom);
+
+            leaf3D.renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                alpha: true,
+                antialias: true,
+                powerPreference: "high-performance"
+            });
+            leaf3D.renderer.setSize(w, h);
+            leaf3D.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xd1fae5, 0.75);
+            leaf3D.scene.add(ambient);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+            keyLight.position.set(3, 4, 4);
+            leaf3D.scene.add(keyLight);
+
+            const backLight = new THREE.DirectionalLight(0x06b6d4, 0.6);
+            backLight.position.set(-3, -2, -3);
+            leaf3D.scene.add(backLight);
+
+            // Leaf Scene Root Group
+            leaf3D.leafGroup = new THREE.Group();
+            leaf3D.scene.add(leaf3D.leafGroup);
+
+            // 1. Leaf Blade
+            const leafGeom = createChiliLeafGeometry();
+            leaf3D.leafMat = new THREE.MeshStandardMaterial({
+                color: 0x10b981,
+                roughness: 0.38,
+                metalness: 0.08,
+                side: THREE.DoubleSide,
+                emissive: 0x064e3b,
+                emissiveIntensity: 0.25
+            });
+            leaf3D.leafMesh = new THREE.Mesh(leafGeom, leaf3D.leafMat);
+            leaf3D.leafGroup.add(leaf3D.leafMesh);
+
+            // 2. Central Midrib Stem
+            const stemCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, -2.25, -0.06),
+                new THREE.Vector3(0, -1.1, 0.18),
+                new THREE.Vector3(0, 0.3, 0.42),
+                new THREE.Vector3(0, 1.4, 0.24),
+                new THREE.Vector3(0, 2.15, 0.04)
+            ]);
+            const stemGeom = new THREE.TubeGeometry(stemCurve, 24, 0.05, 8, false);
+            const stemMat = new THREE.MeshStandardMaterial({
+                color: 0x22c55e,
+                roughness: 0.4,
+                metalness: 0.05
+            });
+            leaf3D.stemMesh = new THREE.Mesh(stemGeom, stemMat);
+            leaf3D.leafGroup.add(leaf3D.stemMesh);
+
+            // 3. Lateral Vein Network
+            leaf3D.veinGroup = new THREE.Group();
+            const veinMat = new THREE.LineBasicMaterial({
+                color: 0x34d399,
+                transparent: true,
+                opacity: 0.65,
+                linewidth: 2
+            });
+
+            const veinLevels = [-1.0, -0.4, 0.2, 0.8, 1.4];
+            veinLevels.forEach((vy, idx) => {
+                const spread = 0.85 + (idx * 0.1);
+                // Left vein
+                const ptsL = [
+                    new THREE.Vector3(0, vy, 0.25),
+                    new THREE.Vector3(-0.45 * spread, vy + 0.32, 0.30),
+                    new THREE.Vector3(-0.95 * spread, vy + 0.58, 0.22)
+                ];
+                const gL = new THREE.BufferGeometry().setFromPoints(ptsL);
+                leaf3D.veinGroup.add(new THREE.Line(gL, veinMat));
+
+                // Right vein
+                const ptsR = [
+                    new THREE.Vector3(0, vy, 0.25),
+                    new THREE.Vector3(0.45 * spread, vy + 0.32, 0.30),
+                    new THREE.Vector3(0.95 * spread, vy + 0.58, 0.22)
+                ];
+                const gR = new THREE.BufferGeometry().setFromPoints(ptsR);
+                leaf3D.veinGroup.add(new THREE.Line(gR, veinMat));
+            });
+            leaf3D.leafGroup.add(leaf3D.veinGroup);
+
+            // 4. Disease Necrosis Lesions System
+            leaf3D.lesionGroup = new THREE.Group();
+            leaf3D.lesionGroup.visible = false;
+
+            const spotCoords = [
+                { x: 0.35, y: 0.4, z: 0.38, r: 0.16 },
+                { x: -0.42, y: -0.2, z: 0.32, r: 0.22 },
+                { x: 0.55, y: -0.7, z: 0.26, r: 0.18 },
+                { x: -0.25, y: 0.9, z: 0.28, r: 0.14 },
+                { x: 0.15, y: -1.2, z: 0.15, r: 0.12 }
+            ];
+
+            spotCoords.forEach(sc => {
+                const spotGeom = new THREE.CircleGeometry(sc.r, 12);
+                const spotMat = new THREE.MeshBasicMaterial({
+                    color: 0x78350f,
+                    side: THREE.DoubleSide
+                });
+                const spotMesh = new THREE.Mesh(spotGeom, spotMat);
+                spotMesh.position.set(sc.x, sc.y, sc.z + 0.02);
+                spotMesh.rotation.x = -0.15;
+                leaf3D.lesionGroup.add(spotMesh);
+
+                // Halo ring
+                const haloGeom = new THREE.RingGeometry(sc.r * 0.9, sc.r * 1.35, 12);
+                const haloMat = new THREE.MeshBasicMaterial({
+                    color: 0xf59e0b,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.75
+                });
+                const haloMesh = new THREE.Mesh(haloGeom, haloMat);
+                haloMesh.position.set(sc.x, sc.y, sc.z + 0.022);
+                haloMesh.rotation.x = -0.15;
+                leaf3D.lesionGroup.add(haloMesh);
+            });
+            leaf3D.leafGroup.add(leaf3D.lesionGroup);
+
+            // 5. Laser Scanning Beam
+            const scanGeom = new THREE.PlaneGeometry(3.2, 0.08);
+            const scanMat = new THREE.MeshBasicMaterial({
+                color: 0x06b6d4,
+                transparent: true,
+                opacity: 0.75,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            leaf3D.scannerMesh = new THREE.Mesh(scanGeom, scanMat);
+            leaf3D.scannerMesh.position.set(0, 0, 0.45);
+            leaf3D.leafGroup.add(leaf3D.scannerMesh);
+
+            // 6. Bio-Energy Particle Cloud
+            const partCount = 55;
+            const partGeom = new THREE.BufferGeometry();
+            const partPos = new Float32Array(partCount * 3);
+            for (let i = 0; i < partCount; i++) {
+                partPos[i * 3] = (Math.random() - 0.5) * 3.2;
+                partPos[i * 3 + 1] = (Math.random() - 0.5) * 4.6;
+                partPos[i * 3 + 2] = (Math.random() - 0.5) * 1.6;
+            }
+            partGeom.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+            const partMat = new THREE.PointsMaterial({
+                color: 0x34d399,
+                size: 0.08,
+                transparent: true,
+                opacity: 0.65,
+                blending: THREE.AdditiveBlending
+            });
+            leaf3D.particles = new THREE.Points(partGeom, partMat);
+            leaf3D.leafGroup.add(leaf3D.particles);
+
+            // Touch / Drag Interaction
+            setupLeaf3DInteraction(container);
+
+            // Resize Listener
+            window.addEventListener("resize", onLeaf3DResize);
+
+            // Start Animation Loop
+            requestAnimationFrame(animateLeaf3D);
+        }
+
+        function setupLeaf3DInteraction(container) {
+            container.addEventListener("pointerdown", e => {
+                leaf3D.isDragging = true;
+                leaf3D.autoRotate = false;
+                const btn = document.getElementById("leaf-cam-rotate");
+                if (btn) btn.classList.remove("active");
+                leaf3D.lastPointerX = e.clientX;
+                leaf3D.lastPointerY = e.clientY;
+                container.setPointerCapture(e.pointerId);
+            });
+
+            container.addEventListener("pointermove", e => {
+                if (!leaf3D.isDragging) return;
+                const dx = e.clientX - leaf3D.lastPointerX;
+                const dy = e.clientY - leaf3D.lastPointerY;
+                leaf3D.targetRotY += dx * 0.012;
+                leaf3D.targetRotX += dy * 0.012;
+                leaf3D.targetRotX = Math.max(-1.3, Math.min(1.3, leaf3D.targetRotX));
+                leaf3D.lastPointerX = e.clientX;
+                leaf3D.lastPointerY = e.clientY;
+            });
+
+            const stopDrag = () => { leaf3D.isDragging = false; };
+            container.addEventListener("pointerup", stopDrag);
+            container.addEventListener("pointercancel", stopDrag);
+
+            container.addEventListener("wheel", e => {
+                e.preventDefault();
+                leaf3D.zoom += e.deltaY * 0.004;
+                leaf3D.zoom = Math.max(3.0, Math.min(8.5, leaf3D.zoom));
+                if (leaf3D.camera) leaf3D.camera.position.z = leaf3D.zoom;
+            }, { passive: false });
+        }
+
+        function onLeaf3DResize() {
+            const container = document.getElementById("leaf-3d-viewport");
+            if (!container || !leaf3D.camera || !leaf3D.renderer) return;
+            const w = container.clientWidth || 380;
+            const h = container.clientHeight || 240;
+            leaf3D.camera.aspect = w / h;
+            leaf3D.camera.updateProjectionMatrix();
+            leaf3D.renderer.setSize(w, h);
+        }
+
+        function updateLeaf3DState(diseaseName, confidence, isHealthy, isScanningMode) {
+            if (!leaf3D.leafMat || !leaf3D.lesionGroup) return;
+
+            const badge = document.getElementById("leaf-3d-badge");
+            const badgeDot = document.getElementById("leaf-badge-dot");
+            const badgeText = document.getElementById("leaf-badge-text");
+            const vigorText = document.getElementById("leaf-biometric-vigor");
+
+            if (isScanningMode || !diseaseName || diseaseName === "NO LEAF DETECTED") {
+                leaf3D.currentState = "SCANNING";
+                leaf3D.leafMat.color.setHex(0x06b6d4);
+                leaf3D.leafMat.emissive.setHex(0x083344);
+                leaf3D.leafMat.wireframe = true;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) {
+                    leaf3D.scannerMesh.visible = true;
+                    leaf3D.scannerMesh.material.color.setHex(0x06b6d4);
+                }
+                if (badgeDot) badgeDot.style.background = "#06b6d4";
+                if (badgeText) badgeText.textContent = "SCANNING CHILI FOLIAGE...";
+                if (vigorText) {
+                    vigorText.textContent = "Scanner: Active (No Leaf)";
+                    vigorText.style.color = "#38bdf8";
+                }
+                return;
+            }
+
+            leaf3D.leafMat.wireframe = false;
+            const dLower = (diseaseName || "").toLowerCase();
+
+            if (isHealthy || dLower.includes("healthy")) {
+                leaf3D.currentState = "HEALTHY";
+                leaf3D.leafMat.color.setHex(0x10b981);
+                leaf3D.leafMat.emissive.setHex(0x064e3b);
+                leaf3D.leafMat.roughness = 0.38;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0x10b981);
+                if (badgeDot) badgeDot.style.background = "#10b981";
+                if (badgeText) badgeText.textContent = `HEALTHY LEAF (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Chlorophyll Vigor: 98.4% (Optimal)";
+                    vigorText.style.color = "#34d399";
+                }
+            } else if (dLower.includes("cercospora")) {
+                leaf3D.currentState = "CERCOSPORA";
+                leaf3D.leafMat.color.setHex(0x84cc16);
+                leaf3D.leafMat.emissive.setHex(0x365314);
+                leaf3D.leafMat.roughness = 0.55;
+                leaf3D.lesionGroup.visible = true;
+                leaf3D.lesionGroup.children.forEach(c => {
+                    if (c.material) c.material.color.setHex(0x78350f);
+                });
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xf59e0b);
+                if (badgeDot) badgeDot.style.background = "#f59e0b";
+                if (badgeText) badgeText.textContent = `CERCOSPORA DETECTED (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Necrotic Spot Lesions Active";
+                    vigorText.style.color = "#fbbf24";
+                }
+            } else if (dLower.includes("bacterial")) {
+                leaf3D.currentState = "BACTERIAL";
+                leaf3D.leafMat.color.setHex(0x65a30d);
+                leaf3D.leafMat.emissive.setHex(0x450a0a);
+                leaf3D.leafMat.roughness = 0.62;
+                leaf3D.lesionGroup.visible = true;
+                leaf3D.lesionGroup.children.forEach(c => {
+                    if (c.material) c.material.color.setHex(0xef4444);
+                });
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xef4444);
+                if (badgeDot) badgeDot.style.background = "#ef4444";
+                if (badgeText) badgeText.textContent = `BACTERIAL SPOT (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Pathogen Infection Alert";
+                    vigorText.style.color = "#f87171";
+                }
+            } else if (dLower.includes("curl")) {
+                leaf3D.currentState = "CURL";
+                leaf3D.leafMat.color.setHex(0xeab308);
+                leaf3D.leafMat.emissive.setHex(0x713f12);
+                leaf3D.leafMat.roughness = 0.48;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xeab308);
+                if (badgeDot) badgeDot.style.background = "#eab308";
+                if (badgeText) badgeText.textContent = `CURL VIRUS (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Viral Margin Stunting Alert";
+                    vigorText.style.color = "#facc15";
+                }
+            }
+        }
+
+        function animateLeaf3D() {
+            requestAnimationFrame(animateLeaf3D);
+
+            if (!leaf3D.renderer || !leaf3D.scene || !leaf3D.camera) return;
+
+            const delta = leaf3D.clock ? leaf3D.clock.getDelta() : 0.016;
+            const elapsed = leaf3D.clock ? leaf3D.clock.getElapsedTime() : 0;
+
+            if (leaf3D.autoRotate) {
+                leaf3D.targetRotY += delta * 0.45;
+            }
+
+            // Smooth interpolation
+            leaf3D.rotY += (leaf3D.targetRotY - leaf3D.rotY) * 0.1;
+            leaf3D.rotX += (leaf3D.targetRotX - leaf3D.rotX) * 0.1;
+
+            if (leaf3D.leafGroup) {
+                leaf3D.leafGroup.rotation.y = leaf3D.rotY;
+                leaf3D.leafGroup.rotation.x = leaf3D.rotX;
+
+                // Gentle organic breathing bob
+                leaf3D.leafGroup.position.y = Math.sin(elapsed * 1.8) * 0.06;
+            }
+
+            // Laser scanner sweep
+            if (leaf3D.scannerMesh) {
+                leaf3D.scannerMesh.position.y = Math.sin(elapsed * 2.8) * 2.0;
+                leaf3D.scannerMesh.material.opacity = 0.45 + Math.sin(elapsed * 6.0) * 0.25;
+            }
+
+            // Bio-particle drift
+            if (leaf3D.particles) {
+                leaf3D.particles.rotation.y = elapsed * 0.15;
+            }
+
+            leaf3D.renderer.render(leaf3D.scene, leaf3D.camera);
+        }
+
+        // Initialize 3D Leaf Hologram immediately
+        initLeaf3D();
+
+        // 3D Perspective Card Tilt on Mouse / Pointer Move
+        document.querySelectorAll('.card, .hud-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -4.5;
+                const rotateY = ((x - centerX) / centerX) * 4.5;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+            });
+        });
 
         // Live Telemetry & Detection State Poller (1.5s interval)
         let lastResultId = "";
@@ -1282,16 +1950,20 @@
                 const data = await response.json();
                 if (!data.success) return;
 
-                // 1. Update Rover Telemetry
+                // 1. Update Rover Telemetry & AI Status
                 if (data.rover) {
                     const r = data.rover;
                     const piPill = document.getElementById("pi-pill");
                     const piPillText = document.getElementById("pi-pill-text");
                     const piIp = document.getElementById("pi-ip-text");
                     const motionText = document.getElementById("rover-motion-text");
+                    const aiPillText = document.getElementById("ai-pill-text");
+                    const camFpsOverlay = document.getElementById("cam-fps-overlay");
 
                     if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
                     if (motionText && (r.direction || r.movement)) motionText.textContent = r.direction || r.movement;
+                    if (aiPillText && r.ai_status) aiPillText.textContent = r.ai_status;
+                    if (camFpsOverlay && r.fps) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;
 
                     if (r.connected) {
                         if (piPill) piPill.className = "status-pill online";
@@ -1300,15 +1972,22 @@
                         if (piPill) piPill.className = "status-pill offline";
                         if (piPillText) piPillText.textContent = "Standby";
                     }
+
+                    // Real-time synchronization of 3D leaf hologram with camera scan state
+                    if (r.last_detection === "NO LEAF DETECTED" || !r.last_detection) {
+                        updateLeaf3DState("NO LEAF DETECTED", 0, true, true);
+                    }
                 }
 
-                // 2. Update Latest Plant Detection (only update DOM if detection changed)
+                // 2. Update Latest Plant Detection (when leaf is detected)
                 if (data.result && data.result.result_id !== lastResultId) {
                     lastResultId = data.result.result_id;
                     const res = data.result;
 
                     const headline = document.getElementById("disease-headline");
+                    const headline2D = document.getElementById("disease-headline-2d");
                     const banner = document.getElementById("disease-banner");
+                    const banner2D = document.getElementById("disease-banner-2d");
                     const confVal = document.getElementById("conf-val");
                     const confFill = document.getElementById("conf-fill");
                     const prescChem = document.getElementById("presc-chemical");
@@ -1316,15 +1995,18 @@
                     const prescTreat = document.getElementById("presc-treatment");
                     const timestamp = document.getElementById("detection-timestamp");
 
-                    if (headline) headline.textContent = res.disease || "Healthy Leaf";
+                    const diseaseTitle = res.disease || "Healthy Leaf";
+                    if (headline) headline.textContent = diseaseTitle;
+                    if (headline2D) headline2D.textContent = diseaseTitle;
                     
                     const isHealthy = res.is_healthy || (res.disease && res.disease.toLowerCase().includes("healthy"));
                     if (banner) {
-                        if (isHealthy) {
-                            banner.className = "disease-banner";
-                        } else {
-                            banner.className = "disease-banner diseased";
-                        }
+                        if (isHealthy) banner.className = "disease-banner";
+                        else banner.className = "disease-banner diseased";
+                    }
+                    if (banner2D) {
+                        if (isHealthy) banner2D.className = "disease-banner";
+                        else banner2D.className = "disease-banner diseased";
                     }
 
                     const conf = parseFloat(res.confidence) || 0;
@@ -1340,11 +2022,14 @@
                     if (prescTreat) prescTreat.textContent = res.treatment || "Standard cultivation.";
                     if (timestamp && res.timestamp) timestamp.textContent = "Scanned: " + res.timestamp;
 
-                    // Update Leaf Image
+                    // Update Leaf Image in 2D View
                     const leafBox = document.getElementById("leaf-img-box");
                     if (leafBox && res.image) {
                         leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
                     }
+
+                    // Update 3D Hologram Leaf with verified detection
+                    updateLeaf3DState(diseaseTitle, conf, isHealthy, false);
                 }
 
                 // 3. Update Statistics

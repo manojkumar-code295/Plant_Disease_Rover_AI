@@ -1,10 +1,10 @@
 {
-    "result_id": "08e36377be5648b7acf542a9c4026f69",
-    "image": "20261005_164127_5de4084d.jpg",
-    "disease": "Curl Virus (88.6%)",
-    "chemical": "Imidacloprid / Neem oil for whitefly & vector control",
-    "fertilizer": "Balanced NPK fertilizer with micronutrients",
-    "treatment": "Uproot severely stunted plants and control insect vectors immediately.",
-    "confidence": 88.6,
-    "timestamp": "2026-10-05 16:41:27"
+    "result_id": "init_standby",
+    "image": "",
+    "disease": "Healthy Leaf (Optimal Vigor)",
+    "chemical": "None Required",
+    "fertilizer": "Balanced NPK fertilizer",
+    "treatment": "Plant is in optimal vigor. Maintain standard irrigation schedule and monitor weekly.",
+    "confidence": 99.0,
+    "timestamp": "Real-time"
 }

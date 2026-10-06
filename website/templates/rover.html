@@ -6,6 +6,14 @@
 <meta name="theme-color" content="#071b12">
 <title>Smart Rover Control & Telemetry | Precision Agriculture</title>
 
+<!-- THREE.JS 3D WEBGL ENGINE -->
+<script src="/static/js/three.min.js"></script>
+<script>
+if (typeof THREE === 'undefined') {
+    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+}
+</script>
+
 <style>
 /* =========================================================
    DESIGN TOKENS & RESET
@@ -357,13 +365,116 @@ main {
     background-size: 100% 100%, 22px 22px, 22px 22px;
     border: 1px solid rgba(52, 211, 153, 0.3);
     border-radius: var(--radius-md);
-    padding: 20px;
+    padding: 16px;
     text-align: center;
     position: relative;
     overflow: hidden;
     margin-bottom: 22px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 35px rgba(16, 185, 129, 0.08);
 }
+
+/* =========================================================
+   3D ROVER HOLOGRAPHIC VIEWPORT
+========================================================= */
+.viewport-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    z-index: 10;
+    position: relative;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.view-mode-toggle, .view-cam-controls {
+    display: flex;
+    gap: 4px;
+    background: rgba(4, 16, 11, 0.8);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.view-btn, .cam-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-btn:hover, .cam-btn:hover {
+    color: #f0fdf4;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.view-btn.active, .cam-btn.active {
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: #ffffff;
+    border-color: #34d399;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.rover-3d-container {
+    width: 100%;
+    height: 310px;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+    background: radial-gradient(circle at 50% 40%, rgba(13, 40, 30, 0.8) 0%, rgba(3, 12, 8, 0.95) 100%);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.rover-3d-container:active {
+    cursor: grabbing;
+}
+
+#rover-3d-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.touch-hint-3d {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(134, 239, 172, 0.85);
+    pointer-events: none;
+    letter-spacing: 0.5px;
+    background: rgba(6, 20, 14, 0.75);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 3px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    transition: opacity 0.5s ease;
+}
+
+.hud-corner-tag {
+    position: absolute;
+    font-family: monospace;
+    font-size: 10px;
+    color: #6ee7b7;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    padding: 3px 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    z-index: 5;
+}
+.hud-tag-tl { top: 10px; left: 10px; }
+.hud-tag-tr { top: 10px; right: 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
 
 /* Sonar radar sweeping overlay */
 .sonar-sweep {
@@ -1320,23 +1431,46 @@ main {
                 <span class="panel-badge" id="command-badge">STOPPED</span>
             </div>
 
-            <!-- ANIMATED 2D ROVER SCHEMATIC -->
+            <!-- INTERACTIVE 3D HOLOGRAPHIC & 2D SCHEMATIC VIEWPORT -->
             <div class="schematic-viewport" id="schematic-viewport">
-                <!-- Sonar radar ring -->
-                <div class="sonar-sweep">
+                <!-- 3D / 2D Mode Switcher Header -->
+                <div class="viewport-header-bar">
+                    <div class="view-mode-toggle">
+                        <button type="button" class="view-btn active" id="btn-view-3d" onclick="switchRoverView('3d')">🛸 3D HOLOGRAM</button>
+                        <button type="button" class="view-btn" id="btn-view-2d" onclick="switchRoverView('2d')">📐 2D SCHEMATIC</button>
+                    </div>
+                    <div class="view-cam-controls" id="view-cam-controls">
+                        <button type="button" class="cam-btn active" id="cam-btn-orbit" onclick="setRoverCam('orbit')">Orbit</button>
+                        <button type="button" class="cam-btn" id="cam-btn-top" onclick="setRoverCam('top')">Top</button>
+                        <button type="button" class="cam-btn" id="cam-btn-iso" onclick="setRoverCam('iso')">Isometric</button>
+                        <button type="button" class="cam-btn" id="cam-btn-front" onclick="setRoverCam('front')">Front</button>
+                        <button type="button" class="cam-btn" onclick="resetRoverCam()">↺ Reset</button>
+                    </div>
+                </div>
+
+                <!-- 3D WEBGL ROVER VIEWPORT -->
+                <div id="rover-3d-container" class="rover-3d-container">
+                    <canvas id="rover-3d-canvas"></canvas>
+                    <div class="hud-corner-tag hud-tag-tl">TELEMETRY: 3D WEBGL</div>
+                    <div class="hud-corner-tag hud-tag-tr" id="hud-3d-fps">60 FPS</div>
+                    <div class="touch-hint-3d" id="touch-hint-3d">✨ Drag to rotate 3D view · Scroll/Pinch to zoom</div>
+                </div>
+
+                <!-- Sonar radar ring (2D mode) -->
+                <div class="sonar-sweep" id="sonar-sweep-2d" style="display: none;">
                     <div class="sonar-beam"></div>
                 </div>
 
-                <!-- Cyber Velocity Particle Stream -->
-                <div class="velocity-stream-layer">
+                <!-- Cyber Velocity Particle Stream (2D mode) -->
+                <div class="velocity-stream-layer" id="velocity-stream-2d" style="display: none;">
                     <div class="v-line v-line-1"></div>
                     <div class="v-line v-line-2"></div>
                     <div class="v-line v-line-3"></div>
                     <div class="v-line v-line-4"></div>
                 </div>
 
-                <!-- SVG Interactive Rover -->
-                <div class="svg-rover-container" id="rover-svg-wrap">
+                <!-- SVG Interactive Rover (2D mode) -->
+                <div class="svg-rover-container" id="rover-svg-wrap" style="display: none;">
                     <svg viewBox="0 0 320 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                         <!-- Dual Headlight Cones (Illuminate forward) -->
                         <polygon class="headlight-cone" points="110,65 50,0 170,0" fill="url(#headlightGrad)" />
@@ -2261,6 +2395,479 @@ setInterval(() => {
 // Status poll loop every 1.5 seconds
 getRoverStatus();
 setInterval(getRoverStatus, 1500);
+
+/* =========================================================
+   THREE.JS 3D SMART ROVER HOLOGRAPHIC ENGINE
+========================================================= */
+let scene3D, camera3D, renderer3D;
+let roverGroup, chassisMesh, solarDeck, reactorCore, lidarTurret, lidarLaser;
+let wheels = [];
+let headlights = [];
+let mistParticles, mistGeo;
+let groundGrid;
+let currentViewMode = '3d';
+let isDragging3D = false;
+let prevMousePos = { x: 0, y: 0 };
+let camSpherical = { radius: 7.2, theta: Math.PI / 4, phi: Math.PI / 3.2 };
+let roverPhysics = {
+    wheelRotationSpeed: 0,
+    targetPitch: 0,
+    currentPitch: 0,
+    targetRoll: 0,
+    currentRoll: 0,
+    targetSteerAngle: 0,
+    currentSteerAngle: 0
+};
+let last3DTime = performance.now();
+let fps3DCount = 0;
+let lastFps3DTime = performance.now();
+
+function initRover3D() {
+    const container = document.getElementById("rover-3d-container");
+    const canvas = document.getElementById("rover-3d-canvas");
+    if (!container || !canvas || typeof THREE === "undefined") return;
+
+    const width = container.clientWidth || 400;
+    const height = container.clientHeight || 310;
+
+    // 1. Scene & Atmosphere Fog
+    scene3D = new THREE.Scene();
+    scene3D.fog = new THREE.FogExp2(0x06140e, 0.04);
+
+    // 2. Camera Setup
+    camera3D = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+    updateCameraSpherical();
+
+    // 3. WebGL Renderer
+    try {
+        renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer3D.setSize(width, height);
+        renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer3D.shadowMap.enabled = true;
+        renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
+    } catch (e) {
+        console.warn("WebGL not supported, falling back to 2D view", e);
+        switchRoverView('2d');
+        return;
+    }
+
+    // 4. Lighting Rig
+    const ambient = new THREE.AmbientLight(0x10b981, 0.85);
+    scene3D.add(ambient);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
+    sunLight.position.set(6, 12, 8);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
+    scene3D.add(sunLight);
+
+    const cyanFill = new THREE.DirectionalLight(0x06b6d4, 0.9);
+    cyanFill.position.set(-6, -2, -5);
+    scene3D.add(cyanFill);
+
+    // 5. Infinite Cyber Ground Grid
+    groundGrid = new THREE.GridHelper(36, 36, 0x22c55e, 0x0a3324);
+    groundGrid.position.y = -0.75;
+    scene3D.add(groundGrid);
+
+    // 6. 3D SMART ROVER ROOT GROUP
+    roverGroup = new THREE.Group();
+    scene3D.add(roverGroup);
+
+    // A. Main Chassis Armor Body
+    const chassisGeo = new THREE.BoxGeometry(2.3, 0.7, 3.2);
+    const chassisMat = new THREE.MeshStandardMaterial({
+        color: 0x0a3324,
+        roughness: 0.35,
+        metalness: 0.75,
+        emissive: 0x047857,
+        emissiveIntensity: 0.15
+    });
+    chassisMesh = new THREE.Mesh(chassisGeo, chassisMat);
+    chassisMesh.castShadow = true;
+    chassisMesh.receiveShadow = true;
+    roverGroup.add(chassisMesh);
+
+    // B. Underbody Armor Skirt
+    const skirtGeo = new THREE.BoxGeometry(2.1, 0.35, 3.3);
+    const skirtMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8, metalness: 0.4 });
+    const skirtMesh = new THREE.Mesh(skirtGeo, skirtMat);
+    skirtMesh.position.y = -0.3;
+    roverGroup.add(skirtMesh);
+
+    // C. Solar Panel Top Deck
+    const solarGeo = new THREE.BoxGeometry(1.9, 0.08, 2.2);
+    const solarMat = new THREE.MeshStandardMaterial({
+        color: 0x082f49,
+        roughness: 0.15,
+        metalness: 0.9,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.4
+    });
+    solarDeck = new THREE.Mesh(solarGeo, solarMat);
+    solarDeck.position.set(0, 0.4, -0.2);
+    roverGroup.add(solarDeck);
+
+    // D. Emerald Reactor / Engine Core
+    const coreGeo = new THREE.TorusGeometry(0.3, 0.07, 16, 32);
+    const coreMat = new THREE.MeshStandardMaterial({
+        color: 0x34d399,
+        roughness: 0.1,
+        emissive: 0x10b981,
+        emissiveIntensity: 0.8
+    });
+    reactorCore = new THREE.Mesh(coreGeo, coreMat);
+    reactorCore.rotation.x = Math.PI / 2;
+    reactorCore.position.set(0, 0.48, -0.2);
+    roverGroup.add(reactorCore);
+
+    // E. 4 All-Terrain Rubber Tread Wheels
+    const wheelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.4, 24);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9, metalness: 0.2 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.8, emissive: 0x10b981, emissiveIntensity: 0.2 });
+
+    const wheelPositions = [
+        { x: -1.35, y: -0.2, z: 1.1, isFront: true, isLeft: true },   // Front-Left
+        { x: 1.35, y: -0.2, z: 1.1, isFront: true, isLeft: false },   // Front-Right
+        { x: -1.35, y: -0.2, z: -1.1, isFront: false, isLeft: true }, // Rear-Left
+        { x: 1.35, y: -0.2, z: -1.1, isFront: false, isLeft: false }  // Rear-Right
+    ];
+
+    wheels = [];
+    wheelPositions.forEach((pos) => {
+        const wheelPivot = new THREE.Group();
+        wheelPivot.position.set(pos.x, pos.y, pos.z);
+
+        const tireMesh = new THREE.Mesh(wheelGeo, tireMat);
+        tireMesh.castShadow = true;
+
+        // Rim Accent Disc
+        const rimGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.41, 16);
+        rimGeo.rotateZ(Math.PI / 2);
+        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+        tireMesh.add(rimMesh);
+
+        // Axle Hub Pin
+        const pinGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.44, 12);
+        pinGeo.rotateZ(Math.PI / 2);
+        const pinMat = new THREE.MeshBasicMaterial({ color: pos.isFront ? 0x34d399 : 0x38bdf8 });
+        const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+        tireMesh.add(pinMesh);
+
+        wheelPivot.add(tireMesh);
+        roverGroup.add(wheelPivot);
+
+        wheels.push({
+            pivot: wheelPivot,
+            mesh: tireMesh,
+            isFront: pos.isFront,
+            isLeft: pos.isLeft
+        });
+    });
+
+    // F. Rotating 3D Lidar & Camera Turret
+    const turretBaseGeo = new THREE.CylinderGeometry(0.28, 0.35, 0.2, 16);
+    const turretBaseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.7 });
+    const turretBase = new THREE.Mesh(turretBaseGeo, turretBaseMat);
+    turretBase.position.set(0, 0.48, 1.1);
+    roverGroup.add(turretBase);
+
+    lidarTurret = new THREE.Group();
+    lidarTurret.position.set(0, 0.65, 1.1);
+    roverGroup.add(lidarTurret);
+
+    const domeGeo = new THREE.SphereGeometry(0.2, 16, 12);
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x06140e, emissive: 0x06b6d4, emissiveIntensity: 0.6 });
+    const domeMesh = new THREE.Mesh(domeGeo, domeMat);
+    lidarTurret.add(domeMesh);
+
+    // Laser Sweep Beam (Translucent cone fan)
+    const beamGeo = new THREE.ConeGeometry(1.6, 2.8, 16, 1, true, 0, Math.PI * 0.4);
+    beamGeo.rotateX(Math.PI / 2);
+    const beamMat = new THREE.MeshBasicMaterial({
+        color: 0x06b6d4,
+        transparent: true,
+        opacity: 0.22,
+        side: THREE.DoubleSide
+    });
+    lidarLaser = new THREE.Mesh(beamGeo, beamMat);
+    lidarLaser.position.set(0, 0, 1.4);
+    lidarTurret.add(lidarLaser);
+
+    // G. Dual Headlights with Volumetric Cones
+    headlights = [];
+    [-0.7, 0.7].forEach(hx => {
+        const lampGeo = new THREE.SphereGeometry(0.12, 12, 8);
+        const lampMat = new THREE.MeshBasicMaterial({ color: 0xecfdf5 });
+        const lamp = new THREE.Mesh(lampGeo, lampMat);
+        lamp.position.set(hx, 0.1, 1.62);
+        roverGroup.add(lamp);
+
+        const coneGeo = new THREE.ConeGeometry(0.65, 3.2, 16, 1, true);
+        coneGeo.rotateX(-Math.PI / 2);
+        const coneMat = new THREE.MeshBasicMaterial({
+            color: 0x34d399,
+            transparent: true,
+            opacity: 0.18,
+            side: THREE.DoubleSide
+        });
+        const lightCone = new THREE.Mesh(coneGeo, coneMat);
+        lightCone.position.set(hx, 0.05, 3.1);
+        roverGroup.add(lightCone);
+
+        headlights.push(lightCone);
+    });
+
+    // H. Dual Rear Sprayer Nozzles & Mist Particles
+    [-0.6, 0.6].forEach(nx => {
+        const nozGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.25, 8);
+        nozGeo.rotateX(Math.PI / 2);
+        const nozMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.2 });
+        const noz = new THREE.Mesh(nozGeo, nozMat);
+        noz.position.set(nx, -0.05, -1.65);
+        roverGroup.add(noz);
+    });
+
+    const pCount = 180;
+    mistGeo = new THREE.BufferGeometry();
+    const pPositions = new Float32Array(pCount * 3);
+    const pVels = [];
+    for (let i = 0; i < pCount; i++) {
+        pPositions[i * 3 + 0] = (Math.random() - 0.5) * 1.5;
+        pPositions[i * 3 + 1] = -0.1 + (Math.random() - 0.5) * 0.4;
+        pPositions[i * 3 + 2] = -1.7 - Math.random() * 2.5;
+        pVels.push({
+            x: (Math.random() - 0.5) * 0.03,
+            y: -0.01 - Math.random() * 0.02,
+            z: -0.06 - Math.random() * 0.08,
+            life: Math.random()
+        });
+    }
+    mistGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+    mistGeo.userData.velocities = pVels;
+
+    const pMat = new THREE.PointsMaterial({
+        color: 0x38bdf8,
+        size: 0.16,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending
+    });
+    mistParticles = new THREE.Points(mistGeo, pMat);
+    roverGroup.add(mistParticles);
+
+    // 7. Interactive Orbit Controls
+    setup3DInteraction(container);
+
+    // 8. Responsive Resize Listener
+    window.addEventListener("resize", on3DResize);
+
+    // 9. Start Loop
+    requestAnimationFrame(animateRover3D);
+}
+
+function setup3DInteraction(container) {
+    container.addEventListener("pointerdown", (e) => {
+        isDragging3D = true;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+        const hint = document.getElementById("touch-hint-3d");
+        if (hint) hint.style.opacity = "0";
+    });
+
+    window.addEventListener("pointermove", (e) => {
+        if (!isDragging3D) return;
+        const dx = e.clientX - prevMousePos.x;
+        const dy = e.clientY - prevMousePos.y;
+        prevMousePos = { x: e.clientX, y: e.clientY };
+
+        camSpherical.theta -= dx * 0.008;
+        camSpherical.phi = Math.max(0.1, Math.min(Math.PI / 2.05, camSpherical.phi - dy * 0.008));
+        updateCameraSpherical();
+    });
+
+    window.addEventListener("pointerup", () => { isDragging3D = false; });
+    window.addEventListener("pointercancel", () => { isDragging3D = false; });
+
+    container.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        camSpherical.radius = Math.max(4.0, Math.min(14.0, camSpherical.radius + e.deltaY * 0.006));
+        updateCameraSpherical();
+    }, { passive: false });
+}
+
+function updateCameraSpherical() {
+    if (!camera3D) return;
+    camera3D.position.x = camSpherical.radius * Math.sin(camSpherical.phi) * Math.sin(camSpherical.theta);
+    camera3D.position.y = camSpherical.radius * Math.cos(camSpherical.phi);
+    camera3D.position.z = camSpherical.radius * Math.sin(camSpherical.phi) * Math.cos(camSpherical.theta);
+    camera3D.lookAt(0, 0, 0);
+}
+
+function setRoverCam(mode) {
+    document.querySelectorAll(".cam-btn").forEach(b => b.classList.remove("active"));
+    const btn = document.getElementById("cam-btn-" + mode);
+    if (btn) btn.classList.add("active");
+
+    if (mode === 'top') {
+        camSpherical = { radius: 7.5, theta: 0, phi: 0.05 };
+    } else if (mode === 'iso') {
+        camSpherical = { radius: 7.2, theta: Math.PI / 4, phi: Math.PI / 3.4 };
+    } else if (mode === 'front') {
+        camSpherical = { radius: 6.8, theta: 0, phi: Math.PI / 2.3 };
+    } else {
+        camSpherical = { radius: 7.2, theta: Math.PI / 5, phi: Math.PI / 3.2 };
+    }
+    updateCameraSpherical();
+}
+
+function resetRoverCam() {
+    setRoverCam('iso');
+}
+
+function switchRoverView(mode) {
+    currentViewMode = mode;
+    const btn3d = document.getElementById("btn-view-3d");
+    const btn2d = document.getElementById("btn-view-2d");
+    const container3d = document.getElementById("rover-3d-container");
+    const controls3d = document.getElementById("view-cam-controls");
+    const wrap2d = document.getElementById("rover-svg-wrap");
+    const sonar2d = document.getElementById("sonar-sweep-2d");
+    const vel2d = document.getElementById("velocity-stream-2d");
+
+    if (mode === '3d') {
+        if (btn3d) btn3d.classList.add("active");
+        if (btn2d) btn2d.classList.remove("active");
+        if (container3d) container3d.style.display = "block";
+        if (controls3d) controls3d.style.display = "flex";
+        if (wrap2d) wrap2d.style.display = "none";
+        if (sonar2d) sonar2d.style.display = "none";
+        if (vel2d) vel2d.style.display = "none";
+        on3DResize();
+    } else {
+        if (btn3d) btn3d.classList.remove("active");
+        if (btn2d) btn2d.classList.add("active");
+        if (container3d) container3d.style.display = "none";
+        if (controls3d) controls3d.style.display = "none";
+        if (wrap2d) wrap2d.style.display = "block";
+        if (sonar2d) sonar2d.style.display = "block";
+        if (vel2d) vel2d.style.display = "block";
+    }
+}
+
+function on3DResize() {
+    if (!renderer3D || !camera3D) return;
+    const container = document.getElementById("rover-3d-container");
+    if (!container || container.style.display === "none") return;
+    const width = container.clientWidth;
+    const height = container.clientHeight || 310;
+    if (width > 0 && height > 0) {
+        camera3D.aspect = width / height;
+        camera3D.updateProjectionMatrix();
+        renderer3D.setSize(width, height);
+    }
+}
+
+function animateRover3D(now) {
+    requestAnimationFrame(animateRover3D);
+
+    if (currentViewMode !== '3d' || !renderer3D || !scene3D) return;
+
+    fps3DCount++;
+    if (now - lastFps3DTime >= 1000) {
+        const fpsElem = document.getElementById("hud-3d-fps");
+        if (fpsElem) fpsElem.textContent = `${Math.round(fps3DCount * 1000 / (now - lastFps3DTime))} FPS`;
+        fps3DCount = 0;
+        lastFps3DTime = now;
+    }
+
+    // 1. Continuous Lidar rotation
+    if (lidarTurret) lidarTurret.rotation.y += 0.04;
+
+    // 2. Reactor Core pulse animation
+    if (reactorCore) {
+        reactorCore.rotation.z += 0.03;
+        const pulse = 0.5 + Math.sin(now * 0.005) * 0.4;
+        reactorCore.material.emissiveIntensity = isEngineArmed ? (0.8 + pulse * 0.6) : 0.2;
+    }
+
+    // 3. Dynamic Wheel physics and steering
+    const targetSpd = (currentDirection === "forward") ? (currentSpeed / 45.0) :
+                      ((currentDirection === "backward" || currentDirection === "reverse") ? -(currentSpeed / 45.0) :
+                      (currentDirection === "left" || currentDirection === "right" ? 0.9 : 0));
+
+    roverPhysics.wheelRotationSpeed += (targetSpd - roverPhysics.wheelRotationSpeed) * 0.12;
+
+    wheels.forEach(w => {
+        let spin = roverPhysics.wheelRotationSpeed * 0.22;
+        if (currentDirection === "left") {
+            spin = w.isLeft ? -0.15 : 0.15;
+        } else if (currentDirection === "right") {
+            spin = w.isLeft ? 0.15 : -0.15;
+        }
+        w.mesh.rotation.x += spin;
+
+        // Front wheel steering
+        if (w.isFront) {
+            const steer = (currentDirection === "left") ? 0.38 : (currentDirection === "right" ? -0.38 : 0);
+            w.pivot.rotation.y += (steer - w.pivot.rotation.y) * 0.15;
+        }
+    });
+
+    // 4. Chassis Suspension Pitch & Roll kinematics
+    let targetPitch = 0;
+    let targetRoll = 0;
+    if (currentDirection === "forward") targetPitch = -0.06;
+    else if (currentDirection === "backward" || currentDirection === "reverse") targetPitch = 0.06;
+
+    if (currentDirection === "left") targetRoll = -0.06;
+    else if (currentDirection === "right") targetRoll = 0.06;
+
+    if (chassisMesh && roverGroup) {
+        roverGroup.rotation.x += (targetPitch - roverGroup.rotation.x) * 0.1;
+        roverGroup.rotation.z += (targetRoll - roverGroup.rotation.z) * 0.1;
+    }
+
+    // 5. Ground grid scrolling
+    if (groundGrid) {
+        groundGrid.position.z -= roverPhysics.wheelRotationSpeed * 0.08;
+        if (groundGrid.position.z > 1.0) groundGrid.position.z -= 1.0;
+        if (groundGrid.position.z < -1.0) groundGrid.position.z += 1.0;
+    }
+
+    // 6. Chemical Mist Particles
+    if (mistParticles && mistGeo) {
+        mistParticles.material.opacity += ((pumpState ? 0.85 : 0.0) - mistParticles.material.opacity) * 0.15;
+        if (mistParticles.material.opacity > 0.02) {
+            const pos = mistGeo.attributes.position.array;
+            const vels = mistGeo.userData.velocities;
+            for (let i = 0; i < vels.length; i++) {
+                pos[i * 3 + 0] += vels[i].x;
+                pos[i * 3 + 1] += vels[i].y;
+                pos[i * 3 + 2] += vels[i].z;
+                vels[i].life += 0.02;
+                if (vels[i].life > 1.0 || pos[i * 3 + 2] < -5.0) {
+                    const side = Math.random() > 0.5 ? -0.6 : 0.6;
+                    pos[i * 3 + 0] = side + (Math.random() - 0.5) * 0.25;
+                    pos[i * 3 + 1] = -0.05 + (Math.random() - 0.5) * 0.1;
+                    pos[i * 3 + 2] = -1.7;
+                    vels[i].life = 0;
+                }
+            }
+            mistGeo.attributes.position.needsUpdate = true;
+        }
+    }
+
+    renderer3D.render(scene3D, camera3D);
+}
+
+// Auto-initialize 3D view after DOM loaded
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(initRover3D, 250);
+} else {
+    window.addEventListener("DOMContentLoaded", () => setTimeout(initRover3D, 250));
+}
 
 </script>
 </body>
