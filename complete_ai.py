@@ -55,16 +55,16 @@ CLASS_FILE = os.path.join(BASE_DIR, "class_names.txt")
 IMAGE_SIZE = 224
 
 # AI Confidence & Classification Thresholds (Strict Precision Thresholds)
-CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.82))
-CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.35))
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.72))
+CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.25))
 
-# Strict Leaf Filtering Thresholds (Botanical Foliage & Chlorophyll)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 5500))           # Min pixels to qualify as a leaf
-MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.65)) # Max 65% of frame (rejects room/ceiling)
-MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.35))   # At least 35% of bounding box must be foliage
-MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.25))       # Skin tone ratio threshold for rejecting full face/hands
-MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 50.0))     # Laplacian variance to reject flat walls and blurry reflections
-MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 40.0)) # Excess Green Index (2G - R - B) threshold
+# Robust Leaf Filtering Thresholds (Botanical Foliage & Chlorophyll for Healthy and Diseased Leaves)
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 2200))           # Min pixels to qualify as a leaf
+MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.75)) # Max 75% of frame (rejects whole room)
+MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.22))   # Foliage density inside bounding box
+MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.35))       # Skin tone ratio threshold for rejecting full face
+MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 20.0))     # Laplacian variance to reject flat blank walls
+MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 15.0)) # Excess Green Index (permits spotted/curled leaves)
 
 # Camera & Performance Configuration
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
@@ -511,20 +511,19 @@ def verify_leaf_structure(crop_bgr):
     g = crop_bgr[:, :, 1].astype(np.float32)
     r = crop_bgr[:, :, 2].astype(np.float32)
 
-    # 1. Botanical chlorophyll foliage mask
-    foliage_mask = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 88) & \
-                   (hsv[:,:,1] >= 48) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 245) & \
-                   (g > r + 6.0) & (g > b + 8.0) & \
-                   (2.0 * g - r - b >= 30.0)
+    # 1. Botanical chlorophyll foliage mask (supports healthy greens & yellowed diseased spots)
+    foliage_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] <= 92) & \
+                   (hsv[:,:,1] >= 28) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 250) & \
+                   (2.0 * g - r - b >= 10.0)
 
     foliage_px = int(np.sum(foliage_mask))
     total_px = float(h * w)
     foliage_ratio = foliage_px / total_px
 
-    if foliage_px < 3200:
-        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 3200)"
-    if foliage_ratio < 0.25:
-        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 25%)"
+    if foliage_px < 1000:
+        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1000)"
+    if foliage_ratio < 0.18:
+        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 18%)"
 
     # 2. Human Skin Tone Rejection
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -533,7 +532,7 @@ def verify_leaf_structure(crop_bgr):
                              np.array([180, 175, 255], dtype=np.uint8))
     skin_mask = cv2.bitwise_or(skin1, skin2)
     skin_px = int(np.sum(skin_mask > 0))
-    if skin_px > foliage_px or (skin_px / total_px) > MAX_SKIN_RATIO:
+    if skin_px > foliage_px * 1.5 or (skin_px / total_px) > MAX_SKIN_RATIO:
         return False, "Hand/Skin detected"
 
     # 3. Excess Green Index (ExG = 2G - R - B)
@@ -542,12 +541,7 @@ def verify_leaf_structure(crop_bgr):
     if mean_exg < MIN_EXG_THRESHOLD:
         return False, f"Low chlorophyll ExG ({mean_exg:.1f} < {MIN_EXG_THRESHOLD})"
 
-    # 4. Green/Red Dominance
-    mean_gr_ratio = float(np.mean(g[foliage_mask] / (r[foliage_mask] + 1.0)))
-    if mean_gr_ratio < 1.16:
-        return False, f"Low Green/Red dominance ({mean_gr_ratio:.2f} < 1.16)"
-
-    # 5. Texture & Venation Check
+    # 4. Texture & Venation Check
     gray = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
     if lap_var < MIN_TEXTURE_VAR:
@@ -557,12 +551,8 @@ def verify_leaf_structure(crop_bgr):
 
 def detect_leaf(frame_bgr):
     """
-    Detects real plant leaves and strictly rejects faces, hands, walls, ceilings, and room clutter.
-    Scores candidates by botanical vegetation metrics (foliage density, Excess Green, solidity),
-    preventing non-plant objects from taking precedence.
-    Returns:
-        crop_bgr, (x1, y1, x2, y2), "LEAF_DETECTED" if a real leaf is present.
-        None, None, "NO_LEAF" if no leaf is in view.
+    Detects real plant leaves (both healthy and diseased with spots/yellowing/curling)
+    and strictly rejects faces, hands, walls, ceilings, and room clutter.
     """
     if frame_bgr is None or frame_bgr.size == 0:
         return None, None, "NO_LEAF"
@@ -577,11 +567,9 @@ def detect_leaf(frame_bgr):
     r_full = frame_bgr[:, :, 2].astype(np.float32)
 
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination:
-    # Real plant leaves have active chlorophyll where Green strictly dominates Red and Blue.
-    foliage_bool = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 88) & (hsv[:,:,1] >= 48) & \
-                   (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 245) & \
-                   (g_full > r_full + 6.0) & (g_full > b_full + 8.0) & \
-                   (2.0 * g_full - r_full - b_full >= 30.0)
+    foliage_bool = (hsv[:,:,0] >= 18) & (hsv[:,:,0] <= 92) & (hsv[:,:,1] >= 28) & \
+                   (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 250) & \
+                   (2.0 * g_full - r_full - b_full >= 10.0)
     foliage_mask = np.uint8(foliage_bool) * 255
 
     # 2. Human Skin Tone Mask: catches faces, hands, arms holding leaves
@@ -611,21 +599,21 @@ def detect_leaf(frame_bgr):
                 continue
 
             bx, by, bw, bh = cv2.boundingRect(c)
-            if bw < 85 or bh < 85:
+            if bw < 55 or bh < 55:
                 continue
 
             # Reject contours spanning almost full width or height (room walls, ceiling, desk width)
-            if bw >= int(w * 0.75) or bh >= int(h * 0.75):
+            if bw >= int(w * 0.85) or bh >= int(h * 0.85):
                 continue
 
             aspect = bw / float(bh)
-            if aspect < 0.25 or aspect > 4.0:
+            if aspect < 0.20 or aspect > 5.0:
                 continue
 
             box_area = float(bw * bh)
             crop_foliage = foliage_clean[by:by+bh, bx:bx+bw]
             foliage_px = cv2.countNonZero(crop_foliage)
-            if foliage_px < 3200:
+            if foliage_px < 1000:
                 continue
             leaf_ratio = foliage_px / box_area
 
@@ -633,7 +621,7 @@ def detect_leaf(frame_bgr):
             hull = cv2.convexHull(c)
             hull_area = cv2.contourArea(hull)
             solidity = area / float(hull_area) if hull_area > 0 else 0
-            if solidity < 0.48:
+            if solidity < 0.32:
                 continue
 
             # Foliage density inside bounding box
@@ -805,7 +793,7 @@ def ai_inference_worker():
 
             # Only upload confirmed disease classifications after 3 consecutive confirmations
             valid_disease_classes = ("HEALTHY", "Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus")
-            if (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 3) and (now - last_upload_time >= UPLOAD_INTERVAL):
+            if (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2) and (now - last_upload_time >= UPLOAD_INTERVAL):
                 snap_path = os.path.join(SAVE_FOLDER, f"leaf_{int(now)}.jpg")
                 cv2.imwrite(snap_path, crop)
                 try:
@@ -1136,17 +1124,22 @@ def main():
                 ai_last_seen = latest_ai_result["last_leaf_seen"]
 
             leaf_currently_visible = (mode == "LEAF_DETECTED" and box is not None)
-            if not leaf_currently_visible:
+            
+            # Smooth detection retention window (1.5s): prevents 1-frame transient blinks from wiping telemetry
+            if leaf_currently_visible or (now - ai_last_seen < 1.5 and ai_disease_code not in ("NO_LEAF", "LOADING", "INITIALIZING")):
+                curr_disease_code = ai_disease_code
+                curr_display_label = ai_display_label
+                curr_conf = ai_conf
+                shared_telemetry["last_detection"] = ai_display_label
+                shared_telemetry["last_confidence"] = round(ai_conf * 100.0 if ai_conf <= 1.0 else ai_conf, 1)
+                shared_telemetry["ai_status"] = f"Classified: {ai_display_label}"
+            else:
                 curr_disease_code = "NO_LEAF"
                 curr_display_label = "NO LEAF DETECTED"
                 curr_conf = 0.0
                 shared_telemetry["last_detection"] = "NO LEAF DETECTED"
                 shared_telemetry["last_confidence"] = 0.0
                 shared_telemetry["ai_status"] = "Active Scanning (No Leaf in View)"
-            else:
-                curr_disease_code = ai_disease_code
-                curr_display_label = ai_display_label
-                curr_conf = ai_conf
 
             # 4. Generate HUD Overlay Frame (for both Live Stream & Preview Window)
             display_frame = frame.copy()

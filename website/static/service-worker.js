@@ -9,7 +9,7 @@
    VERSION
 ============================================================ */
 
-const CACHE_NAME = "smart-rover-v3";
+const CACHE_NAME = "smart-rover-v4";
 
 
 /* ============================================================
@@ -183,18 +183,22 @@ self.addEventListener(
 
 
         /* =====================================================
-           1. LIVE API
+           1. NATIVE PASS-THROUGH FOR VIDEO STREAM & LIVE APIS
            
-           NEVER CACHE AI / ROVER API DATA.
-           
-           The app must always try to contact Flask.
+           NEVER intercept multipart/x-mixed-replace or live APIs!
+           Service workers do not support infinite MJPEG streams.
+           Passing through lets the browser stream at 25+ FPS natively.
         ===================================================== */
 
         if (
-            url.pathname.startsWith(
-                "/api/"
-            )
+            url.pathname === "/video_feed" ||
+            url.pathname.startsWith("/video_feed") ||
+            url.pathname.startsWith("/api/")
         ) {
+
+            return;
+
+        }
 
             event.respondWith(
 

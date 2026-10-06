@@ -2300,8 +2300,9 @@ async function getRoverStatus() {
             document.getElementById("metric-fps").textContent = `${r.fps} FPS`;
         }
         if (r.last_detection) {
-            document.getElementById("metric-disease").textContent = r.last_detection;
-            aiDetailsText.textContent = `Active State: ${r.last_detection}`;
+            const isNoLeaf = r.last_detection === "NO LEAF DETECTED";
+            document.getElementById("metric-disease").textContent = isNoLeaf ? "SCANNING (NO LEAF)" : r.last_detection;
+            aiDetailsText.textContent = isNoLeaf ? "Active State: Searching for foliage..." : `Active State: ${r.last_detection}`;
         }
         if (r.last_confidence !== undefined) {
             document.getElementById("metric-conf").textContent = `${r.last_confidence}%`;

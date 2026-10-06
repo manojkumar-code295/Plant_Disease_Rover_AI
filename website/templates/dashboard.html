@@ -1347,6 +1347,21 @@
                     <span>SQLite WAL</span>
                 </div>
             </div>
+
+            <!-- LIVE TELEMETRY TICKER (UPDATED BY SECONDS) -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.35);">⏱️</div>
+                    <div>
+                        <div class="hud-label">Live Link Clock</div>
+                        <div class="hud-val" id="hud-sync-time" style="font-family: monospace; color: #86efac;">--:--:--</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span id="hud-sync-rate">1.0s Live</span>
+                </div>
+            </div>
         </section>
 
         <!-- PRIMARY TWO-COLUMN SECTION -->
@@ -2233,6 +2248,10 @@
                     const motionText = document.getElementById("rover-motion-text");
                     const aiPillText = document.getElementById("ai-pill-text");
                     const camFpsOverlay = document.getElementById("cam-fps-overlay");
+                    const syncClock = document.getElementById("hud-sync-time");
+
+                    const nowTime = r.last_seen ? r.last_seen.split(" ")[1] : new Date().toTimeString().split(" ")[0];
+                    if (syncClock) syncClock.textContent = nowTime;
 
                     if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
                     if (motionText && (r.direction || r.movement)) motionText.textContent = r.direction || r.movement;
@@ -2247,20 +2266,37 @@
                         if (piPillText) piPillText.textContent = "Standby";
                     }
 
+                    const headline = document.getElementById("disease-headline");
+                    const confVal = document.getElementById("conf-val");
+                    const confFill = document.getElementById("conf-fill");
+                    const banner = document.getElementById("disease-banner");
+                    const vigor = document.getElementById("leaf-biometric-vigor");
+                    const timestamp = document.getElementById("detection-timestamp");
+
                     // Real-time synchronization of 3D leaf hologram with camera scan state
                     if (r.last_detection === "NO LEAF DETECTED" || !r.last_detection) {
                         updateLeaf3DState("NO LEAF DETECTED", 0, true, true);
+
+                        if (headline) headline.textContent = "Active Camera Scanning";
+                        if (banner) banner.className = "disease-banner";
+                        if (confVal) confVal.textContent = "0.0%";
+                        if (confFill) {
+                            confFill.style.width = "0%";
+                            confFill.className = "conf-fill";
+                        }
+                        if (vigor) {
+                            vigor.textContent = "Scanner: Live Searching Foliage";
+                            vigor.style.color = "#38bdf8";
+                        }
+                        if (timestamp) {
+                            timestamp.textContent = "Live Telemetry: " + nowTime + (lastResultId ? " · (Last Scan Stored)" : "");
+                        }
                     } else {
                         // Live active leaf biometrics (every second)
                         const dLive = r.last_detection;
                         const cLive = parseFloat(r.last_confidence) || 0;
                         const isLiveHealthy = dLive.toLowerCase().includes("healthy");
                         updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
-
-                        const headline = document.getElementById("disease-headline");
-                        const confVal = document.getElementById("conf-val");
-                        const confFill = document.getElementById("conf-fill");
-                        const banner = document.getElementById("disease-banner");
 
                         if (headline) headline.textContent = dLive;
                         if (confVal) confVal.textContent = cLive.toFixed(1) + "%";
@@ -2272,6 +2308,9 @@
                         if (banner) {
                             if (isLiveHealthy) banner.className = "disease-banner";
                             else banner.className = "disease-banner diseased";
+                        }
+                        if (timestamp) {
+                            timestamp.textContent = "Live Biometrics: " + nowTime + " · " + (r.fps || 18) + " FPS";
                         }
                     }
                 }
