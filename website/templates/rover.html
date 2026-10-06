@@ -1713,7 +1713,7 @@ main {
                 </div>
                 
                 <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #020c07; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center;">
-                    <img id="live-camera-feed" src="/api/camera/snapshot" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    <img id="live-camera-feed" src="/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;">
                     
                     <div id="camera-feed-fallback" style="display: none; position: absolute; inset: 0; background: rgba(3, 10, 7, 0.95); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
                         <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
@@ -2239,9 +2239,14 @@ document.addEventListener("keyup", e => {
 });
 
 /* =========================================================
-   STATUS POLLING & HEARTBEAT PARSING
+   STATUS POLLING & HEARTBEAT PARSING (UPDATED BY SECONDS)
 ========================================================= */
+let isRoverPolling = false;
+
 async function getRoverStatus() {
+    if (isRoverPolling) return;
+    isRoverPolling = true;
+
     try {
         const res = await fetch("/api/rover/status?_=" + Date.now());
         if (!res.ok) return;
@@ -2290,7 +2295,7 @@ async function getRoverStatus() {
             }
         }
 
-        // AI Metrics
+        // AI Metrics (Updated by seconds)
         if (r.fps !== undefined) {
             document.getElementById("metric-fps").textContent = `${r.fps} FPS`;
         }
@@ -2324,9 +2329,8 @@ async function getRoverStatus() {
                 if (link) link.href = r.stream_url;
                 const fbText = document.getElementById("fallback-ip-text");
                 if (fbText) fbText.textContent = r.stream_url;
-                const img = document.getElementById("live-camera-feed");
-                if (img && !streamActive) {
-                    img.src = r.stream_url;
+                if (liveCameraImg && liveCameraImg.src !== currentStreamUrl) {
+                    liveCameraImg.src = currentStreamUrl;
                 }
             }
         }
@@ -2337,53 +2341,57 @@ async function getRoverStatus() {
 
     } catch (e) {
         // network error handled silently
+    } finally {
+        isRoverPolling = false;
     }
 }
 
+// Native High-Speed Live Camera Stream Engine
 let streamActive = true;
-let isRoverFetching = false;
-const roverBufferImg = new Image();
+let currentStreamUrl = "/video_feed";
+let streamReconnectTimer = null;
 const liveCameraImg = document.getElementById("live-camera-feed");
 const cameraBadge = document.getElementById("camera-feed-badge");
+const roverFallback = document.getElementById("camera-feed-fallback");
 
-function pumpRoverFrame() {
-    if (!streamActive || isRoverFetching) return;
-    isRoverFetching = true;
-    roverBufferImg.src = "/api/camera/snapshot?t=" + Date.now();
-}
+function initRoverStream() {
+    if (!liveCameraImg) return;
+    liveCameraImg.src = currentStreamUrl;
 
-roverBufferImg.onload = function() {
-    isRoverFetching = false;
-    if (liveCameraImg && roverBufferImg.src) {
-        liveCameraImg.src = roverBufferImg.src;
-        const fb = document.getElementById("camera-feed-fallback");
-        if (fb) fb.style.display = "none";
+    liveCameraImg.onload = function() {
+        if (roverFallback) roverFallback.style.display = "none";
         if (cameraBadge) {
             cameraBadge.textContent = "LIVE CSI STREAM";
             cameraBadge.style.color = "#34d399";
         }
-    }
-    setTimeout(pumpRoverFrame, 100);
-};
+    };
 
-roverBufferImg.onerror = function() {
-    isRoverFetching = false;
-    if (cameraBadge) {
-        cameraBadge.textContent = "RECONNECTING...";
-        cameraBadge.style.color = "#f59e0b";
-    }
-    setTimeout(pumpRoverFrame, 600);
-};
-
-function retryStream() {
-    const fb = document.getElementById("camera-feed-fallback");
-    if (fb) fb.style.display = "none";
-    isRoverFetching = false;
-    pumpRoverFrame();
+    liveCameraImg.onerror = function() {
+        if (roverFallback) roverFallback.style.display = "flex";
+        if (cameraBadge) {
+            cameraBadge.textContent = "RECONNECTING...";
+            cameraBadge.style.color = "#f59e0b";
+        }
+        if (!streamReconnectTimer) {
+            streamReconnectTimer = setTimeout(() => {
+                streamReconnectTimer = null;
+                if (liveCameraImg) {
+                    liveCameraImg.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "_=" + Date.now();
+                }
+            }, 1200);
+        }
+    };
 }
 
-// Start live camera stream immediately
-pumpRoverFrame();
+function retryStream() {
+    if (roverFallback) roverFallback.style.display = "none";
+    if (liveCameraImg) {
+        liveCameraImg.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "_=" + Date.now();
+    }
+}
+
+// Start native live camera stream immediately
+initRoverStream();
 
 function updateStreamUrl(url) {
     currentStreamUrl = url.trim();
@@ -2411,9 +2419,9 @@ setInterval(() => {
     document.getElementById("terminal-clock").textContent = d.toTimeString().split(" ")[0];
 }, 1000);
 
-// Status poll loop every 1.5 seconds
+// Status poll loop every 1.0 second (updated by seconds)
 getRoverStatus();
-setInterval(getRoverStatus, 1500);
+setInterval(getRoverStatus, 1000);
 
 /* =========================================================
    THREE.JS 3D SMART ROVER HOLOGRAPHIC ENGINE

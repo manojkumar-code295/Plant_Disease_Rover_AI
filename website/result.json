@@ -1,10 +1,10 @@
 {
-    "result_id": "9887925911e6444e9234022fc8a965aa",
-    "image": "20261006_141712_ba202fd4.jpg",
-    "disease": "Healthy Leaf (87.3%)",
-    "chemical": "No chemical treatment required",
+    "result_id": "35f9bec7d506494f939c8e9bc0213dc6",
+    "image": "20261006_143951_ce69e144.jpg",
+    "disease": "Cercospora Leaf Spot (85.7%)",
+    "chemical": "Copper-based fungicide / Mancozeb",
     "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Plant foliage is healthy and vigorous. Maintain regular monitoring.",
-    "confidence": 87.3,
-    "timestamp": "2026-10-06 14:17:12"
+    "treatment": "Remove infected leaves and improve plant spacing for airflow.",
+    "confidence": 85.7,
+    "timestamp": "2026-10-06 14:39:51"
 }

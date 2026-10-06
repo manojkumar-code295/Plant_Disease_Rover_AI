@@ -1362,7 +1362,7 @@
                 <div class="camera-stream-wrapper">
                     <!-- Dynamic Live Stream Image -->
                     <img id="live-camera-img" 
-                         src="/api/camera/snapshot" 
+                         src="/video_feed" 
                          alt="AgriRover Live Camera Stream" 
                          class="camera-stream-img">
 
@@ -1604,52 +1604,51 @@
         if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
         if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
 
-        // Resilient Double-Buffered Live Camera Feed Engine
+        // Native High-Speed Live Camera Feed Engine (Single persistent connection, 0 connection queuing)
         const cameraImg = document.getElementById("live-camera-img");
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
-        let streamActive = true;
-        let isFetching = false;
-        const bufferImg = new Image();
+        let streamReconnectTimer = null;
 
-        function pumpLiveFrame() {
-            if (!streamActive || isFetching) return;
-            isFetching = true;
-            bufferImg.src = "/api/camera/snapshot?t=" + Date.now();
-        }
+        function initLiveStream() {
+            if (!cameraImg) return;
+            cameraImg.src = "/video_feed";
 
-        bufferImg.onload = function() {
-            isFetching = false;
-            if (cameraImg && bufferImg.src) {
-                cameraImg.src = bufferImg.src;
+            cameraImg.onload = function() {
                 if (cameraFallback) cameraFallback.style.display = "none";
                 if (streamIndicator) streamIndicator.style.background = "#10b981";
                 if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
-            }
-            // Stream smoothly at ~10 FPS
-            setTimeout(pumpLiveFrame, 100);
-        };
+            };
 
-        bufferImg.onerror = function() {
-            isFetching = false;
-            if (streamIndicator) streamIndicator.style.background = "#f59e0b";
-            if (streamStatus) streamStatus.textContent = "Connecting to camera stream...";
-            setTimeout(pumpLiveFrame, 600);
-        };
+            cameraImg.onerror = function() {
+                if (streamIndicator) streamIndicator.style.background = "#f59e0b";
+                if (streamStatus) streamStatus.textContent = "Connecting to camera stream...";
+                if (cameraFallback) cameraFallback.style.display = "flex";
+                if (!streamReconnectTimer) {
+                    streamReconnectTimer = setTimeout(() => {
+                        streamReconnectTimer = null;
+                        if (cameraImg) {
+                            cameraImg.src = "/video_feed?_=" + Date.now();
+                        }
+                    }, 1200);
+                }
+            };
+        }
 
         function retryStreamConnection() {
             if (cameraFallback) cameraFallback.style.display = "none";
-            isFetching = false;
-            pumpLiveFrame();
+            if (cameraImg) {
+                cameraImg.src = "/video_feed?_=" + Date.now();
+            }
         }
 
         function takeSnapshot() {
             window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
         }
 
-        // Start live camera stream immediately on page load
-        pumpLiveFrame();
+        // Initialize native camera stream
+        initLiveStream();
 
         // Quick Rover Movement Command Handler
         async function sendQuickCommand(cmd) {
@@ -2211,17 +2210,21 @@
             });
         });
 
-        // Live Telemetry & Detection State Poller (1.5s interval)
+        // Real-Time Second-by-Second Telemetry & Detection State Poller
+        let isDashboardPolling = false;
         let lastResultId = "";
 
         async function pollDashboardState() {
+            if (isDashboardPolling) return;
+            isDashboardPolling = true;
+
             try {
-                const response = await fetch("/api/dashboard-state", { cache: "no-store" });
+                const response = await fetch("/api/dashboard-state?_=" + Date.now(), { cache: "no-store" });
                 if (!response.ok) return;
                 const data = await response.json();
                 if (!data.success) return;
 
-                // 1. Update Rover Telemetry & AI Status
+                // 1. Update Rover Telemetry & AI Status (Live Every Second)
                 if (data.rover) {
                     const r = data.rover;
                     const piPill = document.getElementById("pi-pill");
@@ -2234,7 +2237,7 @@
                     if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
                     if (motionText && (r.direction || r.movement)) motionText.textContent = r.direction || r.movement;
                     if (aiPillText && r.ai_status) aiPillText.textContent = r.ai_status;
-                    if (camFpsOverlay && r.fps) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;
+                    if (camFpsOverlay && r.fps !== undefined) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;
 
                     if (r.connected) {
                         if (piPill) piPill.className = "status-pill online";
@@ -2247,45 +2250,51 @@
                     // Real-time synchronization of 3D leaf hologram with camera scan state
                     if (r.last_detection === "NO LEAF DETECTED" || !r.last_detection) {
                         updateLeaf3DState("NO LEAF DETECTED", 0, true, true);
+                    } else {
+                        // Live active leaf biometrics (every second)
+                        const dLive = r.last_detection;
+                        const cLive = parseFloat(r.last_confidence) || 0;
+                        const isLiveHealthy = dLive.toLowerCase().includes("healthy");
+                        updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
+
+                        const headline = document.getElementById("disease-headline");
+                        const confVal = document.getElementById("conf-val");
+                        const confFill = document.getElementById("conf-fill");
+                        const banner = document.getElementById("disease-banner");
+
+                        if (headline) headline.textContent = dLive;
+                        if (confVal) confVal.textContent = cLive.toFixed(1) + "%";
+                        if (confFill) {
+                            confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
+                            if (!isLiveHealthy) confFill.className = "conf-fill warning";
+                            else confFill.className = "conf-fill";
+                        }
+                        if (banner) {
+                            if (isLiveHealthy) banner.className = "disease-banner";
+                            else banner.className = "disease-banner diseased";
+                        }
                     }
                 }
 
-                // 2. Update Latest Plant Detection (when leaf is detected)
+                // 2. Update Persisted Plant Detection & Prescription Matrix
                 if (data.result && data.result.result_id !== lastResultId) {
                     lastResultId = data.result.result_id;
                     const res = data.result;
 
-                    const headline = document.getElementById("disease-headline");
                     const headline2D = document.getElementById("disease-headline-2d");
-                    const banner = document.getElementById("disease-banner");
                     const banner2D = document.getElementById("disease-banner-2d");
-                    const confVal = document.getElementById("conf-val");
-                    const confFill = document.getElementById("conf-fill");
                     const prescChem = document.getElementById("presc-chemical");
                     const prescFert = document.getElementById("presc-fertilizer");
                     const prescTreat = document.getElementById("presc-treatment");
                     const timestamp = document.getElementById("detection-timestamp");
 
                     const diseaseTitle = res.disease || "Healthy Leaf";
-                    if (headline) headline.textContent = diseaseTitle;
                     if (headline2D) headline2D.textContent = diseaseTitle;
                     
                     const isHealthy = res.is_healthy || (res.disease && res.disease.toLowerCase().includes("healthy"));
-                    if (banner) {
-                        if (isHealthy) banner.className = "disease-banner";
-                        else banner.className = "disease-banner diseased";
-                    }
                     if (banner2D) {
                         if (isHealthy) banner2D.className = "disease-banner";
                         else banner2D.className = "disease-banner diseased";
-                    }
-
-                    const conf = parseFloat(res.confidence) || 0;
-                    if (confVal) confVal.textContent = conf.toFixed(1) + "%";
-                    if (confFill) {
-                        confFill.style.width = Math.min(100, Math.max(0, conf)) + "%";
-                        if (!isHealthy) confFill.className = "conf-fill warning";
-                        else confFill.className = "conf-fill";
                     }
 
                     if (prescChem) prescChem.textContent = res.chemical || "None Required";
@@ -2298,9 +2307,6 @@
                     if (leafBox && res.image) {
                         leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
                     }
-
-                    // Update 3D Hologram Leaf with verified detection
-                    updateLeaf3DState(diseaseTitle, conf, isHealthy, false);
                 }
 
                 // 3. Update Statistics
@@ -2323,11 +2329,14 @@
 
             } catch (err) {
                 // Silently swallow fetch blips during page transitions
+            } finally {
+                isDashboardPolling = false;
             }
         }
 
-        // Start background polling without blocking UI
-        setInterval(pollDashboardState, 1500);
+        // Start background polling every 1 second (1000ms)
+        pollDashboardState();
+        setInterval(pollDashboardState, 1000);
     </script>
 </body>
 </html>

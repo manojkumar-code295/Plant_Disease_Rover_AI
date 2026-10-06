@@ -973,13 +973,29 @@ def cloud_frame_streamer_worker():
             with latest_jpeg_lock:
                 frame = latest_jpeg_frame
             if frame is not None:
-                session.post(stream_url, data=frame, headers=headers, timeout=1.8)
-            time.sleep(0.20)  # ~5 FPS cloud relay
+                session.post(stream_url, data=frame, headers=headers, timeout=1.2)
+            time.sleep(0.12)  # ~8 FPS cloud relay
         except Exception:
-            time.sleep(0.8)
+            time.sleep(0.4)
 
-def telemetry_heartbeat_worker():
-    """Periodic telemetry heartbeat sender to both cloud and local server."""
+def local_telemetry_worker():
+    """High-speed local telemetry sender (updates local web dashboard every 0.5s with zero WAN lag)."""
+    session = requests.Session()
+    headers = {"Content-Type": "application/json"}
+    while running:
+        try:
+            session.post(
+                "http://127.0.0.1:5000/api/rover/heartbeat",
+                json=shared_telemetry,
+                headers=headers,
+                timeout=0.3
+            )
+        except Exception:
+            pass
+        time.sleep(0.5)
+
+def cloud_telemetry_worker():
+    """Dedicated cloud telemetry heartbeat sender to Render cloud (every 1.0s)."""
     session = requests.Session()
     headers = {"Content-Type": "application/json"}
     if RENDER_API_TOKEN:
@@ -987,14 +1003,10 @@ def telemetry_heartbeat_worker():
 
     while running:
         try:
-            session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=2.5)
+            session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=1.2)
         except Exception:
             pass
-        try:
-            session.post("http://127.0.0.1:5000/api/rover/heartbeat", json=shared_telemetry, headers={"Content-Type": "application/json"}, timeout=1.0)
-        except Exception:
-            pass
-        time.sleep(3.5)
+        time.sleep(1.0)
 
 # ============================================================
 # MAIN ENTRY POINT
@@ -1020,8 +1032,11 @@ def main():
     frame_stream_thread = threading.Thread(target=cloud_frame_streamer_worker, daemon=True, name="CloudFrameStreamer")
     frame_stream_thread.start()
 
-    heartbeat_thread = threading.Thread(target=telemetry_heartbeat_worker, daemon=True, name="HeartbeatWorker")
-    heartbeat_thread.start()
+    local_telemetry_thread = threading.Thread(target=local_telemetry_worker, daemon=True, name="LocalTelemetryWorker")
+    local_telemetry_thread.start()
+
+    cloud_telemetry_thread = threading.Thread(target=cloud_telemetry_worker, daemon=True, name="CloudTelemetryWorker")
+    cloud_telemetry_thread.start()
 
     # 3. Asynchronously load high-speed AI engine in parallel (loads in ~0.5s via LiteRT)
     ai_load_thread = threading.Thread(target=load_ai_model, daemon=True, name="ModelLoader")
