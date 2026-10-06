@@ -7,6 +7,13 @@
 
 <title>Dataset | Precision Agriculture Smart Rover</title>
 
+<!-- PWA & App Icons -->
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<link rel="manifest" href="/manifest.json">
+
 <style>
 
 :root{
@@ -1574,8 +1581,8 @@ footer{
 
     <div class="logo">
 
-        <div class="logo-icon">
-            🌱
+        <div class="logo-icon" style="overflow: hidden; padding: 2px;">
+            <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
         </div>
 
         <h1>

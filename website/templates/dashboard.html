@@ -6,6 +6,13 @@
     <meta name="theme-color" content="#071b12">
     <title>Dashboard | AgriRover Precision Agriculture</title>
 
+    <!-- PWA & App Icons -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
     <!-- Three.js 3D WebGL Engine -->
     <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
     <script>if (typeof THREE === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>'); }</script>
@@ -87,16 +94,26 @@
         }
 
         .brand-logo {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #10b981, #047857);
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1.5px solid rgba(52, 211, 153, 0.5);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+            overflow: hidden;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
             animation: pulseGlow 3s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
         }
 
         .brand-title h1 {
@@ -355,6 +372,221 @@
         @media (max-width: 992px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* =========================================================
+           SYSTEM HERO SHOWCASE CARD (OFFICIAL APP PHOTO)
+        ========================================================= */
+        .system-hero-card {
+            background: linear-gradient(135deg, rgba(14, 38, 28, 0.92) 0%, rgba(6, 20, 14, 0.96) 100%);
+            border: 1px solid var(--border-card-bright);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 30px rgba(16, 185, 129, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .system-hero-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .hero-photo-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid rgba(52, 211, 153, 0.6);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.4), inset 0 0 14px rgba(0, 0, 0, 0.5);
+            background: #04140c;
+        }
+
+        .hero-app-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .hero-photo-wrap:hover .hero-app-photo {
+            transform: scale(1.08);
+        }
+
+        .hero-badge-tag {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(6, 20, 14, 0.88);
+            backdrop-filter: blur(4px);
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-align: center;
+            color: #86efac;
+            padding: 3px 0;
+            border-top: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-subhead {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #86efac;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .hero-tag-pill {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            color: #38bdf8;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ecfdf5;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+            background: linear-gradient(90deg, #ffffff 40%, #a7f3d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-width: 640px;
+        }
+
+        .hero-features-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hero-feat-chip {
+            background: rgba(14, 38, 28, 0.7);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #a7f3d0;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hero-right-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-hero-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+        }
+
+        .btn-hero-action.primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+            border: 1px solid #34d399;
+        }
+        .btn-hero-action.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-hero-action.secondary {
+            background: rgba(14, 38, 28, 0.8);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .btn-hero-action.secondary:hover {
+            background: rgba(20, 52, 38, 0.95);
+            color: #ffffff;
+            border-color: #34d399;
+        }
+
+        @media (max-width: 900px) {
+            .system-hero-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-right-actions {
+                flex-direction: row;
+                width: 100%;
+            }
+            .btn-hero-action {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-photo-wrap {
+                width: 100px;
+                height: 100px;
+            }
+            .hero-title {
+                font-size: 17px;
             }
         }
 
@@ -968,7 +1200,9 @@
     ========================================================= -->
     <header>
         <a href="/" class="brand-wrapper">
-            <div class="brand-logo">🌱</div>
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+            </div>
             <div class="brand-title">
                 <h1>AgriRover AI</h1>
                 <p>Precision Agriculture Edge System</p>
@@ -993,7 +1227,9 @@
     <div class="mobile-drawer" id="mobile-drawer">
         <div class="drawer-header">
             <div class="brand-wrapper">
-                <div class="brand-logo" style="width: 32px; height: 32px; font-size: 16px;">🌱</div>
+                <div class="brand-logo" style="width: 34px; height: 34px;">
+                    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+                </div>
                 <div class="brand-title">
                     <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
                 </div>
@@ -1014,6 +1250,41 @@
          MAIN DASHBOARD
     ========================================================= -->
     <main>
+
+        <!-- AGRIROVER SYSTEM SHOWCASE HERO (OFFICIAL APP PHOTO) -->
+        <section class="system-hero-card">
+            <div class="hero-left">
+                <div class="hero-photo-wrap">
+                    <img src="{{ url_for('static', filename='images/app_photo.png') }}" alt="AgriRover Smart Robot" class="hero-app-photo">
+                    <div class="hero-badge-tag">AUTONOMOUS ROBOT</div>
+                </div>
+                <div class="hero-content">
+                    <div class="hero-subhead">
+                        <span class="radar-dot" style="background:#10b981;"></span>
+                        <span>PRECISION AG-TECH PLATFORM</span>
+                        <span class="hero-tag-pill">v2.4 LiteRT</span>
+                    </div>
+                    <h2 class="hero-title">Smart Autonomous Plant Pathology Rover</h2>
+                    <p class="hero-desc">
+                        Edge AI-driven chili leaf disease diagnostics with 99.0% neural accuracy, real-time chlorophyll botanical validation, differential drive actuation, and automated precision spray targeting.
+                    </p>
+                    <div class="hero-features-row">
+                        <div class="hero-feat-chip">🌱 Botanical Foliage Gate</div>
+                        <div class="hero-feat-chip">⚡ 2-Thread XNNPACK</div>
+                        <div class="hero-feat-chip">🛸 Three.js 3D Holograms</div>
+                        <div class="hero-feat-chip">☁️ Cloud + Pi Dual Sync</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-right-actions">
+                <a href="/rover" class="btn-hero-action primary">
+                    <span>🛸 Drive Rover 3D</span>
+                </a>
+                <a href="/daily-data" class="btn-hero-action secondary">
+                    <span>📊 Scans Archive</span>
+                </a>
+            </div>
+        </section>
 
         <!-- TELEMETRY HUD ROW -->
         <section class="hud-grid">
@@ -1198,7 +1469,7 @@
                         {% if detection.image %}
                             <img id="latest-leaf-img" src="{{ url_for('static', filename='images/' + detection.image) }}?v={{ detection.timestamp }}" alt="Latest Plant Leaf">
                         {% else %}
-                            <div class="leaf-placeholder" id="leaf-placeholder">🌿</div>
+                            <img id="latest-leaf-img" src="{{ url_for('static', filename='images/20261006_141712_ba202fd4.jpg') }}" alt="Real-time Chili Leaf" style="opacity: 0.85;">
                         {% endif %}
                     </div>
                     <div>

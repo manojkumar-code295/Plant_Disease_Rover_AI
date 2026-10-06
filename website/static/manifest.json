@@ -1,14 +1,28 @@
 {
   "name": "Precision Agriculture Smart Rover",
-  "short_name": "Smart Rover",
-  "description": "AI-powered plant disease detection and precision agriculture rover system.",
+  "short_name": "AgriRover",
+  "description": "AI-powered plant disease detection and precision agriculture rover telemetry system.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4f7f5",
-  "theme_color": "#12372a",
+  "background_color": "#06140e",
+  "theme_color": "#06140e",
   "orientation": "portrait-primary",
-
   "icons": [
+    {
+      "src": "/static/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
     {
       "src": "/static/icons/icon-192.png",
       "sizes": "192x192",

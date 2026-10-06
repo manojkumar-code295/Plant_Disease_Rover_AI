@@ -1858,8 +1858,11 @@ def clear_result():
 
 @app.route("/favicon.ico")
 def favicon():
-
-    return "", 204
+    return send_from_directory(
+        STATIC_FOLDER,
+        "favicon.ico",
+        mimetype="image/x-icon"
+    )
 
 
 # ============================================================

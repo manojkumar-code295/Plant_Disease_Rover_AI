@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#071b12">
 <title>Smart Rover Control & Telemetry | Precision Agriculture</title>
 
+<!-- PWA & App Icons -->
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+<link rel="manifest" href="/manifest.json">
+
 <!-- THREE.JS 3D WEBGL ENGINE -->
 <script src="/static/js/three.min.js"></script>
 <script>
@@ -88,16 +95,26 @@ header {
 }
 
 .brand-logo {
-    width: 42px;
-    height: 42px;
-    background: linear-gradient(135deg, #10b981, #047857);
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+    border: 1.5px solid rgba(52, 211, 153, 0.5);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+    overflow: hidden;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
     animation: glowPulse 3s infinite ease-in-out;
+    flex-shrink: 0;
+}
+
+.brand-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
 }
 
 .brand-title h1 {
@@ -1349,7 +1366,9 @@ main {
 ========================================================= -->
 <header>
     <div class="brand-wrapper">
-        <div class="brand-logo">🚜</div>
+        <div class="brand-logo">
+            <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+        </div>
         <div class="brand-title">
             <h1>AgriRover Command Center</h1>
             <p>Smart Rover Telemetry & Actuation</p>

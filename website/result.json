@@ -1,10 +1,10 @@
 {
-    "result_id": "init_standby",
-    "image": "",
-    "disease": "Healthy Leaf (Optimal Vigor)",
-    "chemical": "None Required",
+    "result_id": "9887925911e6444e9234022fc8a965aa",
+    "image": "20261006_141712_ba202fd4.jpg",
+    "disease": "Healthy Leaf (87.3%)",
+    "chemical": "No chemical treatment required",
     "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Plant is in optimal vigor. Maintain standard irrigation schedule and monitor weekly.",
-    "confidence": 99.0,
-    "timestamp": "Real-time"
+    "treatment": "Plant foliage is healthy and vigorous. Maintain regular monitoring.",
+    "confidence": 87.3,
+    "timestamp": "2026-10-06 14:17:12"
 }
