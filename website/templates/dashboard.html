@@ -459,6 +459,44 @@
             font-size: 11px;
             color: #38bdf8;
             border: 1px solid rgba(56, 189, 248, 0.4);
+            z-index: 12;
+        }
+
+        /* Cyber Laser Scanline */
+        .camera-scanline {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.9), transparent);
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.9);
+            pointer-events: none;
+            z-index: 10;
+            animation: cameraScanline 3.2s ease-in-out infinite alternate;
+        }
+        @keyframes cameraScanline {
+            0% { top: 4%; opacity: 0.85; }
+            50% { opacity: 0.25; }
+            100% { top: 96%; opacity: 0.85; }
+        }
+
+        /* HUD Corner Brackets */
+        .hud-corner {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: rgba(52, 211, 153, 0.75);
+            border-style: solid;
+            pointer-events: none;
+            z-index: 11;
+        }
+        .hud-corner-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+        .hud-corner-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+        .hud-corner-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+        .hud-corner-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+        @keyframes spinTurbine {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .camera-controls-bar {
@@ -487,17 +525,36 @@
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition-smooth);
+            transition: all 0.16s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             gap: 6px;
             text-decoration: none;
+            user-select: none;
         }
 
         .btn-stream-action:hover {
             background: rgba(16, 185, 129, 0.3);
             color: #ffffff;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-stream-action:active {
+            transform: scale(0.95);
+        }
+
+        .btn-dpad-quick {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-dpad-quick:hover {
+            transform: translateY(-2px);
+            border-color: rgba(52, 211, 153, 0.7);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+        .btn-dpad-quick:active {
+            transform: scale(0.93);
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
         }
 
         /* =========================================================
@@ -912,6 +969,13 @@
                          alt="AgriRover Live Camera Stream" 
                          class="camera-stream-img">
 
+                    <!-- Cyber HUD Brackets & Laser Scanline -->
+                    <div class="hud-corner hud-corner-tl"></div>
+                    <div class="hud-corner hud-corner-tr"></div>
+                    <div class="hud-corner hud-corner-bl"></div>
+                    <div class="hud-corner hud-corner-br"></div>
+                    <div class="camera-scanline"></div>
+
                     <!-- Camera Stream HUD Overlays -->
                     <div class="hud-overlay-live">
                         <span class="radar-dot" style="background: #ef4444;"></span>
@@ -953,19 +1017,19 @@
 
                     <!-- Primary START / STOP Buttons -->
                     <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
-                        <button id="quick-start-btn" class="btn-stream-action" onclick="sendQuickCommand('start')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(4, 120, 87, 0.5)); border: 1px solid #10b981; color: #ecfdf5; box-shadow: 0 0 14px rgba(16, 185, 129, 0.35); flex: 1; max-width: 130px; cursor: pointer;">▶ START</button>
-                        <button id="quick-stop-btn" class="btn-stream-action" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.4)); border: 1px solid #ef4444; color: #fee2e2; box-shadow: 0 0 14px rgba(239, 68, 68, 0.3); flex: 1; max-width: 130px; cursor: pointer;">■ STOP</button>
+                        <button id="quick-start-btn" class="btn-stream-action" onclick="sendQuickCommand('start')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(4, 120, 87, 0.5)); border: 1px solid #10b981; color: #ecfdf5; box-shadow: 0 0 14px rgba(16, 185, 129, 0.35); flex: 1; max-width: 140px; cursor: pointer;">▶ START ENGINE</button>
+                        <button id="quick-stop-btn" class="btn-stream-action" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.4)); border: 1px solid #ef4444; color: #fee2e2; box-shadow: 0 0 14px rgba(239, 68, 68, 0.3); flex: 1; max-width: 140px; cursor: pointer;">■ STOP</button>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 250px; margin: 0 auto;">
                         <div></div>
-                        <button class="btn-stream-action" onclick="sendQuickCommand('forward')" style="justify-content: center; padding: 10px 4px; font-size: 13px;">▲ FWD</button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('forward')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▲ FWD</button>
                         <div></div>
-                        <button class="btn-stream-action" onclick="sendQuickCommand('left')" style="justify-content: center; padding: 10px 4px; font-size: 13px;">◀ LFT</button>
-                        <button class="btn-stream-action" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 4px; font-size: 13px; background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">■ STOP</button>
-                        <button class="btn-stream-action" onclick="sendQuickCommand('right')" style="justify-content: center; padding: 10px 4px; font-size: 13px;">▶ RGT</button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('left')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">◀ LFT</button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800; background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">■ STOP</button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('right')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▶ RGT</button>
                         <div></div>
-                        <button class="btn-stream-action" onclick="sendQuickCommand('backward')" style="justify-content: center; padding: 10px 4px; font-size: 13px;">▼ REV</button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('backward')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▼ REV</button>
                         <div></div>
                     </div>
                 </div>
@@ -1172,17 +1236,35 @@
                 });
                 const data = await res.json();
                 if (data.success && statusText) {
-                    const isFwd = (cmd === 'start' || cmd === 'forward');
-                    statusText.textContent = isFwd ? 'RUNNING (FWD)' : cmd.toUpperCase();
-                    statusText.style.color = (cmd === 'stop') ? '#94a3b8' : '#34d399';
-                    if (startBtn) {
-                        if (isFwd) {
+                    if (cmd === 'start') {
+                        statusText.textContent = 'ENGINE ARMED (READY)';
+                        statusText.style.color = '#34d399';
+                        if (startBtn) {
                             startBtn.style.boxShadow = '0 0 22px rgba(52, 211, 153, 0.9)';
-                            startBtn.innerHTML = '⚙️ RUNNING';
-                        } else {
-                            startBtn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.35)';
-                            startBtn.innerHTML = '▶ START';
+                            startBtn.innerHTML = '<span style="display:inline-block; animation: spinTurbine 2s linear infinite;">⚙️</span> ARMED';
                         }
+                    } else if (cmd === 'stop') {
+                        statusText.textContent = 'STOPPED';
+                        statusText.style.color = '#94a3b8';
+                        if (startBtn) {
+                            startBtn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.35)';
+                            startBtn.innerHTML = '▶ START ENGINE';
+                        }
+                    } else if (cmd === 'forward') {
+                        statusText.textContent = '▲ MOVING FORWARD';
+                        statusText.style.color = '#34d399';
+                    } else if (cmd === 'backward') {
+                        statusText.textContent = '▼ REVERSING';
+                        statusText.style.color = '#f87171';
+                    } else if (cmd === 'left') {
+                        statusText.textContent = '◀ TURNING LEFT';
+                        statusText.style.color = '#38bdf8';
+                    } else if (cmd === 'right') {
+                        statusText.textContent = '▶ TURNING RIGHT';
+                        statusText.style.color = '#38bdf8';
+                    } else {
+                        statusText.textContent = cmd.toUpperCase();
+                        statusText.style.color = '#34d399';
                     }
                 }
             } catch (e) {
@@ -1208,8 +1290,8 @@
                     const piIp = document.getElementById("pi-ip-text");
                     const motionText = document.getElementById("rover-motion-text");
 
-                    if (piIp && r.ip) piIp.textContent = r.ip;
-                    if (motionText && r.movement) motionText.textContent = r.movement;
+                    if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
+                    if (motionText && (r.direction || r.movement)) motionText.textContent = r.direction || r.movement;
 
                     if (r.connected) {
                         if (piPill) piPill.className = "status-pill online";

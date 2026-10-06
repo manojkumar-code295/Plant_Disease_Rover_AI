@@ -103,6 +103,12 @@ PUMP_PIN  = 26  # Physical Pin 37 (5V Relay Control IN)
 TRIG_PIN  = 24  # Physical Pin 18 (HC-SR04 Trigger)
 ECHO_PIN  = 25  # Physical Pin 22 (HC-SR04 Echo)
 
+# Motor Direction Inversion Configuration (Differential Chassis Optimization)
+# Due to opposing mirror mount on differential chassis, Right Motor is inverted by default
+# so both wheels roll forward together in a straight line instead of spinning clockwise!
+INVERT_RIGHT_MOTOR = os.environ.get("INVERT_RIGHT_MOTOR", "1") == "1"
+INVERT_LEFT_MOTOR = os.environ.get("INVERT_LEFT_MOTOR", "0") == "1"
+
 SAVE_FOLDER = os.path.join(BASE_DIR, "detected_leaves")
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
@@ -304,6 +310,7 @@ def start_streaming_server(port=8080):
         return None
 
 def apply_rover_command(direction, speed, pump):
+    global INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR
     direction = str(direction).lower().strip()
     is_pump = bool(pump)
     set_pump(is_pump)
@@ -311,13 +318,25 @@ def apply_rover_command(direction, speed, pump):
 
     if direction in ("stop", "emergency_stop", "stopped", ""):
         shared_telemetry["direction"] = "Stopped"
+        shared_telemetry["engine_status"] = "Standby"
         stop_motors()
         return
 
-    shared_telemetry["direction"] = "Forward" if direction == "start" else direction.capitalize()
+    # Dedicated START Command: Arms the Engine / Mission System
+    # Does NOT actuate directional wheels until a directional command (FWD/REV/LFT/RGT) is given!
+    if direction == "start":
+        shared_telemetry["direction"] = "Engine Armed"
+        shared_telemetry["engine_status"] = "Running"
+        stop_motors()
+        log("ENGINE ARMED / SYSTEM READY -> Drive system armed, standing by for directional commands.")
+        return
+
+    shared_telemetry["direction"] = direction.capitalize()
     is_moving = speed > 0
     in1, in2, in3, in4 = 0, 0, 0, 0
-    if direction in ("forward", "start"):
+
+    # Directional Kinematics for Differential Drive Chassis
+    if direction == "forward":
         in1, in2 = 1, 0
         in3, in4 = 1, 0
     elif direction in ("backward", "reverse"):
@@ -330,13 +349,19 @@ def apply_rover_command(direction, speed, pump):
         in1, in2 = 1, 0
         in3, in4 = 0, 1
 
+    # Motor Polarity Inversion (Fixes differential drive mirror mount spinning)
+    if INVERT_LEFT_MOTOR:
+        in1, in2 = in2, in1
+    if INVERT_RIGHT_MOTOR:
+        in3, in4 = in4, in3
+
     gpio_write(LEFT_IN1, in1)
     gpio_write(LEFT_IN2, in2)
     gpio_write(RIGHT_IN1, in3)
     gpio_write(RIGHT_IN2, in4)
     gpio_write(LEFT_EN, is_moving)
     gpio_write(RIGHT_EN, is_moving)
-    log(f"GPIO OUTPUT -> IN1(Pin 11)={in1} | IN2(Pin 13)={in2} | IN3(Pin 15)={in3} | IN4(Pin 16)={in4} | ENA(Pin 32)={int(is_moving)} | ENB(Pin 33)={int(is_moving)}")
+    log(f"GPIO OUTPUT ({direction.upper()}) -> IN1(11)={in1} IN2(13)={in2} | IN3(15)={in3} IN4(16)={in4} | ENA(32)={int(is_moving)} ENB(33)={int(is_moving)} [RightInv={INVERT_RIGHT_MOTOR}]")
 
 # ============================================================
 # LOAD CLASS NAMES
@@ -678,6 +703,10 @@ def local_command_worker():
                     direction = data.get("direction", "Stopped")
                     speed = int(data.get("speed", 50))
                     pump = bool(data.get("pump", False))
+                    if "invert_right_motor" in data:
+                        INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
+                    if "invert_left_motor" in data:
+                        INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
                     log(f"ROVER COMMAND (Local Web) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
                     last_local_command_id = cid
@@ -687,7 +716,7 @@ def local_command_worker():
 
 def cloud_command_worker():
     """Dedicated cloud command polling thread for Render / Android App."""
-    global last_command_id
+    global last_command_id, INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR
     session = requests.Session()
     headers = {}
     if RENDER_API_TOKEN:
@@ -703,6 +732,10 @@ def cloud_command_worker():
                     direction = data.get("direction", "Stopped")
                     speed = int(data.get("speed", 50))
                     pump = bool(data.get("pump", False))
+                    if "invert_right_motor" in data:
+                        INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
+                    if "invert_left_motor" in data:
+                        INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
                     log(f"ROVER COMMAND (Cloud Render) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
                     last_command_id = cid

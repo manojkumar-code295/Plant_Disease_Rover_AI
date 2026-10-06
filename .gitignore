@@ -35,6 +35,8 @@ captured_leaves/
 cropped_leaves/
 camera_predictions/
 detected_leaves/
+website/static/images/202*.jpg
+website/history.json
 
 # Temporary files & OS
 *.log

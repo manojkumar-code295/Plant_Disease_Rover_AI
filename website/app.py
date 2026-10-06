@@ -148,7 +148,11 @@ rover_settings = {
 
     "confidence_threshold": 80,
 
-    "speed": 50
+    "speed": 50,
+
+    "invert_right_motor": True,
+
+    "invert_left_motor": False
 }
 
 
@@ -1258,7 +1262,7 @@ def rover_control():
 
         direction_names = {
             "forward": "Forward",
-            "start": "Forward",
+            "start": "Engine Armed",
             "backward": "Backward",
             "left": "Left",
             "right": "Right",
@@ -1269,66 +1273,59 @@ def rover_control():
             "direction"
         ] = direction_names[command]
 
-
         rover_state[
             "last_command"
         ] = command
-
 
         rover_state[
             "command_id"
         ] += 1
 
+        # Check for speed in payload
+        req_speed = data.get("speed")
+        if req_speed is not None:
+            try:
+                s = int(req_speed)
+                if s > 0:
+                    rover_state["speed"] = max(10, min(100, s))
+            except Exception:
+                pass
 
-        if command == "stop":
-
+        if command == "start":
+            rover_state["engine_armed"] = True
+            if rover_state.get("speed", 0) == 0:
+                rover_state["speed"] = rover_settings.get("speed", 50)
+        elif command == "stop":
+            rover_state["engine_armed"] = False
             rover_state["speed"] = 0
-
-        elif rover_state["speed"] == 0:
-
-            rover_state["speed"] = \
-                rover_settings["speed"]
-
+        elif rover_state.get("speed", 0) == 0:
+            rover_state["speed"] = rover_settings.get("speed", 50)
 
         print(
             "ROVER COMMAND:",
-            command
+            command,
+            "| Direction:",
+            rover_state["direction"],
+            "| Speed:",
+            rover_state["speed"]
         )
 
-
         return jsonify({
-
             "success": True,
-
-            "message":
-                "Rover command received",
-
-            "command":
-                command,
-
-            "command_id":
-                rover_state["command_id"],
-
-            "rover":
-                rover_state
-
+            "message": "Rover command received",
+            "command": command,
+            "command_id": rover_state["command_id"],
+            "rover": rover_state
         })
 
-
     except Exception as e:
-
         print(
             "ROVER CONTROL ERROR:",
             e
         )
-
         return jsonify({
-
             "success": False,
-
-            "message":
-                str(e)
-
+            "message": str(e)
         }), 500
 
 
@@ -1347,27 +1344,16 @@ def rover_command():
         return rover_control()
 
     return jsonify({
-
         "success": True,
-
-        "command":
-            rover_state["last_command"],
-
-        "command_id":
-            rover_state["command_id"],
-
-        "direction":
-            rover_state["direction"],
-
-        "speed":
-            rover_state["speed"],
-
-        "pump":
-            rover_state["pump"],
-
-        "mode":
-            rover_state["mode"]
-
+        "command": rover_state["last_command"],
+        "command_id": rover_state["command_id"],
+        "direction": rover_state["direction"],
+        "speed": rover_state["speed"],
+        "pump": rover_state["pump"],
+        "mode": rover_state["mode"],
+        "engine_armed": rover_state.get("engine_armed", False),
+        "invert_right_motor": rover_settings.get("invert_right_motor", True),
+        "invert_left_motor": rover_settings.get("invert_left_motor", False)
     })
 
 

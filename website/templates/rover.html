@@ -348,17 +348,21 @@ main {
 }
 
 /* =========================================================
-   ANIMATED 2D ROVER SCHEMATIC (SVG)
+   ANIMATED 2D ROVER SCHEMATIC (SVG & CYBER HUD)
 ========================================================= */
 .schematic-viewport {
-    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.08) 0%, rgba(5, 20, 14, 0.8) 100%);
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.14) 0%, rgba(4, 16, 11, 0.95) 100%),
+                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 22px 22px, 22px 22px;
+    border: 1px solid rgba(52, 211, 153, 0.3);
     border-radius: var(--radius-md);
     padding: 20px;
     text-align: center;
     position: relative;
     overflow: hidden;
     margin-bottom: 22px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 35px rgba(16, 185, 129, 0.08);
 }
 
 /* Sonar radar sweeping overlay */
@@ -371,22 +375,72 @@ main {
     margin-top: -140px;
     margin-left: -140px;
     border-radius: 50%;
-    border: 1px dashed rgba(16, 185, 129, 0.2);
+    border: 1px dashed rgba(16, 185, 129, 0.25);
     pointer-events: none;
+    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.06);
 }
 
 .sonar-beam {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     border-radius: 50%;
-    background: conic-gradient(from 0deg, rgba(16, 185, 129, 0.25) 0deg, transparent 60deg, transparent 360deg);
-    animation: radarSweep 4s linear infinite;
+    background: conic-gradient(from 0deg, rgba(52, 211, 153, 0.35) 0deg, transparent 65deg, transparent 360deg);
+    animation: radarSweep 3.5s linear infinite;
     pointer-events: none;
 }
 
 @keyframes radarSweep {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Directional Velocity Stream Particles */
+.velocity-stream-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rover-moving .velocity-stream-layer {
+    opacity: 1;
+}
+
+.v-line {
+    position: absolute;
+    width: 2px;
+    height: 50px;
+    border-radius: 2px;
+    opacity: 0.75;
+}
+.v-line-1 { left: 18%; }
+.v-line-2 { left: 28%; animation-delay: 0.18s; }
+.v-line-3 { left: 72%; animation-delay: 0.08s; }
+.v-line-4 { left: 82%; animation-delay: 0.25s; }
+
+.rover-forward .v-line {
+    background: linear-gradient(180deg, transparent, #34d399, transparent);
+    animation: vStreamFwd 0.65s linear infinite;
+}
+
+.rover-backward .v-line {
+    background: linear-gradient(0deg, transparent, #f87171, transparent);
+    animation: vStreamRev 0.65s linear infinite;
+}
+
+@keyframes vStreamFwd {
+    0% { transform: translateY(-60px); opacity: 0; }
+    50% { opacity: 0.95; }
+    100% { transform: translateY(260px); opacity: 0; }
+}
+
+@keyframes vStreamRev {
+    0% { transform: translateY(260px); opacity: 0; }
+    50% { opacity: 0.95; }
+    100% { transform: translateY(-60px); opacity: 0; }
 }
 
 /* Animated SVG Elements */
@@ -399,14 +453,30 @@ main {
     z-index: 2;
 }
 
+/* Rover Chassis Micro-Rumble while moving */
+@keyframes roverChassisRoll {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-1.5px) rotate(0.4deg); }
+    75% { transform: translateY(1.5px) rotate(-0.4deg); }
+}
+
+.rover-moving svg {
+    animation: roverChassisRoll 0.22s infinite ease-in-out;
+}
+
 /* Headlights cone */
 .headlight-cone {
     opacity: 0.15;
     transition: opacity 0.3s ease;
 }
 .rover-moving .headlight-cone {
-    opacity: 0.75;
-    animation: headlightFlicker 0.1s infinite alternate;
+    opacity: 0.85;
+    animation: headlightFlicker 0.15s infinite alternate;
+}
+
+@keyframes headlightFlicker {
+    0% { opacity: 0.75; filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.4)); }
+    100% { opacity: 0.95; filter: drop-shadow(0 0 14px rgba(52, 211, 153, 0.8)); }
 }
 
 /* Wheel rotation animations */
@@ -426,30 +496,30 @@ main {
 }
 
 .rover-forward .wheel-tread {
-    animation: wheelSpinFwd 0.4s linear infinite;
+    animation: wheelSpinFwd 0.35s linear infinite;
     stroke: #34d399 !important;
 }
 
 .rover-backward .wheel-tread {
-    animation: wheelSpinRev 0.4s linear infinite;
+    animation: wheelSpinRev 0.35s linear infinite;
     stroke: #f87171 !important;
 }
 
 .rover-left .left-wheel .wheel-tread {
-    animation: wheelSpinRev 0.4s linear infinite;
+    animation: wheelSpinRev 0.35s linear infinite;
     stroke: #38bdf8 !important;
 }
 .rover-left .right-wheel .wheel-tread {
-    animation: wheelSpinFwd 0.4s linear infinite;
+    animation: wheelSpinFwd 0.35s linear infinite;
     stroke: #38bdf8 !important;
 }
 
 .rover-right .left-wheel .wheel-tread {
-    animation: wheelSpinFwd 0.4s linear infinite;
+    animation: wheelSpinFwd 0.35s linear infinite;
     stroke: #38bdf8 !important;
 }
 .rover-right .right-wheel .wheel-tread {
-    animation: wheelSpinRev 0.4s linear infinite;
+    animation: wheelSpinRev 0.35s linear infinite;
     stroke: #38bdf8 !important;
 }
 
@@ -471,12 +541,12 @@ main {
         opacity: 0;
         transform: translate(0, 0) scale(0.6);
     }
-    50% {
-        opacity: 0.85;
+    40% {
+        opacity: 0.9;
     }
     100% {
         opacity: 0;
-        transform: translate(0, 35px) scale(2.2);
+        transform: translate(0, 40px) scale(2.5);
     }
 }
 
@@ -487,7 +557,7 @@ main {
 
 .pump-active .spray-mist-cone {
     display: block;
-    animation: sprayMist 0.5s ease-out infinite;
+    animation: sprayMist 0.45s ease-out infinite;
 }
 
 /* Active Motion Banner */
@@ -578,7 +648,7 @@ main {
     box-shadow: 0 0 15px rgba(52, 211, 153, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* Primary Engine Start/Stop Bar */
+/* Primary Engine Start/Stop Bar (Master Engine Ignition) */
 .primary-engine-bar {
     display: flex;
     gap: 12px;
@@ -586,7 +656,7 @@ main {
     align-items: center;
     margin-bottom: 14px;
     width: 100%;
-    max-width: 320px;
+    max-width: 340px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -597,34 +667,47 @@ main {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 16px;
+    padding: 13px 18px;
     border-radius: 12px;
     font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     cursor: pointer;
     user-select: none;
     touch-action: manipulation;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .engine-start {
-    background: linear-gradient(135deg, #10b981, #059669);
-    border: 1px solid #34d399;
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(4, 120, 87, 0.55));
+    border: 1px solid #10b981;
+    color: #ecfdf5;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .engine-start:hover {
-    background: linear-gradient(135deg, #059669, #047857);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(4, 120, 87, 0.7));
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5);
 }
 
-.engine-start:active, .engine-start.running {
-    background: linear-gradient(135deg, #047857, #064e3b);
-    border-color: #6ee7b7;
-    animation: enginePulse 1.6s infinite ease-in-out;
+.engine-start.running {
+    background: linear-gradient(135deg, #064e3b, #022c22);
+    border-color: #34d399;
+    box-shadow: 0 0 25px rgba(52, 211, 153, 0.8), inset 0 0 12px rgba(52, 211, 153, 0.3);
+    animation: enginePulseAura 1.8s infinite ease-in-out;
+}
+
+@keyframes enginePulseAura {
+    0%, 100% {
+        box-shadow: 0 0 14px rgba(52, 211, 153, 0.6), inset 0 0 8px rgba(52, 211, 153, 0.2);
+        border-color: #34d399;
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(52, 211, 153, 0.95), inset 0 0 16px rgba(52, 211, 153, 0.4);
+        border-color: #a7f3d0;
+    }
 }
 
 .engine-stop {
@@ -645,55 +728,116 @@ main {
     background: #7f1d1d;
 }
 
-@keyframes enginePulse {
-    0%, 100% {
-        box-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
-        border-color: #34d399;
-    }
-    50% {
-        box-shadow: 0 0 25px rgba(52, 211, 153, 0.95);
-        border-color: #a7f3d0;
-    }
+@keyframes spinTurbine {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.dpad-btn.strt {
-    grid-column: 1;
+/* Tactile D-PAD Layout (Clean Cross, Symmetrical 3x3) */
+.dpad-btn.fwd {
+    grid-column: 2;
     grid-row: 1;
-    background: linear-gradient(145deg, #065f46, #064e3b);
-    border-color: #10b981;
+    background: linear-gradient(145deg, #064e3b, #063729);
+    border: 1px solid rgba(52, 211, 153, 0.45);
     color: #ecfdf5;
 }
-.dpad-btn.strt span { color: #6ee7b7; font-weight: 800; }
-.dpad-btn.strt:hover {
-    background: linear-gradient(145deg, #047857, #065f46);
+.dpad-btn.fwd span { color: #86efac; font-weight: 800; }
+.dpad-btn.fwd:hover {
+    background: linear-gradient(145deg, #059669, #065f46);
     border-color: #34d399;
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.45);
+    transform: translateY(-2px);
 }
-.dpad-btn.strt:active, .dpad-btn.strt.active {
+.dpad-btn.fwd.active, .dpad-btn.fwd:active {
     background: #022c22;
-    border-color: #34d399;
-    box-shadow: 0 0 15px rgba(52, 211, 153, 0.8);
+    border-color: #6ee7b7;
+    box-shadow: 0 0 22px rgba(52, 211, 153, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: scale(0.93);
 }
 
-.dpad-btn.fwd { grid-column: 2; grid-row: 1; }
-.dpad-btn.lft { grid-column: 1; grid-row: 2; }
+.dpad-btn.lft {
+    grid-column: 1;
+    grid-row: 2;
+    background: linear-gradient(145deg, #083344, #082633);
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    color: #ecfeff;
+}
+.dpad-btn.lft span { color: #67e8f9; font-weight: 800; }
+.dpad-btn.lft:hover {
+    background: linear-gradient(145deg, #0e7490, #084c61);
+    border-color: #38bdf8;
+    box-shadow: 0 0 18px rgba(6, 182, 212, 0.4);
+    transform: translateY(-2px);
+}
+.dpad-btn.lft.active, .dpad-btn.lft:active {
+    background: #04212c;
+    border-color: #67e8f9;
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: scale(0.93);
+}
+
 .dpad-btn.stp {
     grid-column: 2;
     grid-row: 2;
-    background: linear-gradient(145deg, #7f1d1d, #5a1515);
-    border-color: rgba(239, 68, 68, 0.4);
+    background: linear-gradient(145deg, #7f1d1d, #450a0a);
+    border: 1px solid rgba(239, 68, 68, 0.5);
     color: #fecaca;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
 }
-.dpad-btn.stp span { color: #fca5a5; }
+.dpad-btn.stp span { color: #fca5a5; font-weight: 800; }
 .dpad-btn.stp:hover {
     background: linear-gradient(145deg, #991b1b, #6b1717);
     border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+    transform: translateY(-2px);
 }
 .dpad-btn.stp:active {
-    background: #450a0a;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+    background: #360707;
+    box-shadow: 0 0 22px rgba(239, 68, 68, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: scale(0.93);
 }
-.dpad-btn.rgt { grid-column: 3; grid-row: 2; }
-.dpad-btn.rev { grid-column: 2; grid-row: 3; }
+
+.dpad-btn.rgt {
+    grid-column: 3;
+    grid-row: 2;
+    background: linear-gradient(145deg, #083344, #082633);
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    color: #ecfeff;
+}
+.dpad-btn.rgt span { color: #67e8f9; font-weight: 800; }
+.dpad-btn.rgt:hover {
+    background: linear-gradient(145deg, #0e7490, #084c61);
+    border-color: #38bdf8;
+    box-shadow: 0 0 18px rgba(6, 182, 212, 0.4);
+    transform: translateY(-2px);
+}
+.dpad-btn.rgt.active, .dpad-btn.rgt:active {
+    background: #04212c;
+    border-color: #67e8f9;
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: scale(0.93);
+}
+
+.dpad-btn.rev {
+    grid-column: 2;
+    grid-row: 3;
+    background: linear-gradient(145deg, #4c0519, #380413);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    color: #fff1f2;
+}
+.dpad-btn.rev span { color: #fda4af; font-weight: 800; }
+.dpad-btn.rev:hover {
+    background: linear-gradient(145deg, #be123c, #881337);
+    border-color: #fb7185;
+    box-shadow: 0 0 18px rgba(244, 63, 94, 0.4);
+    transform: translateY(-2px);
+}
+.dpad-btn.rev.active, .dpad-btn.rev:active {
+    background: #25020c;
+    border-color: #fda4af;
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: scale(0.93);
+}
 
 /* Interactive Steering Wheel */
 .steering-wrapper {
@@ -1183,6 +1327,14 @@ main {
                     <div class="sonar-beam"></div>
                 </div>
 
+                <!-- Cyber Velocity Particle Stream -->
+                <div class="velocity-stream-layer">
+                    <div class="v-line v-line-1"></div>
+                    <div class="v-line v-line-2"></div>
+                    <div class="v-line v-line-3"></div>
+                    <div class="v-line v-line-4"></div>
+                </div>
+
                 <!-- SVG Interactive Rover -->
                 <div class="svg-rover-container" id="rover-svg-wrap">
                     <svg viewBox="0 0 320 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -1281,15 +1433,15 @@ main {
             <div class="control-interaction-row">
                 <!-- TACTILE D-PAD & ENGINE CONTROLS -->
                 <div>
-                    <!-- PRIMARY ENGINE START / STOP -->
+                    <!-- PRIMARY ENGINE START / STOP (MASTER ENGINE IGNITION) -->
                     <div class="primary-engine-bar">
-                        <button id="btn-start-rover" class="engine-btn engine-start" onclick="startRover()">
-                            <span class="engine-icon">▶</span>
-                            <span class="engine-text">START ROVER</span>
+                        <button id="btn-start-rover" class="engine-btn engine-start" onclick="toggleEngineStart()">
+                            <span class="engine-icon" id="engine-icon-symbol">▶</span>
+                            <span class="engine-text" id="engine-btn-text">START ENGINE</span>
                         </button>
                         <button id="btn-stop-rover" class="engine-btn engine-stop" onclick="emergencyStop()">
                             <span class="engine-icon">■</span>
-                            <span class="engine-text">STOP</span>
+                            <span class="engine-text">STOP ALL</span>
                         </button>
                     </div>
 
@@ -1299,22 +1451,20 @@ main {
                         </button>
                     </div>
 
+                    <!-- SYMMETRICAL 3x3 D-PAD -->
                     <div class="dpad-container">
-                        <button class="dpad-btn strt" id="btn-dpad-start" onclick="startRover()" title="Start Rover Forward">
-                            ▶
-                            <span>START</span>
-                        </button>
-
                         <button class="dpad-btn fwd" id="btn-forward"
-                            onmousedown="startMove('forward')" onmouseup="stopMove()" onmouseleave="stopMove()"
-                            ontouchstart="startMove('forward', event)" ontouchend="stopMove(event)">
+                            onclick="handleDpadClick('forward')"
+                            onmousedown="handleDpadDown('forward', event)" onmouseup="handleDpadUp('forward', event)" onmouseleave="handleDpadUp('forward', event)"
+                            ontouchstart="handleDpadDown('forward', event)" ontouchend="handleDpadUp('forward', event)">
                             ▲
                             <span>FWD</span>
                         </button>
 
                         <button class="dpad-btn lft" id="btn-left"
-                            onmousedown="startMove('left')" onmouseup="stopMove()" onmouseleave="stopMove()"
-                            ontouchstart="startMove('left', event)" ontouchend="stopMove(event)">
+                            onclick="handleDpadClick('left')"
+                            onmousedown="handleDpadDown('left', event)" onmouseup="handleDpadUp('left', event)" onmouseleave="handleDpadUp('left', event)"
+                            ontouchstart="handleDpadDown('left', event)" ontouchend="handleDpadUp('left', event)">
                             ◀
                             <span>LEFT</span>
                         </button>
@@ -1325,15 +1475,17 @@ main {
                         </button>
 
                         <button class="dpad-btn rgt" id="btn-right"
-                            onmousedown="startMove('right')" onmouseup="stopMove()" onmouseleave="stopMove()"
-                            ontouchstart="startMove('right', event)" ontouchend="stopMove(event)">
+                            onclick="handleDpadClick('right')"
+                            onmousedown="handleDpadDown('right', event)" onmouseup="handleDpadUp('right', event)" onmouseleave="handleDpadUp('right', event)"
+                            ontouchstart="handleDpadDown('right', event)" ontouchend="handleDpadUp('right', event)">
                             ▶
                             <span>RIGHT</span>
                         </button>
 
                         <button class="dpad-btn rev" id="btn-backward"
-                            onmousedown="startMove('backward')" onmouseup="stopMove()" onmouseleave="stopMove()"
-                            ontouchstart="startMove('backward', event)" ontouchend="stopMove(event)">
+                            onclick="handleDpadClick('backward')"
+                            onmousedown="handleDpadDown('backward', event)" onmouseup="handleDpadUp('backward', event)" onmouseleave="handleDpadUp('backward', event)"
+                            ontouchstart="handleDpadDown('backward', event)" ontouchend="handleDpadUp('backward', event)">
                             ▼
                             <span>REV</span>
                         </button>
@@ -1611,11 +1763,17 @@ function updateSchematicAnimation(direction, pump) {
     const cmdBadge = document.getElementById("command-badge");
 
     if (direction === "stop" || direction === "stopped") {
-        motionText.textContent = "STANDBY / STOPPED";
-        motionText.style.color = "#94a3b8";
+        motionText.textContent = isEngineArmed ? "ENGINE ARMED (READY)" : "STANDBY / STOPPED";
+        motionText.style.color = isEngineArmed ? "#34d399" : "#94a3b8";
         motionSpeed.textContent = "0 RPM / 0% PWM";
-        cmdBadge.textContent = "STOPPED";
-        cmdBadge.style.color = "#94a3b8";
+        cmdBadge.textContent = isEngineArmed ? "ARMED" : "STOPPED";
+        cmdBadge.style.color = isEngineArmed ? "#34d399" : "#94a3b8";
+    } else if (direction === "start") {
+        motionText.textContent = "ENGINE ARMED & READY";
+        motionText.style.color = "#34d399";
+        motionSpeed.textContent = "0 RPM / 0% PWM";
+        cmdBadge.textContent = "ARMED";
+        cmdBadge.style.color = "#34d399";
     } else {
         const dirUpper = direction.toUpperCase();
         motionText.textContent = `${dirUpper} ENGAGED`;
@@ -1628,15 +1786,15 @@ function updateSchematicAnimation(direction, pump) {
 
 /* Send Movement Command to Flask */
 async function sendCommand(command) {
-    currentDirection = command;
-    updateSchematicAnimation(command, pumpState);
-
     try {
         const t0 = performance.now();
         const res = await fetch("/api/rover/control", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ command: command })
+            body: JSON.stringify({ 
+                command: command,
+                speed: currentSpeed 
+            })
         });
         const latency = Math.round(performance.now() - t0);
         document.getElementById("metric-ping").textContent = `${latency} ms`;
@@ -1652,7 +1810,7 @@ async function sendCommand(command) {
     }
 }
 
-/* Start / Stop Movement Handlers */
+/* Drive Mode Toggle */
 let driveMode = 'latch'; // 'latch' = tap to drive until STOP, 'momentary' = hold to move
 
 function toggleDriveMode() {
@@ -1666,78 +1824,121 @@ function toggleDriveMode() {
     showToast(`Switched to ${driveMode === 'latch' ? 'Tap to Drive' : 'Hold to Move'} mode`);
 }
 
-function startRover() {
-    movementActive = true;
-    currentDirection = "forward";
+/* =========================================================
+   MASTER ENGINE ARM & DIRECTIONAL MOTION (COMPLETELY SEPARATED)
+========================================================= */
+let isEngineArmed = false;
 
-    // Highlight Primary Engine Start button with running pulse
+function toggleEngineStart() {
+    isEngineArmed = !isEngineArmed;
     const startBtn = document.getElementById("btn-start-rover");
-    if (startBtn) {
-        startBtn.classList.add("running");
-        startBtn.innerHTML = '<span class="engine-icon" style="color:#34d399;">⚙️</span><span class="engine-text">ROVER RUNNING</span>';
+    const icon = document.getElementById("engine-icon-symbol");
+    const text = document.getElementById("engine-btn-text");
+
+    if (isEngineArmed) {
+        if (startBtn) {
+            startBtn.classList.add("running");
+            if (icon) icon.innerHTML = '<span style="display:inline-block; animation: spinTurbine 1.8s linear infinite;">⚙️</span>';
+            if (text) text.textContent = "ENGINE ONLINE (ARMED)";
+        }
+        sendCommand("start");
+        updateSchematicAnimation("start", pumpState);
+        showToast("▶ ROVER ENGINE & DRIVE SYSTEM ARMED");
+    } else {
+        if (startBtn) {
+            startBtn.classList.remove("running");
+            if (icon) icon.textContent = "▶";
+            if (text) text.textContent = "START ENGINE";
+        }
+        emergencyStop();
+        showToast("■ ENGINE SET TO STANDBY");
     }
-
-    // Highlight D-pad Start and Fwd buttons
-    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
-    const dpadStartBtn = document.getElementById("btn-dpad-start");
-    if (dpadStartBtn) dpadStartBtn.classList.add("active");
-    const fwdBtn = document.getElementById("btn-forward");
-    if (fwdBtn) fwdBtn.classList.add("active");
-
-    updateSchematicAnimation("forward", pumpState);
-    sendCommand("start");
-    showToast("▶ ROVER ENGINE STARTED (FORWARD)");
 }
 
-function resetStartButton() {
+function resetEngineButton() {
+    isEngineArmed = false;
     const startBtn = document.getElementById("btn-start-rover");
+    const icon = document.getElementById("engine-icon-symbol");
+    const text = document.getElementById("engine-btn-text");
     if (startBtn) {
         startBtn.classList.remove("running");
-        startBtn.innerHTML = '<span class="engine-icon">▶</span><span class="engine-text">START ROVER</span>';
+        if (icon) icon.textContent = "▶";
+        if (text) text.textContent = "START ENGINE";
     }
-    const dpadStartBtn = document.getElementById("btn-dpad-start");
-    if (dpadStartBtn) dpadStartBtn.classList.remove("active");
 }
 
-function startMove(command, event) {
-    if (event) event.preventDefault();
-    if (command === "forward" || command === "start") {
-        startRover();
-        return;
-    }
-    movementActive = true;
-    currentDirection = command;
-    resetStartButton();
+let touchActive = false;
 
+function handleDpadClick(dir) {
+    if (driveMode === 'latch') {
+        if (movementActive && currentDirection === dir) {
+            // Tapping active button again stops movement
+            stopMovement();
+        } else {
+            startMovement(dir);
+        }
+    }
+}
+
+function handleDpadDown(dir, event) {
+    if (event && event.type === 'touchstart') {
+        touchActive = true;
+    }
+    if (event && event.type === 'mousedown' && touchActive) {
+        return; // Suppress synthetic mouse click after touch
+    }
+    if (driveMode === 'momentary') {
+        startMovement(dir);
+    }
+}
+
+function handleDpadUp(dir, event) {
+    if (event && event.type === 'touchend') {
+        setTimeout(() => { touchActive = false; }, 300);
+    }
+    if (driveMode === 'momentary') {
+        stopMovement();
+    }
+}
+
+function startMovement(dir) {
+    movementActive = true;
+    currentDirection = dir;
+
+    // Highlight ONLY the chosen directional button (never touch the engine button!)
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
-    const btn = document.getElementById("btn-" + command);
+    const btn = document.getElementById("btn-" + dir);
     if (btn) btn.classList.add("active");
 
-    sendCommand(command);
+    updateSchematicAnimation(dir, pumpState);
+    sendCommand(dir);
+
+    const dirMessages = {
+        forward: "▲ MOVING FORWARD",
+        backward: "▼ REVERSING",
+        left: "◀ TURNING LEFT",
+        right: "▶ TURNING RIGHT"
+    };
+    showToast(dirMessages[dir] || `DIRECTION: ${dir.toUpperCase()}`);
 }
 
-function stopMove(event) {
-    if (event) event.preventDefault();
-    if (driveMode === 'latch') {
-        // In Tap to Drive mode, releasing the finger does NOT immediately stop
-        // The rover keeps moving until STOP or another command is tapped
-        return;
-    }
+function stopMovement() {
     if (!movementActive) return;
-
     movementActive = false;
     currentDirection = "stop";
-    resetStartButton();
 
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
+    updateSchematicAnimation("stop", pumpState);
     sendCommand("stop");
 }
 
 function emergencyStop() {
     movementActive = false;
     currentDirection = "stop";
-    resetStartButton();
+    resetEngineButton();
+
     document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
+    updateSchematicAnimation("stop", pumpState);
     sendCommand("stop");
     showToast("EMERGENCY STOP EXECUTED");
 }
@@ -1868,17 +2069,19 @@ wheel.addEventListener("pointercancel", releaseSteering);
 document.addEventListener("keydown", e => {
     if (e.repeat) return;
     const k = e.key.toLowerCase();
-    if (k === "w") startMove("forward");
-    else if (k === "a") startMove("left");
-    else if (k === "s") startMove("backward");
-    else if (k === "d") startMove("right");
+    if (k === "w") startMovement("forward");
+    else if (k === "a") startMovement("left");
+    else if (k === "s") startMovement("backward");
+    else if (k === "d") startMovement("right");
     else if (e.code === "Space") { e.preventDefault(); emergencyStop(); }
 });
 
 document.addEventListener("keyup", e => {
     const k = e.key.toLowerCase();
     if (["w", "a", "s", "d"].includes(k)) {
-        stopMove();
+        if (driveMode === 'momentary') {
+            stopMovement();
+        }
     }
 });
 
@@ -1946,10 +2149,12 @@ async function getRoverStatus() {
             document.getElementById("metric-conf").textContent = `${r.last_confidence}%`;
         }
 
-        // Sync Speed & Pump
-        if (r.speed !== undefined && !movementActive) {
+        // Sync Speed & Pump (Never overwrite user speed when rover is stopped)
+        if (r.speed !== undefined && r.speed > 0 && !movementActive) {
             currentSpeed = r.speed;
             document.getElementById("speed-display").textContent = `${currentSpeed}%`;
+            const slider = document.getElementById("speed-slider");
+            if (slider) slider.value = currentSpeed;
         }
         if (r.pump !== undefined && r.pump !== pumpState) {
             pumpState = r.pump;
