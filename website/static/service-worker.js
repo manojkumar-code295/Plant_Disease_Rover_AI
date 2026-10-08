@@ -9,7 +9,7 @@
    VERSION
 ============================================================ */
 
-const CACHE_NAME = "smart-rover-v6-lightweight";
+const CACHE_NAME = "smart-rover-v7-livecam-receiver";
 
 
 /* ============================================================

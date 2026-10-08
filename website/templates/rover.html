@@ -492,6 +492,25 @@ input[type="range"] {
     <div class="signal-latency-txt" id="signal-latency-txt">PING: -- ms</div>
 </section>
 
+<!-- LIVE WEBCAM VIDEO STREAM -->
+<section style="width:100%; max-width:520px; background:rgba(14,38,28,0.9); border:1px solid rgba(34,197,94,0.3); border-radius:18px; padding:12px; margin-bottom:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#4ade80;">
+            <span class="pulse-dot" style="background:#ef4444; box-shadow:0 0 6px #ef4444;"></span>
+            <span>📹 LIVE ROVER CAM (CSI)</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <button onclick="refreshLiveStream()" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer;">🔄 Refresh</button>
+        </div>
+    </div>
+    <div style="position:relative; width:100%; aspect-ratio:4/3; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.2);">
+        <img id="live-webcam-feed" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='/static/app_photo.png'">
+        <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); padding:2px 8px; border-radius:4px; font-size:10px; font-family:monospace; color:#86efac;">
+            Picamera2 · Real-Time CSI Feed
+        </div>
+    </div>
+</section>
+
 <!-- MAIN TOUCH CONTROLLER -->
 <main class="controller-card">
     <div class="drive-mode-bar">
@@ -859,6 +878,12 @@ async function requestFreshSnapshot() {
     } catch (e) {
         logMessage("Snapshot failed.");
     }
+}
+
+function refreshLiveStream() {
+    const cam = document.getElementById("live-webcam-feed");
+    if (cam) cam.src = "/video_feed?_=" + Date.now();
+    logMessage("Camera stream refreshed.");
 }
 
 // Keyboard arrow controls for PC testing

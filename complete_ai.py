@@ -1004,8 +1004,22 @@ def cloud_command_worker():
         time.sleep(0.18)
 
 def cloud_frame_streamer_worker():
-    """Disabled per user request: Live camera upload disabled to eliminate WAN latency & prevent Render worker locks."""
-    return
+    """Streams live camera frames to Render so the remote dashboard & phone see live video."""
+    session = requests.Session()
+    headers = {"Content-Type": "image/jpeg"}
+    if RENDER_API_TOKEN:
+        headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
+    stream_url = RENDER_URL + "/api/camera/stream_frame"
+
+    while running:
+        try:
+            with latest_jpeg_lock:
+                frame = latest_jpeg_frame
+            if frame is not None:
+                session.post(stream_url, data=frame, headers=headers, timeout=1.2)
+            time.sleep(0.35)
+        except Exception:
+            time.sleep(0.8)
 
 
 def local_telemetry_worker():
@@ -1222,8 +1236,14 @@ def main():
             try:
                 ret_enc, enc_jpeg = cv2.imencode('.jpg', display_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
                 if ret_enc:
+                    frame_bytes = enc_jpeg.tobytes()
                     with latest_jpeg_lock:
-                        latest_jpeg_frame = enc_jpeg.tobytes()
+                        latest_jpeg_frame = frame_bytes
+                    try:
+                        with open("/dev/shm/rover_stream.jpg", "wb") as f:
+                            f.write(frame_bytes)
+                    except Exception:
+                        pass
             except Exception:
                 pass
 

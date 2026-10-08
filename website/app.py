@@ -660,16 +660,60 @@ def api_camera_stream_frame():
 
 @app.route("/video_feed")
 def video_feed():
-    """Non-blocking single frame response to prevent Gunicorn worker starvation and save mobile data."""
-    live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
-    if os.path.exists(live_path):
+    """Live camera stream reading from /dev/shm in RAM for high-speed zero-lag streaming."""
+    def generate_stream():
+        boundary = b'--FRAME\r\n'
+        last_frame = None
+        while True:
+            frame = None
+            if os.path.exists("/dev/shm/rover_stream.jpg"):
+                try:
+                    with open("/dev/shm/rover_stream.jpg", "rb") as f:
+                        frame = f.read()
+                except Exception:
+                    pass
+            elif latest_cloud_frame is not None:
+                frame = latest_cloud_frame
+            else:
+                p = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+                if os.path.exists(p):
+                    try:
+                        with open(p, "rb") as f:
+                            frame = f.read()
+                    except Exception:
+                        pass
+
+            to_send = frame if frame else (last_frame if last_frame else PLACEHOLDER_JPEG)
+            last_frame = to_send
+
+            yield (boundary +
+                   b'Content-Type: image/jpeg\r\n' +
+                   b'Content-Length: ' + str(len(to_send)).encode() + b'\r\n\r\n' +
+                   to_send + b'\r\n')
+            time.sleep(0.05)
+
+    resp = Response(generate_stream(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
+
+
+@app.route("/api/camera/live_frame")
+def camera_live_frame():
+    """Instantaneous single live frame for high-speed dynamic refresh."""
+    if os.path.exists("/dev/shm/rover_stream.jpg"):
         try:
-            with open(live_path, "rb") as f:
+            with open("/dev/shm/rover_stream.jpg", "rb") as f:
                 resp = Response(f.read(), mimetype='image/jpeg')
                 resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
                 return resp
         except Exception:
             pass
+    if latest_cloud_frame is not None:
+        resp = Response(latest_cloud_frame, mimetype='image/jpeg')
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        return resp
     resp = Response(PLACEHOLDER_JPEG, mimetype='image/jpeg')
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     return resp
