@@ -322,9 +322,14 @@ def add_history_record(result):
 
 # ============================================================
 # ANALYTICS
-# ============================================================
+_cached_analytics = None
+_cached_analytics_time = 0.0
 
-def get_analytics():
+def get_analytics(force_refresh=False):
+    global _cached_analytics, _cached_analytics_time
+    now = time.time()
+    if not force_refresh and _cached_analytics is not None and (now - _cached_analytics_time < 2.5):
+        return _cached_analytics
 
     history = get_history()
 
@@ -431,7 +436,7 @@ def get_analytics():
     latest = get_latest_result()
 
 
-    return {
+    analytics_data = {
 
         "total": total,
 
@@ -484,6 +489,10 @@ def get_analytics():
                 ""
             )
     }
+
+    _cached_analytics = analytics_data
+    _cached_analytics_time = now
+    return analytics_data
 
 
 # ============================================================
@@ -1168,6 +1177,28 @@ def update_result():
         save_latest_result(result)
 
         add_history_record(result)
+
+        global _cached_analytics
+        _cached_analytics = None
+
+        # Clean up excess images if over 35 to prevent disk degradation
+        try:
+            protected_names = {"app_photo.png", "store_icon.png"}
+            img_files = [
+                os.path.join(IMAGE_FOLDER, f) for f in os.listdir(IMAGE_FOLDER)
+                if f.lower().endswith((".jpg", ".png", ".jpeg"))
+                and f not in protected_names
+                and (f.startswith("2026") or f.startswith("leaf_"))
+            ]
+            if len(img_files) > 35:
+                img_files.sort(key=os.path.getmtime)
+                for old_f in img_files[:-35]:
+                    try:
+                        os.remove(old_f)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
 
         rover_state["last_detection"] = disease
         rover_state["last_confidence"] = round(confidence_value, 1)
@@ -1976,5 +2007,6 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=False
+        debug=False,
+        threaded=True
     )

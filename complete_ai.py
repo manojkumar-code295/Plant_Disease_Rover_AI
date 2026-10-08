@@ -58,19 +58,20 @@ IMAGE_SIZE = 224
 CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.72))
 CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.25))
 
-# Robust Leaf Filtering Thresholds (Botanical Foliage & Chlorophyll for Healthy and Diseased Leaves)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 2200))           # Min pixels to qualify as a leaf
+# Robust Leaf Filtering Thresholds (Strict Botanical Quality Gate for Real Leaves Only)
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 1800))           # Min pixels to qualify as a leaf
 MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.75)) # Max 75% of frame (rejects whole room)
-MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.22))   # Foliage density inside bounding box
+MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.30))   # Foliage density inside bounding box
 MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.35))       # Skin tone ratio threshold for rejecting full face
-MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 20.0))     # Laplacian variance to reject flat blank walls
-MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 15.0)) # Excess Green Index (permits spotted/curled leaves)
+MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 16.0))     # Laplacian variance to reject flat blank walls
+MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 20.0)) # Excess Green Index (requires chlorophyll)
+MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 42.0))       # Rejects gray/off-white rooms and furniture
 
 # Camera & Performance Configuration
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
 CAMERA_ROTATION = os.environ.get("CAMERA_ROTATION", "90_CCW")
 PREDICT_EVERY_N_FRAMES = int(os.environ.get("PREDICT_EVERY_N_FRAMES", 2))
-UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 4.0))      # Minimum seconds between cloud uploads
+UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 25.0))     # Cooldown between cloud uploads for same disease
 
 # Render Cloud Synchronization (Configurable via Environment)
 RENDER_URL = os.environ.get("RENDER_URL", "https://precision-agriculture-smart-rover.onrender.com").rstrip("/")
@@ -503,27 +504,38 @@ def verify_leaf_structure(crop_bgr):
         return False, "Empty image"
 
     h, w = crop_bgr.shape[:2]
-    if w < 85 or h < 85 or (w * h) < 8000:
+    if w < 75 or h < 75 or (w * h) < 6000:
         return False, f"Candidate too small ({w}x{h})"
+
+    # Botanical aspect ratio: Chili leaves are elliptical/lanceolate (0.35 <= w/h <= 2.6)
+    aspect = w / float(h)
+    if aspect < 0.35 or aspect > 2.6:
+        return False, f"Non-botanical aspect ratio ({aspect:.2f})"
 
     hsv = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2HSV)
     b = crop_bgr[:, :, 0].astype(np.float32)
     g = crop_bgr[:, :, 1].astype(np.float32)
     r = crop_bgr[:, :, 2].astype(np.float32)
 
-    # 1. Botanical chlorophyll foliage mask (supports healthy greens & yellowed diseased spots)
-    foliage_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] <= 92) & \
-                   (hsv[:,:,1] >= 28) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 250) & \
-                   (2.0 * g - r - b >= 10.0)
+    # 1. Botanical chlorophyll foliage mask:
+    # Requires genuine plant green spectrum OR high-saturation chlorotic yellow
+    green_mask = (hsv[:,:,0] >= 26) & (hsv[:,:,0] <= 86) & \
+                 (hsv[:,:,1] >= 42) & (hsv[:,:,2] >= 40) & (hsv[:,:,2] <= 245) & \
+                 (g > r + 6.0) & (g > b + 8.0) & (2.0 * g - r - b >= 20.0)
 
+    yellow_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 26) & \
+                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 45) & (hsv[:,:,2] <= 245) & \
+                  (g > b + 15.0) & (r > b + 15.0)
+
+    foliage_mask = green_mask | yellow_mask
     foliage_px = int(np.sum(foliage_mask))
     total_px = float(h * w)
     foliage_ratio = foliage_px / total_px
 
     if foliage_px < 1000:
         return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1000)"
-    if foliage_ratio < 0.18:
-        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 18%)"
+    if foliage_ratio < 0.28:
+        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 28%)"
 
     # 2. Human Skin Tone Rejection
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -535,17 +547,21 @@ def verify_leaf_structure(crop_bgr):
     if skin_px > foliage_px * 1.5 or (skin_px / total_px) > MAX_SKIN_RATIO:
         return False, "Hand/Skin detected"
 
-    # 3. Excess Green Index (ExG = 2G - R - B)
+    # 3. Saturation & Excess Green on Foliage
+    sat_foliage = float(np.mean(hsv[:,:,1][foliage_mask]))
+    if sat_foliage < 40.0:
+        return False, f"Desaturated foliage ({sat_foliage:.1f} < 40.0)"
+
     exg = 2.0 * g - r - b
     mean_exg = float(np.mean(exg[foliage_mask]))
-    if mean_exg < MIN_EXG_THRESHOLD:
-        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < {MIN_EXG_THRESHOLD})"
+    if mean_exg < 20.0:
+        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 20.0)"
 
     # 4. Texture & Venation Check
     gray = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    if lap_var < MIN_TEXTURE_VAR:
-        return False, f"Flat texture ({lap_var:.1f} < {MIN_TEXTURE_VAR})"
+    if lap_var < 16.0:
+        return False, f"Flat texture ({lap_var:.1f} < 16.0)"
 
     return True, "VALID_LEAF"
 
@@ -567,10 +583,16 @@ def detect_leaf(frame_bgr):
     r_full = frame_bgr[:, :, 2].astype(np.float32)
 
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination:
-    foliage_bool = (hsv[:,:,0] >= 18) & (hsv[:,:,0] <= 92) & (hsv[:,:,1] >= 28) & \
-                   (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 250) & \
-                   (2.0 * g_full - r_full - b_full >= 10.0)
-    foliage_mask = np.uint8(foliage_bool) * 255
+    green_bool = (hsv[:,:,0] >= 26) & (hsv[:,:,0] <= 86) & \
+                 (hsv[:,:,1] >= 42) & (hsv[:,:,2] >= 42) & (hsv[:,:,2] <= 245) & \
+                 (g_full > r_full + 6.0) & (g_full > b_full + 8.0) & \
+                 (2.0 * g_full - r_full - b_full >= 20.0)
+
+    yellow_bool = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 26) & \
+                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 45) & (hsv[:,:,2] <= 245) & \
+                  (g_full > b_full + 15.0) & (r_full > b_full + 15.0)
+
+    foliage_mask = np.uint8(green_bool | yellow_bool) * 255
 
     # 2. Human Skin Tone Mask: catches faces, hands, arms holding leaves
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -583,7 +605,7 @@ def detect_leaf(frame_bgr):
     foliage_clean = cv2.bitwise_and(foliage_mask, cv2.bitwise_not(skin_mask))
 
     # Morphological bridging to connect leaf blade segments
-    k_bridge = cv2.getStructuringElement(cv2.MORPH_RECT, (7, 7))
+    k_bridge = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     foliage_clean = cv2.morphologyEx(foliage_clean, cv2.MORPH_CLOSE, k_bridge)
 
     contours, _ = cv2.findContours(foliage_clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -607,7 +629,7 @@ def detect_leaf(frame_bgr):
                 continue
 
             aspect = bw / float(bh)
-            if aspect < 0.20 or aspect > 5.0:
+            if aspect < 0.35 or aspect > 2.6:
                 continue
 
             box_area = float(bw * bh)
@@ -621,7 +643,7 @@ def detect_leaf(frame_bgr):
             hull = cv2.convexHull(c)
             hull_area = cv2.contourArea(hull)
             solidity = area / float(hull_area) if hull_area > 0 else 0
-            if solidity < 0.32:
+            if solidity < 0.42:
                 continue
 
             # Foliage density inside bounding box
@@ -659,7 +681,7 @@ def detect_leaf(frame_bgr):
             # Botanical score: prioritizes true green foliage density, Excess Green, and organic solidity
             score = foliage_px * (mean_exg + 5.0) * solidity
 
-            if score >= 130000.0 and score > best_score:
+            if score >= 120000.0 and score > best_score:
                 best_score = score
                 pad = 12
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
@@ -791,21 +813,24 @@ def ai_inference_worker():
             shared_telemetry["last_confidence"] = round(conf * 100.0 if conf <= 1.0 else conf, 1)
             shared_telemetry["ai_status"] = f"Classified: {display_label}"
 
-            # Only upload confirmed disease classifications after 3 consecutive confirmations
+            # Only upload confirmed disease classifications after 2 consecutive confirmations
             valid_disease_classes = ("HEALTHY", "Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus")
-            if (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2) and (now - last_upload_time >= UPLOAD_INTERVAL):
+            is_valid_disease = (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2)
+
+            # Smart deduplication:
+            # - Immediate upload if disease changed
+            # - 25s cooldown if it's the exact same disease to avoid disk thrashing & network spam
+            cooldown = UPLOAD_INTERVAL if disease_code == consec_class and last_upload_time > 0 else 4.0
+            if is_valid_disease and (now - last_upload_time >= cooldown):
                 snap_path = os.path.join(SAVE_FOLDER, f"leaf_{int(now)}.jpg")
                 cv2.imwrite(snap_path, crop)
-                try:
-                    os.sync()
-                except Exception:
-                    pass
 
                 try:
                     if upload_queue.full():
                         upload_queue.get_nowait()
                     upload_queue.put_nowait((crop.copy(), disease_code, display_label, conf))
                     last_upload_time = now
+                    cleanup_old_snapshots()
                 except Exception:
                     pass
 
@@ -814,6 +839,33 @@ def ai_inference_worker():
             continue
         except Exception as e:
             log(f"AI Worker error: {e}")
+
+# ============================================================
+# SNAPSHOT CLEANUP UTILITY
+# ============================================================
+
+def cleanup_old_snapshots():
+    """Keep only the most recent 35 generated images in detected_leaves and static/images to avoid disk thrashing."""
+    protected_names = {"app_photo.png", "store_icon.png"}
+    for folder in [SAVE_FOLDER, os.path.join(BASE_DIR, "website", "static", "images")]:
+        try:
+            if not os.path.exists(folder):
+                continue
+            files = [
+                os.path.join(folder, f) for f in os.listdir(folder)
+                if f.lower().endswith((".jpg", ".png", ".jpeg"))
+                and f not in protected_names
+                and (f.startswith("2026") or f.startswith("leaf_"))
+            ]
+            if len(files) > 35:
+                files.sort(key=os.path.getmtime)
+                for old_f in files[:-35]:
+                    try:
+                        os.remove(old_f)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
 
 # ============================================================
 # ASYNCHRONOUS NON-BLOCKING CLOUD UPLOAD WORKER
@@ -861,20 +913,21 @@ def upload_worker():
                         "http://127.0.0.1:5000/api/update-result",
                         files={"image": ("leaf.jpg", enc.tobytes(), "image/jpeg")},
                         data=data,
-                        timeout=2.0
+                        timeout=1.5
                     )
-                except Exception as local_e:
+                except Exception:
                     pass
 
-                # 2. Render Cloud Sync
+                # 2. Render Cloud Sync (timeout 3.5s to prevent worker thread stalling)
                 try:
-                    r = upload_session.post(UPDATE_URL, files=files, data=data, headers=headers, timeout=10)
+                    r = upload_session.post(UPDATE_URL, files=files, data=data, headers=headers, timeout=3.5)
                     if r.ok:
                         log(f"CLOUD SYNC -> Render updated: {display_name}")
                     else:
                         log(f"CLOUD SYNC -> HTTP {r.status_code}")
                 except Exception as cloud_e:
-                    log(f"CLOUD SYNC ERROR -> {cloud_e}")
+                    # Cloud timeout or offline - completely non-blocking
+                    pass
         except queue.Empty:
             continue
         except Exception as e:
@@ -895,12 +948,12 @@ last_command_id = -1
 last_local_command_id = -1
 
 def local_command_worker():
-    """Ultra-responsive worker for local web dashboard commands (sub-50ms latency)."""
+    """Responsive worker for local web dashboard commands (sub-120ms latency, low CPU)."""
     global last_local_command_id
     session = requests.Session()
     while running:
         try:
-            r = session.get("http://127.0.0.1:5000/api/rover/command", timeout=0.15)
+            r = session.get("http://127.0.0.1:5000/api/rover/command", timeout=0.25)
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
@@ -917,10 +970,10 @@ def local_command_worker():
                     last_local_command_id = cid
         except Exception:
             pass
-        time.sleep(0.04)
+        time.sleep(0.12)
 
 def cloud_command_worker():
-    """Dedicated cloud command polling thread for Render / Android App."""
+    """Dedicated cloud command polling thread for Render / Android App (1.2s cadence)."""
     global last_command_id, INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR
     session = requests.Session()
     headers = {}
@@ -929,7 +982,7 @@ def cloud_command_worker():
 
     while running:
         try:
-            r = session.get(COMMAND_URL, headers=headers, timeout=1.2)
+            r = session.get(COMMAND_URL, headers=headers, timeout=1.5)
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
@@ -946,7 +999,7 @@ def cloud_command_worker():
                     last_command_id = cid
         except Exception:
             pass
-        time.sleep(0.08)
+        time.sleep(1.2)
 
 def cloud_frame_streamer_worker():
     """Streams live camera frames to Render so the Android app & remote dashboard see live video."""
@@ -961,10 +1014,11 @@ def cloud_frame_streamer_worker():
             with latest_jpeg_lock:
                 frame = latest_jpeg_frame
             if frame is not None:
-                session.post(stream_url, data=frame, headers=headers, timeout=1.2)
-            time.sleep(0.12)  # ~8 FPS cloud relay
+                session.post(stream_url, data=frame, headers=headers, timeout=1.5)
+            time.sleep(0.25)  # ~4 FPS cloud relay is optimal for WAN bandwidth
         except Exception:
-            time.sleep(0.4)
+            time.sleep(0.8)
+
 
 def local_telemetry_worker():
     """High-speed local telemetry sender (updates local web dashboard every 0.5s with zero WAN lag)."""
@@ -1066,6 +1120,8 @@ def main():
     curr_disease_code = "NO_LEAF"
     curr_display_label = "NO LEAF DETECTED"
     curr_conf = 0.0
+    last_box = None
+    last_mode = "NO_LEAF"
 
     log(f"AgriRover AI System Active. Headless mode: {HEADLESS}")
     if not HEADLESS:
@@ -1104,8 +1160,15 @@ def main():
                 fps_timer = now
                 shared_telemetry["fps"] = round(fps_display, 1)
 
-            # 2. Strict Botanical Leaf Identification (Runs in ~3ms)
-            crop, box, mode = detect_leaf(frame)
+            # 2. Strict Botanical Leaf Identification (Runs every PREDICT_EVERY_N_FRAMES for high efficiency)
+            if frame_count % PREDICT_EVERY_N_FRAMES == 0:
+                crop, box, mode = detect_leaf(frame)
+                last_box = box
+                last_mode = mode
+            else:
+                box = last_box
+                mode = last_mode
+                crop = None
 
             # 3. Asynchronously push leaf candidate to AI inference worker (Zero Camera Delay!)
             if mode == "LEAF_DETECTED" and crop is not None and crop.size > 0:

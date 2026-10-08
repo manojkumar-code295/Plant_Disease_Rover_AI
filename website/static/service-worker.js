@@ -9,7 +9,7 @@
    VERSION
 ============================================================ */
 
-const CACHE_NAME = "smart-rover-v4";
+const CACHE_NAME = "smart-rover-v5";
 
 
 /* ============================================================
@@ -195,64 +195,6 @@ self.addEventListener(
             url.pathname.startsWith("/video_feed") ||
             url.pathname.startsWith("/api/")
         ) {
-
-            return;
-
-        }
-
-            event.respondWith(
-
-                fetch(
-                    request,
-                    {
-                        cache: "no-store"
-                    }
-                )
-                .then(function(response) {
-
-                    return response;
-
-                })
-                .catch(function() {
-
-                    /*
-                     * Return a JSON response instead
-                     * of allowing the app to completely
-                     * fail when Flask is offline.
-                     */
-
-                    return new Response(
-
-                        JSON.stringify({
-
-                            success: false,
-
-                            offline: true,
-
-                            message:
-                                "Smart Rover server is offline."
-
-                        }),
-
-                        {
-
-                            status: 503,
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json"
-
-                            }
-
-                        }
-
-                    );
-
-                })
-
-            );
-
 
             return;
 
