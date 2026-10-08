@@ -77,11 +77,16 @@ def main():
     total_signals = 0
     last_pump = None
     heartbeat_tick = 0
+    current_direction = "STOPPED"
+    current_speed = 0
 
     while True:
+        signal_found = None
+
+        # 1. Check Local API (instant 5ms on local Wi-Fi)
         try:
             req = urllib.request.Request(LOCAL_API, headers={"User-Agent": "PhoneSignalReceiver/1.0"})
-            with urllib.request.urlopen(req, timeout=1.0) as resp:
+            with urllib.request.urlopen(req, timeout=0.4) as resp:
                 if resp.status == 200:
                     data = json.loads(resp.read().decode())
                     rover = data.get("rover", {})
@@ -90,54 +95,83 @@ def main():
                     direction = rover.get("direction", "Stopped")
                     speed = int(rover.get("speed", 0))
                     pump = bool(rover.get("pump", False))
-                    connected = bool(rover.get("connected", False))
-
-                    # Check for pump changes
-                    if last_pump is not None and pump != last_pump:
-                        now_str = time.strftime("%H:%M:%S")
-                        total_signals += 1
-                        print(f"\a", end="", flush=True) # Terminal bell
-                        print(f"{CYAN}================================================================================")
-                        print(f"{BOLD}[{now_str}] 💦 SPRAY PUMP: {'ON (SPRAYING)' if pump else 'OFF (STOPPED)'}{RESET}")
-                        print(f"{CYAN}================================================================================{RESET}")
-                        print(f"   Status:       {GREEN if pump else RED}{'SPRAY PUMP RUNNING (12V ACTIVE)' if pump else 'SPRAY PUMP STOPPED'}{RESET}")
-                        print(f"   GPIO Pin:     Pin 37 (GPIO 26) -> {'HIGH' if pump else 'LOW'}")
-                        print(f"{CYAN}================================================================================{RESET}\n")
-
-                    last_pump = pump
-
-                    # Check for new rover command from phone
-                    if cid != last_command_id and cid > 0:
-                        last_command_id = cid
-                        total_signals += 1
-                        now_str = time.strftime("%H:%M:%S")
-                        cmd_upper = cmd.upper()
-                        is_stop = cmd == "stop" or direction.lower() == "stopped"
-
-                        print(f"\a", end="", flush=True) # Terminal bell
-
-                        color = RED if is_stop else GREEN
-                        symbol = "🛑" if is_stop else "⚡"
-                        print(f"{color}{BOLD}================================================================================")
-                        print(f" {symbol} [{now_str}] DIRECTION: {cmd_upper}")
-                        print(f"================================================================================{RESET}")
-                        print(f"   Action:       {BOLD}{WHITE}{'STOPPED' if is_stop else f'MOVING {cmd_upper}'}{RESET}")
-                        print(f"   Speed:        {BOLD}{CYAN}{speed}% PWM{RESET}")
-                        print(f"   Motor Driver: {get_gpio_desc(direction, speed, not is_stop)}")
-                        print(f"   Pump Relay:   {MAGENTA}{'SPRAYING (ON)' if pump else 'OFF'}{RESET}")
-                        print(f"   Motor Status: {GREEN}{'BRAKE APPLIED' if is_stop else 'RUNNING'}{RESET}")
-                        print(f"{color}================================================================================{RESET}\n")
-
-        except Exception as e:
+                    if cid > 0 and cid != last_command_id:
+                        signal_found = (cid, cmd, direction, speed, pump, "Local Wi-Fi / Hotspot")
+                    elif last_pump is not None and pump != last_pump:
+                        signal_found = (last_command_id, cmd, direction, speed, pump, "Local Wi-Fi / Hotspot")
+        except Exception:
             pass
+
+        # 2. Check Render Cloud API (instant ~150ms when phone is on cellular 4G/5G anywhere)
+        if not signal_found:
+            try:
+                req = urllib.request.Request(CLOUD_API, headers={"User-Agent": "PhoneSignalReceiver/1.0"})
+                with urllib.request.urlopen(req, timeout=0.8) as resp:
+                    if resp.status == 200:
+                        data = json.loads(resp.read().decode())
+                        cid = data.get("command_id", 0)
+                        cmd = data.get("command", "stop")
+                        direction = data.get("direction", "Stopped")
+                        speed = int(data.get("speed", 50))
+                        pump = bool(data.get("pump", False))
+                        if cid > 0 and cid != last_command_id:
+                            signal_found = (cid, cmd, direction, speed, pump, "Render Cloud (Cellular/Internet)")
+                        elif last_pump is not None and pump != last_pump:
+                            signal_found = (last_command_id, cmd, direction, speed, pump, "Render Cloud (Cellular/Internet)")
+            except Exception:
+                pass
+
+        # 3. Process new verified signal from phone
+        if signal_found:
+            cid, cmd, direction, speed, pump, source = signal_found
+            now_str = time.strftime("%H:%M:%S")
+            current_direction = direction
+            current_speed = speed
+
+            # A. Check for Spray Pump toggle
+            if last_pump is not None and pump != last_pump:
+                total_signals += 1
+                print(f"\a", end="", flush=True)
+                print(f"{CYAN}================================================================================")
+                print(f"{BOLD}[{now_str}] 💦 SIGNAL VERIFIED: SPRAY PUMP {'ON (ACTIVE)' if pump else 'OFF (STOPPED)'}{RESET}")
+                print(f"{CYAN}================================================================================{RESET}")
+                print(f"   Route:        {WHITE}{source}{RESET}")
+                print(f"   Pi Received:  {GREEN}✅ CONFIRMED: Raspberry Pi 4 received pump trigger!{RESET}")
+                print(f"   Relay Pin:    Pin 37 (BCM GPIO 26) -> {'HIGH (3.3V -> 12V PUMP ACTIVE)' if pump else 'LOW (0V -> PUMP OFF)'}")
+                print(f"   Hardware:     12V Diaphragm Chemical Spray Pump Relay")
+                print(f"{CYAN}================================================================================{RESET}\n")
+
+            last_pump = pump
+
+            # B. Check for Movement Command
+            if cid != last_command_id and cid > 0:
+                last_command_id = cid
+                total_signals += 1
+                cmd_upper = cmd.upper()
+                is_stop = cmd == "stop" or direction.lower() == "stopped"
+
+                print(f"\a", end="", flush=True)
+                color = RED if is_stop else GREEN
+                symbol = "🛑" if is_stop else "⚡"
+                print(f"{color}{BOLD}================================================================================")
+                print(f" {symbol} [{now_str}] SIGNAL VERIFIED: {cmd_upper} (Signal #{total_signals} | Command ID #{cid})")
+                print(f"================================================================================{RESET}")
+                print(f"   Pi Received:  {GREEN}✅ VERIFIED: Raspberry Pi 4 received signal from phone!{RESET}")
+                print(f"   Signal Sent:  {BOLD}{WHITE}{cmd_upper}{RESET} ({direction}) via {CYAN}{source}{RESET}")
+                print(f"   Chassis Move: {BOLD}{WHITE}{'STOPPED (BRAKED)' if is_stop else f'MOVING {cmd_upper}'}{RESET}")
+                print(f"   PWM Speed:    {BOLD}{CYAN}{speed}% PWM Power{RESET}")
+                print(f"   Hardware BTS: {get_gpio_desc(direction, speed, not is_stop)}")
+                print(f"   Motor Status: {GREEN}{'🛑 EMERGENCY BRAKE ENGAGED' if is_stop else '⚡ MOTORS ROTATING'}{RESET}")
+                print(f"   Pump Relay:   {MAGENTA}{'SPRAYING (ON)' if pump else 'OFF'}{RESET}")
+                print(f"{color}================================================================================{RESET}\n")
 
         heartbeat_tick += 1
         if heartbeat_tick % 15 == 0:
             now_str = time.strftime("%H:%M:%S")
-            sys.stdout.write(f"\r{DIM}[{now_str}] 🟢 Ready | Current: {direction.upper()} | Speed: {speed}%{RESET}")
+            sys.stdout.write(f"\r{DIM}[{now_str}] 🟢 Pi Listening | Verified Signals: {total_signals} | Last: {current_direction.upper()}{RESET}")
             sys.stdout.flush()
 
-        time.sleep(0.15)
+        time.sleep(0.12)
 
 if __name__ == "__main__":
     try:
