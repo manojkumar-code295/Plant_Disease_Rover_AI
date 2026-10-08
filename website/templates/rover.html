@@ -2,2928 +2,886 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#071b12">
-<title>Smart Rover Control & Telemetry | Precision Agriculture</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#06140e">
+<title>AgriRover | Fast Mobile Controller</title>
 
 <!-- PWA & App Icons -->
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
-<link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
 <link rel="manifest" href="/manifest.json">
 
-<!-- THREE.JS 3D WEBGL ENGINE -->
-<script src="/static/js/three.min.js"></script>
-<script>
-if (typeof THREE === 'undefined') {
-    document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
-}
-</script>
-
 <style>
-/* =========================================================
-   DESIGN TOKENS & RESET
-========================================================= */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-}
-
-:root {
-    --bg-dark: #06140e;
-    --bg-card: rgba(14, 38, 28, 0.82);
-    --bg-card-hover: rgba(20, 52, 38, 0.92);
-    --border-card: rgba(34, 197, 94, 0.22);
-    --border-card-bright: rgba(34, 197, 94, 0.6);
-    --accent-emerald: #10b981;
-    --accent-green: #22c55e;
-    --accent-cyan: #06b6d4;
-    --accent-amber: #f59e0b;
-    --accent-red: #ef4444;
-    --text-primary: #f0fdf4;
-    --text-muted: #86efac;
-    --text-dim: #64748b;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --radius-sm: 8px;
-    --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.22);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
-    color: var(--text-primary);
+    background: #06140e;
+    color: #f0fdf4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     overflow-x: hidden;
-    position: relative;
 }
 
-/* Background Cyber Scanlines */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(34, 197, 94, 0.03), rgba(0, 0, 0, 0.03) 3%, transparent 3%);
-    background-size: 100% 4px, 60px 100%;
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* =========================================================
-   HEADER & NAVBAR
-========================================================= */
-header {
-    background: rgba(10, 30, 22, 0.92);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border-card);
-    padding: 16px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.brand-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.brand-logo {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
-    border: 1.5px solid rgba(52, 211, 153, 0.5);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
-    animation: glowPulse 3s infinite ease-in-out;
-    flex-shrink: 0;
-}
-
-.brand-icon-img {
+/* TOP STATUS BAR */
+.top-bar {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-    display: block;
-}
-
-.brand-title h1 {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.brand-title p {
-    font-size: 11px;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-nav {
-    display: flex;
-    gap: 8px;
-    background: rgba(6, 20, 14, 0.6);
-    padding: 6px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-nav a {
-    color: #94a3b8;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 14px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-
-nav a:hover {
-    color: var(--text-primary);
-    background: rgba(34, 197, 94, 0.12);
-}
-
-nav a.active {
-    color: #ecfdf5;
-    background: rgba(16, 185, 129, 0.24);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-}
-
-/* =========================================================
-   CONTAINER & HUD TOP BAR
-========================================================= */
-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-    position: relative;
-    z-index: 1;
-}
-
-.hud-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.hud-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-lg);
-    padding: 18px 22px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    max-width: 520px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.25s ease, border-color 0.25s ease;
-}
-
-.hud-card::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-emerald), transparent);
-    opacity: 0.6;
-}
-
-.hud-card:hover {
-    border-color: var(--border-card-bright);
-    transform: translateY(-2px);
-}
-
-.hud-card-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.hud-icon-wrap {
-    width: 52px;
-    height: 52px;
+    padding: 8px 12px;
+    background: rgba(14, 38, 28, 0.95);
+    border: 1px solid rgba(34, 197, 94, 0.25);
     border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    position: relative;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.hud-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #94a3b8;
-    margin-bottom: 4px;
-}
-
-.hud-title {
-    font-size: 17px;
-    font-weight: 800;
-    color: #ffffff;
+.brand-title {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: #4ade80;
 }
 
-.hud-sub {
-    font-size: 12px;
-    color: #6ee7b7;
-    margin-top: 3px;
-    font-family: monospace;
+.brand-title a {
+    color: #4ade80;
+    text-decoration: none;
 }
 
-.hud-card-right {
-    text-align: right;
+.pill-group {
+    display: flex;
+    gap: 6px;
+    align-items: center;
 }
 
-/* Status Badges */
 .status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-}
-
-.status-pill.online {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.5);
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
-}
-
-.status-pill.offline {
-    background: rgba(239, 68, 68, 0.18);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.4);
-}
-
-/* Pulsing Radar Dot Animation */
-.radar-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #10b981;
-    position: relative;
-    display: inline-block;
-}
-
-.status-pill.online .radar-dot {
-    background: #10b981;
-}
-
-.status-pill.online .radar-dot::after {
-    content: "";
-    position: absolute;
-    top: -4px; left: -4px; right: -4px; bottom: -4px;
-    border-radius: 50%;
-    border: 2px solid #34d399;
-    animation: radarPing 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.status-pill.offline .radar-dot {
-    background: #ef4444;
-}
-
-.status-pill.offline .radar-dot::after {
-    display: none;
-}
-
-/* Neural Synapse Pulse Animation */
-@keyframes brainPulse {
-    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.5)); }
-    50% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.9)); }
-}
-
-.brain-pulse {
-    animation: brainPulse 2s infinite ease-in-out;
-}
-
-/* =========================================================
-   TWO-COLUMN CONTROL LAYOUT
-========================================================= */
-.control-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 22px;
-}
-
-.panel-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(16px);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
-    position: relative;
-}
-
-.panel-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.panel-title h3 {
-    font-size: 17px;
-    font-weight: 700;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.panel-badge {
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #86efac;
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-/* =========================================================
-   ANIMATED 2D ROVER SCHEMATIC (SVG & CYBER HUD)
-========================================================= */
-.schematic-viewport {
-    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.14) 0%, rgba(4, 16, 11, 0.95) 100%),
-                linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
-    background-size: 100% 100%, 22px 22px, 22px 22px;
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 22px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 35px rgba(16, 185, 129, 0.08);
+.status-pill.offline {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
 }
 
-/* =========================================================
-   3D ROVER HOLOGRAPHIC VIEWPORT
-========================================================= */
-.viewport-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse 1.5s infinite;
+}
+
+.status-pill.offline .pulse-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* SIGNAL FEEDBACK BANNER */
+.signal-banner {
+    width: 100%;
+    max-width: 520px;
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.5), rgba(15, 23, 42, 0.6));
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
     margin-bottom: 12px;
-    z-index: 10;
-    position: relative;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.view-mode-toggle, .view-cam-controls {
-    display: flex;
-    gap: 4px;
-    background: rgba(4, 16, 11, 0.8);
-    padding: 4px;
-    border-radius: 10px;
-    border: 1px solid rgba(52, 211, 153, 0.25);
-}
-
-.view-btn, .cam-btn {
-    background: transparent;
-    border: 1px solid transparent;
-    color: #94a3b8;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 5px 11px;
-    border-radius: 7px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.view-btn:hover, .cam-btn:hover {
-    color: #f0fdf4;
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.view-btn.active, .cam-btn.active {
-    background: linear-gradient(135deg, #10b981, #047857);
-    color: #ffffff;
-    border-color: #34d399;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
-}
-
-.rover-3d-container {
-    width: 100%;
-    height: 310px;
-    position: relative;
-    border-radius: 14px;
-    overflow: hidden;
-    touch-action: none;
-    cursor: grab;
-    background: radial-gradient(circle at 50% 40%, rgba(13, 40, 30, 0.8) 0%, rgba(3, 12, 8, 0.95) 100%);
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
-}
-
-.rover-3d-container:active {
-    cursor: grabbing;
-}
-
-#rover-3d-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-.touch-hint-3d {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-    font-weight: 600;
-    color: rgba(134, 239, 172, 0.85);
-    pointer-events: none;
-    letter-spacing: 0.5px;
-    background: rgba(6, 20, 14, 0.75);
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    padding: 3px 12px;
-    border-radius: 20px;
-    backdrop-filter: blur(4px);
-    transition: opacity 0.5s ease;
-}
-
-.hud-corner-tag {
-    position: absolute;
-    font-family: monospace;
-    font-size: 10px;
-    color: #6ee7b7;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(52, 211, 153, 0.3);
-    padding: 3px 8px;
-    border-radius: 6px;
-    pointer-events: none;
-    z-index: 5;
-}
-.hud-tag-tl { top: 10px; left: 10px; }
-.hud-tag-tr { top: 10px; right: 10px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
-
-/* Sonar radar sweeping overlay */
-.sonar-sweep {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 280px;
-    height: 280px;
-    margin-top: -140px;
-    margin-left: -140px;
-    border-radius: 50%;
-    border: 1px dashed rgba(16, 185, 129, 0.25);
-    pointer-events: none;
-    box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.06);
-}
-
-.sonar-beam {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: 50%;
-    background: conic-gradient(from 0deg, rgba(52, 211, 153, 0.35) 0deg, transparent 65deg, transparent 360deg);
-    animation: radarSweep 3.5s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes radarSweep {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Directional Velocity Stream Particles */
-.velocity-stream-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.rover-moving .velocity-stream-layer {
-    opacity: 1;
-}
-
-.v-line {
-    position: absolute;
-    width: 2px;
-    height: 50px;
-    border-radius: 2px;
-    opacity: 0.75;
-}
-.v-line-1 { left: 18%; }
-.v-line-2 { left: 28%; animation-delay: 0.18s; }
-.v-line-3 { left: 72%; animation-delay: 0.08s; }
-.v-line-4 { left: 82%; animation-delay: 0.25s; }
-
-.rover-forward .v-line {
-    background: linear-gradient(180deg, transparent, #34d399, transparent);
-    animation: vStreamFwd 0.65s linear infinite;
-}
-
-.rover-backward .v-line {
-    background: linear-gradient(0deg, transparent, #f87171, transparent);
-    animation: vStreamRev 0.65s linear infinite;
-}
-
-@keyframes vStreamFwd {
-    0% { transform: translateY(-60px); opacity: 0; }
-    50% { opacity: 0.95; }
-    100% { transform: translateY(260px); opacity: 0; }
-}
-
-@keyframes vStreamRev {
-    0% { transform: translateY(260px); opacity: 0; }
-    50% { opacity: 0.95; }
-    100% { transform: translateY(-60px); opacity: 0; }
-}
-
-/* Animated SVG Elements */
-.svg-rover-container {
-    width: 100%;
-    max-width: 320px;
-    height: 210px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 2;
-}
-
-/* Rover Chassis Micro-Rumble while moving */
-@keyframes roverChassisRoll {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    25% { transform: translateY(-1.5px) rotate(0.4deg); }
-    75% { transform: translateY(1.5px) rotate(-0.4deg); }
-}
-
-.rover-moving svg {
-    animation: roverChassisRoll 0.22s infinite ease-in-out;
-}
-
-/* Headlights cone */
-.headlight-cone {
-    opacity: 0.15;
-    transition: opacity 0.3s ease;
-}
-.rover-moving .headlight-cone {
-    opacity: 0.85;
-    animation: headlightFlicker 0.15s infinite alternate;
-}
-
-@keyframes headlightFlicker {
-    0% { opacity: 0.75; filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.4)); }
-    100% { opacity: 0.95; filter: drop-shadow(0 0 14px rgba(52, 211, 153, 0.8)); }
-}
-
-/* Wheel rotation animations */
-@keyframes wheelSpinFwd {
-    0% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: -20; }
-}
-
-@keyframes wheelSpinRev {
-    0% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: 20; }
-}
-
-.wheel-tread {
-    stroke-dasharray: 4, 3;
-    transition: stroke 0.3s ease;
-}
-
-.rover-forward .wheel-tread {
-    animation: wheelSpinFwd 0.35s linear infinite;
-    stroke: #34d399 !important;
-}
-
-.rover-backward .wheel-tread {
-    animation: wheelSpinRev 0.35s linear infinite;
-    stroke: #f87171 !important;
-}
-
-.rover-left .left-wheel .wheel-tread {
-    animation: wheelSpinRev 0.35s linear infinite;
-    stroke: #38bdf8 !important;
-}
-.rover-left .right-wheel .wheel-tread {
-    animation: wheelSpinFwd 0.35s linear infinite;
-    stroke: #38bdf8 !important;
-}
-
-.rover-right .left-wheel .wheel-tread {
-    animation: wheelSpinFwd 0.35s linear infinite;
-    stroke: #38bdf8 !important;
-}
-.rover-right .right-wheel .wheel-tread {
-    animation: wheelSpinRev 0.35s linear infinite;
-    stroke: #38bdf8 !important;
-}
-
-/* Front wheels steer tilt */
-.front-wheels {
-    transition: transform 0.3s ease;
-    transform-origin: center;
-}
-.rover-left .front-wheels {
-    transform: rotate(-18deg);
-}
-.rover-right .front-wheels {
-    transform: rotate(18deg);
-}
-
-/* Spray Nozzles Mist Animation */
-@keyframes sprayMist {
-    0% {
-        opacity: 0;
-        transform: translate(0, 0) scale(0.6);
-    }
-    40% {
-        opacity: 0.9;
-    }
-    100% {
-        opacity: 0;
-        transform: translate(0, 40px) scale(2.5);
-    }
-}
-
-.spray-mist-cone {
-    display: none;
-    transform-origin: top center;
-}
-
-.pump-active .spray-mist-cone {
-    display: block;
-    animation: sprayMist 0.45s ease-out infinite;
-}
-
-/* Active Motion Banner */
-.motion-hud {
-    margin-top: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(6, 20, 14, 0.7);
-    padding: 10px 16px;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 12px;
 }
 
-.motion-hud-state {
-    font-size: 13px;
+.signal-live-txt {
     font-weight: 800;
     color: #34d399;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.5px;
+}
+
+.signal-latency-txt {
+    color: #94a3b8;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+/* MAIN CONTROLLER CONTAINER */
+.controller-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(14, 38, 28, 0.85);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 18px;
+    padding: 18px 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    margin-bottom: 14px;
     display: flex;
+    flex-direction: column;
     align-items: center;
+}
+
+/* DRIVE MODE & SPEED SELECTOR */
+.drive-mode-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
     gap: 8px;
 }
 
-.motion-hud-speed {
-    font-size: 12px;
+.btn-mode-toggle {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #86efac;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.speed-badge-wrap {
+    font-size: 11px;
     color: #94a3b8;
+    font-weight: 700;
+}
+
+.speed-badge-wrap span {
+    color: #38bdf8;
+    font-size: 13px;
     font-family: monospace;
 }
 
-/* =========================================================
-   D-PAD CONTROLLER & STEERING WHEEL
-========================================================= */
-.control-interaction-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    align-items: center;
-}
-
-/* Tactile D-PAD */
-.dpad-container {
+/* GIANT TOUCH D-PAD (3x3 CROSS) */
+.dpad-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
-    width: 220px;
-    height: 220px;
-    margin: 0 auto;
+    gap: 12px;
+    width: 270px;
+    height: 270px;
+    margin: 8px auto 16px auto;
 }
 
 .dpad-btn {
+    border: 1px solid rgba(52, 211, 153, 0.3);
     background: linear-gradient(145deg, #133a2a, #0b261b);
-    border: 1px solid rgba(52, 211, 153, 0.25);
-    border-radius: 14px;
-    color: #ecfdf5;
-    font-size: 16px;
-    font-weight: 800;
+    color: #f0fdf4;
+    border-radius: 16px;
+    font-size: 26px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
     cursor: pointer;
-    user-select: none;
     touch-action: manipulation;
-    transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.08s ease, background 0.08s ease;
 }
 
 .dpad-btn span {
-    font-size: 10px;
-    color: #86efac;
+    font-size: 11px;
+    font-weight: 800;
     letter-spacing: 0.5px;
-}
-
-.dpad-btn:hover {
-    background: linear-gradient(145deg, #194d38, #0f3525);
-    border-color: rgba(52, 211, 153, 0.6);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+    margin-top: 2px;
 }
 
 .dpad-btn:active, .dpad-btn.active {
-    transform: scale(0.94);
-    background: #064e3b;
-    border-color: #34d399;
-    box-shadow: 0 0 15px rgba(52, 211, 153, 0.6), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    transform: scale(0.92);
+    background: #059669 !important;
+    border-color: #34d399 !important;
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.8) !important;
 }
 
-/* Primary Engine Start/Stop Bar (Master Engine Ignition) */
-.primary-engine-bar {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 14px;
-    width: 100%;
-    max-width: 340px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.engine-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 13px 18px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    cursor: pointer;
-    user-select: none;
-    touch-action: manipulation;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-}
-
-.engine-start {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(4, 120, 87, 0.55));
-    border: 1px solid #10b981;
-    color: #ecfdf5;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.engine-start:hover {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(4, 120, 87, 0.7));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(16, 185, 129, 0.5);
-}
-
-.engine-start.running {
-    background: linear-gradient(135deg, #064e3b, #022c22);
-    border-color: #34d399;
-    box-shadow: 0 0 25px rgba(52, 211, 153, 0.8), inset 0 0 12px rgba(52, 211, 153, 0.3);
-    animation: enginePulseAura 1.8s infinite ease-in-out;
-}
-
-@keyframes enginePulseAura {
-    0%, 100% {
-        box-shadow: 0 0 14px rgba(52, 211, 153, 0.6), inset 0 0 8px rgba(52, 211, 153, 0.2);
-        border-color: #34d399;
-    }
-    50% {
-        box-shadow: 0 0 30px rgba(52, 211, 153, 0.95), inset 0 0 16px rgba(52, 211, 153, 0.4);
-        border-color: #a7f3d0;
-    }
-}
-
-.engine-stop {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    border: 1px solid #f87171;
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.engine-stop:hover {
-    background: linear-gradient(135deg, #b91c1c, #991b1b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
-}
-
-.engine-stop:active {
-    transform: scale(0.96);
-    background: #7f1d1d;
-}
-
-@keyframes spinTurbine {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* Tactile D-PAD Layout (Clean Cross, Symmetrical 3x3) */
-.dpad-btn.fwd {
+.dpad-fwd {
     grid-column: 2;
     grid-row: 1;
-    background: linear-gradient(145deg, #064e3b, #063729);
-    border: 1px solid rgba(52, 211, 153, 0.45);
-    color: #ecfdf5;
-}
-.dpad-btn.fwd span { color: #86efac; font-weight: 800; }
-.dpad-btn.fwd:hover {
-    background: linear-gradient(145deg, #059669, #065f46);
-    border-color: #34d399;
-    box-shadow: 0 0 20px rgba(52, 211, 153, 0.45);
-    transform: translateY(-2px);
-}
-.dpad-btn.fwd.active, .dpad-btn.fwd:active {
-    background: #022c22;
-    border-color: #6ee7b7;
-    box-shadow: 0 0 22px rgba(52, 211, 153, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: scale(0.93);
+    background: linear-gradient(145deg, #154c37, #0d3625);
+    border-color: rgba(52, 211, 153, 0.5);
+    color: #86efac;
 }
 
-.dpad-btn.lft {
+.dpad-lft {
     grid-column: 1;
     grid-row: 2;
-    background: linear-gradient(145deg, #083344, #082633);
-    border: 1px solid rgba(6, 182, 212, 0.35);
-    color: #ecfeff;
-}
-.dpad-btn.lft span { color: #67e8f9; font-weight: 800; }
-.dpad-btn.lft:hover {
-    background: linear-gradient(145deg, #0e7490, #084c61);
-    border-color: #38bdf8;
-    box-shadow: 0 0 18px rgba(6, 182, 212, 0.4);
-    transform: translateY(-2px);
-}
-.dpad-btn.lft.active, .dpad-btn.lft:active {
-    background: #04212c;
-    border-color: #67e8f9;
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: scale(0.93);
 }
 
-.dpad-btn.stp {
+.dpad-stp {
     grid-column: 2;
     grid-row: 2;
     background: linear-gradient(145deg, #7f1d1d, #450a0a);
-    border: 1px solid rgba(239, 68, 68, 0.5);
-    color: #fecaca;
-    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
-}
-.dpad-btn.stp span { color: #fca5a5; font-weight: 800; }
-.dpad-btn.stp:hover {
-    background: linear-gradient(145deg, #991b1b, #6b1717);
     border-color: #ef4444;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-    transform: translateY(-2px);
-}
-.dpad-btn.stp:active {
-    background: #360707;
-    box-shadow: 0 0 22px rgba(239, 68, 68, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: scale(0.93);
+    color: #fee2e2;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
 }
 
-.dpad-btn.rgt {
+.dpad-stp:active, .dpad-stp.active {
+    background: #dc2626 !important;
+    border-color: #f87171 !important;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9) !important;
+}
+
+.dpad-stp span {
+    color: #fca5a5;
+}
+
+.dpad-rgt {
     grid-column: 3;
     grid-row: 2;
-    background: linear-gradient(145deg, #083344, #082633);
-    border: 1px solid rgba(6, 182, 212, 0.35);
-    color: #ecfeff;
-}
-.dpad-btn.rgt span { color: #67e8f9; font-weight: 800; }
-.dpad-btn.rgt:hover {
-    background: linear-gradient(145deg, #0e7490, #084c61);
-    border-color: #38bdf8;
-    box-shadow: 0 0 18px rgba(6, 182, 212, 0.4);
-    transform: translateY(-2px);
-}
-.dpad-btn.rgt.active, .dpad-btn.rgt:active {
-    background: #04212c;
-    border-color: #67e8f9;
-    box-shadow: 0 0 20px rgba(6, 182, 212, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: scale(0.93);
 }
 
-.dpad-btn.rev {
+.dpad-rev {
     grid-column: 2;
     grid-row: 3;
-    background: linear-gradient(145deg, #4c0519, #380413);
-    border: 1px solid rgba(244, 63, 94, 0.35);
-    color: #fff1f2;
-}
-.dpad-btn.rev span { color: #fda4af; font-weight: 800; }
-.dpad-btn.rev:hover {
-    background: linear-gradient(145deg, #be123c, #881337);
-    border-color: #fb7185;
-    box-shadow: 0 0 18px rgba(244, 63, 94, 0.4);
-    transform: translateY(-2px);
-}
-.dpad-btn.rev.active, .dpad-btn.rev:active {
-    background: #25020c;
-    border-color: #fda4af;
-    box-shadow: 0 0 20px rgba(244, 63, 94, 0.75), inset 0 2px 4px rgba(0, 0, 0, 0.5);
-    transform: scale(0.93);
+    background: linear-gradient(145deg, #37230b, #1f1406);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #fde68a;
 }
 
-/* Interactive Steering Wheel */
-.steering-wrapper {
-    text-align: center;
+.dpad-rev span {
+    color: #fcd34d;
 }
 
-.wheel-graphic-box {
-    position: relative;
-    width: 190px;
-    height: 190px;
-    margin: 0 auto;
-    border-radius: 50%;
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-    transition: transform 0.1s ease;
-}
-
-.wheel-graphic-box:active {
-    cursor: grabbing;
-}
-
-.wheel-rim {
+/* HARDWARE ACTION CONTROLS */
+.actions-row {
     width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 14px solid #133a2a;
-    background: radial-gradient(circle, #081a13 0%, #05120c 60%, transparent 62%);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 0 0 3px rgba(34, 197, 94, 0.3);
-    position: relative;
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
 }
 
-.wheel-center-cap {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #10b981, #065f46);
-    border: 3px solid #f0fdf4;
+.btn-action-hardware {
+    flex: 1;
+    padding: 12px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    background: rgba(16, 185, 129, 0.12);
+    color: #86efac;
+    font-size: 13px;
+    font-weight: 800;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.wheel-spoke {
-    position: absolute;
-    background: #133a2a;
-    border-radius: 6px;
-}
-.spoke-v {
-    width: 14px;
-    height: 65px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-}
-.spoke-h-l {
-    width: 60px;
-    height: 14px;
-    top: 50%; left: 10px;
-    transform: translateY(-50%) rotate(-15deg);
-    transform-origin: right center;
-}
-.spoke-h-r {
-    width: 60px;
-    height: 14px;
-    top: 50%; right: 10px;
-    transform: translateY(-50%) rotate(15deg);
-    transform-origin: left center;
-}
-
-.steering-readout {
-    margin-top: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #6ee7b7;
-    letter-spacing: 0.5px;
-}
-
-/* Keyboard hint strip */
-.key-hint-strip {
-    margin-top: 18px;
-    display: flex;
     justify-content: center;
     gap: 8px;
-    font-size: 11px;
-    color: #94a3b8;
-}
-
-.key-badge {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 2px 7px;
-    border-radius: 6px;
-    font-weight: 800;
-    color: #ecfdf5;
-    font-family: monospace;
-}
-
-/* =========================================================
-   SPEED SLIDER & SPRAY PUMP SWITCH
-========================================================= */
-.actuator-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 20px;
-}
-
-.actuator-card {
-    background: rgba(8, 26, 18, 0.7);
-    border: 1px solid rgba(34, 197, 94, 0.15);
-    border-radius: var(--radius-md);
-    padding: 16px;
-}
-
-.actuator-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.actuator-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #e2e8f0;
-}
-
-.actuator-val {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--accent-emerald);
-    font-family: monospace;
-}
-
-/* Range Slider */
-.speed-slider {
-    width: 100%;
-    -webkit-appearance: none;
-    height: 8px;
-    border-radius: 4px;
-    background: #1e3a2f;
-    outline: none;
-    margin: 8px 0;
-}
-
-.speed-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--accent-emerald);
     cursor: pointer;
-    box-shadow: 0 0 10px var(--accent-emerald);
-    transition: transform 0.15s ease;
+    touch-action: manipulation;
+    transition: all 0.12s ease;
 }
 
-.speed-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
+.btn-action-hardware:active {
+    transform: scale(0.95);
+}
+
+.btn-action-hardware.pump-active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(8, 145, 178, 0.5));
+    border-color: #06b6d4;
+    color: #cffafe;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+}
+
+/* SPEED SLIDER & PRESETS */
+.speed-control-box {
+    width: 100%;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.speed-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+input[type="range"] {
+    flex: 1;
+    accent-color: #10b981;
+    height: 8px;
+    background: #0f2c1f;
+    border-radius: 4px;
 }
 
 .speed-presets {
     display: flex;
-    gap: 6px;
-    margin-top: 8px;
+    gap: 8px;
 }
 
-.preset-btn {
+.btn-speed-chip {
     flex: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    background: rgba(14, 38, 28, 0.9);
+    border: 1px solid rgba(52, 211, 153, 0.25);
     color: #94a3b8;
-    padding: 4px 0;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-speed-chip.active {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #34d399;
+    color: #ecfdf5;
+}
+
+/* LATEST LEAF DIAGNOSIS CARD (REPLACES LIVE WEBCAM) */
+.diagnosis-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(14, 38, 28, 0.85);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.card-title-txt {
+    font-size: 13px;
+    font-weight: 800;
+    color: #4ade80;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.diagnosis-content {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.leaf-thumb {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    object-fit: cover;
+    background: #0b1f16;
+}
+
+.leaf-meta {
+    flex: 1;
+}
+
+.disease-name-badge {
+    font-size: 15px;
+    font-weight: 800;
+    color: #f0fdf4;
+    margin-bottom: 4px;
+}
+
+.confidence-pill {
+    display: inline-block;
+    padding: 2px 8px;
     border-radius: 6px;
     font-size: 11px;
     font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.preset-btn:hover {
-    background: rgba(34, 197, 94, 0.2);
-    color: #ffffff;
-    border-color: var(--accent-emerald);
-}
-
-/* High Voltage Pump Switch */
-.pump-toggle-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.pump-toggle-btn.off {
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    color: #94a3b8;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.pump-toggle-btn.off:hover {
-    background: linear-gradient(135deg, #334155, #1e293b);
-    color: #ffffff;
-}
-
-.pump-toggle-btn.on {
-    background: linear-gradient(135deg, #0284c7, #0369a1);
-    color: #ffffff;
-    border: 1px solid #38bdf8;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
-    animation: sprayButtonGlow 1.8s infinite alternate;
-}
-
-@keyframes sprayButtonGlow {
-    from { box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
-    to { box-shadow: 0 0 24px rgba(56, 189, 248, 0.7); }
-}
-
-/* =========================================================
-   RIGHT COLUMN: LIVE TELEMETRY & TERMINAL
-========================================================= */
-.telemetry-row {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.stat-chip-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.stat-chip {
-    background: rgba(6, 20, 14, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
-}
-
-.stat-chip-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #94a3b8;
-    letter-spacing: 0.5px;
-}
-
-.stat-chip-val {
-    font-size: 16px;
-    font-weight: 800;
-    color: #ffffff;
-    margin-top: 4px;
-    font-family: monospace;
-}
-
-/* Live Terminal Log */
-.terminal-card {
-    background: #030a07;
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    border-radius: var(--radius-md);
-    padding: 14px;
-    font-family: "Courier New", Courier, monospace;
-    font-size: 11px;
+    background: rgba(16, 185, 129, 0.2);
     color: #86efac;
-    height: 180px;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 6px;
 }
 
-.terminal-header {
+.treatment-txt {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.3;
+}
+
+/* PIN MONITOR & LOG STRIP */
+.pin-monitor-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(10, 26, 19, 0.9);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+    font-size: 11px;
+}
+
+.pin-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 10px;
-    color: #64748b;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 4px;
-}
-
-.terminal-line {
-    margin-bottom: 4px;
-    line-height: 1.4;
-    word-break: break-all;
-}
-.terminal-line.cmd { color: #38bdf8; }
-.terminal-line.ack { color: #34d399; }
-.terminal-line.err { color: #f87171; }
-
-/* =========================================================
-   HARDWARE PINOUT CARD
-========================================================= */
-.hardware-map-card {
-    grid-column: 1 / -1;
-    margin-top: 8px;
-}
-
-.pin-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-top: 12px;
-}
-
-.pin-table th {
-    text-align: left;
-    padding: 8px 12px;
+    padding: 3px 0;
     color: #94a3b8;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.pin-table td {
-    padding: 9px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.pin-table code {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #38bdf8;
     font-family: monospace;
 }
 
-/* =========================================================
-   GENERIC ANIMATIONS
-========================================================= */
-@keyframes radarPing {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2.8); opacity: 0; }
-}
-
-@keyframes glowPulse {
-    0%, 100% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.3); }
-    50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.6); }
-}
-
-@keyframes headlightFlicker {
-    0% { opacity: 0.70; }
-    100% { opacity: 0.90; }
-}
-
-/* Toast message */
-.toast-msg {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 13px;
+.pin-row span.val {
+    color: #34d399;
     font-weight: 700;
-    z-index: 1000;
-    display: none;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    animation: toastIn 0.3s ease;
-}
-.toast-success { background: #065f46; color: #a7f3d0; border: 1px solid #10b981; }
-.toast-error { background: #7f1d1d; color: #fecaca; border: 1px solid #ef4444; }
-
-@keyframes toastIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-@media (max-width: 900px) {
-    .hud-grid { grid-template-columns: 1fr; }
-    .control-grid { grid-template-columns: 1fr; }
-    .control-interaction-row { grid-template-columns: 1fr; }
-    .wheel-graphic-box { margin-top: 16px; }
-}
-@media (max-width: 600px) {
-    header { flex-direction: column; gap: 12px; }
-    .actuator-row { grid-template-columns: 1fr; }
+.console-strip {
+    width: 100%;
+    max-width: 520px;
+    background: #030a07;
+    border: 1px solid rgba(52, 211, 153, 0.15);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 10px;
+    color: #86efac;
+    height: 50px;
+    overflow-y: hidden;
+    line-height: 1.4;
 }
 </style>
 </head>
-
 <body>
 
-<!-- =========================================================
-     TOPBAR HEADER
-========================================================= -->
-<header>
-    <div class="brand-wrapper">
-        <div class="brand-logo">
-            <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
-        </div>
-        <div class="brand-title">
-            <h1>AgriRover Command Center</h1>
-            <p>Smart Rover Telemetry & Actuation</p>
-        </div>
+<!-- TOP STATUS BAR -->
+<header class="top-bar">
+    <div class="brand-title">
+        <span>🚜</span>
+        <a href="/">AgriRover Mobile</a>
     </div>
-
-    <nav>
-        <a href="/">Dashboard</a>
-        <a href="/rover" class="active">🚜 Rover</a>
-        <a href="/daily-data">Daily Data</a>
-        <a href="/analytics">Analytics</a>
-        <a href="/dataset">Dataset</a>
-        <a href="/settings">Settings</a>
-    </nav>
+    <div class="pill-group">
+        <div class="status-pill {% if rover.connected %}online{% else %}offline{% endif %}" id="pi-status-pill">
+            <span class="pulse-dot"></span>
+            <span id="pi-status-label">{{ "Pi Online" if rover.connected else "Pi Offline" }}</span>
+        </div>
+        <a href="/" style="text-decoration:none; color:#86efac; font-size:11px; font-weight:700; padding:4px 8px; border:1px solid rgba(34,197,94,0.3); border-radius:6px; background:rgba(16,185,129,0.1);">Dashboard ↗</a>
+    </div>
 </header>
 
-<main>
+<!-- SIGNAL FEEDBACK BANNER -->
+<section class="signal-banner">
+    <div>
+        <span style="color:#94a3b8;">SIGNAL: </span>
+        <span class="signal-live-txt" id="signal-state-txt">READY / STANDBY</span>
+    </div>
+    <div class="signal-latency-txt" id="signal-latency-txt">PING: -- ms</div>
+</section>
 
-    <!-- =====================================================
-         DUAL HARDWARE CONNECTION HUD
-    ====================================================== -->
-    <div class="hud-grid">
-        <!-- RASPBERRY PI 4 HARDWARE STATUS -->
-        <div class="hud-card" id="pi-card">
-            <div class="hud-card-left">
-                <div class="hud-icon-wrap" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.4);">
-                    🍓
-                </div>
-                <div>
-                    <div class="hud-label">Mainboard Controller</div>
-                    <div class="hud-title">
-                        Raspberry Pi 4
-                        <span style="font-size: 11px; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 6px; font-weight: normal; color: #94a3b8;">4GB Model B</span>
-                    </div>
-                    <div class="hud-sub" id="pi-heartbeat-text">Heartbeat: Waiting for connection...</div>
-                </div>
-            </div>
-            <div class="hud-card-right">
-                <div class="status-pill offline" id="pi-status-badge">
-                    <span class="radar-dot"></span>
-                    <span id="pi-status-label">Pi Offline</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROVER AI MODEL INFERENCE ENGINE -->
-        <div class="hud-card" id="ai-card">
-            <div class="hud-card-left">
-                <div class="hud-icon-wrap brain-pulse" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.4);">
-                    🧠
-                </div>
-                <div>
-                    <div class="hud-label">Edge Neural Engine</div>
-                    <div class="hud-title">
-                        MobileNetV2 AI
-                        <span style="font-size: 11px; background: rgba(6, 182, 212, 0.18); color: #38bdf8; padding: 2px 7px; border-radius: 6px; font-weight: 700;">99.0% Acc</span>
-                    </div>
-                    <div class="hud-sub" id="ai-details-text">Inference: Initializing...</div>
-                </div>
-            </div>
-            <div class="hud-card-right">
-                <div class="status-pill offline" id="ai-status-badge">
-                    <span class="radar-dot" style="background:#06b6d4;"></span>
-                    <span id="ai-status-label">Model Standby</span>
-                </div>
-            </div>
+<!-- MAIN TOUCH CONTROLLER -->
+<main class="controller-card">
+    <div class="drive-mode-bar">
+        <button class="btn-mode-toggle" id="btn-drive-mode" onclick="toggleDriveMode()">
+            Mode: 🟢 Continuous (Tap)
+        </button>
+        <div class="speed-badge-wrap">
+            SPEED: <span id="speed-val-badge">60%</span>
         </div>
     </div>
 
-    <!-- =====================================================
-         MAIN CONTROL GRID
-    ====================================================== -->
-    <div class="control-grid">
+    <!-- TACTICAL TOUCH D-PAD -->
+    <div class="dpad-grid">
+        <button class="dpad-btn dpad-fwd" id="btn-forward"
+            onclick="handleDpadPress('forward')"
+            ontouchstart="handleTouchStart('forward', event)" ontouchend="handleTouchEnd('forward', event)">
+            ▲
+            <span>FWD</span>
+        </button>
 
-        <!-- LEFT COLUMN: INTERACTIVE ROVER VISUALIZER & D-PAD -->
-        <div class="panel-card">
-            <div class="panel-title">
-                <h3>🎮 Dynamic Drive & Steer Control</h3>
-                <span class="panel-badge" id="command-badge">STOPPED</span>
-            </div>
+        <button class="dpad-btn dpad-lft" id="btn-left"
+            onclick="handleDpadPress('left')"
+            ontouchstart="handleTouchStart('left', event)" ontouchend="handleTouchEnd('left', event)">
+            ◀
+            <span>LEFT</span>
+        </button>
 
-            <!-- INTERACTIVE 3D HOLOGRAPHIC & 2D SCHEMATIC VIEWPORT -->
-            <div class="schematic-viewport" id="schematic-viewport">
-                <!-- 3D / 2D Mode Switcher Header -->
-                <div class="viewport-header-bar">
-                    <div class="view-mode-toggle">
-                        <button type="button" class="view-btn active" id="btn-view-3d" onclick="switchRoverView('3d')">🛸 3D HOLOGRAM</button>
-                        <button type="button" class="view-btn" id="btn-view-2d" onclick="switchRoverView('2d')">📐 2D SCHEMATIC</button>
-                    </div>
-                    <div class="view-cam-controls" id="view-cam-controls">
-                        <button type="button" class="cam-btn active" id="cam-btn-orbit" onclick="setRoverCam('orbit')">Orbit</button>
-                        <button type="button" class="cam-btn" id="cam-btn-top" onclick="setRoverCam('top')">Top</button>
-                        <button type="button" class="cam-btn" id="cam-btn-iso" onclick="setRoverCam('iso')">Isometric</button>
-                        <button type="button" class="cam-btn" id="cam-btn-front" onclick="setRoverCam('front')">Front</button>
-                        <button type="button" class="cam-btn" onclick="resetRoverCam()">↺ Reset</button>
-                    </div>
-                </div>
+        <button class="dpad-btn dpad-stp" id="btn-stop"
+            onclick="emergencyBrake()"
+            ontouchstart="handleTouchBrake(event)">
+            ■
+            <span>STOP</span>
+        </button>
 
-                <!-- 3D WEBGL ROVER VIEWPORT -->
-                <div id="rover-3d-container" class="rover-3d-container">
-                    <canvas id="rover-3d-canvas"></canvas>
-                    <div class="hud-corner-tag hud-tag-tl">TELEMETRY: 3D WEBGL</div>
-                    <div class="hud-corner-tag hud-tag-tr" id="hud-3d-fps">60 FPS</div>
-                    <div class="touch-hint-3d" id="touch-hint-3d">✨ Drag to rotate 3D view · Scroll/Pinch to zoom</div>
-                </div>
+        <button class="dpad-btn dpad-rgt" id="btn-right"
+            onclick="handleDpadPress('right')"
+            ontouchstart="handleTouchStart('right', event)" ontouchend="handleTouchEnd('right', event)">
+            ▶
+            <span>RIGHT</span>
+        </button>
 
-                <!-- Sonar radar ring (2D mode) -->
-                <div class="sonar-sweep" id="sonar-sweep-2d" style="display: none;">
-                    <div class="sonar-beam"></div>
-                </div>
-
-                <!-- Cyber Velocity Particle Stream (2D mode) -->
-                <div class="velocity-stream-layer" id="velocity-stream-2d" style="display: none;">
-                    <div class="v-line v-line-1"></div>
-                    <div class="v-line v-line-2"></div>
-                    <div class="v-line v-line-3"></div>
-                    <div class="v-line v-line-4"></div>
-                </div>
-
-                <!-- SVG Interactive Rover (2D mode) -->
-                <div class="svg-rover-container" id="rover-svg-wrap" style="display: none;">
-                    <svg viewBox="0 0 320 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Dual Headlight Cones (Illuminate forward) -->
-                        <polygon class="headlight-cone" points="110,65 50,0 170,0" fill="url(#headlightGrad)" />
-                        <polygon class="headlight-cone" points="210,65 150,0 270,0" fill="url(#headlightGrad)" />
-
-                        <!-- Dual Spray Nozzle Mist (Shoots backward when pump is on) -->
-                        <g class="spray-mist-cone">
-                            <ellipse cx="120" cy="180" rx="20" ry="10" fill="url(#sprayGrad)" />
-                            <ellipse cx="200" cy="180" rx="20" ry="10" fill="url(#sprayGrad)" />
-                            <circle cx="110" cy="195" r="8" fill="#38bdf8" opacity="0.6" />
-                            <circle cx="130" cy="205" r="10" fill="#38bdf8" opacity="0.4" />
-                            <circle cx="190" cy="195" r="8" fill="#38bdf8" opacity="0.6" />
-                            <circle cx="210" cy="205" r="10" fill="#38bdf8" opacity="0.4" />
-                        </g>
-
-                        <defs>
-                            <linearGradient id="headlightGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-                                <stop offset="0%" stop-color="#34d399" stop-opacity="0.8" />
-                                <stop offset="100%" stop-color="#34d399" stop-opacity="0" />
-                            </linearGradient>
-                            <linearGradient id="sprayGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9" />
-                                <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
-                            </linearGradient>
-                            <linearGradient id="chassisGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#164e3b" />
-                                <stop offset="50%" stop-color="#0d3326" />
-                                <stop offset="100%" stop-color="#061c14" />
-                            </linearGradient>
-                        </defs>
-
-                        <!-- Chassis Base -->
-                        <rect x="95" y="55" width="130" height="110" rx="18" fill="url(#chassisGrad)" stroke="#34d399" stroke-width="2" />
-                        
-                        <!-- Solar Panel on Chassis -->
-                        <rect x="110" y="70" width="100" height="50" rx="6" fill="#082f49" stroke="#0284c7" stroke-width="1.2" />
-                        <!-- Solar Grid Lines -->
-                        <line x1="135" y1="70" x2="135" y2="120" stroke="#0284c7" stroke-width="0.8" />
-                        <line x1="160" y1="70" x2="160" y2="120" stroke="#0284c7" stroke-width="0.8" />
-                        <line x1="185" y1="70" x2="185" y2="120" stroke="#0284c7" stroke-width="0.8" />
-
-                        <!-- Ultrasonic Camera Pod (Front) -->
-                        <circle cx="160" cy="55" r="14" fill="#06140e" stroke="#34d399" stroke-width="2" />
-                        <circle cx="160" cy="55" r="6" fill="#10b981" />
-
-                        <!-- Spray Nozzles (Rear) -->
-                        <rect x="112" y="162" width="16" height="8" rx="2" fill="#38bdf8" />
-                        <rect x="192" y="162" width="16" height="8" rx="2" fill="#38bdf8" />
-
-                        <!-- 4 HEAVY TREAD WHEELS -->
-                        <!-- Front Wheels Group (Can Steer Tilt) -->
-                        <g class="front-wheels" id="front-wheels-group">
-                            <!-- Left Front Wheel -->
-                            <g class="left-wheel">
-                                <rect x="58" y="42" width="28" height="52" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" />
-                                <rect class="wheel-tread" x="62" y="46" width="20" height="44" rx="4" fill="none" stroke="#64748b" stroke-width="3" />
-                            </g>
-                            <!-- Right Front Wheel -->
-                            <g class="right-wheel">
-                                <rect x="234" y="42" width="28" height="52" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" />
-                                <rect class="wheel-tread" x="238" y="46" width="20" height="44" rx="4" fill="none" stroke="#64748b" stroke-width="3" />
-                            </g>
-                        </g>
-
-                        <!-- Rear Wheels Group -->
-                        <g class="rear-wheels">
-                            <!-- Left Rear Wheel -->
-                            <g class="left-wheel">
-                                <rect x="58" y="126" width="28" height="52" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" />
-                                <rect class="wheel-tread" x="62" y="130" width="20" height="44" rx="4" fill="none" stroke="#64748b" stroke-width="3" />
-                            </g>
-                            <!-- Right Rear Wheel -->
-                            <g class="right-wheel">
-                                <rect x="234" y="126" width="28" height="52" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" />
-                                <rect class="wheel-tread" x="238" y="130" width="20" height="44" rx="4" fill="none" stroke="#64748b" stroke-width="3" />
-                            </g>
-                        </g>
-
-                        <!-- Center AgriRover Emblem -->
-                        <text x="160" y="145" font-size="11" font-weight="bold" fill="#6ee7b7" text-anchor="middle" letter-spacing="1">AGRIROVER</text>
-                    </svg>
-                </div>
-
-                <!-- Live motion banner -->
-                <div class="motion-hud">
-                    <div class="motion-hud-state" id="motion-hud-state">
-                        <span>●</span> <span id="motion-text">STANDBY / STOPPED</span>
-                    </div>
-                    <div class="motion-hud-speed" id="motion-speed-text">0 RPM / 50% PWM</div>
-                </div>
-            </div>
-
-            <!-- CONTROLS: D-PAD & STEERING WHEEL -->
-            <div class="control-interaction-row">
-                <!-- TACTILE D-PAD & ENGINE CONTROLS -->
-                <div>
-                    <!-- PRIMARY ENGINE START / STOP (MASTER ENGINE IGNITION) -->
-                    <div class="primary-engine-bar">
-                        <button id="btn-start-rover" class="engine-btn engine-start" onclick="toggleEngineStart()">
-                            <span class="engine-icon" id="engine-icon-symbol">▶</span>
-                            <span class="engine-text" id="engine-btn-text">START ENGINE</span>
-                        </button>
-                        <button id="btn-stop-rover" class="engine-btn engine-stop" onclick="emergencyStop()">
-                            <span class="engine-icon">■</span>
-                            <span class="engine-text">STOP ALL</span>
-                        </button>
-                    </div>
-
-                    <div style="display:flex; justify-content:center; margin-bottom:12px;">
-                        <button id="btn-drive-mode" onclick="toggleDriveMode()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #86efac; border-radius: 8px; padding: 6px 14px; font-size: 11px; font-weight: 700; cursor: pointer;">
-                            Mode: 🟢 Tap to Drive (Continuous)
-                        </button>
-                    </div>
-
-                    <!-- SYMMETRICAL 3x3 D-PAD -->
-                    <div class="dpad-container">
-                        <button class="dpad-btn fwd" id="btn-forward"
-                            onclick="handleDpadClick('forward')"
-                            onmousedown="handleDpadDown('forward', event)" onmouseup="handleDpadUp('forward', event)" onmouseleave="handleDpadUp('forward', event)"
-                            ontouchstart="handleDpadDown('forward', event)" ontouchend="handleDpadUp('forward', event)">
-                            ▲
-                            <span>FWD</span>
-                        </button>
-
-                        <button class="dpad-btn lft" id="btn-left"
-                            onclick="handleDpadClick('left')"
-                            onmousedown="handleDpadDown('left', event)" onmouseup="handleDpadUp('left', event)" onmouseleave="handleDpadUp('left', event)"
-                            ontouchstart="handleDpadDown('left', event)" ontouchend="handleDpadUp('left', event)">
-                            ◀
-                            <span>LEFT</span>
-                        </button>
-
-                        <button class="dpad-btn stp" id="btn-stop" onclick="emergencyStop()" ontouchstart="emergencyStop()">
-                            ■
-                            <span>STOP</span>
-                        </button>
-
-                        <button class="dpad-btn rgt" id="btn-right"
-                            onclick="handleDpadClick('right')"
-                            onmousedown="handleDpadDown('right', event)" onmouseup="handleDpadUp('right', event)" onmouseleave="handleDpadUp('right', event)"
-                            ontouchstart="handleDpadDown('right', event)" ontouchend="handleDpadUp('right', event)">
-                            ▶
-                            <span>RIGHT</span>
-                        </button>
-
-                        <button class="dpad-btn rev" id="btn-backward"
-                            onclick="handleDpadClick('backward')"
-                            onmousedown="handleDpadDown('backward', event)" onmouseup="handleDpadUp('backward', event)" onmouseleave="handleDpadUp('backward', event)"
-                            ontouchstart="handleDpadDown('backward', event)" ontouchend="handleDpadUp('backward', event)">
-                            ▼
-                            <span>REV</span>
-                        </button>
-                    </div>
-
-                    <div class="key-hint-strip">
-                        <span>Keys:</span>
-                        <span class="key-badge">W</span>
-                        <span class="key-badge">A</span>
-                        <span class="key-badge">S</span>
-                        <span class="key-badge">D</span>
-                        <span class="key-badge">Space</span>
-                    </div>
-                </div>
-
-                <!-- STEERING WHEEL -->
-                <div class="steering-wrapper">
-                    <div class="wheel-graphic-box" id="steering-wheel">
-                        <div class="wheel-rim">
-                            <div class="wheel-spoke spoke-v"></div>
-                            <div class="wheel-spoke spoke-h-l"></div>
-                            <div class="wheel-spoke spoke-h-r"></div>
-                            <div class="wheel-center-cap">🚜</div>
-                        </div>
-                    </div>
-                    <div class="steering-readout" id="steering-indicator">STEER: CENTER (0°)</div>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Drag wheel to turn</div>
-                </div>
-            </div>
-
-            <!-- SPEED SLIDER & PUMP CONTROL -->
-            <div class="actuator-row">
-                <!-- SPEED SLIDER -->
-                <div class="actuator-card">
-                    <div class="actuator-header">
-                        <span class="actuator-label">🚀 Motor Velocity</span>
-                        <span class="actuator-val" id="speed-display">50%</span>
-                    </div>
-                    <input type="range" class="speed-slider" id="speed-slider" min="10" max="100" value="50" oninput="onSpeedChange(this.value)">
-                    <div class="speed-presets">
-                        <button class="preset-btn" onclick="setSpeed(25)">25%</button>
-                        <button class="preset-btn" onclick="setSpeed(50)">50%</button>
-                        <button class="preset-btn" onclick="setSpeed(75)">75%</button>
-                        <button class="preset-btn" onclick="setSpeed(100)">MAX</button>
-                    </div>
-                </div>
-
-                <!-- SPRAY PUMP SWITCH -->
-                <div class="actuator-card">
-                    <div class="actuator-header">
-                        <span class="actuator-label">💧 Precision Spray</span>
-                        <span class="actuator-val" id="pump-status-text" style="color: #ef4444;">OFF</span>
-                    </div>
-                    <button class="pump-toggle-btn off" id="pump-toggle-btn" onclick="togglePump()">
-                        <span id="pump-btn-icon">💧</span>
-                        <span id="pump-btn-label">ACTIVATE PUMP</span>
-                    </button>
-                    <div style="font-size: 11px; color: #64748b; margin-top: 8px; text-align: center;">
-                        5V Relay · GPIO 26 (Physical Pin 37)
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT COLUMN: AI STREAM & TELEMETRY -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-            <!-- LIVE AI CAMERA STREAM HUD CARD -->
-            <div class="panel-card">
-                <div class="panel-title">
-                    <h3>📹 Real-Time Edge AI Camera Stream</h3>
-                    <span class="panel-badge" id="camera-feed-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">CSI STREAM</span>
-                </div>
-                
-                <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #020c07; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-card); display: flex; align-items: center; justify-content: center;">
-                    <img id="live-camera-feed" src="/video_feed" alt="AgriRover AI Live Feed" style="width: 100%; height: 100%; object-fit: contain; display: block;">
-                    
-                    <div id="camera-feed-fallback" style="display: none; position: absolute; inset: 0; background: rgba(3, 10, 7, 0.95); flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-                        <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
-                        <div style="font-weight: 700; color: #f0fdf4; margin-bottom: 4px;">Camera Stream Standby</div>
-                        <div style="font-size: 12px; color: #94a3b8; max-width: 320px; margin-bottom: 12px;">Connecting to camera stream (<span id="fallback-ip-text">/video_feed</span>)...</div>
-                        <button onclick="retryStream()" style="background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; color: #86efac; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold;">🔄 Reconnect Feed</button>
-                    </div>
-
-                    <!-- HUD Overlays -->
-                    <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.65); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 11px; color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3);">
-                        🔴 LIVE <span id="hud-cam-fps">--</span>
-                    </div>
-                    <div style="position: absolute; top: 10px; right: 10px;">
-                        <a id="stream-direct-link" href="/video_feed" target="_blank" style="background: rgba(0,0,0,0.65); color: #38bdf8; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(56, 189, 248, 0.3);">
-                            ↗ Fullscreen
-                        </a>
-                    </div>
-                </div>
-
-                <!-- STREAM CONTROLS & MANUAL IP OVERRIDE -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span>Stream URL:</span>
-                        <input type="text" id="stream-url-input" value="/video_feed" style="background: rgba(14, 38, 28, 0.9); border: 1px solid var(--border-card); color: #86efac; border-radius: 6px; padding: 4px 8px; font-size: 11px; width: 210px;" onchange="updateStreamUrl(this.value)">
-                    </div>
-                    <button onclick="takeSnapshot()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 11px;">
-                        📸 Snapshot
-                    </button>
-                </div>
-            </div>
-
-            <!-- TELEMETRY & HEALTH CARD -->
-            <div class="panel-card telemetry-row">
-                <div class="panel-title">
-                    <h3>📡 Real-Time Telemetry & Health</h3>
-                    <span class="panel-badge" style="background: rgba(6, 182, 212, 0.15); color: #38bdf8;">LIVE STREAM</span>
-                </div>
-
-                <!-- METRIC CHIPS -->
-                <div class="stat-chip-grid">
-                    <div class="stat-chip">
-                        <div class="stat-chip-label">AI Inference FPS</div>
-                        <div class="stat-chip-val" id="metric-fps" style="color: #38bdf8;">-- FPS</div>
-                    </div>
-
-                    <div class="stat-chip">
-                        <div class="stat-chip-label">Latency to Cloud</div>
-                        <div class="stat-chip-val" id="metric-ping" style="color: #34d399;">-- ms</div>
-                    </div>
-
-                    <div class="stat-chip">
-                        <div class="stat-chip-label">Active Disease Mode</div>
-                        <div class="stat-chip-val" id="metric-disease" style="font-size: 13px; color: #fde047;">Scanning</div>
-                    </div>
-
-                    <div class="stat-chip">
-                        <div class="stat-chip-label">Confidence</div>
-                        <div class="stat-chip-val" id="metric-conf" style="color: #6ee7b7;">--%</div>
-                    </div>
-                </div>
-
-                <!-- LIVE COMMAND CONSOLE TERMINAL -->
-                <div>
-                    <div class="terminal-header">
-                        <span>⚡ TRANSMISSION LOG</span>
-                        <span id="terminal-clock">00:00:00</span>
-                    </div>
-                    <div class="terminal-card" id="terminal-log">
-                        <div class="terminal-line ack">[INIT] AgriRover Web Telemetry System initialized.</div>
-                        <div class="terminal-line">[SYNC] Polling Raspberry Pi 4 telemetry loop...</div>
-                    </div>
-                </div>
-
-                <!-- DETECTION SUMMARY CARD -->
-                <div style="background: rgba(6, 20, 14, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 14px;">
-                    <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 6px;">
-                        Targeted Disease Spectrum
-                    </div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                        <span style="font-size: 11px; background: rgba(239, 68, 68, 0.15); color: #fca5a5; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">Bacterial Spot</span>
-                        <span style="font-size: 11px; background: rgba(245, 158, 11, 0.15); color: #fcd34d; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">Cercospora Leaf Spot</span>
-                        <span style="font-size: 11px; background: rgba(168, 85, 247, 0.15); color: #d8b4fe; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(168, 85, 247, 0.3);">Curl Virus</span>
-                        <span style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #6ee7b7; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">Healthy Leaf</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- FULL-WIDTH HARDWARE GPIO PINOUT MAP -->
-        <div class="panel-card hardware-map-card">
-            <div class="panel-title">
-                <h3>⚡ Raspberry Pi 4 GPIO Wiring & Actuator Map</h3>
-                <span class="panel-badge">BCM MAPPING</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
-                <!-- Left Motor -->
-                <div style="background: rgba(6, 20, 14, 0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                    <strong style="color: #34d399; font-size: 13px;">🚜 Left Drive (L298N A)</strong>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 6px; line-height: 1.6;">
-                        IN1: <code>GPIO 17</code> (Pin 11)<br>
-                        IN2: <code>GPIO 27</code> (Pin 13)<br>
-                        EN: <code>GPIO 12</code> (Pin 32 PWM0)
-                    </div>
-                </div>
-
-                <!-- Right Motor -->
-                <div style="background: rgba(6, 20, 14, 0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                    <strong style="color: #34d399; font-size: 13px;">🚜 Right Drive (L298N B)</strong>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 6px; line-height: 1.6;">
-                        IN3: <code>GPIO 22</code> (Pin 15)<br>
-                        IN4: <code>GPIO 23</code> (Pin 16)<br>
-                        EN: <code>GPIO 13</code> (Pin 33 PWM1)
-                    </div>
-                </div>
-
-                <!-- Spray Pump & Sensors -->
-                <div style="background: rgba(6, 20, 14, 0.6); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.06);">
-                    <strong style="color: #38bdf8; font-size: 13px;">💧 Relay & Sensors</strong>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 6px; line-height: 1.6;">
-                        Pump Relay: <code>GPIO 26</code> (Pin 37)<br>
-                        Ultrasonic: <code>GPIO 24/25</code> (Pin 18/22)<br>
-                        Camera: <code>CSI-2 Ribbon</code> (OV5647)
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <button class="dpad-btn dpad-rev" id="btn-backward"
+            onclick="handleDpadPress('backward')"
+            ontouchstart="handleTouchStart('backward', event)" ontouchend="handleTouchEnd('backward', event)">
+            ▼
+            <span>REV</span>
+        </button>
     </div>
 
+    <!-- HARDWARE ACTIONS -->
+    <div class="actions-row">
+        <button class="btn-action-hardware" id="btn-pump-toggle" onclick="togglePump()">
+            <span>💦</span>
+            <span id="pump-btn-txt">SPRAY PUMP: OFF</span>
+        </button>
+        <button class="btn-action-hardware" onclick="emergencyBrake()" style="border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.15);">
+            <span>🛑</span>
+            <span>EMERGENCY BRAKE</span>
+        </button>
+    </div>
+
+    <!-- SPEED SLIDER & PRESETS -->
+    <div class="speed-control-box">
+        <div class="speed-slider-wrap">
+            <span style="font-size:11px; color:#94a3b8;">PWM</span>
+            <input type="range" id="speed-slider" min="20" max="100" value="60" oninput="onSpeedSlider(this.value)">
+            <span style="font-size:12px; font-weight:800; color:#38bdf8;" id="speed-slider-label">60%</span>
+        </div>
+        <div class="speed-presets">
+            <button class="btn-speed-chip" onclick="setSpeedPreset(35)">35% Crawl</button>
+            <button class="btn-speed-chip active" id="chip-60" onclick="setSpeedPreset(60)">60% Cruise</button>
+            <button class="btn-speed-chip" onclick="setSpeedPreset(85)">85% Turbo</button>
+            <button class="btn-speed-chip" onclick="setSpeedPreset(100)">100% Max</button>
+        </div>
+    </div>
 </main>
 
-<!-- Floating Toast Message -->
-<div class="toast-msg toast-success" id="toast-msg"></div>
+<!-- LATEST LEAF DIAGNOSIS (ZERO WEBCAM BANDWIDTH) -->
+<section class="diagnosis-card">
+    <div class="card-title-row">
+        <span class="card-title-txt">🔬 Latest Detected Plant Health</span>
+        <button onclick="requestFreshSnapshot()" style="background:none; border:none; color:#34d399; font-size:11px; font-weight:700; cursor:pointer;">📸 Snapshot</button>
+    </div>
+    <div class="diagnosis-content">
+        <img id="leaf-preview-img" 
+             src="{% if latest_result and latest_result.image %}{{ url_for('static', filename='images/' + latest_result.image) }}{% else %}{{ url_for('static', filename='app_photo.png') }}{% endif %}" 
+             alt="Latest Scanned Leaf" class="leaf-thumb"
+             onerror="this.src='/static/app_photo.png'">
+        <div class="leaf-meta">
+            <div class="disease-name-badge" id="leaf-disease-txt">{{ (latest_result.disease if latest_result else "Active Scanning (No Leaf in View)") }}</div>
+            <div class="confidence-pill" id="leaf-confidence-txt">Confidence: {{ (latest_result.confidence if latest_result else "0.0") }}%</div>
+            <div class="treatment-txt" id="leaf-treatment-txt">{{ (latest_result.treatment if latest_result else "Waiting for botanical leaf in front of AI lens.") }}</div>
+        </div>
+    </div>
+</section>
+
+<!-- BTS7960 HARDWARE PIN MONITOR -->
+<section class="pin-monitor-card">
+    <div style="font-weight:800; color:#4ade80; margin-bottom:6px;">⚡ BTS7960 H-Bridge GPIO Monitor</div>
+    <div class="pin-row">
+        <span>LEFT MOTOR (Driver 1)</span>
+        <span class="val" id="pin-left-val">RPWM: Pin 11 | LPWM: Pin 13 | EN: Pin 32</span>
+    </div>
+    <div class="pin-row">
+        <span>RIGHT MOTOR (Driver 2)</span>
+        <span class="val" id="pin-right-val">RPWM: Pin 15 | LPWM: Pin 16 | EN: Pin 33</span>
+    </div>
+    <div class="pin-row">
+        <span>SPRAY RELAY (Pump)</span>
+        <span class="val" id="pin-pump-val">GPIO 26: OFF</span>
+    </div>
+</section>
+
+<!-- REALTIME SIGNAL CONSOLE LOG -->
+<footer class="console-strip" id="console-strip">
+    <div>[READY] Controller initialized. Direct phone signals enabled.</div>
+</footer>
 
 <script>
-/* =========================================================
-   ROVER STATE & LOGIC
-========================================================= */
-let currentDirection = "stop";
-let movementActive = false;
-let currentSpeed = 50;
-let pumpState = false;
-let isPiOnline = false;
-let isModelOnline = false;
+let currentSpeed = 60;
+let pumpActive = false;
+let driveMode = 'continuous'; // 'continuous' or 'momentary'
+let activeDirection = 'stop';
+let touchHandled = false;
 
-let steeringAngle = 0;
-let steeringDragging = false;
-let steeringStartX = 0;
-let steeringStartAngle = 0;
-
-/* Terminal Logger */
-function logTerminal(msg, type="norm") {
-    const term = document.getElementById("terminal-log");
+function logMessage(msg) {
+    const strip = document.getElementById("console-strip");
+    if (!strip) return;
+    const now = new Date().toTimeString().split(' ')[0];
     const line = document.createElement("div");
-    const d = new Date();
-    const timeStr = d.toTimeString().split(" ")[0];
-    line.className = "terminal-line " + type;
-    line.textContent = `[${timeStr}] ${msg}`;
-    term.appendChild(line);
-    term.scrollTop = term.scrollHeight;
-    while (term.children.length > 35) {
-        term.removeChild(term.children[0]);
-    }
+    line.textContent = `[${now}] ${msg}`;
+    strip.prepend(line);
+    if (strip.children.length > 8) strip.removeChild(strip.lastChild);
 }
 
-/* Toast Message */
-let toastTimer = null;
-function showToast(msg, isError=false) {
-    const toast = document.getElementById("toast-msg");
-    toast.textContent = msg;
-    toast.className = "toast-msg " + (isError ? "toast-error" : "toast-success");
-    toast.style.display = "block";
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { toast.style.display = "none"; }, 2500);
-}
-
-/* Update Schematic Visual States */
-function updateSchematicAnimation(direction, pump) {
-    const wrap = document.getElementById("schematic-viewport");
-    wrap.classList.remove("rover-forward", "rover-backward", "rover-left", "rover-right", "rover-moving", "pump-active");
-
-    if (direction === "forward") {
-        wrap.classList.add("rover-forward", "rover-moving");
-    } else if (direction === "backward" || direction === "reverse") {
-        wrap.classList.add("rover-backward", "rover-moving");
-    } else if (direction === "left") {
-        wrap.classList.add("rover-left", "rover-moving");
-    } else if (direction === "right") {
-        wrap.classList.add("rover-right", "rover-moving");
-    }
-
-    if (pump) {
-        wrap.classList.add("pump-active");
-    }
-
-    // Update Motion Banner
-    const motionText = document.getElementById("motion-text");
-    const motionSpeed = document.getElementById("motion-speed-text");
-    const cmdBadge = document.getElementById("command-badge");
-
-    if (direction === "stop" || direction === "stopped") {
-        motionText.textContent = isEngineArmed ? "ENGINE ARMED (READY)" : "STANDBY / STOPPED";
-        motionText.style.color = isEngineArmed ? "#34d399" : "#94a3b8";
-        motionSpeed.textContent = "0 RPM / 0% PWM";
-        cmdBadge.textContent = isEngineArmed ? "ARMED" : "STOPPED";
-        cmdBadge.style.color = isEngineArmed ? "#34d399" : "#94a3b8";
-    } else if (direction === "start") {
-        motionText.textContent = "ENGINE ARMED & READY";
-        motionText.style.color = "#34d399";
-        motionSpeed.textContent = "0 RPM / 0% PWM";
-        cmdBadge.textContent = "ARMED";
-        cmdBadge.style.color = "#34d399";
-    } else {
-        const dirUpper = direction.toUpperCase();
-        motionText.textContent = `${dirUpper} ENGAGED`;
-        motionText.style.color = "#34d399";
-        motionSpeed.textContent = `${Math.round(currentSpeed * 2.8)} RPM / ${currentSpeed}% PWM`;
-        cmdBadge.textContent = dirUpper;
-        cmdBadge.style.color = "#34d399";
-    }
-}
-
-/* Send Movement Command to Flask */
-async function sendCommand(command) {
+/* Instant Direct Command Sender */
+async function sendSignal(cmd, speedOverride) {
+    const spd = speedOverride !== undefined ? speedOverride : currentSpeed;
+    const bannerTxt = document.getElementById("signal-state-txt");
+    const pingTxt = document.getElementById("signal-latency-txt");
+    
+    if (bannerTxt) bannerTxt.textContent = `DISPATCHING: ${cmd.toUpperCase()}...`;
+    
+    const t0 = performance.now();
     try {
-        const t0 = performance.now();
         const res = await fetch("/api/rover/control", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                command: command,
-                speed: currentSpeed 
+            body: JSON.stringify({
+                command: cmd,
+                speed: spd
             })
         });
+        
         const latency = Math.round(performance.now() - t0);
-        document.getElementById("metric-ping").textContent = `${latency} ms`;
-
+        if (pingTxt) pingTxt.textContent = `PING: ${latency} ms`;
+        
         const data = await res.json();
         if (data.success) {
-            logTerminal(`CMD: ${command.toUpperCase()} (ID: ${data.command_id}) -> ACK`, "cmd");
+            activeDirection = cmd;
+            if (bannerTxt) bannerTxt.textContent = `${cmd.toUpperCase()} -> ACK #${data.command_id || 1}`;
+            logMessage(`CMD: ${cmd.toUpperCase()} | Speed: ${spd}% -> ACK (${latency}ms)`);
+            updateActiveButton(cmd);
+            updatePinMonitor(cmd, spd);
         } else {
-            logTerminal(`ERR: ${data.message || 'Command rejected'}`, "err");
+            if (bannerTxt) bannerTxt.textContent = `REJECTED: ${data.message || 'Error'}`;
+            logMessage(`ERR: ${data.message}`);
         }
-    } catch (e) {
-        logTerminal(`NETWORK ERR: Cannot reach server`, "err");
+    } catch (err) {
+        if (bannerTxt) bannerTxt.textContent = `NETWORK ERROR`;
+        logMessage(`FAILED: Cannot reach Pi (${err.message})`);
     }
 }
 
-/* Drive Mode Toggle */
-let driveMode = 'latch'; // 'latch' = tap to drive until STOP, 'momentary' = hold to move
+/* Touch & Click Handlers */
+function handleTouchStart(dir, event) {
+    if (event && event.cancelable) event.preventDefault();
+    touchHandled = true;
+    if (navigator.vibrate) navigator.vibrate(25);
+    
+    if (driveMode === 'continuous') {
+        if (activeDirection === dir) {
+            sendSignal('stop', 0);
+        } else {
+            sendSignal(dir, currentSpeed);
+        }
+    } else {
+        sendSignal(dir, currentSpeed);
+    }
+}
+
+function handleTouchEnd(dir, event) {
+    if (event && event.cancelable) event.preventDefault();
+    setTimeout(() => { touchHandled = false; }, 300);
+    
+    if (driveMode === 'momentary') {
+        sendSignal('stop', 0);
+    }
+}
+
+function handleTouchBrake(event) {
+    if (event && event.cancelable) event.preventDefault();
+    touchHandled = true;
+    emergencyBrake();
+}
+
+function handleDpadPress(dir) {
+    if (touchHandled) return;
+    if (driveMode === 'continuous') {
+        if (activeDirection === dir) {
+            sendSignal('stop', 0);
+        } else {
+            sendSignal(dir, currentSpeed);
+        }
+    } else {
+        sendSignal(dir, currentSpeed);
+    }
+}
+
+function emergencyBrake() {
+    if (navigator.vibrate) navigator.vibrate(50);
+    sendSignal('stop', 0);
+}
 
 function toggleDriveMode() {
-    driveMode = (driveMode === 'latch') ? 'momentary' : 'latch';
+    driveMode = (driveMode === 'continuous') ? 'momentary' : 'continuous';
     const btn = document.getElementById("btn-drive-mode");
     if (btn) {
-        btn.textContent = (driveMode === 'latch') ? "Mode: 🟢 Tap to Drive (Continuous)" : "Mode: 🔵 Hold to Move (Momentary)";
-        btn.style.borderColor = (driveMode === 'latch') ? "rgba(16, 185, 129, 0.4)" : "rgba(6, 182, 212, 0.4)";
-        btn.style.color = (driveMode === 'latch') ? "#86efac" : "#67e8f9";
+        btn.textContent = (driveMode === 'continuous') ? "Mode: 🟢 Continuous (Tap)" : "Mode: 🔵 Momentary (Hold)";
     }
-    showToast(`Switched to ${driveMode === 'latch' ? 'Tap to Drive' : 'Hold to Move'} mode`);
+    logMessage(`Mode switched to ${driveMode}`);
 }
 
-/* =========================================================
-   MASTER ENGINE ARM & DIRECTIONAL MOTION (COMPLETELY SEPARATED)
-========================================================= */
-let isEngineArmed = false;
-
-function toggleEngineStart() {
-    isEngineArmed = !isEngineArmed;
-    const startBtn = document.getElementById("btn-start-rover");
-    const icon = document.getElementById("engine-icon-symbol");
-    const text = document.getElementById("engine-btn-text");
-
-    if (isEngineArmed) {
-        if (startBtn) {
-            startBtn.classList.add("running");
-            if (icon) icon.innerHTML = '<span style="display:inline-block; animation: spinTurbine 1.8s linear infinite;">⚙️</span>';
-            if (text) text.textContent = "ENGINE ONLINE (ARMED)";
-        }
-        sendCommand("start");
-        updateSchematicAnimation("start", pumpState);
-        showToast("▶ ROVER ENGINE & DRIVE SYSTEM ARMED");
-    } else {
-        if (startBtn) {
-            startBtn.classList.remove("running");
-            if (icon) icon.textContent = "▶";
-            if (text) text.textContent = "START ENGINE";
-        }
-        emergencyStop();
-        showToast("■ ENGINE SET TO STANDBY");
-    }
-}
-
-function resetEngineButton() {
-    isEngineArmed = false;
-    const startBtn = document.getElementById("btn-start-rover");
-    const icon = document.getElementById("engine-icon-symbol");
-    const text = document.getElementById("engine-btn-text");
-    if (startBtn) {
-        startBtn.classList.remove("running");
-        if (icon) icon.textContent = "▶";
-        if (text) text.textContent = "START ENGINE";
-    }
-}
-
-let touchActive = false;
-
-function handleDpadClick(dir) {
-    if (touchActive) return;
-    if (driveMode === 'latch') {
-        if (movementActive && currentDirection === dir) {
-            stopMovement();
-        } else {
-            startMovement(dir);
-        }
-    }
-}
-
-function handleDpadDown(dir, event) {
-    if (event && event.type === 'touchstart') {
-        touchActive = true;
-        if (event.cancelable) event.preventDefault();
-        if (driveMode === 'latch') {
-            if (movementActive && currentDirection === dir) {
-                stopMovement();
-            } else {
-                startMovement(dir);
-            }
-        } else {
-            startMovement(dir);
-        }
-    } else if (event && event.type === 'mousedown') {
-        if (touchActive) return;
-        if (driveMode === 'momentary') {
-            startMovement(dir);
-        }
-    }
-}
-
-function handleDpadUp(dir, event) {
-    if (event && event.type === 'touchend') {
-        if (event.cancelable) event.preventDefault();
-        setTimeout(() => { touchActive = false; }, 350);
-        if (driveMode === 'momentary') {
-            stopMovement();
-        }
-    } else if (event && (event.type === 'mouseup' || event.type === 'mouseleave')) {
-        if (driveMode === 'momentary') {
-            stopMovement();
-        }
-    }
-}
-
-function startMovement(dir) {
-    movementActive = true;
-    currentDirection = dir;
-
-    // Highlight ONLY the chosen directional button (never touch the engine button!)
-    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
-    const btn = document.getElementById("btn-" + dir);
-    if (btn) btn.classList.add("active");
-
-    updateSchematicAnimation(dir, pumpState);
-    sendCommand(dir);
-
-    const dirMessages = {
-        forward: "▲ MOVING FORWARD",
-        backward: "▼ REVERSING",
-        left: "◀ TURNING LEFT",
-        right: "▶ TURNING RIGHT"
-    };
-    showToast(dirMessages[dir] || `DIRECTION: ${dir.toUpperCase()}`);
-}
-
-function stopMovement() {
-    if (!movementActive) return;
-    movementActive = false;
-    currentDirection = "stop";
-
-    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
-    updateSchematicAnimation("stop", pumpState);
-    sendCommand("stop");
-}
-
-function emergencyStop() {
-    movementActive = false;
-    currentDirection = "stop";
-    resetEngineButton();
-
-    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
-    updateSchematicAnimation("stop", pumpState);
-    sendCommand("stop");
-    showToast("EMERGENCY STOP EXECUTED");
-}
-
-/* Speed Control */
-let speedDebounce = null;
-function onSpeedChange(val) {
-    currentSpeed = parseInt(val);
-    document.getElementById("speed-display").textContent = `${currentSpeed}%`;
-    clearTimeout(speedDebounce);
-    speedDebounce = setTimeout(() => {
-        postSpeed(currentSpeed);
-    }, 150);
-}
-
-function setSpeed(val) {
-    document.getElementById("speed-slider").value = val;
-    onSpeedChange(val);
-}
-
-async function postSpeed(val) {
-    try {
-        const res = await fetch("/api/rover/speed", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ speed: val })
-        });
-        const data = await res.json();
-        if (data.success) {
-            logTerminal(`SPEED: Updated to ${val}%`, "ack");
-            showToast(`Speed set to ${val}%`);
-        }
-    } catch (e) {
-        logTerminal(`SPEED ERR: Failed to set speed`, "err");
-    }
-}
-
-/* Pump Toggle Control */
+/* Spray Pump Toggle */
 async function togglePump() {
-    pumpState = !pumpState;
-    applyPumpUI(pumpState);
-
+    pumpActive = !pumpActive;
+    const btn = document.getElementById("btn-pump-toggle");
+    const txt = document.getElementById("pump-btn-txt");
+    const pinVal = document.getElementById("pin-pump-val");
+    
+    if (btn) {
+        if (pumpActive) {
+            btn.classList.add("pump-active");
+            if (txt) txt.textContent = "SPRAY PUMP: ON (SPRAYING)";
+            if (pinVal) pinVal.textContent = "GPIO 26: HIGH (12V ON)";
+        } else {
+            btn.classList.remove("pump-active");
+            if (txt) txt.textContent = "SPRAY PUMP: OFF";
+            if (pinVal) pinVal.textContent = "GPIO 26: LOW (OFF)";
+        }
+    }
+    
     try {
-        const res = await fetch("/api/rover/pump", {
+        await fetch("/api/rover/pump", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ state: pumpState })
+            body: JSON.stringify({ state: pumpActive })
         });
-        const data = await res.json();
-        if (data.success) {
-            logTerminal(`PUMP: Switched to ${pumpState ? 'ON' : 'OFF'}`, pumpState ? "cmd" : "ack");
-            showToast(`Pesticide Pump: ${pumpState ? 'ACTIVE' : 'DEACTIVATED'}`);
-        }
+        logMessage(`PUMP -> ${pumpActive ? 'STARTED' : 'STOPPED'}`);
     } catch (e) {
-        logTerminal(`PUMP ERR: Connection error`, "err");
+        logMessage(`PUMP ERR: ${e}`);
     }
 }
 
-function applyPumpUI(state) {
-    const text = document.getElementById("pump-status-text");
-    const btn = document.getElementById("pump-toggle-btn");
-    const label = document.getElementById("pump-btn-label");
+/* Speed Slider & Presets */
+function onSpeedSlider(val) {
+    currentSpeed = parseInt(val);
+    document.getElementById("speed-slider-label").textContent = `${currentSpeed}%`;
+    document.getElementById("speed-val-badge").textContent = `${currentSpeed}%`;
+    updatePresetChips(currentSpeed);
+    if (activeDirection !== 'stop') {
+        sendSignal(activeDirection, currentSpeed);
+    }
+}
 
-    if (state) {
-        text.textContent = "ON (SPRAYING)";
-        text.style.color = "#38bdf8";
-        btn.className = "pump-toggle-btn on";
-        label.textContent = "DEACTIVATE PUMP";
+function setSpeedPreset(val) {
+    document.getElementById("speed-slider").value = val;
+    onSpeedSlider(val);
+}
+
+function updatePresetChips(val) {
+    document.querySelectorAll(".btn-speed-chip").forEach(c => c.classList.remove("active"));
+    if (val === 60) {
+        const c = document.getElementById("chip-60");
+        if (c) c.classList.add("active");
+    }
+}
+
+function updateActiveButton(cmd) {
+    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
+    if (cmd !== 'stop') {
+        const btn = document.getElementById("btn-" + cmd);
+        if (btn) btn.classList.add("active");
+    }
+}
+
+function updatePinMonitor(dir, spd) {
+    const leftVal = document.getElementById("pin-left-val");
+    const rightVal = document.getElementById("pin-right-val");
+    
+    if (dir === 'forward') {
+        if (leftVal) leftVal.textContent = `RPWM: HIGH | LPWM: LOW | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: HIGH | ENB: ${spd}%`;
+    } else if (dir === 'backward') {
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: HIGH | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: HIGH | LPWM: LOW | ENB: ${spd}%`;
+    } else if (dir === 'left') {
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: HIGH | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: HIGH | ENB: ${spd}%`;
+    } else if (dir === 'right') {
+        if (leftVal) leftVal.textContent = `RPWM: HIGH | LPWM: LOW | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: HIGH | LPWM: LOW | ENB: ${spd}%`;
     } else {
-        text.textContent = "OFF";
-        text.style.color = "#ef4444";
-        btn.className = "pump-toggle-btn off";
-        label.textContent = "ACTIVATE PUMP";
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: LOW | ENA: 0 (STOP)`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: LOW | ENB: 0 (STOP)`;
     }
-    updateSchematicAnimation(currentDirection, state);
 }
 
-/* Interactive Steering Wheel Drag Mechanics */
-const wheel = document.getElementById("steering-wheel");
-const steerIndicator = document.getElementById("steering-indicator");
-const frontWheelsSvg = document.getElementById("front-wheels-group");
-
-function updateSteering(angle) {
-    steeringAngle = Math.max(-70, Math.min(70, angle));
-    wheel.style.transform = `rotate(${steeringAngle}deg)`;
-
-    const sign = steeringAngle > 0 ? "+" : "";
-    let dir = "CENTER";
-    if (steeringAngle < -12) {
-        dir = "LEFT";
-        if (currentDirection !== "left") sendCommand("left");
-    } else if (steeringAngle > 12) {
-        dir = "RIGHT";
-        if (currentDirection !== "right") sendCommand("right");
-    } else {
-        if (currentDirection === "left" || currentDirection === "right") {
-            sendCommand("stop");
-        }
-    }
-
-    steerIndicator.textContent = `STEER: ${dir} (${sign}${Math.round(steeringAngle)}°)`;
-}
-
-wheel.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    steeringDragging = true;
-    steeringStartX = e.clientX;
-    steeringStartAngle = steeringAngle;
-    wheel.setPointerCapture(e.pointerId);
-});
-
-wheel.addEventListener("pointermove", e => {
-    if (!steeringDragging) return;
-    e.preventDefault();
-    const delta = e.clientX - steeringStartX;
-    updateSteering(steeringStartAngle + delta * 0.7);
-});
-
-function releaseSteering() {
-    if (!steeringDragging) return;
-    steeringDragging = false;
-    updateSteering(0);
-}
-wheel.addEventListener("pointerup", releaseSteering);
-wheel.addEventListener("pointercancel", releaseSteering);
-
-/* Keyboard Hotkeys (W, A, S, D, Space) */
-document.addEventListener("keydown", e => {
-    if (e.repeat) return;
-    const k = e.key.toLowerCase();
-    if (k === "w") startMovement("forward");
-    else if (k === "a") startMovement("left");
-    else if (k === "s") startMovement("backward");
-    else if (k === "d") startMovement("right");
-    else if (e.code === "Space") { e.preventDefault(); emergencyStop(); }
-});
-
-document.addEventListener("keyup", e => {
-    const k = e.key.toLowerCase();
-    if (["w", "a", "s", "d"].includes(k)) {
-        if (driveMode === 'momentary') {
-            stopMovement();
-        }
-    }
-});
-
-/* =========================================================
-   STATUS POLLING & HEARTBEAT PARSING (UPDATED BY SECONDS)
-========================================================= */
-let isRoverPolling = false;
-
-async function getRoverStatus() {
-    if (isRoverPolling) return;
-    isRoverPolling = true;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1200);
-
+/* Polling Status & Detection Updates */
+async function syncRoverStatus() {
     try {
-        const res = await fetch("/api/rover/status?_=" + Date.now(), { signal: controller.signal });
-        clearTimeout(timeoutId);
+        const res = await fetch("/api/rover/status?_=" + Date.now());
         if (!res.ok) return;
-
         const data = await res.json();
-        if (!data.success || !data.rover) return;
-
+        
         const r = data.rover;
-
-        // 1. RASPBERRY PI ONLINE / OFFLINE BADGE
-        const piBadge = document.getElementById("pi-status-badge");
-        const piLabel = document.getElementById("pi-status-label");
-        const piHeartbeatText = document.getElementById("pi-heartbeat-text");
-
-        const piIsOnline = Boolean(r.pi_online ?? r.connected);
-        if (piIsOnline !== isPiOnline) {
-            isPiOnline = piIsOnline;
-            if (isPiOnline) {
-                piBadge.className = "status-pill online";
-                piLabel.textContent = "Raspberry Pi Online";
-                logTerminal("[LINK] Raspberry Pi 4 is ONLINE & communicating.", "ack");
-            } else {
-                piBadge.className = "status-pill offline";
-                piLabel.textContent = "Raspberry Pi Offline";
-                logTerminal("[LINK] Raspberry Pi 4 went OFFLINE.", "err");
-            }
-        }
-        if (r.last_seen) {
-            piHeartbeatText.textContent = `Heartbeat: ${r.last_seen}`;
-        }
-
-        // 2. AI MODEL ONLINE / STANDBY BADGE
-        const aiBadge = document.getElementById("ai-status-badge");
-        const aiLabel = document.getElementById("ai-status-label");
-        const aiDetailsText = document.getElementById("ai-details-text");
-
-        const modelIsOnline = Boolean(r.model_online && isPiOnline);
-        if (modelIsOnline !== isModelOnline) {
-            isModelOnline = modelIsOnline;
-            if (isModelOnline) {
-                aiBadge.className = "status-pill online";
-                aiLabel.textContent = "AI Model Online";
-            } else {
-                aiBadge.className = "status-pill offline";
-                aiLabel.textContent = "Model Standby";
-            }
-        }
-
-        // AI Metrics (Updated by seconds)
-        if (r.fps !== undefined) {
-            document.getElementById("metric-fps").textContent = `${r.fps} FPS`;
-        }
-
-        const hasLiveLeaf = Boolean(r.last_detection && r.last_detection !== "NO LEAF DETECTED");
-        if (hasLiveLeaf) {
-            document.getElementById("metric-disease").textContent = `LIVE: ${r.last_detection}`;
-            if (aiDetailsText) aiDetailsText.textContent = `Live Scanning: ${r.last_detection}`;
-            if (r.last_confidence !== undefined) {
-                document.getElementById("metric-conf").textContent = `${r.last_confidence}%`;
-            }
+        const pill = document.getElementById("pi-status-pill");
+        const pillTxt = document.getElementById("pi-status-label");
+        
+        if (r && r.connected) {
+            if (pill) pill.className = "status-pill online";
+            if (pillTxt) pillTxt.textContent = "Pi Online";
         } else {
-            document.getElementById("metric-disease").textContent = "No Leaf in View (Scanning)";
-            if (aiDetailsText) aiDetailsText.textContent = "Active Scanning: Point camera at chili leaf";
-            document.getElementById("metric-conf").textContent = "--";
+            if (pill) pill.className = "status-pill offline";
+            if (pillTxt) pillTxt.textContent = "Pi Offline";
         }
-
-        // Sync Speed & Pump (Never overwrite user speed when rover is stopped)
-        if (r.speed !== undefined && r.speed > 0 && !movementActive) {
-            currentSpeed = r.speed;
-            document.getElementById("speed-display").textContent = `${currentSpeed}%`;
-            const slider = document.getElementById("speed-slider");
-            if (slider) slider.value = currentSpeed;
-        }
-        if (r.pump !== undefined && r.pump !== pumpState) {
-            pumpState = r.pump;
-            applyPumpUI(pumpState);
-        }
-
-        // Live AI Video Stream URL Auto-Sync
-        if (r.stream_url) {
-            const streamInput = document.getElementById("stream-url-input");
-            if (streamInput && !streamInput.dataset.userModified) {
-                const targetUrl = (window.location.protocol === "https:") ? "/video_feed" : r.stream_url;
-                if (currentStreamUrl !== targetUrl) {
-                    currentStreamUrl = targetUrl;
-                    streamInput.value = currentStreamUrl;
-                    const link = document.getElementById("stream-direct-link");
-                    if (link) link.href = currentStreamUrl;
-                    const fbText = document.getElementById("fallback-ip-text");
-                    if (fbText) fbText.textContent = currentStreamUrl;
-                    if (liveCameraImg && liveCameraImg.src !== currentStreamUrl) {
-                        liveCameraImg.src = currentStreamUrl;
-                    }
-                }
+        
+        if (data.result) {
+            const resData = data.result;
+            const leafTxt = document.getElementById("leaf-disease-txt");
+            const confTxt = document.getElementById("leaf-confidence-txt");
+            const treatTxt = document.getElementById("leaf-treatment-txt");
+            const imgEl = document.getElementById("leaf-preview-img");
+            
+            if (leafTxt && resData.disease) leafTxt.textContent = resData.disease;
+            if (confTxt && resData.confidence) confTxt.textContent = `Confidence: ${resData.confidence}%`;
+            if (treatTxt && resData.treatment) treatTxt.textContent = resData.treatment;
+            if (imgEl && resData.image && !imgEl.dataset.custom) {
+                imgEl.src = "/static/images/" + resData.image;
             }
         }
-        if (r.fps !== undefined) {
-            const hudFps = document.getElementById("hud-cam-fps");
-            if (hudFps) hudFps.textContent = `${r.fps} FPS`;
-        }
-
-    } catch (e) {
-        // network error handled silently
-    } finally {
-        clearTimeout(timeoutId);
-        isRoverPolling = false;
-    }
+    } catch (e) {}
 }
 
-// Native High-Speed Live Camera Stream Engine
-let streamActive = true;
-let currentStreamUrl = "/video_feed";
-let streamReconnectTimer = null;
-const liveCameraImg = document.getElementById("live-camera-feed");
-const cameraBadge = document.getElementById("camera-feed-badge");
-const roverFallback = document.getElementById("camera-feed-fallback");
-
-function initRoverStream() {
-    if (!liveCameraImg) return;
-    liveCameraImg.src = currentStreamUrl;
-
-    liveCameraImg.onload = function() {
-        if (roverFallback) roverFallback.style.display = "none";
-        if (cameraBadge) {
-            cameraBadge.textContent = "LIVE CSI STREAM";
-            cameraBadge.style.color = "#34d399";
-        }
-    };
-
-    liveCameraImg.onerror = function() {
-        if (roverFallback) roverFallback.style.display = "flex";
-        if (cameraBadge) {
-            cameraBadge.textContent = "RECONNECTING...";
-            cameraBadge.style.color = "#f59e0b";
-        }
-        if (!streamReconnectTimer) {
-            streamReconnectTimer = setTimeout(() => {
-                streamReconnectTimer = null;
-                if (liveCameraImg) {
-                    liveCameraImg.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "_=" + Date.now();
-                }
-            }, 1200);
-        }
-    };
-}
-
-function retryStream() {
-    if (roverFallback) roverFallback.style.display = "none";
-    if (liveCameraImg) {
-        liveCameraImg.src = currentStreamUrl + (currentStreamUrl.includes("?") ? "&" : "?") + "_=" + Date.now();
-    }
-}
-
-// Start native live camera stream immediately
-initRoverStream();
-
-function updateStreamUrl(url) {
-    currentStreamUrl = url.trim();
-    const streamInput = document.getElementById("stream-url-input");
-    if (streamInput) streamInput.dataset.userModified = "true";
-    const img = document.getElementById("live-camera-feed");
-    if (img) img.src = currentStreamUrl;
-    const link = document.getElementById("stream-direct-link");
-    if (link) link.href = currentStreamUrl;
-    const fbText = document.getElementById("fallback-ip-text");
-    if (fbText) fbText.textContent = currentStreamUrl;
-}
-
-function takeSnapshot() {
-    let snapUrl = currentStreamUrl.replace("/video_feed", "/snapshot");
-    if (!snapUrl.includes("/snapshot")) {
-        snapUrl = currentStreamUrl + "/snapshot";
-    }
-    window.open(snapUrl + (snapUrl.includes("?") ? "&" : "?") + "t=" + Date.now(), "_blank");
-}
-
-// Clock ticker
-setInterval(() => {
-    const d = new Date();
-    document.getElementById("terminal-clock").textContent = d.toTimeString().split(" ")[0];
-}, 1000);
-
-// Status poll loop every 1.0 second (updated by seconds)
-getRoverStatus();
-setInterval(getRoverStatus, 1000);
-
-/* =========================================================
-   THREE.JS 3D SMART ROVER HOLOGRAPHIC ENGINE
-========================================================= */
-let scene3D, camera3D, renderer3D;
-let roverGroup, chassisMesh, solarDeck, reactorCore, lidarTurret, lidarLaser;
-let wheels = [];
-let headlights = [];
-let mistParticles, mistGeo;
-let groundGrid;
-let currentViewMode = '3d';
-let isDragging3D = false;
-let prevMousePos = { x: 0, y: 0 };
-let camSpherical = { radius: 7.2, theta: Math.PI / 4, phi: Math.PI / 3.2 };
-let roverPhysics = {
-    wheelRotationSpeed: 0,
-    targetPitch: 0,
-    currentPitch: 0,
-    targetRoll: 0,
-    currentRoll: 0,
-    targetSteerAngle: 0,
-    currentSteerAngle: 0
-};
-let last3DTime = performance.now();
-let fps3DCount = 0;
-let lastFps3DTime = performance.now();
-
-function initRover3D() {
-    const container = document.getElementById("rover-3d-container");
-    const canvas = document.getElementById("rover-3d-canvas");
-    if (!container || !canvas || typeof THREE === "undefined") return;
-
-    const width = container.clientWidth || 400;
-    const height = container.clientHeight || 310;
-
-    // 1. Scene & Atmosphere Fog
-    scene3D = new THREE.Scene();
-    scene3D.fog = new THREE.FogExp2(0x06140e, 0.04);
-
-    // 2. Camera Setup
-    camera3D = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-    updateCameraSpherical();
-
-    // 3. WebGL Renderer
+async function requestFreshSnapshot() {
+    logMessage("Triggering on-demand leaf snapshot...");
     try {
-        renderer3D = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer3D.setSize(width, height);
-        renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer3D.shadowMap.enabled = true;
-        renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
+        const res = await fetch("/api/camera/snapshot");
+        const data = await res.json();
+        if (data.success && data.filename) {
+            const imgEl = document.getElementById("leaf-preview-img");
+            if (imgEl) imgEl.src = "/static/images/" + data.filename + "?_=" + Date.now();
+            logMessage("Fresh snapshot captured.");
+        }
     } catch (e) {
-        console.warn("WebGL not supported, falling back to 2D view", e);
-        switchRoverView('2d');
-        return;
-    }
-
-    // 4. Lighting Rig
-    const ambient = new THREE.AmbientLight(0x10b981, 0.85);
-    scene3D.add(ambient);
-
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
-    sunLight.position.set(6, 12, 8);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    scene3D.add(sunLight);
-
-    const cyanFill = new THREE.DirectionalLight(0x06b6d4, 0.9);
-    cyanFill.position.set(-6, -2, -5);
-    scene3D.add(cyanFill);
-
-    // 5. Infinite Cyber Ground Grid
-    groundGrid = new THREE.GridHelper(36, 36, 0x22c55e, 0x0a3324);
-    groundGrid.position.y = -0.75;
-    scene3D.add(groundGrid);
-
-    // 6. 3D SMART ROVER ROOT GROUP
-    roverGroup = new THREE.Group();
-    scene3D.add(roverGroup);
-
-    // A. Main Chassis Armor Body
-    const chassisGeo = new THREE.BoxGeometry(2.3, 0.7, 3.2);
-    const chassisMat = new THREE.MeshStandardMaterial({
-        color: 0x0a3324,
-        roughness: 0.35,
-        metalness: 0.75,
-        emissive: 0x047857,
-        emissiveIntensity: 0.15
-    });
-    chassisMesh = new THREE.Mesh(chassisGeo, chassisMat);
-    chassisMesh.castShadow = true;
-    chassisMesh.receiveShadow = true;
-    roverGroup.add(chassisMesh);
-
-    // B. Underbody Armor Skirt
-    const skirtGeo = new THREE.BoxGeometry(2.1, 0.35, 3.3);
-    const skirtMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8, metalness: 0.4 });
-    const skirtMesh = new THREE.Mesh(skirtGeo, skirtMat);
-    skirtMesh.position.y = -0.3;
-    roverGroup.add(skirtMesh);
-
-    // C. Solar Panel Top Deck
-    const solarGeo = new THREE.BoxGeometry(1.9, 0.08, 2.2);
-    const solarMat = new THREE.MeshStandardMaterial({
-        color: 0x082f49,
-        roughness: 0.15,
-        metalness: 0.9,
-        emissive: 0x0284c7,
-        emissiveIntensity: 0.4
-    });
-    solarDeck = new THREE.Mesh(solarGeo, solarMat);
-    solarDeck.position.set(0, 0.4, -0.2);
-    roverGroup.add(solarDeck);
-
-    // D. Emerald Reactor / Engine Core
-    const coreGeo = new THREE.TorusGeometry(0.3, 0.07, 16, 32);
-    const coreMat = new THREE.MeshStandardMaterial({
-        color: 0x34d399,
-        roughness: 0.1,
-        emissive: 0x10b981,
-        emissiveIntensity: 0.8
-    });
-    reactorCore = new THREE.Mesh(coreGeo, coreMat);
-    reactorCore.rotation.x = Math.PI / 2;
-    reactorCore.position.set(0, 0.48, -0.2);
-    roverGroup.add(reactorCore);
-
-    // E. 4 All-Terrain Rubber Tread Wheels
-    const wheelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.4, 24);
-    wheelGeo.rotateZ(Math.PI / 2);
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9, metalness: 0.2 });
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.8, emissive: 0x10b981, emissiveIntensity: 0.2 });
-
-    const wheelPositions = [
-        { x: -1.35, y: -0.2, z: 1.1, isFront: true, isLeft: true },   // Front-Left
-        { x: 1.35, y: -0.2, z: 1.1, isFront: true, isLeft: false },   // Front-Right
-        { x: -1.35, y: -0.2, z: -1.1, isFront: false, isLeft: true }, // Rear-Left
-        { x: 1.35, y: -0.2, z: -1.1, isFront: false, isLeft: false }  // Rear-Right
-    ];
-
-    wheels = [];
-    wheelPositions.forEach((pos) => {
-        const wheelPivot = new THREE.Group();
-        wheelPivot.position.set(pos.x, pos.y, pos.z);
-
-        const tireMesh = new THREE.Mesh(wheelGeo, tireMat);
-        tireMesh.castShadow = true;
-
-        // Rim Accent Disc
-        const rimGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.41, 16);
-        rimGeo.rotateZ(Math.PI / 2);
-        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
-        tireMesh.add(rimMesh);
-
-        // Axle Hub Pin
-        const pinGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.44, 12);
-        pinGeo.rotateZ(Math.PI / 2);
-        const pinMat = new THREE.MeshBasicMaterial({ color: pos.isFront ? 0x34d399 : 0x38bdf8 });
-        const pinMesh = new THREE.Mesh(pinGeo, pinMat);
-        tireMesh.add(pinMesh);
-
-        wheelPivot.add(tireMesh);
-        roverGroup.add(wheelPivot);
-
-        wheels.push({
-            pivot: wheelPivot,
-            mesh: tireMesh,
-            isFront: pos.isFront,
-            isLeft: pos.isLeft
-        });
-    });
-
-    // F. Rotating 3D Lidar & Camera Turret
-    const turretBaseGeo = new THREE.CylinderGeometry(0.28, 0.35, 0.2, 16);
-    const turretBaseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5, metalness: 0.7 });
-    const turretBase = new THREE.Mesh(turretBaseGeo, turretBaseMat);
-    turretBase.position.set(0, 0.48, 1.1);
-    roverGroup.add(turretBase);
-
-    lidarTurret = new THREE.Group();
-    lidarTurret.position.set(0, 0.65, 1.1);
-    roverGroup.add(lidarTurret);
-
-    const domeGeo = new THREE.SphereGeometry(0.2, 16, 12);
-    const domeMat = new THREE.MeshStandardMaterial({ color: 0x06140e, emissive: 0x06b6d4, emissiveIntensity: 0.6 });
-    const domeMesh = new THREE.Mesh(domeGeo, domeMat);
-    lidarTurret.add(domeMesh);
-
-    // Laser Sweep Beam (Translucent cone fan)
-    const beamGeo = new THREE.ConeGeometry(1.6, 2.8, 16, 1, true, 0, Math.PI * 0.4);
-    beamGeo.rotateX(Math.PI / 2);
-    const beamMat = new THREE.MeshBasicMaterial({
-        color: 0x06b6d4,
-        transparent: true,
-        opacity: 0.22,
-        side: THREE.DoubleSide
-    });
-    lidarLaser = new THREE.Mesh(beamGeo, beamMat);
-    lidarLaser.position.set(0, 0, 1.4);
-    lidarTurret.add(lidarLaser);
-
-    // G. Dual Headlights with Volumetric Cones
-    headlights = [];
-    [-0.7, 0.7].forEach(hx => {
-        const lampGeo = new THREE.SphereGeometry(0.12, 12, 8);
-        const lampMat = new THREE.MeshBasicMaterial({ color: 0xecfdf5 });
-        const lamp = new THREE.Mesh(lampGeo, lampMat);
-        lamp.position.set(hx, 0.1, 1.62);
-        roverGroup.add(lamp);
-
-        const coneGeo = new THREE.ConeGeometry(0.65, 3.2, 16, 1, true);
-        coneGeo.rotateX(-Math.PI / 2);
-        const coneMat = new THREE.MeshBasicMaterial({
-            color: 0x34d399,
-            transparent: true,
-            opacity: 0.18,
-            side: THREE.DoubleSide
-        });
-        const lightCone = new THREE.Mesh(coneGeo, coneMat);
-        lightCone.position.set(hx, 0.05, 3.1);
-        roverGroup.add(lightCone);
-
-        headlights.push(lightCone);
-    });
-
-    // H. Dual Rear Sprayer Nozzles & Mist Particles
-    [-0.6, 0.6].forEach(nx => {
-        const nozGeo = new THREE.CylinderGeometry(0.08, 0.1, 0.25, 8);
-        nozGeo.rotateX(Math.PI / 2);
-        const nozMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.2 });
-        const noz = new THREE.Mesh(nozGeo, nozMat);
-        noz.position.set(nx, -0.05, -1.65);
-        roverGroup.add(noz);
-    });
-
-    const pCount = 180;
-    mistGeo = new THREE.BufferGeometry();
-    const pPositions = new Float32Array(pCount * 3);
-    const pVels = [];
-    for (let i = 0; i < pCount; i++) {
-        pPositions[i * 3 + 0] = (Math.random() - 0.5) * 1.5;
-        pPositions[i * 3 + 1] = -0.1 + (Math.random() - 0.5) * 0.4;
-        pPositions[i * 3 + 2] = -1.7 - Math.random() * 2.5;
-        pVels.push({
-            x: (Math.random() - 0.5) * 0.03,
-            y: -0.01 - Math.random() * 0.02,
-            z: -0.06 - Math.random() * 0.08,
-            life: Math.random()
-        });
-    }
-    mistGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-    mistGeo.userData.velocities = pVels;
-
-    const pMat = new THREE.PointsMaterial({
-        color: 0x38bdf8,
-        size: 0.16,
-        transparent: true,
-        opacity: 0,
-        blending: THREE.AdditiveBlending
-    });
-    mistParticles = new THREE.Points(mistGeo, pMat);
-    roverGroup.add(mistParticles);
-
-    // 7. Interactive Orbit Controls
-    setup3DInteraction(container);
-
-    // 8. Responsive Resize Listener
-    window.addEventListener("resize", on3DResize);
-
-    // 9. Start Loop
-    requestAnimationFrame(animateRover3D);
-}
-
-function setup3DInteraction(container) {
-    container.addEventListener("pointerdown", (e) => {
-        isDragging3D = true;
-        prevMousePos = { x: e.clientX, y: e.clientY };
-        const hint = document.getElementById("touch-hint-3d");
-        if (hint) hint.style.opacity = "0";
-    });
-
-    window.addEventListener("pointermove", (e) => {
-        if (!isDragging3D) return;
-        const dx = e.clientX - prevMousePos.x;
-        const dy = e.clientY - prevMousePos.y;
-        prevMousePos = { x: e.clientX, y: e.clientY };
-
-        camSpherical.theta -= dx * 0.008;
-        camSpherical.phi = Math.max(0.1, Math.min(Math.PI / 2.05, camSpherical.phi - dy * 0.008));
-        updateCameraSpherical();
-    });
-
-    window.addEventListener("pointerup", () => { isDragging3D = false; });
-    window.addEventListener("pointercancel", () => { isDragging3D = false; });
-
-    container.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        camSpherical.radius = Math.max(4.0, Math.min(14.0, camSpherical.radius + e.deltaY * 0.006));
-        updateCameraSpherical();
-    }, { passive: false });
-}
-
-function updateCameraSpherical() {
-    if (!camera3D) return;
-    camera3D.position.x = camSpherical.radius * Math.sin(camSpherical.phi) * Math.sin(camSpherical.theta);
-    camera3D.position.y = camSpherical.radius * Math.cos(camSpherical.phi);
-    camera3D.position.z = camSpherical.radius * Math.sin(camSpherical.phi) * Math.cos(camSpherical.theta);
-    camera3D.lookAt(0, 0, 0);
-}
-
-function setRoverCam(mode) {
-    document.querySelectorAll(".cam-btn").forEach(b => b.classList.remove("active"));
-    const btn = document.getElementById("cam-btn-" + mode);
-    if (btn) btn.classList.add("active");
-
-    if (mode === 'top') {
-        camSpherical = { radius: 7.5, theta: 0, phi: 0.05 };
-    } else if (mode === 'iso') {
-        camSpherical = { radius: 7.2, theta: Math.PI / 4, phi: Math.PI / 3.4 };
-    } else if (mode === 'front') {
-        camSpherical = { radius: 6.8, theta: 0, phi: Math.PI / 2.3 };
-    } else {
-        camSpherical = { radius: 7.2, theta: Math.PI / 5, phi: Math.PI / 3.2 };
-    }
-    updateCameraSpherical();
-}
-
-function resetRoverCam() {
-    setRoverCam('iso');
-}
-
-function switchRoverView(mode) {
-    currentViewMode = mode;
-    const btn3d = document.getElementById("btn-view-3d");
-    const btn2d = document.getElementById("btn-view-2d");
-    const container3d = document.getElementById("rover-3d-container");
-    const controls3d = document.getElementById("view-cam-controls");
-    const wrap2d = document.getElementById("rover-svg-wrap");
-    const sonar2d = document.getElementById("sonar-sweep-2d");
-    const vel2d = document.getElementById("velocity-stream-2d");
-
-    if (mode === '3d') {
-        if (btn3d) btn3d.classList.add("active");
-        if (btn2d) btn2d.classList.remove("active");
-        if (container3d) container3d.style.display = "block";
-        if (controls3d) controls3d.style.display = "flex";
-        if (wrap2d) wrap2d.style.display = "none";
-        if (sonar2d) sonar2d.style.display = "none";
-        if (vel2d) vel2d.style.display = "none";
-        on3DResize();
-    } else {
-        if (btn3d) btn3d.classList.remove("active");
-        if (btn2d) btn2d.classList.add("active");
-        if (container3d) container3d.style.display = "none";
-        if (controls3d) controls3d.style.display = "none";
-        if (wrap2d) wrap2d.style.display = "block";
-        if (sonar2d) sonar2d.style.display = "block";
-        if (vel2d) vel2d.style.display = "block";
+        logMessage("Snapshot failed.");
     }
 }
 
-function on3DResize() {
-    if (!renderer3D || !camera3D) return;
-    const container = document.getElementById("rover-3d-container");
-    if (!container || container.style.display === "none") return;
-    const width = container.clientWidth;
-    const height = container.clientHeight || 310;
-    if (width > 0 && height > 0) {
-        camera3D.aspect = width / height;
-        camera3D.updateProjectionMatrix();
-        renderer3D.setSize(width, height);
-    }
-}
+// Keyboard arrow controls for PC testing
+window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    if (e.key === "ArrowUp" || e.key === "w") sendSignal("forward");
+    else if (e.key === "ArrowDown" || e.key === "s") sendSignal("backward");
+    else if (e.key === "ArrowLeft" || e.key === "a") sendSignal("left");
+    else if (e.key === "ArrowRight" || e.key === "d") sendSignal("right");
+    else if (e.key === " " || e.key === "Escape") emergencyBrake();
+});
 
-function animateRover3D(now) {
-    requestAnimationFrame(animateRover3D);
-
-    if (currentViewMode !== '3d' || !renderer3D || !scene3D) return;
-
-    fps3DCount++;
-    if (now - lastFps3DTime >= 1000) {
-        const fpsElem = document.getElementById("hud-3d-fps");
-        if (fpsElem) fpsElem.textContent = `${Math.round(fps3DCount * 1000 / (now - lastFps3DTime))} FPS`;
-        fps3DCount = 0;
-        lastFps3DTime = now;
-    }
-
-    // 1. Continuous Lidar rotation
-    if (lidarTurret) lidarTurret.rotation.y += 0.04;
-
-    // 2. Reactor Core pulse animation
-    if (reactorCore) {
-        reactorCore.rotation.z += 0.03;
-        const pulse = 0.5 + Math.sin(now * 0.005) * 0.4;
-        reactorCore.material.emissiveIntensity = isEngineArmed ? (0.8 + pulse * 0.6) : 0.2;
-    }
-
-    // 3. Dynamic Wheel physics and steering
-    const targetSpd = (currentDirection === "forward") ? (currentSpeed / 45.0) :
-                      ((currentDirection === "backward" || currentDirection === "reverse") ? -(currentSpeed / 45.0) :
-                      (currentDirection === "left" || currentDirection === "right" ? 0.9 : 0));
-
-    roverPhysics.wheelRotationSpeed += (targetSpd - roverPhysics.wheelRotationSpeed) * 0.12;
-
-    wheels.forEach(w => {
-        let spin = roverPhysics.wheelRotationSpeed * 0.22;
-        if (currentDirection === "left") {
-            spin = w.isLeft ? -0.15 : 0.15;
-        } else if (currentDirection === "right") {
-            spin = w.isLeft ? 0.15 : -0.15;
-        }
-        w.mesh.rotation.x += spin;
-
-        // Front wheel steering
-        if (w.isFront) {
-            const steer = (currentDirection === "left") ? 0.38 : (currentDirection === "right" ? -0.38 : 0);
-            w.pivot.rotation.y += (steer - w.pivot.rotation.y) * 0.15;
-        }
-    });
-
-    // 4. Chassis Suspension Pitch & Roll kinematics
-    let targetPitch = 0;
-    let targetRoll = 0;
-    if (currentDirection === "forward") targetPitch = -0.06;
-    else if (currentDirection === "backward" || currentDirection === "reverse") targetPitch = 0.06;
-
-    if (currentDirection === "left") targetRoll = -0.06;
-    else if (currentDirection === "right") targetRoll = 0.06;
-
-    if (chassisMesh && roverGroup) {
-        roverGroup.rotation.x += (targetPitch - roverGroup.rotation.x) * 0.1;
-        roverGroup.rotation.z += (targetRoll - roverGroup.rotation.z) * 0.1;
-    }
-
-    // 5. Ground grid scrolling
-    if (groundGrid) {
-        groundGrid.position.z -= roverPhysics.wheelRotationSpeed * 0.08;
-        if (groundGrid.position.z > 1.0) groundGrid.position.z -= 1.0;
-        if (groundGrid.position.z < -1.0) groundGrid.position.z += 1.0;
-    }
-
-    // 6. Chemical Mist Particles
-    if (mistParticles && mistGeo) {
-        mistParticles.material.opacity += ((pumpState ? 0.85 : 0.0) - mistParticles.material.opacity) * 0.15;
-        if (mistParticles.material.opacity > 0.02) {
-            const pos = mistGeo.attributes.position.array;
-            const vels = mistGeo.userData.velocities;
-            for (let i = 0; i < vels.length; i++) {
-                pos[i * 3 + 0] += vels[i].x;
-                pos[i * 3 + 1] += vels[i].y;
-                pos[i * 3 + 2] += vels[i].z;
-                vels[i].life += 0.02;
-                if (vels[i].life > 1.0 || pos[i * 3 + 2] < -5.0) {
-                    const side = Math.random() > 0.5 ? -0.6 : 0.6;
-                    pos[i * 3 + 0] = side + (Math.random() - 0.5) * 0.25;
-                    pos[i * 3 + 1] = -0.05 + (Math.random() - 0.5) * 0.1;
-                    pos[i * 3 + 2] = -1.7;
-                    vels[i].life = 0;
-                }
-            }
-            mistGeo.attributes.position.needsUpdate = true;
+window.addEventListener("keyup", (e) => {
+    if (driveMode === 'momentary') {
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "s", "a", "d"].includes(e.key)) {
+            sendSignal("stop", 0);
         }
     }
+});
 
-    renderer3D.render(scene3D, camera3D);
-}
-
-// Auto-initialize 3D view after DOM loaded
-if (document.readyState === "complete" || document.readyState === "interactive") {
-    setTimeout(initRover3D, 250);
-} else {
-    window.addEventListener("DOMContentLoaded", () => setTimeout(initRover3D, 250));
-}
-
+// Periodic status poll (every 1.5s)
+syncRoverStatus();
+setInterval(syncRoverStatus, 1500);
 </script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 {
-    "result_id": "1858847d7a9d407499c6ea0fbcdd4cd2",
-    "image": "20261008_150052_d4dbfa6a.jpg",
-    "disease": "Cercospora Leaf Spot (80.0%)",
-    "chemical": "Copper-based fungicide / Mancozeb",
-    "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Remove infected leaves and improve plant spacing for airflow.",
-    "confidence": 80.0,
-    "timestamp": "2026-10-08 15:00:52"
+    "result_id": "a84962e58c8142fdaa4969d90d256a7f",
+    "image": "20261008_161253_33298293.jpg",
+    "disease": "Curl Virus (75.4%)",
+    "chemical": "Imidacloprid / Neem oil for whitefly & vector control",
+    "fertilizer": "Balanced NPK fertilizer with micronutrients",
+    "treatment": "Uproot severely stunted plants and control insect vectors immediately.",
+    "confidence": 75.4,
+    "timestamp": "2026-10-08 16:12:53"
 }

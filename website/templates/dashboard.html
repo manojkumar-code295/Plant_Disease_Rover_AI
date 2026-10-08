@@ -1367,122 +1367,62 @@
         <!-- PRIMARY TWO-COLUMN SECTION -->
         <section class="dashboard-grid">
 
-            <!-- LEFT COLUMN: LIVE CAMERA FEED (Requirement 2) -->
+            <!-- LEFT COLUMN: ROVER COMMAND & TELEMETRY CENTER (No live webcam) -->
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">📹 Real-Time Edge AI Camera Feed</h2>
-                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">CSI STREAM</span>
+                    <h2 class="card-title">🎮 Rover Command & Telemetry Center</h2>
+                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="quick-signal-badge">DIRECT LINK</span>
                 </div>
 
-                <div class="camera-stream-wrapper">
-                    <!-- Dynamic Live Stream Image -->
-                    <img id="live-camera-img" 
-                         src="/video_feed" 
-                         alt="AgriRover Live Camera Stream" 
-                         class="camera-stream-img">
-
-                    <!-- Cyber HUD Brackets & Laser Scanline -->
-                    <div class="hud-corner hud-corner-tl"></div>
-                    <div class="hud-corner hud-corner-tr"></div>
-                    <div class="hud-corner hud-corner-bl"></div>
-                    <div class="hud-corner hud-corner-br"></div>
-                    <div class="camera-scanline"></div>
-
-                    <!-- Camera Stream HUD Overlays -->
-                    <div class="hud-overlay-live">
-                        <span class="radar-dot" style="background: #ef4444;"></span>
-                        <span>LIVE</span>
+                <!-- Signal Status & Quick Telemetry HUD -->
+                <div style="background: rgba(10, 26, 19, 0.9); border: 1px solid var(--border-card); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Drive Status:</span>
+                        <span id="quick-motion-status" style="font-size: 13px; font-weight: 800; color: #34d399;">STOPPED</span>
                     </div>
-                    <div class="hud-overlay-fps" id="cam-fps-overlay">Picamera2 640x480</div>
-
-                    <!-- Stream Standby Fallback -->
-                    <div class="camera-fallback" id="camera-fallback">
-                        <div style="font-size: 36px; margin-bottom: 8px;">📷</div>
-                        <h4 style="color: #ecfdf5; margin-bottom: 6px;">Camera Stream Standby</h4>
-                        <p style="font-size: 12px; color: var(--text-dim); max-width: 280px; margin-bottom: 14px;">
-                            Connecting to local Raspberry Pi stream (<span id="fallback-stream-url">/video_feed</span>)...
-                        </p>
-                        <button class="btn-stream-action" onclick="retryStreamConnection()">
-                            🔄 Reconnect Stream
-                        </button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; font-family: monospace;">
+                        <span>Link Latency: <strong id="quick-latency-val" style="color:#38bdf8;">-- ms</strong></span>
+                        <span>Motor Power: <strong id="quick-speed-val" style="color:#86efac;">60% PWM</strong></span>
                     </div>
                 </div>
 
-                <!-- Stream Controls & Snapshot -->
-                <div class="camera-controls-bar">
-                    <div class="stream-status-text">
-                        <span class="radar-dot" style="background: #10b981;" id="stream-indicator-dot"></span>
-                        <span id="stream-status-label">Streaming active concurrently</span>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-stream-action" onclick="takeSnapshot()">📸 Snapshot</button>
-                        <a href="/video_feed" target="_blank" class="btn-stream-action">↗ Fullscreen</a>
+                <!-- Direct Touch D-Pad -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 14px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 220px; height: 220px;">
+                        <div></div>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('forward')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #154c37, #0d3625); border-color: rgba(52, 211, 153, 0.5); color: #86efac;">▲<span style="font-size:10px; display:block;">FWD</span></button>
+                        <div></div>
+
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('left')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #133a2a, #0b261b); border-color: rgba(52, 211, 153, 0.3); color: #ecfdf5;">◀<span style="font-size:10px; display:block;">LEFT</span></button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('stop')" style="justify-content: center; font-size: 20px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #7f1d1d, #450a0a); border-color: #ef4444; color: #fee2e2; box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);">■<span style="font-size:10px; display:block;">STOP</span></button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('right')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #133a2a, #0b261b); border-color: rgba(52, 211, 153, 0.3); color: #ecfdf5;">▶<span style="font-size:10px; display:block;">RIGHT</span></button>
+
+                        <div></div>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('backward')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #37230b, #1f1406); border-color: rgba(245, 158, 11, 0.4); color: #fde68a;">▼<span style="font-size:10px; display:block;">REV</span></button>
+                        <div></div>
                     </div>
                 </div>
 
-                <!-- Quick Motion Controls Directly on Dashboard -->
-                <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-card);">
-                    <div style="font-size: 11px; font-weight: 700; color: #86efac; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span>🏎️ Quick Motion Controls</span>
-                        <span id="quick-motion-status" style="color: #94a3b8; font-weight: normal; font-size: 11px;">STOPPED</span>
-                    </div>
-
-                    <!-- Primary START / STOP Buttons -->
-                    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;">
-                        <button id="quick-start-btn" class="btn-stream-action" onclick="sendQuickCommand('start')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(4, 120, 87, 0.5)); border: 1px solid #10b981; color: #ecfdf5; box-shadow: 0 0 14px rgba(16, 185, 129, 0.35); flex: 1; max-width: 140px; cursor: pointer;">▶ START ENGINE</button>
-                        <button id="quick-stop-btn" class="btn-stream-action" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 18px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.4)); border: 1px solid #ef4444; color: #fee2e2; box-shadow: 0 0 14px rgba(239, 68, 68, 0.3); flex: 1; max-width: 140px; cursor: pointer;">■ STOP</button>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 250px; margin: 0 auto;">
-                        <div></div>
-                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('forward')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▲ FWD</button>
-                        <div></div>
-                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('left')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">◀ LFT</button>
-                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('stop')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800; background: rgba(239, 68, 68, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5;">■ STOP</button>
-                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('right')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▶ RGT</button>
-                        <div></div>
-                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('backward')" style="justify-content: center; padding: 10px 4px; font-size: 13px; font-weight: 800;">▼ REV</button>
-                        <div></div>
-                    </div>
+                <!-- Action Buttons: Pump Toggle + Mobile Controller Link -->
+                <div style="display: flex; gap: 8px;">
+                    <button id="quick-pump-btn" class="btn-stream-action" onclick="toggleQuickPump()" style="flex: 1; justify-content: center; padding: 10px; font-size: 12px; font-weight: 800;">💦 Spray Pump: OFF</button>
+                    <a href="/rover" class="btn-stream-action" style="flex: 1; justify-content: center; padding: 10px; font-size: 12px; font-weight: 800; background: rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.5); color: #67e8f9; text-decoration: none;">📱 Mobile Cockpit ↗</a>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: LATEST DETECTION RESULT & 3D HOLOGRAPHIC DIAGNOSIS -->
+            <!-- RIGHT COLUMN: LATEST DETECTION RESULT -->
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">🔬 Plant Leaf Health Diagnosis</h2>
-                    <span class="card-badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee;" id="diagnosis-engine-badge">3D BIOMETRICS</span>
+                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="diagnosis-engine-badge">AI SCAN</span>
                 </div>
 
-                <!-- 3D Hologram vs 2D Snapshot Mode Switcher -->
-                <div class="leaf-view-mode-bar">
-                    <div class="leaf-mode-toggle">
-                        <button type="button" class="leaf-mode-btn active" id="btn-leaf-3d" onclick="switchLeafView('3d')">🧬 3D HOLOGRAPHIC SCANNER</button>
-                        <button type="button" class="leaf-mode-btn" id="btn-leaf-2d" onclick="switchLeafView('2d')">📷 SNAPSHOT</button>
-                    </div>
-                    <div class="leaf-3d-cam-controls" id="leaf-cam-controls">
-                        <button type="button" class="leaf-cam-btn active" id="leaf-cam-rotate" onclick="toggleLeafAutoRotate()">↺ Auto-Rotate</button>
-                        <button type="button" class="leaf-cam-btn" onclick="setLeafCamAngle('top')">Top</button>
-                        <button type="button" class="leaf-cam-btn" onclick="setLeafCamAngle('underside')">Underside</button>
-                        <button type="button" class="leaf-cam-btn" onclick="resetLeafCam()">Reset</button>
-                    </div>
-                </div>
-
-                <!-- 3D WebGL Leaf Hologram Viewport -->
-                <div class="leaf-3d-viewport" id="leaf-3d-viewport">
-                    <canvas id="leaf-3d-canvas"></canvas>
-                    <div class="leaf-3d-badge" id="leaf-3d-badge">
-                        <span class="radar-dot" style="background:#10b981;" id="leaf-badge-dot"></span>
-                        <span id="leaf-badge-text">SCANNING CHILI FOLIAGE</span>
-                    </div>
-                    <div class="leaf-3d-status-hint">✨ Drag / Swipe to rotate 360° · Scroll to zoom</div>
-                </div>
-
-                <!-- 2D Snapshot Container (Shown when 2D mode selected) -->
-                <div class="leaf-preview-container" id="leaf-2d-container" style="display: none;">
+                <!-- 2D High Resolution Snapshot Container -->
+                <div class="leaf-preview-container" id="leaf-2d-container" style="display: flex; margin-bottom: 14px;">
                     <div class="leaf-img-box" id="leaf-img-box">
                         {% if detection.image %}
                             <img id="latest-leaf-img" src="{{ url_for('static', filename='images/' + detection.image) }}?v={{ detection.timestamp }}" alt="Latest Plant Leaf">
+
                         {% else %}
                             <img id="latest-leaf-img" src="{{ url_for('static', filename='images/20261006_141712_ba202fd4.jpg') }}" alt="Real-time Chili Leaf" style="opacity: 0.85;">
                         {% endif %}
@@ -1662,36 +1602,28 @@
             window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
         }
 
-        // Initialize native camera stream
-        initLiveStream();
-
-        // Quick Rover Movement Command Handler
+        // Quick Rover Direct Movement Command Handler
         async function sendQuickCommand(cmd) {
             const statusText = document.getElementById("quick-motion-status");
-            const startBtn = document.getElementById("quick-start-btn");
+            const latencyText = document.getElementById("quick-latency-val");
             if (statusText) statusText.textContent = cmd.toUpperCase() + "...";
+            const t0 = performance.now();
             try {
                 const res = await fetch("/api/rover/control", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ command: cmd })
+                    body: JSON.stringify({ 
+                        command: cmd,
+                        speed: 60
+                    })
                 });
+                const latency = Math.round(performance.now() - t0);
+                if (latencyText) latencyText.textContent = `${latency} ms`;
                 const data = await res.json();
                 if (data.success && statusText) {
-                    if (cmd === 'start') {
-                        statusText.textContent = 'ENGINE ARMED (READY)';
-                        statusText.style.color = '#34d399';
-                        if (startBtn) {
-                            startBtn.style.boxShadow = '0 0 22px rgba(52, 211, 153, 0.9)';
-                            startBtn.innerHTML = '<span style="display:inline-block; animation: spinTurbine 2s linear infinite;">⚙️</span> ARMED';
-                        }
-                    } else if (cmd === 'stop') {
+                    if (cmd === 'stop') {
                         statusText.textContent = 'STOPPED';
-                        statusText.style.color = '#94a3b8';
-                        if (startBtn) {
-                            startBtn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.35)';
-                            startBtn.innerHTML = '▶ START ENGINE';
-                        }
+                        statusText.style.color = '#ef4444';
                     } else if (cmd === 'forward') {
                         statusText.textContent = '▲ MOVING FORWARD';
                         statusText.style.color = '#34d399';
@@ -1712,6 +1644,25 @@
             } catch (e) {
                 if (statusText) statusText.textContent = "ERR: NO LINK";
             }
+        }
+
+        let quickPumpActive = false;
+        async function toggleQuickPump() {
+            quickPumpActive = !quickPumpActive;
+            const btn = document.getElementById("quick-pump-btn");
+            if (btn) {
+                btn.textContent = quickPumpActive ? "💦 Spray Pump: ON" : "💦 Spray Pump: OFF";
+                btn.style.color = quickPumpActive ? "#38bdf8" : "#f0fdf4";
+                btn.style.borderColor = quickPumpActive ? "#06b6d4" : "rgba(34, 197, 94, 0.3)";
+            }
+            try {
+                await fetch("/api/rover/pump", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ state: quickPumpActive })
+                });
+            } catch (e) {}
+        }
         // =========================================================
         // 3D HOLOGRAPHIC PLANT LEAF BIOMETRIC VISUALIZER (Three.js)
         // =========================================================

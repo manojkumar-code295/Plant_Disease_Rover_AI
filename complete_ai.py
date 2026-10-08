@@ -346,6 +346,8 @@ def apply_rover_command(direction, speed, pump):
         return
 
     shared_telemetry["direction"] = direction.capitalize()
+    if speed <= 0 and direction in ("forward", "backward", "reverse", "left", "right"):
+        speed = 60
     is_moving = speed > 0
     in1, in2, in3, in4 = 0, 0, 0, 0
 
@@ -999,25 +1001,11 @@ def cloud_command_worker():
                     last_command_id = cid
         except Exception:
             pass
-        time.sleep(0.35)
+        time.sleep(0.18)
 
 def cloud_frame_streamer_worker():
-    """Streams live camera frames to Render so the Android app & remote dashboard see live video."""
-    session = requests.Session()
-    headers = {"Content-Type": "image/jpeg"}
-    if RENDER_API_TOKEN:
-        headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-    stream_url = RENDER_URL + "/api/camera/stream_frame"
-
-    while running:
-        try:
-            with latest_jpeg_lock:
-                frame = latest_jpeg_frame
-            if frame is not None:
-                session.post(stream_url, data=frame, headers=headers, timeout=1.5)
-            time.sleep(0.25)  # ~4 FPS cloud relay is optimal for WAN bandwidth
-        except Exception:
-            time.sleep(0.8)
+    """Disabled per user request: Live camera upload disabled to eliminate WAN latency & prevent Render worker locks."""
+    return
 
 
 def local_telemetry_worker():

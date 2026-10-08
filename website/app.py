@@ -660,68 +660,19 @@ def api_camera_stream_frame():
 
 @app.route("/video_feed")
 def video_feed():
-    """Proxies the local MJPEG camera stream from port 8080 or streams relayed cloud frames."""
-    # 1. If on Raspberry Pi, proxy direct 8080 stream
-    try:
-        import urllib.request
-        req = urllib.request.Request("http://127.0.0.1:8080/video_feed")
-        resp = urllib.request.urlopen(req, timeout=0.8)
-        if resp.status == 200:
-            def generate_local():
-                try:
-                    while True:
-                        chunk = resp.read(4096)
-                        if not chunk:
-                            break
-                        yield chunk
-                except Exception:
-                    pass
-            return Response(generate_local(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
-    except Exception:
-        pass
-
-    # 2. Cloud MJPEG generator (reads from disk or memory)
+    """Non-blocking single frame response to prevent Gunicorn worker starvation and save mobile data."""
     live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
-    def generate_cloud():
-        boundary = b'--FRAME\r\n'
-        last_mtime = 0.0
-        current_frame = None
-
-        # Pre-load existing frame if on disk
-        if os.path.exists(live_path):
-            try:
-                with open(live_path, "rb") as f:
-                    current_frame = f.read()
-                last_mtime = os.path.getmtime(live_path)
-            except Exception:
-                pass
-
-        while True:
-            try:
-                if os.path.exists(live_path):
-                    mtime = os.path.getmtime(live_path)
-                    if mtime > last_mtime or current_frame is None:
-                        last_mtime = mtime
-                        with open(live_path, "rb") as f:
-                            current_frame = f.read()
-                elif latest_cloud_frame is not None:
-                    current_frame = latest_cloud_frame
-            except Exception:
-                pass
-
-            frame_to_send = current_frame if current_frame else PLACEHOLDER_JPEG
-            yield (boundary +
-                   b'Content-Type: image/jpeg\r\n' +
-                   b'Content-Length: ' + str(len(frame_to_send)).encode() + b'\r\n\r\n' +
-                   frame_to_send + b'\r\n')
-            time.sleep(0.10)
-
-    response = Response(generate_cloud(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    response.headers['X-Accel-Buffering'] = 'no'
-    return response
+    if os.path.exists(live_path):
+        try:
+            with open(live_path, "rb") as f:
+                resp = Response(f.read(), mimetype='image/jpeg')
+                resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                return resp
+        except Exception:
+            pass
+    resp = Response(PLACEHOLDER_JPEG, mimetype='image/jpeg')
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    return resp
 
 
 @app.route("/api/camera/snapshot")
@@ -1252,28 +1203,21 @@ def update_result():
 
 @app.route(
     "/api/rover/control",
-    methods=["POST"]
+    methods=["GET", "POST"]
 )
 def rover_control():
 
     try:
-
-        data = request.get_json(
-            silent=True
-        )
-
-
-        if data is None:
-            data = request.form
-
+        if request.method == "GET":
+            data = request.args
+        else:
+            data = request.get_json(silent=True)
+            if data is None:
+                data = request.form
 
         command = str(
-            data.get(
-                "command",
-                "stop"
-            )
+            data.get("command", "stop")
         ).lower().strip()
-
 
         valid_commands = [
             "forward",
@@ -1287,10 +1231,8 @@ def rover_control():
         if command not in valid_commands:
             return jsonify({
                 "success": False,
-                "message":
-                    "Invalid rover command",
-                "command":
-                    command
+                "message": "Invalid rover command",
+                "command": command
             }), 400
 
         direction_names = {
@@ -1302,17 +1244,9 @@ def rover_control():
             "stop": "Stopped"
         }
 
-        rover_state[
-            "direction"
-        ] = direction_names[command]
-
-        rover_state[
-            "last_command"
-        ] = command
-
-        rover_state[
-            "command_id"
-        ] += 1
+        rover_state["direction"] = direction_names[command]
+        rover_state["last_command"] = command
+        rover_state["command_id"] += 1
 
         # Check for speed in payload
         req_speed = data.get("speed")
@@ -1320,19 +1254,21 @@ def rover_control():
             try:
                 s = int(req_speed)
                 if s > 0:
-                    rover_state["speed"] = max(10, min(100, s))
+                    rover_state["speed"] = max(20, min(100, s))
             except Exception:
                 pass
 
-        if command == "start":
+        if command in ("forward", "backward", "left", "right"):
             rover_state["engine_armed"] = True
-            if rover_state.get("speed", 0) == 0:
-                rover_state["speed"] = rover_settings.get("speed", 50)
+            if rover_state.get("speed", 0) <= 0:
+                rover_state["speed"] = rover_settings.get("speed", 60)
+        elif command == "start":
+            rover_state["engine_armed"] = True
+            if rover_state.get("speed", 0) <= 0:
+                rover_state["speed"] = rover_settings.get("speed", 60)
         elif command == "stop":
             rover_state["engine_armed"] = False
             rover_state["speed"] = 0
-        elif rover_state.get("speed", 0) == 0:
-            rover_state["speed"] = rover_settings.get("speed", 50)
 
         print(
             "ROVER COMMAND:",
