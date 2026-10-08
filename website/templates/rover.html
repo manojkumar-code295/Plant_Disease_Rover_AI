@@ -848,18 +848,36 @@ async function syncRoverStatus() {
             if (pillTxt) pillTxt.textContent = "Pi Offline";
         }
         
-        if (data.result) {
+        const leafTxt = document.getElementById("leaf-disease-txt");
+        const confTxt = document.getElementById("leaf-confidence-txt");
+        const treatTxt = document.getElementById("leaf-treatment-txt");
+        const imgEl = document.getElementById("leaf-preview-img");
+
+        // Continuous Live AI Disease Diagnosis (Real-Time)
+        if (r && r.last_detection && r.last_detection !== "NO LEAF DETECTED") {
+            if (leafTxt) leafTxt.textContent = r.last_detection;
+            if (confTxt) confTxt.textContent = `Live Confidence: ${(r.last_confidence || 0).toFixed(1)}%`;
+            if (treatTxt && r.disease_treatment) {
+                treatTxt.textContent = `Rx: ${r.disease_chemical || 'Standard Care'} | ${r.disease_treatment}`;
+            } else if (data.result && data.result.treatment) {
+                treatTxt.textContent = data.result.treatment;
+            }
+        } else if (data.result && data.result.disease) {
             const resData = data.result;
-            const leafTxt = document.getElementById("leaf-disease-txt");
-            const confTxt = document.getElementById("leaf-confidence-txt");
-            const treatTxt = document.getElementById("leaf-treatment-txt");
-            const imgEl = document.getElementById("leaf-preview-img");
-            
-            if (leafTxt && resData.disease) leafTxt.textContent = resData.disease;
-            if (confTxt && resData.confidence) confTxt.textContent = `Confidence: ${resData.confidence}%`;
+            if (leafTxt) leafTxt.textContent = resData.disease;
+            if (confTxt) confTxt.textContent = `Confidence: ${resData.confidence}%`;
             if (treatTxt && resData.treatment) treatTxt.textContent = resData.treatment;
-            if (imgEl && resData.image && !imgEl.dataset.custom) {
-                imgEl.src = "/static/images/" + resData.image;
+        } else {
+            if (leafTxt) leafTxt.textContent = "Scanning Foliage... (No Leaf in View)";
+            if (confTxt) confTxt.textContent = "Confidence: 0.0%";
+            if (treatTxt) treatTxt.textContent = "Hold camera over plant leaf to detect diseases.";
+        }
+
+        // Continuous Leaf Photo Auto-Refresh
+        if (data.result && data.result.image && imgEl && !imgEl.dataset.custom) {
+            const newSrc = "/static/images/" + data.result.image;
+            if (!imgEl.src.includes(data.result.image)) {
+                imgEl.src = newSrc;
             }
         }
     } catch (e) {}

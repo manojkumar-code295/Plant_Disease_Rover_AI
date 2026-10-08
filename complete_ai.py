@@ -71,7 +71,7 @@ MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 42.0))       # Rejects g
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
 CAMERA_ROTATION = os.environ.get("CAMERA_ROTATION", "90_CCW")
 PREDICT_EVERY_N_FRAMES = int(os.environ.get("PREDICT_EVERY_N_FRAMES", 2))
-UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 25.0))     # Cooldown between cloud uploads for same disease
+UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 2.0))     # Cooldown between cloud uploads for same disease
 
 # Render Cloud Synchronization (Configurable via Environment)
 RENDER_URL = os.environ.get("RENDER_URL", "https://precision-agriculture-smart-rover.onrender.com").rstrip("/")
@@ -811,18 +811,35 @@ def ai_inference_worker():
                 consec_class = disease_code
                 consec_count = 1
 
+            info_key = disease_code.lower()
+            if "bacterial" in info_key:
+                info_key = "bacterial_spot"
+            elif "cercospora" in info_key:
+                info_key = "cercospora_leaf_spot"
+            elif "curl" in info_key:
+                info_key = "curl_virus"
+            else:
+                info_key = "healthy_leaf"
+
+            d_info = DISEASE_INFO.get(info_key, {
+                "chemical": "None required",
+                "fertilizer": "Balanced NPK fertilizer",
+                "treatment": "Maintain regular crop monitoring."
+            })
+
             shared_telemetry["last_detection"] = display_label
             shared_telemetry["last_confidence"] = round(conf * 100.0 if conf <= 1.0 else conf, 1)
             shared_telemetry["ai_status"] = f"Classified: {display_label}"
+            shared_telemetry["disease_name"] = display_label
+            shared_telemetry["disease_chemical"] = d_info["chemical"]
+            shared_telemetry["disease_fertilizer"] = d_info["fertilizer"]
+            shared_telemetry["disease_treatment"] = d_info["treatment"]
 
-            # Only upload confirmed disease classifications after 2 consecutive confirmations
+            # Continuous disease upload: immediately on change, or every 2s for continuous updates
             valid_disease_classes = ("HEALTHY", "Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus")
-            is_valid_disease = (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2)
+            is_valid_disease = (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD)
 
-            # Smart deduplication:
-            # - Immediate upload if disease changed
-            # - 25s cooldown if it's the exact same disease to avoid disk thrashing & network spam
-            cooldown = UPLOAD_INTERVAL if disease_code == consec_class and last_upload_time > 0 else 4.0
+            cooldown = UPLOAD_INTERVAL if disease_code == consec_class and last_upload_time > 0 else 1.0
             if is_valid_disease and (now - last_upload_time >= cooldown):
                 snap_path = os.path.join(SAVE_FOLDER, f"leaf_{int(now)}.jpg")
                 cv2.imwrite(snap_path, crop)

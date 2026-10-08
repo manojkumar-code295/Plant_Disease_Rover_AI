@@ -115,6 +115,10 @@ rover_state = {
     "command_id": 0,
     "pi_ip": "",
     "stream_url": "",
+    "disease_name": "NO LEAF DETECTED",
+    "disease_chemical": "",
+    "disease_fertilizer": "",
+    "disease_treatment": "",
     "last_seen": None,
     "last_seen_epoch": 0.0
 }
@@ -1419,6 +1423,14 @@ def rover_heartbeat():
                 rover_state["ip"] = str(data.get("pi_ip"))
             if "stream_url" in data:
                 rover_state["stream_url"] = str(data.get("stream_url"))
+            if "disease_name" in data:
+                rover_state["disease_name"] = str(data.get("disease_name"))
+            if "disease_chemical" in data:
+                rover_state["disease_chemical"] = str(data.get("disease_chemical"))
+            if "disease_fertilizer" in data:
+                rover_state["disease_fertilizer"] = str(data.get("disease_fertilizer"))
+            if "disease_treatment" in data:
+                rover_state["disease_treatment"] = str(data.get("disease_treatment"))
 
         return jsonify({
             "success": True,

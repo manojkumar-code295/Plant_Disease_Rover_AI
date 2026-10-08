@@ -2274,6 +2274,9 @@
                         confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
                         confFill.className = isLiveHealthy ? "conf-fill" : "conf-fill warning";
                     }
+                    if (prescChem && data.rover.disease_chemical) prescChem.textContent = data.rover.disease_chemical;
+                    if (prescFert && data.rover.disease_fertilizer) prescFert.textContent = data.rover.disease_fertilizer;
+                    if (prescTreat && data.rover.disease_treatment) prescTreat.textContent = data.rover.disease_treatment;
                     if (timestamp) timestamp.textContent = "Live Stream Analysis";
                     if (vigor) {
                         vigor.textContent = isLiveHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
