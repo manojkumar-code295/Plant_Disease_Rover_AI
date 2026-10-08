@@ -1376,7 +1376,7 @@
 
                 <!-- LIVE WEBCAM VIDEO STREAM -->
                 <div style="position:relative; width:100%; aspect-ratio:16/9; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px;">
-                    <img id="live-dashboard-cam" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='/static/app_photo.png'">
+                    <img id="live-dashboard-cam" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
                     <div style="position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; color:#ef4444;">
                         <span class="radar-dot" style="background:#ef4444;"></span> LIVE CAM
                     </div>
@@ -1567,54 +1567,63 @@
         if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
         if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
 
-        // Native High-Speed Live Camera Feed Engine (Single persistent connection, 0 connection queuing)
-        const cameraImg = document.getElementById("live-camera-img");
+        // High-Speed Live Camera Engine (Universal Polling)
+        const cameraImg = document.getElementById("live-dashboard-cam");
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
-        let streamReconnectTimer = null;
+        let dashCamPolling = true;
+        let dashCamInFlight = false;
 
-        function initLiveStream() {
-            if (!cameraImg) return;
-            cameraImg.src = "/video_feed";
-
-            cameraImg.onload = function() {
+        function fetchDashboardCameraFrame() {
+            if (!dashCamPolling || dashCamInFlight) return;
+            dashCamInFlight = true;
+            const img = new Image();
+            img.onload = function() {
+                if (cameraImg) cameraImg.src = img.src;
                 if (cameraFallback) cameraFallback.style.display = "none";
                 if (streamIndicator) streamIndicator.style.background = "#10b981";
                 if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
+                dashCamInFlight = false;
             };
-
-            cameraImg.onerror = function() {
-                if (streamIndicator) streamIndicator.style.background = "#f59e0b";
-                if (streamStatus) streamStatus.textContent = "Connecting to camera stream...";
-                if (cameraFallback) cameraFallback.style.display = "flex";
-                if (!streamReconnectTimer) {
-                    streamReconnectTimer = setTimeout(() => {
-                        streamReconnectTimer = null;
-                        if (cameraImg) {
-                            cameraImg.src = "/video_feed?_=" + Date.now();
-                        }
-                    }, 1200);
-                }
+            img.onerror = function() {
+                dashCamInFlight = false;
             };
+            img.src = "/api/camera/live_frame?t=" + Date.now();
         }
 
+        setInterval(fetchDashboardCameraFrame, 200);
+
         function retryStreamConnection() {
-            if (cameraFallback) cameraFallback.style.display = "none";
-            if (cameraImg) {
-                cameraImg.src = "/video_feed?_=" + Date.now();
-            }
+            fetchDashboardCameraFrame();
         }
 
         function takeSnapshot() {
             window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
         }
 
-        // Quick Rover Direct Movement Command Handler
+        // Quick Rover Movement Command Handler
         async function sendQuickCommand(cmd) {
             const statusText = document.getElementById("quick-motion-status");
             const latencyText = document.getElementById("quick-latency-val");
-            if (statusText) statusText.textContent = cmd.toUpperCase() + "...";
+            if (statusText) {
+                if (cmd === 'forward') {
+                    statusText.textContent = 'FORWARD';
+                    statusText.style.color = '#34d399';
+                } else if (cmd === 'backward') {
+                    statusText.textContent = 'BACKWARD';
+                    statusText.style.color = '#f87171';
+                } else if (cmd === 'left') {
+                    statusText.textContent = 'TURNING LEFT';
+                    statusText.style.color = '#38bdf8';
+                } else if (cmd === 'right') {
+                    statusText.textContent = 'TURNING RIGHT';
+                    statusText.style.color = '#38bdf8';
+                } else if (cmd === 'stop') {
+                    statusText.textContent = 'STOPPED';
+                    statusText.style.color = '#ef4444';
+                }
+            }
             const t0 = performance.now();
             try {
                 const res = await fetch("/api/rover/control", {
@@ -1633,20 +1642,17 @@
                         statusText.textContent = 'STOPPED';
                         statusText.style.color = '#ef4444';
                     } else if (cmd === 'forward') {
-                        statusText.textContent = '▲ MOVING FORWARD';
+                        statusText.textContent = 'FORWARD';
                         statusText.style.color = '#34d399';
                     } else if (cmd === 'backward') {
-                        statusText.textContent = '▼ REVERSING';
+                        statusText.textContent = 'BACKWARD';
                         statusText.style.color = '#f87171';
                     } else if (cmd === 'left') {
-                        statusText.textContent = '◀ TURNING LEFT';
+                        statusText.textContent = 'TURNING LEFT';
                         statusText.style.color = '#38bdf8';
                     } else if (cmd === 'right') {
-                        statusText.textContent = '▶ TURNING RIGHT';
+                        statusText.textContent = 'TURNING RIGHT';
                         statusText.style.color = '#38bdf8';
-                    } else {
-                        statusText.textContent = cmd.toUpperCase();
-                        statusText.style.color = '#34d399';
                     }
                 }
             } catch (e) {
@@ -2194,7 +2200,7 @@
             isDashboardPolling = true;
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1200);
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
 
             try {
                 const response = await fetch("/api/dashboard-state?_=" + Date.now(), {
@@ -2223,7 +2229,7 @@
                     if (syncClock) syncClock.textContent = nowTime;
 
                     if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
-                    if (motionText && (r.direction || r.movement)) motionText.textContent = r.direction || r.movement;
+                    if (motionText && (r.direction || r.movement)) motionText.textContent = (r.direction || r.movement).toUpperCase();
                     if (aiPillText && r.ai_status) aiPillText.textContent = r.ai_status;
                     if (camFpsOverlay && r.fps !== undefined) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;
 
@@ -2242,7 +2248,6 @@
                         const isLiveHealthy = dLive.toLowerCase().includes("healthy");
                         updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
                     } else {
-                        // Return 3D to active scanning holographic wireframe mode
                         updateLeaf3DState("NO LEAF DETECTED", 0, false, true);
                     }
                 }
@@ -2283,22 +2288,39 @@
                         vigor.style.color = isLiveHealthy ? "#34d399" : "#f87171";
                     }
                     if (diagBadge) diagBadge.textContent = "LIVE DETECTION";
+                } else if (data.result && data.result.disease) {
+                    // DISPLAY LATEST PERSISTED SCAN WHEN CAMERA IS TRANSITIONING
+                    const res = data.result;
+                    const isHealthy = Boolean(res.is_healthy) || (res.disease && res.disease.toLowerCase().includes("healthy"));
+                    if (headline) headline.textContent = res.disease;
+                    if (banner) banner.className = isHealthy ? "disease-banner" : "disease-banner diseased";
+                    const cVal = parseFloat(res.confidence) || 0;
+                    if (confVal) confVal.textContent = cVal.toFixed(1) + "%";
+                    if (confFill) {
+                        confFill.style.width = Math.min(100, Math.max(0, cVal)) + "%";
+                        confFill.className = isHealthy ? "conf-fill" : "conf-fill warning";
+                    }
+                    if (prescChem && res.chemical) prescChem.textContent = res.chemical;
+                    if (prescFert && res.fertilizer) prescFert.textContent = res.fertilizer;
+                    if (prescTreat && res.treatment) prescTreat.textContent = res.treatment;
+                    if (timestamp) timestamp.textContent = "Latest Scan: " + (res.timestamp || "Recently detected");
+                    if (vigor) {
+                        vigor.textContent = isHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
+                        vigor.style.color = isHealthy ? "#34d399" : "#f87171";
+                    }
+                    if (diagBadge) diagBadge.textContent = "LATEST RESULT";
                 } else {
-                    // NO LEAF IN FRONT OF CAMERA
-                    if (headline) headline.textContent = "Scanning... (No Leaf in View)";
+                    // NO PREVIOUS SCANS
+                    if (headline) headline.textContent = "Scanning... (Hold leaf in front of camera)";
                     if (banner) banner.className = "disease-banner";
                     if (confVal) confVal.textContent = "0.0%";
                     if (confFill) {
                         confFill.style.width = "0%";
                         confFill.className = "conf-fill";
                     }
-                    if (data.result && data.result.timestamp) {
-                        if (timestamp) timestamp.textContent = "Last Captured: " + data.result.timestamp;
-                    } else {
-                        if (timestamp) timestamp.textContent = "Point camera at chili leaf";
-                    }
+                    if (timestamp) timestamp.textContent = "Point camera at chili leaf";
                     if (vigor) {
-                        vigor.textContent = "Scanner: Active (Searching for plant foliage)";
+                        vigor.textContent = "Scanner: Active (Searching for foliage)";
                         vigor.style.color = "#38bdf8";
                     }
                     if (diagBadge) diagBadge.textContent = "ACTIVE SCANNER";

@@ -706,20 +706,43 @@ def video_feed():
 @app.route("/api/camera/live_frame")
 def camera_live_frame():
     """Instantaneous single live frame for high-speed dynamic refresh."""
+    # 1. Local RPi RAM disk
     if os.path.exists("/dev/shm/rover_stream.jpg"):
         try:
             with open("/dev/shm/rover_stream.jpg", "rb") as f:
-                resp = Response(f.read(), mimetype='image/jpeg')
-                resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
-                return resp
+                data = f.read()
+                if len(data) > 100:
+                    resp = Response(data, mimetype='image/jpeg')
+                    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                    resp.headers['Pragma'] = 'no-cache'
+                    return resp
         except Exception:
             pass
-    if latest_cloud_frame is not None:
+
+    # 2. In-memory cloud frame
+    if latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
         resp = Response(latest_cloud_frame, mimetype='image/jpeg')
         resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
         return resp
+
+    # 3. Disk file shared across all Gunicorn workers on Render
+    live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+    if os.path.exists(live_path):
+        try:
+            with open(live_path, "rb") as f:
+                data = f.read()
+                if len(data) > 100:
+                    resp = Response(data, mimetype='image/jpeg')
+                    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                    resp.headers['Pragma'] = 'no-cache'
+                    return resp
+        except Exception:
+            pass
+
     resp = Response(PLACEHOLDER_JPEG, mimetype='image/jpeg')
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
     return resp
 
 

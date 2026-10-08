@@ -483,11 +483,11 @@ input[type="range"] {
     </div>
 </header>
 
-<!-- SIGNAL FEEDBACK BANNER -->
+<!-- ROVER DIRECTION & MOTION STATUS BANNER -->
 <section class="signal-banner">
     <div>
-        <span style="color:#94a3b8;">SIGNAL: </span>
-        <span class="signal-live-txt" id="signal-state-txt">READY / STANDBY</span>
+        <span style="color:#94a3b8; font-weight:700;">DIRECTION: </span>
+        <span class="signal-live-txt" id="signal-state-txt" style="font-size:15px; font-weight:900;">STOPPED</span>
     </div>
     <div class="signal-latency-txt" id="signal-latency-txt">PING: -- ms</div>
 </section>
@@ -504,9 +504,9 @@ input[type="range"] {
         </div>
     </div>
     <div style="position:relative; width:100%; aspect-ratio:4/3; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.2);">
-        <img id="live-webcam-feed" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.src='/static/app_photo.png'">
+        <img id="live-webcam-feed" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
         <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); padding:2px 8px; border-radius:4px; font-size:10px; font-family:monospace; color:#86efac;">
-            Picamera2 · Real-Time CSI Feed
+            Picamera2 · Real-Time Edge Stream
         </div>
     </div>
 </section>
@@ -652,7 +652,28 @@ async function sendSignal(cmd, speedOverride) {
     const bannerTxt = document.getElementById("signal-state-txt");
     const pingTxt = document.getElementById("signal-latency-txt");
     
-    if (bannerTxt) bannerTxt.textContent = `DISPATCHING: ${cmd.toUpperCase()}...`;
+    // Immediate direction update on screen
+    if (bannerTxt) {
+        if (cmd === 'forward') {
+            bannerTxt.textContent = "FORWARD";
+            bannerTxt.style.color = "#10b981";
+        } else if (cmd === 'backward') {
+            bannerTxt.textContent = "BACKWARD";
+            bannerTxt.style.color = "#f59e0b";
+        } else if (cmd === 'left') {
+            bannerTxt.textContent = "TURNING LEFT";
+            bannerTxt.style.color = "#06b6d4";
+        } else if (cmd === 'right') {
+            bannerTxt.textContent = "TURNING RIGHT";
+            bannerTxt.style.color = "#06b6d4";
+        } else if (cmd === 'stop') {
+            bannerTxt.textContent = "STOPPED";
+            bannerTxt.style.color = "#ef4444";
+        } else {
+            bannerTxt.textContent = cmd.toUpperCase();
+            bannerTxt.style.color = "#10b981";
+        }
+    }
     
     const t0 = performance.now();
     try {
@@ -671,8 +692,7 @@ async function sendSignal(cmd, speedOverride) {
         const data = await res.json();
         if (data.success) {
             activeDirection = cmd;
-            if (bannerTxt) bannerTxt.textContent = `${cmd.toUpperCase()} -> ACK #${data.command_id || 1}`;
-            logMessage(`CMD: ${cmd.toUpperCase()} | Speed: ${spd}% -> ACK (${latency}ms)`);
+            logMessage(`Direction: ${cmd.toUpperCase()} | Speed: ${spd}% (${latency}ms)`);
             updateActiveButton(cmd);
             updatePinMonitor(cmd, spd);
         } else {
@@ -829,10 +849,13 @@ function updatePinMonitor(dir, spd) {
     }
 }
 
-/* Polling Status & Detection Updates */
+/* Polling Status & Detection Updates (1s Real-Time Auto-Refresh) */
+let isSyncing = false;
 async function syncRoverStatus() {
+    if (isSyncing) return;
+    isSyncing = true;
     try {
-        const res = await fetch("/api/rover/status?_=" + Date.now());
+        const res = await fetch("/api/rover/status?_=" + Date.now(), { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         
@@ -847,16 +870,45 @@ async function syncRoverStatus() {
             if (pill) pill.className = "status-pill offline";
             if (pillTxt) pillTxt.textContent = "Pi Offline";
         }
+
+        // Keep direction display accurate to live rover hardware state
+        const bannerTxt = document.getElementById("signal-state-txt");
+        if (bannerTxt && r && r.direction && !touchHandled) {
+            const d = r.direction.toLowerCase();
+            if (d === 'forward') {
+                bannerTxt.textContent = "FORWARD";
+                bannerTxt.style.color = "#10b981";
+            } else if (d === 'backward' || d === 'reverse') {
+                bannerTxt.textContent = "BACKWARD";
+                bannerTxt.style.color = "#f59e0b";
+            } else if (d === 'left') {
+                bannerTxt.textContent = "TURNING LEFT";
+                bannerTxt.style.color = "#06b6d4";
+            } else if (d === 'right') {
+                bannerTxt.textContent = "TURNING RIGHT";
+                bannerTxt.style.color = "#06b6d4";
+            } else if (d === 'stopped' || d === 'stop') {
+                bannerTxt.textContent = "STOPPED";
+                bannerTxt.style.color = "#ef4444";
+            }
+        }
+
+        // Update spray pump state
+        const pumpBtnTxt = document.getElementById("pump-btn-txt");
+        if (pumpBtnTxt && r && r.pump !== undefined) {
+            pumpActive = Boolean(r.pump);
+            pumpBtnTxt.textContent = pumpActive ? "SPRAY PUMP: ON (SPRAYING)" : "SPRAY PUMP: OFF";
+        }
         
         const leafTxt = document.getElementById("leaf-disease-txt");
         const confTxt = document.getElementById("leaf-confidence-txt");
         const treatTxt = document.getElementById("leaf-treatment-txt");
         const imgEl = document.getElementById("leaf-preview-img");
 
-        // Continuous Live AI Disease Diagnosis (Real-Time)
+        // Continuous Live AI Disease Diagnosis (Real-Time Auto-Update Every Second)
         if (r && r.last_detection && r.last_detection !== "NO LEAF DETECTED") {
             if (leafTxt) leafTxt.textContent = r.last_detection;
-            if (confTxt) confTxt.textContent = `Live Confidence: ${(r.last_confidence || 0).toFixed(1)}%`;
+            if (confTxt) confTxt.textContent = `Confidence: ${(r.last_confidence || 0).toFixed(1)}%`;
             if (treatTxt && r.disease_treatment) {
                 treatTxt.textContent = `Rx: ${r.disease_chemical || 'Standard Care'} | ${r.disease_treatment}`;
             } else if (data.result && data.result.treatment) {
@@ -880,7 +932,10 @@ async function syncRoverStatus() {
                 imgEl.src = newSrc;
             }
         }
-    } catch (e) {}
+    } catch (e) {
+    } finally {
+        isSyncing = false;
+    }
 }
 
 async function requestFreshSnapshot() {
@@ -898,11 +953,32 @@ async function requestFreshSnapshot() {
     }
 }
 
+/* Bulletproof Live Camera Polling Engine (Zero-Lag, Universal Mobile & Cloud Support) */
+let isCameraPolling = true;
+let frameFetchInProgress = false;
+
+function fetchLiveCameraFrame() {
+    if (!isCameraPolling || frameFetchInProgress) return;
+    frameFetchInProgress = true;
+    const imgObj = new Image();
+    imgObj.onload = function() {
+        const targetImg = document.getElementById("live-webcam-feed");
+        if (targetImg) targetImg.src = imgObj.src;
+        frameFetchInProgress = false;
+    };
+    imgObj.onerror = function() {
+        frameFetchInProgress = false;
+    };
+    imgObj.src = "/api/camera/live_frame?t=" + Date.now();
+}
+
 function refreshLiveStream() {
-    const cam = document.getElementById("live-webcam-feed");
-    if (cam) cam.src = "/video_feed?_=" + Date.now();
+    fetchLiveCameraFrame();
     logMessage("Camera stream refreshed.");
 }
+
+// Start fast camera polling (every 200ms -> smooth live video across internet)
+setInterval(fetchLiveCameraFrame, 200);
 
 // Keyboard arrow controls for PC testing
 window.addEventListener("keydown", (e) => {
@@ -922,9 +998,9 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-// Periodic status poll (every 1.5s)
+// Second-by-second auto-update (1000ms = 1 sec)
 syncRoverStatus();
-setInterval(syncRoverStatus, 1500);
+setInterval(syncRoverStatus, 1000);
 </script>
 </body>
 </html>

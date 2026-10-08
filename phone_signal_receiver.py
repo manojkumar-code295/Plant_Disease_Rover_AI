@@ -28,6 +28,7 @@ WHITE = "\033[97m"
 BG_DARK = "\033[48;5;234m"
 BG_GREEN = "\033[48;5;22m"
 BG_RED = "\033[48;5;52m"
+DIM = "\033[2m"
 
 def get_ip():
     try:
@@ -96,12 +97,12 @@ def main():
                         now_str = time.strftime("%H:%M:%S")
                         total_signals += 1
                         print(f"\a", end="", flush=True) # Terminal bell
-                        print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
-                        print(f"{BOLD}[{now_str}] 📱 PHONE SIGNAL #{total_signals}: {MAGENTA}SPRAY PUMP TOGGLED{RESET}")
-                        print(f"   Action:       {GREEN if pump else RED}{'SPRAY PUMP ACTIVATED (ON)' if pump else 'SPRAY PUMP STOPPED (OFF)'}{RESET}")
-                        print(f"   GPIO Pin:     {WHITE}Pin 37 (GPIO 26) -> {'HIGH (12V ON)' if pump else 'LOW (0V OFF)'}{RESET}")
-                        print(f"   Confirmation: {GREEN}✅ PUMP RELAY EXECUTED BY RASPBERRY PI{RESET}")
-                        print(f"{CYAN}--------------------------------------------------------------------------------{RESET}\n")
+                        print(f"{CYAN}================================================================================")
+                        print(f"{BOLD}[{now_str}] 💦 SPRAY PUMP: {'ON (SPRAYING)' if pump else 'OFF (STOPPED)'}{RESET}")
+                        print(f"{CYAN}================================================================================{RESET}")
+                        print(f"   Status:       {GREEN if pump else RED}{'SPRAY PUMP RUNNING (12V ACTIVE)' if pump else 'SPRAY PUMP STOPPED'}{RESET}")
+                        print(f"   GPIO Pin:     Pin 37 (GPIO 26) -> {'HIGH' if pump else 'LOW'}")
+                        print(f"{CYAN}================================================================================{RESET}\n")
 
                     last_pump = pump
 
@@ -110,20 +111,21 @@ def main():
                         last_command_id = cid
                         total_signals += 1
                         now_str = time.strftime("%H:%M:%S")
-                        is_stop = cmd == "stop" or direction == "Stopped"
+                        cmd_upper = cmd.upper()
+                        is_stop = cmd == "stop" or direction.lower() == "stopped"
 
                         print(f"\a", end="", flush=True) # Terminal bell
 
                         color = RED if is_stop else GREEN
                         symbol = "🛑" if is_stop else "⚡"
                         print(f"{color}{BOLD}================================================================================")
-                        print(f" {symbol} [{now_str}] PHONE SIGNAL #{total_signals} RECEIVED! (Command ID: #{cid})")
+                        print(f" {symbol} [{now_str}] DIRECTION: {cmd_upper}")
                         print(f"================================================================================{RESET}")
-                        print(f"   Command:     {BOLD}{WHITE}{cmd.upper()}{RESET} ({direction})")
-                        print(f"   Speed:       {BOLD}{CYAN}{speed}% PWM{RESET}")
-                        print(f"   BTS7960:     {get_gpio_desc(direction, speed, not is_stop)}")
-                        print(f"   Pump State:  {MAGENTA}{'SPRAYING (ON)' if pump else 'OFF'}{RESET}")
-                        print(f"   Status:      {GREEN}{'🛑 EMERGENCY BRAKE APPLIED' if is_stop else '✅ SIGNAL ACKNOWLEDGED - MOTORS MOVING'}{RESET}")
+                        print(f"   Action:       {BOLD}{WHITE}{'STOPPED' if is_stop else f'MOVING {cmd_upper}'}{RESET}")
+                        print(f"   Speed:        {BOLD}{CYAN}{speed}% PWM{RESET}")
+                        print(f"   Motor Driver: {get_gpio_desc(direction, speed, not is_stop)}")
+                        print(f"   Pump Relay:   {MAGENTA}{'SPRAYING (ON)' if pump else 'OFF'}{RESET}")
+                        print(f"   Motor Status: {GREEN}{'BRAKE APPLIED' if is_stop else 'RUNNING'}{RESET}")
                         print(f"{color}================================================================================{RESET}\n")
 
         except Exception as e:
@@ -132,7 +134,7 @@ def main():
         heartbeat_tick += 1
         if heartbeat_tick % 15 == 0:
             now_str = time.strftime("%H:%M:%S")
-            sys.stdout.write(f"\r{DIM}[{now_str}] 🟢 Signal Receiver Active | Total signals received: {total_signals} | Pi Online: YES{RESET}")
+            sys.stdout.write(f"\r{DIM}[{now_str}] 🟢 Ready | Current: {direction.upper()} | Speed: {speed}%{RESET}")
             sys.stdout.flush()
 
         time.sleep(0.15)

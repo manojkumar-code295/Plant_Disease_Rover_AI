@@ -58,20 +58,20 @@ IMAGE_SIZE = 224
 CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.72))
 CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.25))
 
-# Robust Leaf Filtering Thresholds (Strict Botanical Quality Gate for Real Leaves Only)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 1800))           # Min pixels to qualify as a leaf
+# Robust Leaf Filtering Thresholds (Botanical Quality Gate for Chili Leaves)
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 1200))           # Min pixels to qualify as a leaf
 MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.75)) # Max 75% of frame (rejects whole room)
-MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.30))   # Foliage density inside bounding box
-MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.35))       # Skin tone ratio threshold for rejecting full face
-MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 16.0))     # Laplacian variance to reject flat blank walls
-MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 20.0)) # Excess Green Index (requires chlorophyll)
-MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 42.0))       # Rejects gray/off-white rooms and furniture
+MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.20))   # Foliage density inside bounding box
+MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.40))       # Skin tone ratio threshold for rejecting full face
+MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 10.0))     # Laplacian variance to reject flat blank walls
+MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 8.0))  # Excess Green Index (chlorophyll presence)
+MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 25.0))       # Rejects gray/off-white rooms and furniture
 
 # Camera & Performance Configuration
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
 CAMERA_ROTATION = os.environ.get("CAMERA_ROTATION", "90_CCW")
 PREDICT_EVERY_N_FRAMES = int(os.environ.get("PREDICT_EVERY_N_FRAMES", 2))
-UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 2.0))     # Cooldown between cloud uploads for same disease
+UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 1.5))     # Cooldown between cloud uploads for same disease
 
 # Render Cloud Synchronization (Configurable via Environment)
 RENDER_URL = os.environ.get("RENDER_URL", "https://precision-agriculture-smart-rover.onrender.com").rstrip("/")
@@ -522,22 +522,22 @@ def verify_leaf_structure(crop_bgr):
     # 1. Botanical chlorophyll foliage mask:
     # Requires genuine plant green spectrum OR high-saturation chlorotic yellow
     green_mask = (hsv[:,:,0] >= 26) & (hsv[:,:,0] <= 86) & \
-                 (hsv[:,:,1] >= 42) & (hsv[:,:,2] >= 40) & (hsv[:,:,2] <= 245) & \
-                 (g > r + 6.0) & (g > b + 8.0) & (2.0 * g - r - b >= 20.0)
+                 (hsv[:,:,1] >= 30) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 250) & \
+                 (g > r + 3.0) & (g > b + 5.0) & (2.0 * g - r - b >= 8.0)
 
-    yellow_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 26) & \
-                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 45) & (hsv[:,:,2] <= 245) & \
-                  (g > b + 15.0) & (r > b + 15.0)
+    yellow_mask = (hsv[:,:,0] >= 16) & (hsv[:,:,0] < 28) & \
+                  (hsv[:,:,1] >= 35) & (hsv[:,:,2] >= 40) & (hsv[:,:,2] <= 250) & \
+                  (g > b + 10.0) & (r > b + 10.0)
 
     foliage_mask = green_mask | yellow_mask
     foliage_px = int(np.sum(foliage_mask))
     total_px = float(h * w)
     foliage_ratio = foliage_px / total_px
 
-    if foliage_px < 1000:
-        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1000)"
-    if foliage_ratio < 0.28:
-        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 28%)"
+    if foliage_px < 500:
+        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 500)"
+    if foliage_ratio < 0.15:
+        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 15%)"
 
     # 2. Human Skin Tone Rejection
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -546,24 +546,24 @@ def verify_leaf_structure(crop_bgr):
                              np.array([180, 175, 255], dtype=np.uint8))
     skin_mask = cv2.bitwise_or(skin1, skin2)
     skin_px = int(np.sum(skin_mask > 0))
-    if skin_px > foliage_px * 1.5 or (skin_px / total_px) > MAX_SKIN_RATIO:
+    if skin_px > foliage_px * 2.0 or (skin_px / total_px) > MAX_SKIN_RATIO:
         return False, "Hand/Skin detected"
 
     # 3. Saturation & Excess Green on Foliage
     sat_foliage = float(np.mean(hsv[:,:,1][foliage_mask]))
-    if sat_foliage < 40.0:
-        return False, f"Desaturated foliage ({sat_foliage:.1f} < 40.0)"
+    if sat_foliage < 22.0:
+        return False, f"Desaturated foliage ({sat_foliage:.1f} < 22.0)"
 
     exg = 2.0 * g - r - b
     mean_exg = float(np.mean(exg[foliage_mask]))
-    if mean_exg < 20.0:
-        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 20.0)"
+    if mean_exg < 6.0:
+        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 6.0)"
 
     # 4. Texture & Venation Check
     gray = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    if lap_var < 16.0:
-        return False, f"Flat texture ({lap_var:.1f} < 16.0)"
+    if lap_var < 8.0:
+        return False, f"Flat texture ({lap_var:.1f} < 8.0)"
 
     return True, "VALID_LEAF"
 
@@ -683,7 +683,7 @@ def detect_leaf(frame_bgr):
             # Botanical score: prioritizes true green foliage density, Excess Green, and organic solidity
             score = foliage_px * (mean_exg + 5.0) * solidity
 
-            if score >= 120000.0 and score > best_score:
+            if score >= 25000.0 and score > best_score:
                 best_score = score
                 pad = 12
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
