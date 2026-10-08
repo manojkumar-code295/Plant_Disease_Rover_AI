@@ -1294,7 +1294,7 @@
                     <div class="hud-icon">🍓</div>
                     <div>
                         <div class="hud-label">Raspberry Pi 4</div>
-                        <div class="hud-val" id="pi-ip-text">{{ rover.ip or "192.168.14.18" }}</div>
+                        <div class="hud-val" id="pi-ip-text">{{ rover.pi_ip or rover.ip or "192.168.14.138" }}</div>
                     </div>
                 </div>
                 <div class="status-pill {% if rover.connected %}online{% else %}offline{% endif %}" id="pi-pill">

@@ -999,7 +999,7 @@ def cloud_command_worker():
                     last_command_id = cid
         except Exception:
             pass
-        time.sleep(1.2)
+        time.sleep(0.35)
 
 def cloud_frame_streamer_worker():
     """Streams live camera frames to Render so the Android app & remote dashboard see live video."""

@@ -1436,6 +1436,7 @@ def rover_heartbeat():
                     pass
             if "pi_ip" in data:
                 rover_state["pi_ip"] = str(data.get("pi_ip"))
+                rover_state["ip"] = str(data.get("pi_ip"))
             if "stream_url" in data:
                 rover_state["stream_url"] = str(data.get("stream_url"))
 

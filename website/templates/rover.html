@@ -1622,7 +1622,7 @@ main {
                             <span>LEFT</span>
                         </button>
 
-                        <button class="dpad-btn stp" id="btn-stop" onclick="emergencyStop()">
+                        <button class="dpad-btn stp" id="btn-stop" onclick="emergencyStop()" ontouchstart="emergencyStop()">
                             ■
                             <span>STOP</span>
                         </button>
@@ -1737,7 +1737,7 @@ main {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span>Stream URL:</span>
-                        <input type="text" id="stream-url-input" value="http://192.168.14.18:8080/video_feed" style="background: rgba(14, 38, 28, 0.9); border: 1px solid var(--border-card); color: #86efac; border-radius: 6px; padding: 4px 8px; font-size: 11px; width: 210px;" onchange="updateStreamUrl(this.value)">
+                        <input type="text" id="stream-url-input" value="/video_feed" style="background: rgba(14, 38, 28, 0.9); border: 1px solid var(--border-card); color: #86efac; border-radius: 6px; padding: 4px 8px; font-size: 11px; width: 210px;" onchange="updateStreamUrl(this.value)">
                     </div>
                     <button onclick="takeSnapshot()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 11px;">
                         📸 Snapshot
@@ -2023,9 +2023,9 @@ function resetEngineButton() {
 let touchActive = false;
 
 function handleDpadClick(dir) {
+    if (touchActive) return;
     if (driveMode === 'latch') {
         if (movementActive && currentDirection === dir) {
-            // Tapping active button again stops movement
             stopMovement();
         } else {
             startMovement(dir);
@@ -2036,21 +2036,35 @@ function handleDpadClick(dir) {
 function handleDpadDown(dir, event) {
     if (event && event.type === 'touchstart') {
         touchActive = true;
-    }
-    if (event && event.type === 'mousedown' && touchActive) {
-        return; // Suppress synthetic mouse click after touch
-    }
-    if (driveMode === 'momentary') {
-        startMovement(dir);
+        if (event.cancelable) event.preventDefault();
+        if (driveMode === 'latch') {
+            if (movementActive && currentDirection === dir) {
+                stopMovement();
+            } else {
+                startMovement(dir);
+            }
+        } else {
+            startMovement(dir);
+        }
+    } else if (event && event.type === 'mousedown') {
+        if (touchActive) return;
+        if (driveMode === 'momentary') {
+            startMovement(dir);
+        }
     }
 }
 
 function handleDpadUp(dir, event) {
     if (event && event.type === 'touchend') {
-        setTimeout(() => { touchActive = false; }, 300);
-    }
-    if (driveMode === 'momentary') {
-        stopMovement();
+        if (event.cancelable) event.preventDefault();
+        setTimeout(() => { touchActive = false; }, 350);
+        if (driveMode === 'momentary') {
+            stopMovement();
+        }
+    } else if (event && (event.type === 'mouseup' || event.type === 'mouseleave')) {
+        if (driveMode === 'momentary') {
+            stopMovement();
+        }
     }
 }
 
@@ -2332,15 +2346,18 @@ async function getRoverStatus() {
         // Live AI Video Stream URL Auto-Sync
         if (r.stream_url) {
             const streamInput = document.getElementById("stream-url-input");
-            if (streamInput && !streamInput.dataset.userModified && currentStreamUrl !== r.stream_url) {
-                currentStreamUrl = r.stream_url;
-                streamInput.value = r.stream_url;
-                const link = document.getElementById("stream-direct-link");
-                if (link) link.href = r.stream_url;
-                const fbText = document.getElementById("fallback-ip-text");
-                if (fbText) fbText.textContent = r.stream_url;
-                if (liveCameraImg && liveCameraImg.src !== currentStreamUrl) {
-                    liveCameraImg.src = currentStreamUrl;
+            if (streamInput && !streamInput.dataset.userModified) {
+                const targetUrl = (window.location.protocol === "https:") ? "/video_feed" : r.stream_url;
+                if (currentStreamUrl !== targetUrl) {
+                    currentStreamUrl = targetUrl;
+                    streamInput.value = currentStreamUrl;
+                    const link = document.getElementById("stream-direct-link");
+                    if (link) link.href = currentStreamUrl;
+                    const fbText = document.getElementById("fallback-ip-text");
+                    if (fbText) fbText.textContent = currentStreamUrl;
+                    if (liveCameraImg && liveCameraImg.src !== currentStreamUrl) {
+                        liveCameraImg.src = currentStreamUrl;
+                    }
                 }
             }
         }

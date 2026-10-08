@@ -1,10 +1,10 @@
 {
-    "result_id": "fb47ef8a9e5a4263a9fb45d7341796ed",
-    "image": "20261006_151907_d8d94595.jpg",
-    "disease": "Curl Virus (88.6%)",
-    "chemical": "Imidacloprid / Neem oil for whitefly & vector control",
-    "fertilizer": "Balanced NPK fertilizer with micronutrients",
-    "treatment": "Uproot severely stunted plants and control insect vectors immediately.",
-    "confidence": 88.6,
-    "timestamp": "2026-10-06 15:19:07"
+    "result_id": "1858847d7a9d407499c6ea0fbcdd4cd2",
+    "image": "20261008_150052_d4dbfa6a.jpg",
+    "disease": "Cercospora Leaf Spot (80.0%)",
+    "chemical": "Copper-based fungicide / Mancozeb",
+    "fertilizer": "Balanced NPK fertilizer",
+    "treatment": "Remove infected leaves and improve plant spacing for airflow.",
+    "confidence": 80.0,
+    "timestamp": "2026-10-08 15:00:52"
 }
