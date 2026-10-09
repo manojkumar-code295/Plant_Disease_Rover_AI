@@ -80,17 +80,25 @@ invert_motor = False
 total_signals = 0
 cloud_connected = False
 running = True
+relay_active_low = os.environ.get("RELAY_ACTIVE_LOW", "0") == "1"
 
 # Initialize GPIO with lgpio
 try:
     import lgpio
     gpio_chip = lgpio.gpiochip_open(0)
-    for pin in [RPWM_PIN, LPWM_PIN, EN_PIN, PUMP_PIN]:
+    for pin in [RPWM_PIN, LPWM_PIN, EN_PIN]:
         try:
             lgpio.gpio_free(gpio_chip, pin)
         except Exception:
             pass
         lgpio.gpio_claim_output(gpio_chip, pin, 0)
+    
+    # Claim pump pin with safe OFF level (0 if active high, 1 if active low)
+    try:
+        lgpio.gpio_free(gpio_chip, PUMP_PIN)
+    except Exception:
+        pass
+    lgpio.gpio_claim_output(gpio_chip, PUMP_PIN, 1 if relay_active_low else 0)
     gpio_available = True
 except Exception as e:
     gpio_available = False
@@ -120,8 +128,9 @@ def apply_hardware(direction, speed, pump):
             d = "forward"
 
     try:
-        # Actuate Spray Pump
-        lgpio.gpio_write(gpio_chip, PUMP_PIN, 1 if pump else 0)
+        # Actuate Spray Pump (respects active-high / active-low polarity)
+        pump_gpio_val = (0 if pump else 1) if relay_active_low else (1 if pump else 0)
+        lgpio.gpio_write(gpio_chip, PUMP_PIN, pump_gpio_val)
 
         # Actuate BTS7960 Motors
         if d == "forward" and speed > 0:
@@ -162,7 +171,7 @@ def apply_hardware(direction, speed, pump):
         print(f"{RED}[GPIO ERROR] {e}{RESET}")
 
 def stop_hardware():
-    """Emergency brake / safe shutdown: all GPIO pins driven LOW."""
+    """Emergency brake / safe shutdown: all GPIO pins driven to safe OFF states."""
     if gpio_available and gpio_chip is not None:
         try:
             lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, 0)
@@ -170,7 +179,8 @@ def stop_hardware():
             lgpio.gpio_write(gpio_chip, RPWM_PIN, 0)
             lgpio.gpio_write(gpio_chip, LPWM_PIN, 0)
             lgpio.gpio_write(gpio_chip, EN_PIN, 0)
-            lgpio.gpio_write(gpio_chip, PUMP_PIN, 0)
+            pump_gpio_val = 1 if relay_active_low else 0
+            lgpio.gpio_write(gpio_chip, PUMP_PIN, pump_gpio_val)
         except Exception:
             pass
 
@@ -192,37 +202,39 @@ def print_banner():
     print(f"  • {WHITE}Pin 6  (GND)     -> {YELLOW}Common Ground (Pi GND + Buck OUT1- + Buck OUT2-){RESET}")
     print(f"  • {WHITE}Pin 2  (5V)      -> {RED}BTS7960 Logic VCC (5V Power from Buck OUT1+){RESET}")
     print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
-    print(f"  [{GREEN}W{RESET}/{GREEN}F{RESET}] Forward | [{YELLOW}S{RESET}/{YELLOW}B{RESET}] Backward | [{CYAN}A{RESET}] Left Crawl | [{CYAN}D{RESET}] Right Crawl | [{RED}Space{RESET}] Stop | [{MAGENTA}P{RESET}] Pump")
-    print(f"  [{CYAN}+{RESET}/{CYAN}-{RESET}] Speed +/- | [{CYAN}1-9{RESET}] 10-90% Speed  | [{YELLOW}I{RESET}] Invert Direction | [{RED}Q{RESET}] Quit")
+    print(f"  [{GREEN}W{RESET}/{GREEN}F{RESET}] Forward | [{YELLOW}S{RESET}/{YELLOW}B{RESET}] Backward | [{CYAN}A{RESET}] Left Crawl | [{CYAN}D{RESET}] Right Crawl | [{RED}Space{RESET}] Stop")
+    print(f"  [{MAGENTA}P{RESET}] Toggle Pump | [{MAGENTA}T{RESET}] Flip Relay Active-H/L | [{CYAN}+/-{RESET}] Speed | [{YELLOW}I{RESET}] Invert | [{RED}Q{RESET}] Quit")
     print(f"{CYAN}================================================================================{RESET}")
     if gpio_available:
-        print(f"{GREEN}✅ GPIO Driver (lgpio) initialized successfully. Motors armed and ready!{RESET}\n")
+        relay_mode_name = "ACTIVE-LOW (0V=ON, 3.3V=OFF)" if relay_active_low else "ACTIVE-HIGH (3.3V=ON, 0V=OFF)"
+        print(f"{GREEN}✅ GPIO Driver (lgpio) initialized. Relay Mode: {WHITE}{relay_mode_name}{RESET}\n")
     else:
         print(f"{RED}⚠️ GPIO Driver Warning: {gpio_err}{RESET}\n")
 
 def get_gpio_desc(direction, speed, pump):
     d = direction.lower().strip()
+    pump_lbl = f"{'ON' if pump else 'OFF'} ({'0V' if (pump if relay_active_low else not pump) else '3.3V'})"
     if d == "forward":
         return (f"RPWM(Pin 11)={GREEN}PWM {speed}% (ACTIVE){RESET} | "
                 f"LPWM(Pin 13)={DIM}0V (LOW){RESET} | "
                 f"EN(Pin 32)={GREEN}HIGH (3.3V){RESET} | "
-                f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
+                f"PUMP(Pin 37)={MAGENTA}{pump_lbl}{RESET}")
     elif d in ("left", "right"):
         crawl_spd = max(25, min(40, int(speed * 0.55)))
         return (f"RPWM(Pin 11)={CYAN}PWM {crawl_spd}% (SLOW CRAWL){RESET} | "
                 f"LPWM(Pin 13)={DIM}0V (LOW){RESET} | "
                 f"EN(Pin 32)={GREEN}HIGH (3.3V){RESET} | "
-                f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
+                f"PUMP(Pin 37)={MAGENTA}{pump_lbl}{RESET}")
     elif d in ("backward", "reverse"):
         return (f"RPWM(Pin 11)={DIM}0V (LOW){RESET} | "
                 f"LPWM(Pin 13)={YELLOW}PWM {speed}% (ACTIVE){RESET} | "
                 f"EN(Pin 32)={GREEN}HIGH (3.3V){RESET} | "
-                f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
+                f"PUMP(Pin 37)={MAGENTA}{pump_lbl}{RESET}")
     else:
         return (f"RPWM(Pin 11)={DIM}0V{RESET} | "
                 f"LPWM(Pin 13)={DIM}0V{RESET} | "
                 f"EN(Pin 32)={DIM}0V{RESET} | "
-                f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
+                f"PUMP(Pin 37)={MAGENTA}{pump_lbl}{RESET}")
 
 def print_signal_card(source, cid, direction, speed, pump, is_pump_toggle=False):
     global total_signals
@@ -345,6 +357,11 @@ def keyboard_listener_thread():
                     current_pump = not current_pump
                     apply_hardware(current_direction, current_speed, current_pump)
                     print_signal_card("Pi Console Keyboard [P]", 999, current_direction, current_speed, current_pump, is_pump_toggle=True)
+                elif ch == 't':
+                    relay_active_low = not relay_active_low
+                    apply_hardware(current_direction, current_speed, current_pump)
+                    mode_str = "ACTIVE-LOW (0V=ON, 3.3V=OFF)" if relay_active_low else "ACTIVE-HIGH (3.3V=ON, 0V=OFF)"
+                    print(f"\n{MAGENTA}⚡ Relay Trigger Mode toggled to: {WHITE}{mode_str}{RESET}\n")
                 elif ch in ('+', '='):
                     current_speed = min(100, current_speed + 10)
                     apply_hardware(current_direction, current_speed, current_pump)
