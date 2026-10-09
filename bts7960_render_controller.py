@@ -3,10 +3,11 @@
 AgriRover - Dedicated BTS7960 Render Cloud Controller & Signal Verifier
 ========================================================================
 Hardware Configuration:
-  - Single BTS7960 (IBT-2 43A) Motor Driver
-  - Two 300 RPM DC Geared Motors (Wired in Parallel)
-  - Buck Converter (12V Battery -> 5.1V for Raspberry Pi 4)
-  - 12V Diaphragm Chemical Spray Pump (Relay Control)
+  - Battery -> Dual-Output Buck Converter:
+      • Output 1: 5.1V DC -> Raspberry Pi 4 (Pin 2/6) & BTS7960 Logic VCC (5V)
+      • Output 2: 12V High-Current -> BTS7960 Motor Power (B+ / B-)
+  - Single BTS7960 (IBT-2 43A) Motor Driver -> 2x 300 RPM Motors (Parallel on M+ / M-)
+  - 12V Diaphragm Chemical Spray Pump (Relay Control on Pin 37)
 
 Pin Mapping:
   - Physical Pin 11 (BCM GPIO 17) -> BTS7960 RPWM (Forward Direction & PWM)
@@ -157,8 +158,8 @@ def print_banner():
     print(f"{CYAN}{BOLD}================================================================================")
     print(f"   🏎️  AGRIROVER BTS7960 RENDER CLOUD CONTROLLER & HARDWARE TERMINAL")
     print(f"================================================================================{RESET}")
-    print(f"{WHITE}Hardware:        {GREEN}1x BTS7960 (IBT-2 43A) + 2x 300 RPM Motors (Parallel){RESET}")
-    print(f"{WHITE}Power Supply:    {GREEN}12V Battery -> Buck Converter -> 5.1V Raspberry Pi 4{RESET}")
+    print(f"{WHITE}Hardware:        {GREEN}1x BTS7960 (IBT-2 43A) + 2x 300 RPM Motors (Parallel on M+/M-){RESET}")
+    print(f"{WHITE}Buck Converter:  {GREEN}2-Output Buck: Out 1 (5.1V Pi 4) | Out 2 (12V BTS7960 Motor Power){RESET}")
     print(f"{WHITE}Local Pi IP:     {GREEN}http://{LOCAL_IP}:5000/rover{RESET}")
     print(f"{WHITE}Render Cloud:    {GREEN}{CLOUD_BASE}/rover{RESET}")
     print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
@@ -167,8 +168,8 @@ def print_banner():
     print(f"  • {WHITE}Pin 13 (GPIO 27) -> {CYAN}LPWM (Backward Direction & Speed PWM){RESET}")
     print(f"  • {WHITE}Pin 32 (GPIO 12) -> {CYAN}R_EN + L_EN (Bridged Enable / Standby){RESET}")
     print(f"  • {WHITE}Pin 37 (GPIO 26) -> {MAGENTA}Spray Pump Relay (IN Trigger){RESET}")
-    print(f"  • {WHITE}Pin 6  (GND)     -> {YELLOW}Common Ground (Pi GND + Buck OUT- + Battery-){RESET}")
-    print(f"  • {WHITE}Pin 2  (5V)      -> {RED}BTS7960 Logic VCC (5V Power){RESET}")
+    print(f"  • {WHITE}Pin 6  (GND)     -> {YELLOW}Common Ground (Pi GND + Buck OUT1- + Buck OUT2-){RESET}")
+    print(f"  • {WHITE}Pin 2  (5V)      -> {RED}BTS7960 Logic VCC (5V Power from Buck OUT1+){RESET}")
     print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
     print(f"{BOLD}KEYBOARD CONTROLS (Pi Console):{RESET}")
     print(f"  [{GREEN}W{RESET}/{GREEN}F{RESET}] Forward  | [{YELLOW}S{RESET}/{YELLOW}B{RESET}] Backward  | [{RED}Space{RESET}/{RED}X{RESET}] Stop  | [{MAGENTA}P{RESET}] Toggle Pump")
