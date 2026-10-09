@@ -172,6 +172,8 @@ gpio_available = False
 gpio_chip = None
 lgpio = None
 
+RELAY_ACTIVE_LOW = os.environ.get("RELAY_ACTIVE_LOW", "1") == "1"
+
 def init_gpio():
     global gpio_available, gpio_chip, lgpio
     if not GPIO_ENABLED:
@@ -184,7 +186,7 @@ def init_gpio():
         gpio_chip = lgpio.gpiochip_open(0)
 
         # Free stale locks and claim outputs in safe low state (motors STOPPED)
-        pins = [LEFT_IN1, LEFT_IN2, LEFT_EN, RIGHT_IN1, RIGHT_IN2, RIGHT_EN, PUMP_PIN]
+        pins = [LEFT_IN1, LEFT_IN2, LEFT_EN, RIGHT_IN1, RIGHT_IN2, RIGHT_EN]
         for pin in pins:
             try:
                 lgpio.gpio_free(gpio_chip, pin)
@@ -192,8 +194,15 @@ def init_gpio():
                 pass
             lgpio.gpio_claim_output(gpio_chip, pin, 0)
 
+        # Claim pump pin in safe OFF state (1 if active-low, 0 if active-high)
+        try:
+            lgpio.gpio_free(gpio_chip, PUMP_PIN)
+        except Exception:
+            pass
+        lgpio.gpio_claim_output(gpio_chip, PUMP_PIN, 1 if RELAY_ACTIVE_LOW else 0)
+
         gpio_available = True
-        log("GPIO Controller initialized. All motors and pump safely initialized in OFF state.")
+        log(f"GPIO Controller initialized. Motors safely OFF, Relay mode: {'ACTIVE-LOW' if RELAY_ACTIVE_LOW else 'ACTIVE-HIGH'}.")
     except Exception as e:
         gpio_available = False
         log(f"GPIO Hardware unavailable ({e}). Operating in Safe Simulation Mode.")
@@ -228,7 +237,8 @@ def stop_motors():
     log("GPIO OUTPUT -> All BTS7960/motor pins driven LOW (0V - Stopped)")
 
 def set_pump(state):
-    gpio_write(PUMP_PIN, state)
+    val = (0 if state else 1) if RELAY_ACTIVE_LOW else (1 if state else 0)
+    gpio_write(PUMP_PIN, val)
 
 # Ensure motors are completely stopped right after init
 stop_motors()
@@ -989,11 +999,13 @@ def upload_worker():
 # ============================================================
 
 last_command_id = -1
+last_cloud_pump = None
 last_local_command_id = -1
+last_local_pump = None
 
 def local_command_worker():
     """Responsive worker for local web dashboard commands (sub-120ms latency, low CPU)."""
-    global last_local_command_id
+    global last_local_command_id, last_local_pump, INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR, RELAY_ACTIVE_LOW
     session = requests.Session()
     while running:
         try:
@@ -1001,24 +1013,31 @@ def local_command_worker():
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
-                if cid != last_local_command_id and cid > 0:
+                pump = bool(data.get("pump", False))
+                if "relay_active_low" in data:
+                    RELAY_ACTIVE_LOW = bool(data["relay_active_low"])
+                if "invert_right_motor" in data:
+                    INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
+                if "invert_left_motor" in data:
+                    INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
+
+                if last_local_command_id == -1:
+                    last_local_command_id = cid
+                    last_local_pump = pump
+                elif (cid != last_local_command_id and cid > 0) or (last_local_pump is not None and pump != last_local_pump):
                     direction = data.get("direction", "Stopped")
                     speed = int(data.get("speed", 50))
-                    pump = bool(data.get("pump", False))
-                    if "invert_right_motor" in data:
-                        INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
-                    if "invert_left_motor" in data:
-                        INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
                     log(f"ROVER COMMAND (Local Web) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
                     last_local_command_id = cid
+                    last_local_pump = pump
         except Exception:
             pass
         time.sleep(0.12)
 
 def cloud_command_worker():
     """Dedicated cloud command polling thread for Render / Android App (1.2s cadence)."""
-    global last_command_id, INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR
+    global last_command_id, last_cloud_pump, INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR, RELAY_ACTIVE_LOW
     session = requests.Session()
     headers = {}
     if RENDER_API_TOKEN:
@@ -1030,17 +1049,26 @@ def cloud_command_worker():
             if r.ok:
                 data = r.json()
                 cid = data.get("command_id", 0)
-                if cid != last_command_id and cid > 0:
+                pump = bool(data.get("pump", False))
+                if "relay_active_low" in data:
+                    RELAY_ACTIVE_LOW = bool(data["relay_active_low"])
+                if "invert_right_motor" in data:
+                    INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
+                if "invert_left_motor" in data:
+                    INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
+
+                if last_command_id == -1:
+                    last_command_id = cid
+                    last_cloud_pump = pump
+                    if data.get("direction", "").lower() == "stopped":
+                        apply_rover_command("stopped", 0, pump)
+                elif (cid != last_command_id and cid > 0) or (last_cloud_pump is not None and pump != last_cloud_pump):
                     direction = data.get("direction", "Stopped")
                     speed = int(data.get("speed", 50))
-                    pump = bool(data.get("pump", False))
-                    if "invert_right_motor" in data:
-                        INVERT_RIGHT_MOTOR = bool(data["invert_right_motor"])
-                    if "invert_left_motor" in data:
-                        INVERT_LEFT_MOTOR = bool(data["invert_left_motor"])
                     log(f"ROVER COMMAND (Cloud Render) -> {direction} | Speed: {speed}% | Pump: {'ON' if pump else 'OFF'}")
                     apply_rover_command(direction, speed, pump)
                     last_command_id = cid
+                    last_cloud_pump = pump
         except Exception:
             pass
         time.sleep(0.18)
