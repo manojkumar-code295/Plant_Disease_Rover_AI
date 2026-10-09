@@ -319,7 +319,7 @@ def heartbeat_sender_thread():
 
 def keyboard_listener_thread():
     """Allows instant direct manual testing of Forward/Backward from Pi terminal keyboard."""
-    global current_direction, current_speed, current_pump, invert_motor, running
+    global current_direction, current_speed, current_pump, invert_motor, running, relay_active_low
 
     # Put terminal in cbreak/raw mode
     fd = sys.stdin.fileno()
@@ -388,7 +388,7 @@ def keyboard_listener_thread():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 def main():
-    global current_direction, current_speed, current_pump, running
+    global current_direction, current_speed, current_pump, running, relay_active_low, cloud_connected
 
     print_banner()
 
@@ -400,8 +400,10 @@ def main():
     kb_thread = threading.Thread(target=keyboard_listener_thread, daemon=True)
     kb_thread.start()
 
-    last_command_id = -1
-    last_pump_state = None
+    last_cloud_cid = None
+    last_cloud_pump = None
+    last_local_cid = None
+    last_local_pump = None
     tick = 0
 
     print(f"{YELLOW}▶ Connecting to Render Cloud ({CLOUD_CMD_URL})...{RESET}")
@@ -410,8 +412,9 @@ def main():
     try:
         while running:
             signal_found = None
+            cloud_ok = False
 
-            # 1. Primary: Poll Render Cloud endpoint (Heart of Render)
+            # 1. Primary: Poll Render Cloud endpoint
             try:
                 req = urllib.request.Request(
                     CLOUD_CMD_URL,
@@ -419,6 +422,8 @@ def main():
                 )
                 with urllib.request.urlopen(req, timeout=0.8) as resp:
                     if resp.status == 200:
+                        cloud_ok = True
+                        cloud_connected = True
                         data = json.loads(resp.read().decode())
                         cid = data.get("command_id", 0)
                         cmd = str(data.get("command", "stop")).lower().strip()
@@ -431,15 +436,26 @@ def main():
                         pump = bool(data.get("pump", False))
                         if "relay_active_low" in data:
                             relay_active_low = bool(data["relay_active_low"])
-                        if cid > 0 and cid != last_command_id:
-                            signal_found = ("Render Cloud (Phone/Web)", cid, cmd, direction, speed, pump)
-                        elif last_pump_state is not None and pump != last_pump_state:
-                            signal_found = ("Render Cloud (Phone/Web)", last_command_id, cmd, direction, speed, pump)
-            except Exception:
-                pass
 
-            # 2. Secondary: Fallback to Local API if on same Wi-Fi / Hotspot
-            if not signal_found:
+                        if last_cloud_cid is None:
+                            # Initial connection sync: record IDs and don't execute stale motions
+                            last_cloud_cid = cid
+                            last_cloud_pump = pump
+                            if cmd == "stop":
+                                apply_hardware("stop", 0, pump)
+                        elif cid != last_cloud_cid:
+                            signal_found = ("Render Cloud (Phone/Web)", cid, cmd, direction, speed, pump)
+                            last_cloud_cid = cid
+                            last_cloud_pump = pump
+                        elif pump != last_cloud_pump:
+                            signal_found = ("Render Cloud (Phone/Web)", cid, cmd, direction, speed, pump)
+                            last_cloud_pump = pump
+            except Exception:
+                cloud_ok = False
+                cloud_connected = False
+
+            # 2. Secondary: Fallback to Local API ONLY if Render Cloud failed
+            if not cloud_ok and not signal_found:
                 try:
                     req = urllib.request.Request(
                         LOCAL_STATUS_URL,
@@ -460,23 +476,28 @@ def main():
                             pump = bool(rover.get("pump", False))
                             if "relay_active_low" in rover:
                                 relay_active_low = bool(rover["relay_active_low"])
-                            if cid > 0 and cid != last_command_id:
+
+                            if last_local_cid is None:
+                                last_local_cid = cid
+                                last_local_pump = pump
+                            elif cid != last_local_cid:
                                 signal_found = ("Local Wi-Fi / Hotspot", cid, cmd, direction, speed, pump)
-                            elif last_pump_state is not None and pump != last_pump_state:
-                                signal_found = ("Local Wi-Fi / Hotspot", last_command_id, cmd, direction, speed, pump)
+                                last_local_cid = cid
+                                last_local_pump = pump
+                            elif pump != last_local_pump:
+                                signal_found = ("Local Wi-Fi / Hotspot", cid, cmd, direction, speed, pump)
+                                last_local_pump = pump
                 except Exception:
                     pass
 
             # 3. Process new verified signal and actuate physical BTS7960
             if signal_found:
                 source, cid, cmd, direction, speed, pump = signal_found
-                is_pump_toggle = (last_pump_state is not None and pump != last_pump_state and cid == last_command_id)
+                is_pump_toggle = (current_pump != pump and current_direction.lower() == direction.lower())
 
                 current_direction = direction
                 current_speed = speed
                 current_pump = pump
-                last_command_id = cid
-                last_pump_state = pump
 
                 # PHYSICALLY ACTUATE MOTORS & PUMP
                 apply_hardware(direction, speed, pump)
