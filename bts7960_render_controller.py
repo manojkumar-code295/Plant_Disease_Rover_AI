@@ -80,7 +80,7 @@ invert_motor = False
 total_signals = 0
 cloud_connected = False
 running = True
-relay_active_low = os.environ.get("RELAY_ACTIVE_LOW", "0") == "1"
+relay_active_low = os.environ.get("RELAY_ACTIVE_LOW", "1") == "1"
 
 # Initialize GPIO with lgpio
 try:
@@ -429,6 +429,8 @@ def main():
                         if speed <= 0 and (cmd in ("forward", "backward") or direction.lower() in ("forward", "backward")):
                             speed = 60
                         pump = bool(data.get("pump", False))
+                        if "relay_active_low" in data:
+                            relay_active_low = bool(data["relay_active_low"])
                         if cid > 0 and cid != last_command_id:
                             signal_found = ("Render Cloud (Phone/Web)", cid, cmd, direction, speed, pump)
                         elif last_pump_state is not None and pump != last_pump_state:
@@ -456,6 +458,8 @@ def main():
                             if speed <= 0 and (cmd in ("forward", "backward") or direction.lower() in ("forward", "backward")):
                                 speed = 60
                             pump = bool(rover.get("pump", False))
+                            if "relay_active_low" in rover:
+                                relay_active_low = bool(rover["relay_active_low"])
                             if cid > 0 and cid != last_command_id:
                                 signal_found = ("Local Wi-Fi / Hotspot", cid, cmd, direction, speed, pump)
                             elif last_pump_state is not None and pump != last_pump_state:

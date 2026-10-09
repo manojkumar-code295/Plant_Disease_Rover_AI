@@ -120,7 +120,8 @@ rover_state = {
     "disease_fertilizer": "",
     "disease_treatment": "",
     "last_seen": None,
-    "last_seen_epoch": 0.0
+    "last_seen_epoch": 0.0,
+    "relay_active_low": True
 }
 
 
@@ -1393,7 +1394,8 @@ def rover_command():
         "mode": rover_state["mode"],
         "engine_armed": rover_state.get("engine_armed", False),
         "invert_right_motor": rover_settings.get("invert_right_motor", True),
-        "invert_left_motor": rover_settings.get("invert_left_motor", False)
+        "invert_left_motor": rover_settings.get("invert_left_motor", False),
+        "relay_active_low": rover_state.get("relay_active_low", True)
     })
 
 
@@ -1649,25 +1651,34 @@ def rover_pump():
 
 
         return jsonify({
-
             "success": True,
-
-            "message":
-                "Pump command received",
-
-            "pump":
-                state,
-
-            "command":
-                rover_state["last_command"],
-
-            "command_id":
-                rover_state["command_id"]
-
+            "message": "Pump command received",
+            "pump": state,
+            "command": rover_state["last_command"],
+            "command_id": rover_state["command_id"]
         })
 
-
     except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route(
+    "/api/rover/invert_relay",
+    methods=["POST", "GET"]
+)
+def rover_invert_relay():
+    try:
+        rover_state["relay_active_low"] = not rover_state.get("relay_active_low", True)
+        rover_state["command_id"] += 1
+        return jsonify({
+            "success": True,
+            "relay_active_low": rover_state["relay_active_low"],
+            "command_id": rover_state["command_id"],
+            "message": f"Relay Mode: {'Active-Low (0V=ON)' if rover_state['relay_active_low'] else 'Active-High (3.3V=ON)'}"
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 
         return jsonify({
 
