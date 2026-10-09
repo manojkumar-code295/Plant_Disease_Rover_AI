@@ -207,14 +207,25 @@ def gpio_write(pin, value):
         except Exception as e:
             log(f"GPIO write error on pin {pin}: {e}")
 
+def gpio_pwm(pin, duty):
+    if gpio_available and gpio_chip is not None and pin is not None:
+        try:
+            lgpio.tx_pwm(gpio_chip, pin, 1000, max(0, min(100, int(duty))))
+        except Exception as e:
+            log(f"GPIO PWM error on pin {pin}: {e}")
+
 def stop_motors():
+    gpio_pwm(LEFT_IN1, 0)
+    gpio_pwm(LEFT_IN2, 0)
+    gpio_pwm(RIGHT_IN1, 0)
+    gpio_pwm(RIGHT_IN2, 0)
     gpio_write(LEFT_IN1, 0)
     gpio_write(LEFT_IN2, 0)
     gpio_write(LEFT_EN, 0)
     gpio_write(RIGHT_IN1, 0)
     gpio_write(RIGHT_IN2, 0)
     gpio_write(RIGHT_EN, 0)
-    log("GPIO OUTPUT -> All motor pins driven LOW (0V - Stopped)")
+    log("GPIO OUTPUT -> All BTS7960/motor pins driven LOW (0V - Stopped)")
 
 def set_pump(state):
     gpio_write(PUMP_PIN, state)
@@ -371,13 +382,17 @@ def apply_rover_command(direction, speed, pump):
     if INVERT_RIGHT_MOTOR:
         in3, in4 = in4, in3
 
-    gpio_write(LEFT_IN1, in1)
-    gpio_write(LEFT_IN2, in2)
-    gpio_write(RIGHT_IN1, in3)
-    gpio_write(RIGHT_IN2, in4)
-    gpio_write(LEFT_EN, is_moving)
-    gpio_write(RIGHT_EN, is_moving)
-    log(f"GPIO OUTPUT ({direction.upper()}) -> IN1(11)={in1} IN2(13)={in2} | IN3(15)={in3} IN4(16)={in4} | ENA(32)={int(is_moving)} ENB(33)={int(is_moving)} [RightInv={INVERT_RIGHT_MOTOR}]")
+    if is_moving:
+        gpio_write(LEFT_EN, 1)
+        gpio_write(RIGHT_EN, 1)
+        gpio_pwm(LEFT_IN1, speed if in1 else 0)
+        gpio_pwm(LEFT_IN2, speed if in2 else 0)
+        gpio_pwm(RIGHT_IN1, speed if in3 else 0)
+        gpio_pwm(RIGHT_IN2, speed if in4 else 0)
+    else:
+        stop_motors()
+    log(f"GPIO OUTPUT ({direction.upper()}) -> RPWM/IN1(11)={speed if in1 else 0}% LPWM/IN2(13)={speed if in2 else 0}% | EN(32)={int(is_moving)} [RightInv={INVERT_RIGHT_MOTOR}]")
+
 
 # ============================================================
 # LOAD CLASS NAMES

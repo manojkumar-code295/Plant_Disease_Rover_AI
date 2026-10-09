@@ -59,15 +59,11 @@ def get_gpio_desc(direction, speed, is_moving):
     spd = speed if is_moving else 0
     d = direction.lower()
     if d == "forward":
-        return f"{GREEN}IN1(Pin 11)=HIGH, IN2(Pin 13)=LOW | IN3(Pin 15)=LOW, IN4(Pin 16)=HIGH | ENA(Pin 32)={spd}% ENB(Pin 33)={spd}%{RESET}"
+        return f"{GREEN}RPWM(Pin 11)={spd}% PWM | LPWM(Pin 13)=0V | EN(Pin 32)=3.3V (ENABLED){RESET}"
     elif d in ("backward", "reverse"):
-        return f"{YELLOW}IN1(Pin 11)=LOW, IN2(Pin 13)=HIGH | IN3(Pin 15)=HIGH, IN4(Pin 16)=LOW | ENA(Pin 32)={spd}% ENB(Pin 33)={spd}%{RESET}"
-    elif d == "left":
-        return f"{CYAN}IN1(Pin 11)=LOW, IN2(Pin 13)=HIGH | IN3(Pin 15)=LOW, IN4(Pin 16)=HIGH | ENA(Pin 32)={spd}% ENB(Pin 33)={spd}%{RESET}"
-    elif d == "right":
-        return f"{CYAN}IN1(Pin 11)=HIGH, IN2(Pin 13)=LOW | IN3(Pin 15)=HIGH, IN4(Pin 16)=LOW | ENA(Pin 32)={spd}% ENB(Pin 33)={spd}%{RESET}"
+        return f"{YELLOW}RPWM(Pin 11)=0V | LPWM(Pin 13)={spd}% PWM | EN(Pin 32)=3.3V (ENABLED){RESET}"
     else:
-        return f"{RED}ALL PINS LOW (0V) - MOTORS SAFELY STOPPED{RESET}"
+        return f"{RED}RPWM(Pin 11)=0V | LPWM(Pin 13)=0V | EN(Pin 32)=0V (SAFELY BRAKED){RESET}"
 
 def main():
     os.system("clear")
