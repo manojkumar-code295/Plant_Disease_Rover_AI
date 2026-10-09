@@ -661,10 +661,10 @@ async function sendSignal(cmd, speedOverride) {
             bannerTxt.textContent = "BACKWARD";
             bannerTxt.style.color = "#f59e0b";
         } else if (cmd === 'left') {
-            bannerTxt.textContent = "TURNING LEFT";
+            bannerTxt.textContent = "LEFT (SLOW CRAWL)";
             bannerTxt.style.color = "#06b6d4";
         } else if (cmd === 'right') {
-            bannerTxt.textContent = "TURNING RIGHT";
+            bannerTxt.textContent = "RIGHT (SLOW CRAWL)";
             bannerTxt.style.color = "#06b6d4";
         } else if (cmd === 'stop') {
             bannerTxt.textContent = "STOPPED";
@@ -865,10 +865,10 @@ async function syncRoverStatus() {
                 bannerTxt.textContent = "BACKWARD";
                 bannerTxt.style.color = "#f59e0b";
             } else if (d === 'left') {
-                bannerTxt.textContent = "TURNING LEFT";
+                bannerTxt.textContent = "LEFT (SLOW CRAWL)";
                 bannerTxt.style.color = "#06b6d4";
             } else if (d === 'right') {
-                bannerTxt.textContent = "TURNING RIGHT";
+                bannerTxt.textContent = "RIGHT (SLOW CRAWL)";
                 bannerTxt.style.color = "#06b6d4";
             } else if (d === 'stopped' || d === 'stop') {
                 bannerTxt.textContent = "STOPPED";

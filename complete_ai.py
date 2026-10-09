@@ -369,12 +369,11 @@ def apply_rover_command(direction, speed, pump):
     elif direction in ("backward", "reverse"):
         in1, in2 = 0, 1
         in3, in4 = 0, 1
-    elif direction == "left":
-        in1, in2 = 0, 1
-        in3, in4 = 1, 0
-    elif direction == "right":
+    elif direction in ("left", "right"):
+        # Single BTS7960 Option 1: Slow / Quarter-Speed Precision Crawl (35% PWM)
+        speed = max(25, min(40, int(speed * 0.55)))
         in1, in2 = 1, 0
-        in3, in4 = 0, 1
+        in3, in4 = 1, 0
 
     # Motor Polarity Inversion (Fixes differential drive mirror mount spinning)
     if INVERT_LEFT_MOTOR:

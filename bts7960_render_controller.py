@@ -133,6 +133,15 @@ def apply_hardware(direction, speed, pump):
             lgpio.gpio_write(gpio_chip, EN_PIN, 1)
             lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, speed)
 
+        elif d in ("left", "right") and speed > 0:
+            # Single BTS7960 Option 1: Precision Slow Crawl Nudge (35% PWM)
+            crawl_speed = max(25, min(40, int(speed * 0.55)))
+            lgpio.tx_pwm(gpio_chip, LPWM_PIN, PWM_FREQ, 0)
+            lgpio.gpio_write(gpio_chip, LPWM_PIN, 0)
+            time.sleep(0.01) # 10ms deadtime for MOSFET commutation
+            lgpio.gpio_write(gpio_chip, EN_PIN, 1)
+            lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, crawl_speed)
+
         elif d in ("backward", "reverse") and speed > 0:
             # 1. Cleanly cancel forward PWM to prevent H-bridge braking/shoot-through
             lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, 0)
@@ -183,8 +192,7 @@ def print_banner():
     print(f"  • {WHITE}Pin 6  (GND)     -> {YELLOW}Common Ground (Pi GND + Buck OUT1- + Buck OUT2-){RESET}")
     print(f"  • {WHITE}Pin 2  (5V)      -> {RED}BTS7960 Logic VCC (5V Power from Buck OUT1+){RESET}")
     print(f"{CYAN}--------------------------------------------------------------------------------{RESET}")
-    print(f"{BOLD}KEYBOARD CONTROLS (Pi Console):{RESET}")
-    print(f"  [{GREEN}W{RESET}/{GREEN}F{RESET}] Forward  | [{YELLOW}S{RESET}/{YELLOW}B{RESET}] Backward  | [{RED}Space{RESET}/{RED}X{RESET}] Stop  | [{MAGENTA}P{RESET}] Toggle Pump")
+    print(f"  [{GREEN}W{RESET}/{GREEN}F{RESET}] Forward | [{YELLOW}S{RESET}/{YELLOW}B{RESET}] Backward | [{CYAN}A{RESET}] Left Crawl | [{CYAN}D{RESET}] Right Crawl | [{RED}Space{RESET}] Stop | [{MAGENTA}P{RESET}] Pump")
     print(f"  [{CYAN}+{RESET}/{CYAN}-{RESET}] Speed +/- | [{CYAN}1-9{RESET}] 10-90% Speed  | [{YELLOW}I{RESET}] Invert Direction | [{RED}Q{RESET}] Quit")
     print(f"{CYAN}================================================================================{RESET}")
     if gpio_available:
@@ -196,6 +204,12 @@ def get_gpio_desc(direction, speed, pump):
     d = direction.lower().strip()
     if d == "forward":
         return (f"RPWM(Pin 11)={GREEN}PWM {speed}% (ACTIVE){RESET} | "
+                f"LPWM(Pin 13)={DIM}0V (LOW){RESET} | "
+                f"EN(Pin 32)={GREEN}HIGH (3.3V){RESET} | "
+                f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
+    elif d in ("left", "right"):
+        crawl_spd = max(25, min(40, int(speed * 0.55)))
+        return (f"RPWM(Pin 11)={CYAN}PWM {crawl_spd}% (SLOW CRAWL){RESET} | "
                 f"LPWM(Pin 13)={DIM}0V (LOW){RESET} | "
                 f"EN(Pin 32)={GREEN}HIGH (3.3V){RESET} | "
                 f"PUMP(Pin 37)={MAGENTA}{'ON (HIGH)' if pump else 'OFF (0V)'}{RESET}")
@@ -232,8 +246,8 @@ def print_signal_card(source, cid, direction, speed, pump, is_pump_toggle=False)
         print(f"{MAGENTA}================================================================================{RESET}\n")
         return
 
-    color = RED if is_stop else (GREEN if d_upper == "FORWARD" else YELLOW)
-    symbol = "🛑" if is_stop else ("⚡" if d_upper == "FORWARD" else "🔄")
+    color = RED if is_stop else (GREEN if d_upper == "FORWARD" else (CYAN if d_upper in ("LEFT", "RIGHT") else YELLOW))
+    symbol = "🛑" if is_stop else ("⚡" if d_upper == "FORWARD" else ("◀" if d_upper == "LEFT" else ("▶" if d_upper == "RIGHT" else "🔄")))
 
     print(f"\n{color}{BOLD}================================================================================")
     print(f" {symbol} [{now_str}] SIGNAL VERIFIED: {d_upper} (Signal #{total_signals} | Command ID #{cid})")
@@ -243,6 +257,10 @@ def print_signal_card(source, cid, direction, speed, pump, is_pump_toggle=False)
     if is_stop:
         print(f"   Motion State:  {BOLD}{RED}STOPPED (ELECTRICAL BRAKE ENGAGED){RESET}")
         print(f"   Motor Status:  {RED}300 RPM DC MOTORS SAFELY BRAKED (0V){RESET}")
+    elif d_upper in ("LEFT", "RIGHT"):
+        crawl_spd = max(25, min(40, int(speed * 0.55)))
+        print(f"   Motion State:  {BOLD}{CYAN}{d_upper} (PRECISION SLOW CRAWL NUDGE){RESET} at {CYAN}{crawl_spd}% PWM{RESET}")
+        print(f"   Motor Status:  {CYAN}⚡ 300 RPM MOTORS IN PRECISION CRAWL (Single BTS7960 Mode){RESET}")
     else:
         print(f"   Motion State:  {BOLD}{WHITE}CHASSIS DRIVING {d_upper}{RESET} at {CYAN}{speed}% PWM{RESET}")
         print(f"   Motor Status:  {GREEN}⚡ 300 RPM DC MOTORS ROTATING {d_upper}{RESET}")
@@ -311,6 +329,14 @@ def keyboard_listener_thread():
                     current_direction = "Backward"
                     apply_hardware("backward", current_speed, current_pump)
                     print_signal_card("Pi Console Keyboard [S/B]", 999, "BACKWARD", current_speed, current_pump)
+                elif ch == 'a':
+                    current_direction = "Left"
+                    apply_hardware("left", current_speed, current_pump)
+                    print_signal_card("Pi Console Keyboard [A]", 999, "LEFT", current_speed, current_pump)
+                elif ch == 'd':
+                    current_direction = "Right"
+                    apply_hardware("right", current_speed, current_pump)
+                    print_signal_card("Pi Console Keyboard [D]", 999, "RIGHT", current_speed, current_pump)
                 elif ch in (' ', 'x'):
                     current_direction = "Stopped"
                     apply_hardware("stop", 0, current_pump)
