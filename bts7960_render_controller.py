@@ -107,8 +107,10 @@ def apply_hardware(direction, speed, pump):
     if not gpio_available or gpio_chip is None:
         return
 
-    speed = max(0, min(100, int(speed)))
     d = direction.lower().strip()
+    if speed <= 0 and d in ("forward", "backward", "reverse"):
+        speed = current_speed if current_speed > 0 else 60
+    speed = max(0, min(100, int(speed)))
 
     # Handle polarity inversion if configured
     if invert_motor:
@@ -123,13 +125,23 @@ def apply_hardware(direction, speed, pump):
 
         # Actuate BTS7960 Motors
         if d == "forward" and speed > 0:
-            lgpio.gpio_write(gpio_chip, EN_PIN, 1)
+            # 1. Cleanly cancel reverse PWM to prevent H-bridge braking/shoot-through
+            lgpio.tx_pwm(gpio_chip, LPWM_PIN, PWM_FREQ, 0)
             lgpio.gpio_write(gpio_chip, LPWM_PIN, 0)
-            lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, speed)
-        elif d in ("backward", "reverse") and speed > 0:
+            time.sleep(0.01) # 10ms deadtime for MOSFET commutation
+            # 2. Assert forward PWM
             lgpio.gpio_write(gpio_chip, EN_PIN, 1)
+            lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, speed)
+
+        elif d in ("backward", "reverse") and speed > 0:
+            # 1. Cleanly cancel forward PWM to prevent H-bridge braking/shoot-through
+            lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, 0)
             lgpio.gpio_write(gpio_chip, RPWM_PIN, 0)
+            time.sleep(0.01) # 10ms deadtime for MOSFET commutation
+            # 2. Assert backward PWM
+            lgpio.gpio_write(gpio_chip, EN_PIN, 1)
             lgpio.tx_pwm(gpio_chip, LPWM_PIN, PWM_FREQ, speed)
+
         else: # STOP
             lgpio.tx_pwm(gpio_chip, RPWM_PIN, PWM_FREQ, 0)
             lgpio.tx_pwm(gpio_chip, LPWM_PIN, PWM_FREQ, 0)
@@ -366,9 +378,13 @@ def main():
                     if resp.status == 200:
                         data = json.loads(resp.read().decode())
                         cid = data.get("command_id", 0)
-                        cmd = data.get("command", "stop")
-                        direction = data.get("direction", "Stopped")
+                        cmd = str(data.get("command", "stop")).lower().strip()
+                        direction = str(data.get("direction", cmd)).strip()
+                        if not direction or direction.lower() in ("none", "", "null"):
+                            direction = cmd
                         speed = int(data.get("speed", 60))
+                        if speed <= 0 and (cmd in ("forward", "backward") or direction.lower() in ("forward", "backward")):
+                            speed = 60
                         pump = bool(data.get("pump", False))
                         if cid > 0 and cid != last_command_id:
                             signal_found = ("Render Cloud (Phone/Web)", cid, cmd, direction, speed, pump)
@@ -389,9 +405,13 @@ def main():
                             data = json.loads(resp.read().decode())
                             rover = data.get("rover", {})
                             cid = rover.get("command_id", 0)
-                            cmd = rover.get("last_command", "stop")
-                            direction = rover.get("direction", "Stopped")
+                            cmd = str(rover.get("last_command", "stop")).lower().strip()
+                            direction = str(rover.get("direction", cmd)).strip()
+                            if not direction or direction.lower() in ("none", "", "null"):
+                                direction = cmd
                             speed = int(rover.get("speed", 60))
+                            if speed <= 0 and (cmd in ("forward", "backward") or direction.lower() in ("forward", "backward")):
+                                speed = 60
                             pump = bool(rover.get("pump", False))
                             if cid > 0 and cid != last_command_id:
                                 signal_found = ("Local Wi-Fi / Hotspot", cid, cmd, direction, speed, pump)

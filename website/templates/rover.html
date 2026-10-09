@@ -710,21 +710,12 @@ function handleTouchStart(dir, event) {
     if (event && event.cancelable) event.preventDefault();
     touchHandled = true;
     if (navigator.vibrate) navigator.vibrate(25);
-    
-    if (driveMode === 'continuous') {
-        if (activeDirection === dir) {
-            sendSignal('stop', 0);
-        } else {
-            sendSignal(dir, currentSpeed);
-        }
-    } else {
-        sendSignal(dir, currentSpeed);
-    }
+    sendSignal(dir, currentSpeed);
 }
 
 function handleTouchEnd(dir, event) {
     if (event && event.cancelable) event.preventDefault();
-    setTimeout(() => { touchHandled = false; }, 300);
+    setTimeout(() => { touchHandled = false; }, 400);
     
     if (driveMode === 'momentary') {
         sendSignal('stop', 0);
@@ -739,15 +730,7 @@ function handleTouchBrake(event) {
 
 function handleDpadPress(dir) {
     if (touchHandled) return;
-    if (driveMode === 'continuous') {
-        if (activeDirection === dir) {
-            sendSignal('stop', 0);
-        } else {
-            sendSignal(dir, currentSpeed);
-        }
-    } else {
-        sendSignal(dir, currentSpeed);
-    }
+    sendSignal(dir, currentSpeed);
 }
 
 function emergencyBrake() {

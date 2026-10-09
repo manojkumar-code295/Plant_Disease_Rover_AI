@@ -383,6 +383,17 @@ def apply_rover_command(direction, speed, pump):
         in3, in4 = in4, in3
 
     if is_moving:
+        if in1:
+            gpio_pwm(LEFT_IN2, 0)
+            gpio_write(LEFT_IN2, 0)
+            gpio_pwm(RIGHT_IN2, 0)
+            gpio_write(RIGHT_IN2, 0)
+        elif in2:
+            gpio_pwm(LEFT_IN1, 0)
+            gpio_write(LEFT_IN1, 0)
+            gpio_pwm(RIGHT_IN1, 0)
+            gpio_write(RIGHT_IN1, 0)
+        time.sleep(0.01)
         gpio_write(LEFT_EN, 1)
         gpio_write(RIGHT_EN, 1)
         gpio_pwm(LEFT_IN1, speed if in1 else 0)
