@@ -1,10 +1,10 @@
 {
-    "result_id": "31e8d9a02a1f441182c7f20f75cc9a8c",
-    "image": "20261008_174244_6c4a1f61.jpg",
-    "disease": "Curl Virus (73.0%)",
-    "chemical": "Imidacloprid / Neem oil for whitefly & vector control",
-    "fertilizer": "Balanced NPK fertilizer with micronutrients",
-    "treatment": "Uproot severely stunted plants and control insect vectors immediately.",
-    "confidence": 73.0,
-    "timestamp": "2026-10-08 17:42:44"
+    "result_id": "init",
+    "image": "",
+    "disease": "Active Scanning (No Leaf in View)",
+    "chemical": "None required",
+    "fertilizer": "None required",
+    "treatment": "Point camera directly at a chili plant leaf to analyze disease symptoms and recommended treatments.",
+    "confidence": 0.0,
+    "timestamp": "2026-10-12 12:00:00"
 }
