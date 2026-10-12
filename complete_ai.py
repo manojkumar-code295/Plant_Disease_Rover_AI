@@ -59,13 +59,13 @@ CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.80))
 CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.28))
 
 # Robust Leaf Filtering Thresholds (Botanical Quality Gate for Chili Leaves)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 3000))           # Min pixels to qualify as a leaf
-MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.70)) # Max 70% of frame (rejects whole room)
-MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.28))   # Foliage density inside bounding box (at least 28%)
-MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.16))       # Skin tone ratio threshold for rejecting human face/hand
-MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 12.0))     # Laplacian variance to reject flat blank walls
-MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 26.0)) # Excess Green Index (chlorophyll presence)
-MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 45.0))       # Rejects gray/off-white rooms and furniture
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 2000))           # Min pixels to qualify as a leaf
+MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.98)) # Up to 98% of frame for full-frame closeups
+MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.18))   # Foliage density inside bounding box
+MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.20))       # Skin tone ratio threshold for rejecting human face/hand
+MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 8.0))      # Laplacian variance to reject flat blank walls
+MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 20.0)) # Excess Green Index (chlorophyll presence)
+MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 40.0))       # Rejects gray/off-white rooms and furniture
 
 # Camera & Performance Configuration
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
@@ -542,13 +542,13 @@ def verify_leaf_structure(crop_bgr):
 
     h, w = crop_bgr.shape[:2]
     total_px = float(h * w)
-    if w < 70 or h < 70 or total_px < 5000:
+    if w < 50 or h < 50 or total_px < 2500:
         return False, f"Candidate too small ({w}x{h})"
 
-    # Botanical aspect ratio: Chili leaves are elliptical/lanceolate (0.35 <= w/h <= 2.5)
+    # Botanical aspect ratio: Chili leaves can be tall upright, horizontal, diagonal, or full-frame close-up
     aspect = w / float(h)
-    if aspect < 0.35 or aspect > 2.5:
-        return False, f"Non-botanical aspect ratio ({aspect:.2f})"
+    if aspect < 0.15 or aspect > 6.0:
+        return False, f"Aspect ratio extreme ({aspect:.2f})"
 
     b = crop_bgr[:, :, 0].astype(np.float32)
     g = crop_bgr[:, :, 1].astype(np.float32)
@@ -556,27 +556,26 @@ def verify_leaf_structure(crop_bgr):
     hsv = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2HSV)
 
     # 1. Botanical chlorophyll foliage mask:
-    # Green range: strictly 30 to 78 (rejects cyan/teal > 78 and wood/skin < 30)
-    # Plant green MUST have G > R + 8 and G > B + 12.
-    # B <= R + 10 ensures Blue is heavily absorbed (rejects teal/cyan painted walls).
-    green_mask = (hsv[:,:,0] >= 30) & (hsv[:,:,0] <= 78) & \
-                 (hsv[:,:,1] >= 42) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 245) & \
-                 (g > r + 8.0) & (g > b + 12.0) & (b <= r + 10.0) & \
-                 (2.0 * g - r - b >= 24.0)
+    # Green range: plant green [28, 80] with chlorophyll absorption signature
+    # G must exceed R and B; B must be heavily absorbed compared to R (rejects cyan/teal walls)
+    green_mask = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 80) & \
+                 (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
+                 (g > r + 5.0) & (g > b + 10.0) & (b <= r + 6.0) & \
+                 (2.0 * g - r - b >= 20.0)
 
     # Yellow chlorotic foliage mask (for viral curl / spot diseases)
-    yellow_mask = (hsv[:,:,0] >= 20) & (hsv[:,:,0] < 32) & \
-                  (hsv[:,:,1] >= 65) & (hsv[:,:,2] >= 45) & (hsv[:,:,2] <= 245) & \
-                  (g > b + 25.0) & (r > b + 25.0) & (abs(g - r) < 25.0)
+    yellow_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 28) & \
+                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
+                  (g > b + 16.0) & (r > b + 16.0) & (abs(g - r) < 30.0)
 
     foliage_mask = green_mask | yellow_mask
     foliage_px = int(np.sum(foliage_mask))
     foliage_ratio = foliage_px / total_px
 
-    if foliage_px < 2000:
-        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 2000)"
-    if foliage_ratio < 0.25:
-        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 25%)"
+    if foliage_px < 1500:
+        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1500)"
+    if foliage_ratio < 0.18:
+        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 18%)"
 
     # 2. Human Skin Tone Rejection
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -585,34 +584,34 @@ def verify_leaf_structure(crop_bgr):
                              np.array([180, 175, 255], dtype=np.uint8))
     skin_mask = cv2.bitwise_or(skin1, skin2)
     skin_px = int(np.sum(skin_mask > 0))
-    if skin_px > foliage_px * 0.6 or (skin_px / total_px) > 0.16:
+    if skin_px > foliage_px * 0.70 or (skin_px / total_px) > 0.20:
         return False, "Hand/Skin/Face detected"
 
     # 3. Straight architectural lines check (tables, walls, doors)
     gray = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 140)
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=38, minLineLength=int(min(w,h)*0.42), maxLineGap=6)
-    if lines is not None and len(lines) >= 3:
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=42, minLineLength=int(min(w,h)*0.45), maxLineGap=6)
+    if lines is not None and len(lines) >= 4:
         return False, f"Straight structural lines ({len(lines)} detected)"
 
-    # 4. Chlorophyll Vegetation Index (ExG, G-B, G-R)
+    # 4. Chlorophyll Vegetation Index (ExG, G-B)
     exg = 2.0 * g - r - b
     mean_exg = float(np.mean(exg[foliage_mask]))
-    if mean_exg < 26.0:
-        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 26.0)"
+    if mean_exg < 20.0:
+        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 20.0)"
 
     mean_gb = float(np.mean((g - b)[foliage_mask]))
-    if mean_gb < 14.0:
-        return False, f"Low green-over-blue dominance ({mean_gb:.1f} < 14.0)"
+    if mean_gb < 12.0:
+        return False, f"Low green-over-blue dominance ({mean_gb:.1f} < 12.0)"
 
-    mean_gr = float(np.mean((g - r)[foliage_mask]))
-    if mean_gr < 8.0:
-        return False, f"Low green-over-red dominance ({mean_gr:.1f} < 8.0)"
+    mean_sat = float(np.mean(hsv[:, :, 1][foliage_mask]))
+    if mean_sat < MIN_SATURATION:
+        return False, f"Low foliage saturation ({mean_sat:.1f} < {MIN_SATURATION:.1f})"
 
     # 5. Texture & Venation Check
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    if lap_var < 10.0:
-        return False, f"Flat texture ({lap_var:.1f} < 10.0)"
+    if lap_var < 8.0:
+        return False, f"Flat texture ({lap_var:.1f} < 8.0)"
 
     return True, "VALID_LEAF"
 
@@ -634,19 +633,19 @@ def detect_leaf(frame_bgr):
     r_full = frame_bgr[:, :, 2].astype(np.float32)
 
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination:
-    # Strictly in plant green range [30, 76] (rejects cyan/teal > 76 and wood/skin < 30)
-    # G must be strongly greater than R and B.
-    # B must NOT exceed R by more than 8 (prevents teal walls where B > R by 30+)
-    green_bool = (hsv[:,:,0] >= 30) & (hsv[:,:,0] <= 76) & \
-                 (hsv[:,:,1] >= 45) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 245) & \
-                 (g_full > r_full + 8.0) & (g_full > b_full + 12.0) & \
-                 (b_full <= r_full + 10.0) & \
-                 (2.0 * g_full - r_full - b_full >= 25.0)
+    # Strictly in plant green range [28, 80] with chlorophyll absorption signature
+    # G must be greater than R and B.
+    # B must NOT exceed R by more than 6 (prevents teal walls where B > R by 30+)
+    green_bool = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 80) & \
+                 (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
+                 (g_full > r_full + 5.0) & (g_full > b_full + 10.0) & \
+                 (b_full <= r_full + 6.0) & \
+                 (2.0 * g_full - r_full - b_full >= 20.0)
 
     # Yellow chlorotic foliage mask (for viral curl / spot diseases)
-    yellow_bool = (hsv[:,:,0] >= 20) & (hsv[:,:,0] < 30) & \
-                  (hsv[:,:,1] >= 65) & (hsv[:,:,2] >= 45) & (hsv[:,:,2] <= 245) & \
-                  (g_full > b_full + 25.0) & (r_full > b_full + 25.0) & \
+    yellow_bool = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 28) & \
+                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
+                  (g_full > b_full + 16.0) & (r_full > b_full + 16.0) & \
                   (2.0 * g_full - r_full - b_full >= 10.0)
 
     foliage_mask = np.uint8(green_bool | yellow_bool) * 255
@@ -667,6 +666,9 @@ def detect_leaf(frame_bgr):
     k_bridge = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
     foliage_clean = cv2.morphologyEx(foliage_clean, cv2.MORPH_CLOSE, k_bridge)
 
+    total_foliage_px = cv2.countNonZero(foliage_clean)
+    total_foliage_ratio = total_foliage_px / total_area
+
     contours, _ = cv2.findContours(foliage_clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     best_candidate = None
@@ -675,26 +677,22 @@ def detect_leaf(frame_bgr):
     if contours:
         for c in contours:
             area = cv2.contourArea(c)
-            # Area must be between minimum leaf size and maximum leaf ratio
+            # Area must be between minimum leaf size and maximum leaf ratio (up to 98% for full-frame)
             if area < MIN_LEAF_AREA or area > max_leaf_area:
                 continue
 
             bx, by, bw, bh = cv2.boundingRect(c)
-            if bw < 60 or bh < 60:
-                continue
-
-            # Reject contours spanning almost full width or height (room walls, ceiling, desk width)
-            if bw >= int(w * 0.82) or bh >= int(h * 0.82):
+            if bw < 45 or bh < 45:
                 continue
 
             aspect = bw / float(bh)
-            if aspect < 0.35 or aspect > 2.5:
+            if aspect < 0.15 or aspect > 6.0:
                 continue
 
             box_area = float(bw * bh)
             crop_foliage = foliage_clean[by:by+bh, bx:bx+bw]
             foliage_px = cv2.countNonZero(crop_foliage)
-            if foliage_px < 2200:
+            if foliage_px < 1500:
                 continue
             leaf_ratio = foliage_px / box_area
 
@@ -702,7 +700,7 @@ def detect_leaf(frame_bgr):
             hull = cv2.convexHull(c)
             hull_area = cv2.contourArea(hull)
             solidity = area / float(hull_area) if hull_area > 0 else 0
-            if solidity < 0.48:
+            if solidity < 0.30:
                 continue
 
             # Foliage density inside bounding box
@@ -713,15 +711,15 @@ def detect_leaf(frame_bgr):
             crop_skin = skin_mask[by:by+bh, bx:bx+bw]
             skin_px = cv2.countNonZero(crop_skin)
             skin_ratio = skin_px / box_area
-            if skin_ratio > MAX_SKIN_RATIO or skin_px > foliage_px * 0.6:
+            if skin_ratio > MAX_SKIN_RATIO or skin_px > foliage_px * 0.70:
                 continue
 
             # Straight lines check (reject tables, doors, walls)
             leaf_bgr = frame_bgr[by:by+bh, bx:bx+bw]
             gray = cv2.cvtColor(leaf_bgr, cv2.COLOR_BGR2GRAY)
             edges = cv2.Canny(gray, 50, 140)
-            lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=38, minLineLength=int(min(bw,bh)*0.40), maxLineGap=6)
-            if lines is not None and len(lines) >= 3:
+            lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=42, minLineLength=int(min(bw,bh)*0.45), maxLineGap=6)
+            if lines is not None and len(lines) >= 4:
                 continue
 
             # Texture check: Real leaves have veins and margins
@@ -741,18 +739,29 @@ def detect_leaf(frame_bgr):
                 continue
 
             mean_gb = float(np.mean((g_ch - b_ch)[foliage_mask_crop]))
-            if mean_gb < 14.0:
+            if mean_gb < 12.0:
                 continue
 
             # Botanical score: prioritizes true green foliage density, Excess Green, and organic solidity
             score = foliage_px * (mean_exg + 5.0) * solidity
 
-            if score >= 35000.0 and score > best_score:
+            if score >= 15000.0 and score > best_score:
                 best_score = score
-                pad = 10
+                pad = 8
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
                 cx2 = min(w, bx + bw + pad); cy2 = min(h, by + bh + pad)
                 best_candidate = (cx1, cy1, cx2, cy2)
+
+    # Full frame coverage fallback (Macro / Close-up leaf filling 28%+ of the whole camera view)
+    if (best_candidate is None or total_foliage_ratio >= 0.30) and total_foliage_ratio >= 0.28:
+        pts = cv2.findNonZero(foliage_clean)
+        if pts is not None:
+            fx, fy, fw, fh = cv2.boundingRect(pts)
+            if fw >= 60 and fh >= 60:
+                full_crop = frame_bgr[fy:fy+fh, fx:fx+fw]
+                is_valid, _ = verify_leaf_structure(full_crop)
+                if is_valid:
+                    best_candidate = (fx, fy, fx+fw, fy+fh)
 
     if best_candidate is not None:
         x1, y1, x2, y2 = best_candidate
