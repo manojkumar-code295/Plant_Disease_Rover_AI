@@ -55,17 +55,17 @@ CLASS_FILE = os.path.join(BASE_DIR, "class_names.txt")
 IMAGE_SIZE = 224
 
 # AI Confidence & Classification Thresholds (Strict Precision Thresholds)
-CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.80))
-CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.28))
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.75))
+CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.20))
 
 # Robust Leaf Filtering Thresholds (Botanical Quality Gate for Chili Leaves)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 2000))           # Min pixels to qualify as a leaf
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 3200))           # Min pixels to qualify as a leaf
 MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.98)) # Up to 98% of frame for full-frame closeups
-MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.18))   # Foliage density inside bounding box
+MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.22))   # Foliage density inside bounding box
 MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.20))       # Skin tone ratio threshold for rejecting human face/hand
 MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 8.0))      # Laplacian variance to reject flat blank walls
-MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 20.0)) # Excess Green Index (chlorophyll presence)
-MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 40.0))       # Rejects gray/off-white rooms and furniture
+MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 24.0)) # Excess Green Index (chlorophyll presence)
+MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 55.0))       # Rejects gray/off-white rooms and furniture
 
 # Camera & Performance Configuration
 # Mounting orientation: "90_CCW" (default for upright rover chassis mount), "90_CW", "180", "NONE"
@@ -542,7 +542,7 @@ def verify_leaf_structure(crop_bgr):
 
     h, w = crop_bgr.shape[:2]
     total_px = float(h * w)
-    if w < 50 or h < 50 or total_px < 2500:
+    if w < 50 or h < 50 or total_px < 3200:
         return False, f"Candidate too small ({w}x{h})"
 
     # Botanical aspect ratio: Chili leaves can be tall upright, horizontal, diagonal, or full-frame close-up
@@ -559,23 +559,23 @@ def verify_leaf_structure(crop_bgr):
     # Green range: plant green [28, 80] with chlorophyll absorption signature
     # G must exceed R and B; B must be heavily absorbed compared to R (rejects cyan/teal walls)
     green_mask = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 80) & \
-                 (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
-                 (g > r + 5.0) & (g > b + 10.0) & (b <= r + 6.0) & \
-                 (2.0 * g - r - b >= 20.0)
+                 (hsv[:,:,1] >= 44) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
+                 (g > r + 5.0) & (g > b + 12.0) & (b <= r + 5.0) & \
+                 (2.0 * g - r - b >= 22.0)
 
     # Yellow chlorotic foliage mask (for viral curl / spot diseases)
     yellow_mask = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 28) & \
-                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
-                  (g > b + 16.0) & (r > b + 16.0) & (abs(g - r) < 30.0)
+                  (hsv[:,:,1] >= 55) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
+                  (g > b + 18.0) & (r > b + 18.0) & (abs(g - r) < 28.0)
 
     foliage_mask = green_mask | yellow_mask
     foliage_px = int(np.sum(foliage_mask))
     foliage_ratio = foliage_px / total_px
 
-    if foliage_px < 1500:
-        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1500)"
-    if foliage_ratio < 0.18:
-        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 18%)"
+    if foliage_px < 1800:
+        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 1800)"
+    if foliage_ratio < 0.22:
+        return False, f"Low foliage ratio ({foliage_ratio*100:.1f}% < 22%)"
 
     # 2. Human Skin Tone Rejection
     skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
@@ -594,15 +594,15 @@ def verify_leaf_structure(crop_bgr):
     if lines is not None and len(lines) >= 4:
         return False, f"Straight structural lines ({len(lines)} detected)"
 
-    # 4. Chlorophyll Vegetation Index (ExG, G-B)
+    # 4. Chlorophyll Vegetation Index (ExG, G-B, Saturation)
     exg = 2.0 * g - r - b
     mean_exg = float(np.mean(exg[foliage_mask]))
-    if mean_exg < 20.0:
-        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 20.0)"
+    if mean_exg < 24.0:
+        return False, f"Low chlorophyll ExG ({mean_exg:.1f} < 24.0)"
 
     mean_gb = float(np.mean((g - b)[foliage_mask]))
-    if mean_gb < 12.0:
-        return False, f"Low green-over-blue dominance ({mean_gb:.1f} < 12.0)"
+    if mean_gb < 14.0:
+        return False, f"Low green-over-blue dominance ({mean_gb:.1f} < 14.0)"
 
     mean_sat = float(np.mean(hsv[:, :, 1][foliage_mask]))
     if mean_sat < MIN_SATURATION:
@@ -635,17 +635,17 @@ def detect_leaf(frame_bgr):
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination:
     # Strictly in plant green range [28, 80] with chlorophyll absorption signature
     # G must be greater than R and B.
-    # B must NOT exceed R by more than 6 (prevents teal walls where B > R by 30+)
+    # B must NOT exceed R by more than 5 (prevents teal walls where B > R by 30+)
     green_bool = (hsv[:,:,0] >= 28) & (hsv[:,:,0] <= 80) & \
-                 (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
-                 (g_full > r_full + 5.0) & (g_full > b_full + 10.0) & \
-                 (b_full <= r_full + 6.0) & \
-                 (2.0 * g_full - r_full - b_full >= 20.0)
+                 (hsv[:,:,1] >= 44) & (hsv[:,:,2] >= 30) & (hsv[:,:,2] <= 248) & \
+                 (g_full > r_full + 5.0) & (g_full > b_full + 12.0) & \
+                 (b_full <= r_full + 5.0) & \
+                 (2.0 * g_full - r_full - b_full >= 22.0)
 
     # Yellow chlorotic foliage mask (for viral curl / spot diseases)
     yellow_bool = (hsv[:,:,0] >= 18) & (hsv[:,:,0] < 28) & \
-                  (hsv[:,:,1] >= 50) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
-                  (g_full > b_full + 16.0) & (r_full > b_full + 16.0) & \
+                  (hsv[:,:,1] >= 55) & (hsv[:,:,2] >= 38) & (hsv[:,:,2] <= 248) & \
+                  (g_full > b_full + 18.0) & (r_full > b_full + 18.0) & \
                   (2.0 * g_full - r_full - b_full >= 10.0)
 
     foliage_mask = np.uint8(green_bool | yellow_bool) * 255
@@ -682,7 +682,7 @@ def detect_leaf(frame_bgr):
                 continue
 
             bx, by, bw, bh = cv2.boundingRect(c)
-            if bw < 45 or bh < 45:
+            if bw < 50 or bh < 50:
                 continue
 
             aspect = bw / float(bh)
@@ -692,7 +692,7 @@ def detect_leaf(frame_bgr):
             box_area = float(bw * bh)
             crop_foliage = foliage_clean[by:by+bh, bx:bx+bw]
             foliage_px = cv2.countNonZero(crop_foliage)
-            if foliage_px < 1500:
+            if foliage_px < 1800:
                 continue
             leaf_ratio = foliage_px / box_area
 
@@ -739,13 +739,13 @@ def detect_leaf(frame_bgr):
                 continue
 
             mean_gb = float(np.mean((g_ch - b_ch)[foliage_mask_crop]))
-            if mean_gb < 12.0:
+            if mean_gb < 14.0:
                 continue
 
             # Botanical score: prioritizes true green foliage density, Excess Green, and organic solidity
             score = foliage_px * (mean_exg + 5.0) * solidity
 
-            if score >= 15000.0 and score > best_score:
+            if score >= 20000.0 and score > best_score:
                 best_score = score
                 pad = 8
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
@@ -801,8 +801,9 @@ def predict_crop(crop_bgr):
         local_out = output_details
 
     try:
-        # Resize to standard model input dimensions (IMAGE_SIZE, IMAGE_SIZE)
-        resized = cv2.resize(crop_bgr, (IMAGE_SIZE, IMAGE_SIZE), interpolation=cv2.INTER_AREA)
+        # Symmetrically letterbox crop to IMAGE_SIZE x IMAGE_SIZE to preserve natural aspect ratio
+        # and eliminate artificial edge distortion/curling artifacts.
+        resized = letterbox(crop_bgr, target_size=IMAGE_SIZE, bg_color=(255, 255, 255))
         # Convert BGR to RGB (model expects RGB)
         img = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB).astype(np.float32)
         img = np.expand_dims(img, axis=0)

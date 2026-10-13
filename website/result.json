@@ -1,10 +1,10 @@
 {
-    "result_id": "7670ac279b884454941900fcec6ba2bd",
-    "image": "20261012_121019_77820f6b.jpg",
-    "disease": "Healthy Leaf (87.4%)",
-    "chemical": "No chemical treatment required",
-    "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Plant foliage is healthy and vigorous. Maintain regular monitoring.",
-    "confidence": 87.4,
-    "timestamp": "2026-10-12 12:10:19"
+    "result_id": "ready",
+    "image": "",
+    "disease": "Active Scanning (Ready for Leaf)",
+    "chemical": "None required",
+    "fertilizer": "None required",
+    "treatment": "Point camera directly at a chili plant leaf to detect health and view remedies.",
+    "confidence": 0.0,
+    "timestamp": "2026-10-13 11:20:00"
 }
