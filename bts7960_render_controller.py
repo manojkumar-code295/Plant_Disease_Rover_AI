@@ -128,8 +128,22 @@ def apply_hardware(direction, speed, pump):
             d = "forward"
 
     try:
-        # Actuate Spray Pump (respects active-high / active-low polarity)
-        pump_gpio_val = (0 if pump else 1) if relay_active_low else (1 if pump else 0)
+        # Actuate Spray Pump (respects disease safety rule: spray ONLY for diseased leaves!)
+        actual_pump = pump
+        if pump:
+            try:
+                res_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "website", "result.json")
+                if os.path.exists(res_path):
+                    with open(res_path, "r", encoding="utf-8") as rf:
+                        rdata = json.load(rf)
+                    dis = str(rdata.get("disease", "")).lower()
+                    if "healthy" in dis or "scanning" in dis or "ready" in dis or "none" in dis:
+                        actual_pump = False
+                        print(f"\n{GREEN}🌿 [PUMP SAFETY] Leaf is Healthy or No Disease detected. Spray pump held OFF for crop protection.{RESET}\n")
+            except Exception:
+                pass
+
+        pump_gpio_val = (0 if actual_pump else 1) if relay_active_low else (1 if actual_pump else 0)
         lgpio.gpio_write(gpio_chip, PUMP_PIN, pump_gpio_val)
 
         # Actuate BTS7960 Motors

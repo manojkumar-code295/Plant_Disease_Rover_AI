@@ -31,6 +31,7 @@ import time
 import queue
 import signal
 import threading
+import collections
 import socket
 import socketserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -106,8 +107,19 @@ RIGHT_IN1 = 22  # Physical Pin 15 (Forward Direction)
 RIGHT_IN2 = 23  # Physical Pin 16 (Reverse Direction)
 RIGHT_EN  = 13  # Physical Pin 33 (PWM1 Speed)
 PUMP_PIN  = 26  # Physical Pin 37 (5V Relay Control IN)
-TRIG_PIN  = 24  # Physical Pin 18 (HC-SR04 Trigger)
-ECHO_PIN  = 25  # Physical Pin 22 (HC-SR04 Echo)
+TRIG_PIN  = int(os.environ.get("ULTRASONIC_TRIG_PIN", 24))  # Physical Pin 18 (HC-SR04 Trigger)
+ECHO_PIN  = int(os.environ.get("ULTRASONIC_ECHO_PIN", 25))  # Physical Pin 22 (HC-SR04 Echo)
+
+# Ultrasonic Obstacle Stop Configuration
+ULTRASONIC_ENABLED = os.environ.get("ULTRASONIC_ENABLED", "1") == "1"
+OBSTACLE_STOP_DISTANCE_CM = float(os.environ.get("OBSTACLE_STOP_DISTANCE_CM", 30.0)) # Emergency stop threshold
+
+# Precision Targeted Disease Spray Configuration (Relay Module / DC Motor)
+# Rule: Relay module actuates DC motor spray pump ONLY when a diseased leaf is detected!
+AUTO_DISEASE_SPRAY_ENABLED = os.environ.get("AUTO_DISEASE_SPRAY_ENABLED", "1") == "1"
+SPRAY_BURST_SECONDS = float(os.environ.get("SPRAY_BURST_SECONDS", 2.5))       # Spray pulse duration per diseased leaf
+SPRAY_COOLDOWN_SECONDS = float(os.environ.get("SPRAY_COOLDOWN_SECONDS", 5.0)) # Cooldown between sprays to prevent flooding
+DISEASE_CLASSES_FOR_SPRAY = {"Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus"} # Diseased classes ONLY
 
 # Motor Direction Inversion Configuration (Differential Chassis Optimization)
 # Due to opposing mirror mount on differential chassis, Right Motor is inverted by default
@@ -201,8 +213,24 @@ def init_gpio():
             pass
         lgpio.gpio_claim_output(gpio_chip, PUMP_PIN, 1 if RELAY_ACTIVE_LOW else 0)
 
+        # Claim ultrasonic sensor pins (TRIG as output, ECHO as input with pull-down)
+        if ULTRASONIC_ENABLED:
+            try:
+                lgpio.gpio_free(gpio_chip, TRIG_PIN)
+            except Exception:
+                pass
+            try:
+                lgpio.gpio_free(gpio_chip, ECHO_PIN)
+            except Exception:
+                pass
+            try:
+                lgpio.gpio_claim_output(gpio_chip, TRIG_PIN, 0)
+                lgpio.gpio_claim_input(gpio_chip, ECHO_PIN, lgpio.SET_PULL_DOWN)
+            except Exception as ue:
+                log(f"Ultrasonic pin claim notice: {ue}")
+
         gpio_available = True
-        log(f"GPIO Controller initialized. Motors safely OFF, Relay mode: {'ACTIVE-LOW' if RELAY_ACTIVE_LOW else 'ACTIVE-HIGH'}.")
+        log(f"GPIO Controller initialized. Motors safely OFF, Relay mode: {'ACTIVE-LOW' if RELAY_ACTIVE_LOW else 'ACTIVE-HIGH'}, HC-SR04: Trig={TRIG_PIN}, Echo={ECHO_PIN}.")
     except Exception as e:
         gpio_available = False
         log(f"GPIO Hardware unavailable ({e}). Operating in Safe Simulation Mode.")
@@ -244,6 +272,167 @@ def set_pump(state):
 stop_motors()
 set_pump(False)
 
+# ============================================================
+# ULTRASONIC OBSTACLE SENSING & COLLISION STOP SUBSYSTEM
+# ============================================================
+
+obstacle_detected = False
+current_obstacle_distance = 999.0
+obstacle_lock = threading.Lock()
+
+def read_ultrasonic_distance_cm(timeout_sec=0.03):
+    """
+    Measures distance in cm using HC-SR04 ultrasonic sensor via lgpio.
+    Returns distance in cm, or None if no echo received / timeout.
+    """
+    if not gpio_available or gpio_chip is None or not ULTRASONIC_ENABLED:
+        return None
+    try:
+        # Settle trigger pin low
+        lgpio.gpio_write(gpio_chip, TRIG_PIN, 0)
+        time.sleep(0.000005)
+        # Send 10-12us trigger pulse
+        lgpio.gpio_write(gpio_chip, TRIG_PIN, 1)
+        time.sleep(0.000012)
+        lgpio.gpio_write(gpio_chip, TRIG_PIN, 0)
+
+        t0 = time.perf_counter()
+        timeout_rise = t0 + timeout_sec
+        while lgpio.gpio_read(gpio_chip, ECHO_PIN) == 0:
+            if time.perf_counter() > timeout_rise:
+                return None
+            time.sleep(0.00005)
+
+        t_rise = time.perf_counter()
+        timeout_fall = t_rise + timeout_sec
+        while lgpio.gpio_read(gpio_chip, ECHO_PIN) == 1:
+            if time.perf_counter() > timeout_fall:
+                return None
+            time.sleep(0.00005)
+
+        t_fall = time.perf_counter()
+        duration = t_fall - t_rise
+        dist_cm = (duration * 34300.0) / 2.0
+
+        if 2.0 <= dist_cm <= 400.0:
+            return dist_cm
+        return None
+    except Exception:
+        return None
+
+def ultrasonic_obstacle_worker():
+    """
+    High-speed obstacle monitoring thread (~12 Hz).
+    If an obstacle comes within OBSTACLE_STOP_DISTANCE_CM (30 cm),
+    immediately halts motor drive to prevent rover collision!
+    """
+    global obstacle_detected, current_obstacle_distance
+    recent_distances = collections.deque(maxlen=3)
+
+    while running:
+        try:
+            if ULTRASONIC_ENABLED and gpio_available:
+                d = read_ultrasonic_distance_cm(timeout_sec=0.025)
+                if d is not None:
+                    recent_distances.append(d)
+                    med_d = sorted(recent_distances)[len(recent_distances) // 2]
+                    with obstacle_lock:
+                        current_obstacle_distance = med_d
+                        if med_d <= OBSTACLE_STOP_DISTANCE_CM:
+                            if not obstacle_detected:
+                                log(f"⚠️ [OBSTACLE DETECTED] Distance: {med_d:.1f} cm (<= {OBSTACLE_STOP_DISTANCE_CM} cm) -> STOPPING MOTORS FOR SAFETY!")
+                            obstacle_detected = True
+                            shared_telemetry["obstacle"] = True
+                            shared_telemetry["distance_cm"] = round(med_d, 1)
+
+                            # Immediately halt forward motion!
+                            if shared_telemetry.get("direction", "").lower() in ("forward", "engine armed", "left", "right"):
+                                stop_motors()
+                                shared_telemetry["direction"] = "Obstacle Stop"
+                        else:
+                            if obstacle_detected:
+                                log(f"✅ [OBSTACLE CLEARED] Distance: {med_d:.1f} cm > {OBSTACLE_STOP_DISTANCE_CM} cm. Drive unlocked.")
+                            obstacle_detected = False
+                            shared_telemetry["obstacle"] = False
+                            shared_telemetry["distance_cm"] = round(med_d, 1)
+                else:
+                    if recent_distances:
+                        recent_distances.clear()
+                    with obstacle_lock:
+                        if obstacle_detected:
+                            obstacle_detected = False
+                            shared_telemetry["obstacle"] = False
+        except Exception:
+            pass
+        time.sleep(0.08)
+
+# ============================================================
+# TARGETED DISEASE SPRAY SUBSYSTEM (RELAY MODULE / DC MOTOR)
+# ============================================================
+
+is_spraying = False
+spray_stop_time = 0.0
+last_disease_spray_time = 0.0
+spray_lock = threading.Lock()
+
+def trigger_disease_spray(disease_name, confidence):
+    """
+    Triggers the spray pump relay to actuate the DC motor ONLY for diseased leaves.
+    Applies precision spray pulse and safety cooldown.
+    """
+    global is_spraying, spray_stop_time, last_disease_spray_time
+    if not AUTO_DISEASE_SPRAY_ENABLED:
+        return
+
+    now = time.time()
+    with spray_lock:
+        if is_spraying:
+            return
+        if (now - last_disease_spray_time) < SPRAY_COOLDOWN_SECONDS:
+            return
+
+        log(f"💦 [DISEASE SPRAY TRIGGERED] Target: {disease_name} ({confidence*100:.1f}%) -> Energizing Relay (DC Motor Spray ON) for {SPRAY_BURST_SECONDS}s")
+        set_pump(True)
+        is_spraying = True
+        spray_stop_time = now + SPRAY_BURST_SECONDS
+        last_disease_spray_time = now
+        shared_telemetry["pump"] = True
+        shared_telemetry["spray_status"] = f"Spraying for {disease_name}"
+
+def cancel_disease_spray_for_healthy():
+    """
+    Strict safety guarantee: if leaf in view is Healthy, relay is immediately de-energized
+    so DC motor spray pump never sprays healthy plants.
+    """
+    global is_spraying
+    with spray_lock:
+        if is_spraying:
+            log("🌿 [HEALTHY LEAF SAFETY] Spray pump immediately deactivated to protect healthy foliage.")
+            set_pump(False)
+            is_spraying = False
+            shared_telemetry["pump"] = False
+            shared_telemetry["spray_status"] = "Standby (Healthy Leaf)"
+
+def disease_spray_monitor_worker():
+    """
+    Monitors active disease spray duration and automatically cuts off the DC motor pump
+    once the precision spray pulse completes.
+    """
+    global is_spraying, spray_stop_time
+    while running:
+        try:
+            now = time.time()
+            with spray_lock:
+                if is_spraying and now >= spray_stop_time:
+                    log("💦 [DISEASE SPRAY COMPLETED] Relay de-energized -> DC Motor Spray OFF.")
+                    set_pump(False)
+                    is_spraying = False
+                    shared_telemetry["pump"] = False
+                    shared_telemetry["spray_status"] = "Standby"
+        except Exception:
+            pass
+        time.sleep(0.05)
+
 shared_telemetry = {
     "device": "Raspberry Pi 4 Model B",
     "pi_online": True,
@@ -255,6 +444,9 @@ shared_telemetry = {
     "last_confidence": 0.0,
     "direction": "Stopped",
     "pump": False,
+    "obstacle": False,
+    "distance_cm": None,
+    "spray_status": "Standby",
     "pi_ip": LOCAL_IP,
     "stream_url": STREAM_URL
 }
@@ -348,8 +540,32 @@ def apply_rover_command(direction, speed, pump):
     global INVERT_RIGHT_MOTOR, INVERT_LEFT_MOTOR
     direction = str(direction).lower().strip()
     is_pump = bool(pump)
-    set_pump(is_pump)
-    shared_telemetry["pump"] = is_pump
+
+    # 1. Targeted Spray Rule: Actuate spray relay ONLY for diseased leaves!
+    with spray_lock:
+        if is_pump:
+            with latest_ai_lock:
+                current_disease = latest_ai_result.get("disease_code", "")
+            if current_disease in DISEASE_CLASSES_FOR_SPRAY:
+                set_pump(True)
+                shared_telemetry["pump"] = True
+                shared_telemetry["spray_status"] = f"Spraying for {current_disease}"
+                log(f"💦 [SPRAY COMMAND] Confirmed disease in view ({current_disease}) -> Spray pump ON.")
+            elif current_disease == "HEALTHY":
+                log("🌿 [PUMP SAFETY] Leaf in view is HEALTHY. Spray relay held strictly OFF to protect plant.")
+                set_pump(False)
+                shared_telemetry["pump"] = False
+                shared_telemetry["spray_status"] = "Held OFF (Healthy Leaf)"
+            else:
+                log("🌿 [PUMP SAFETY] No diseased leaf currently in view. Spray pump held OFF.")
+                set_pump(False)
+                shared_telemetry["pump"] = False
+                shared_telemetry["spray_status"] = "Held OFF (No Disease)"
+        else:
+            if not is_spraying:
+                set_pump(False)
+                shared_telemetry["pump"] = False
+                shared_telemetry["spray_status"] = "Standby"
 
     if direction in ("stop", "emergency_stop", "stopped", ""):
         shared_telemetry["direction"] = "Stopped"
@@ -365,6 +581,16 @@ def apply_rover_command(direction, speed, pump):
         stop_motors()
         log("ENGINE ARMED / SYSTEM READY -> Drive system armed, standing by for directional commands.")
         return
+
+    # 2. Ultrasonic Obstacle Safety Intercept: Block forward driving if obstacle is within range!
+    if direction in ("forward", "left", "right"):
+        with obstacle_lock:
+            if obstacle_detected:
+                log(f"⚠️ [OBSTACLE INTERCEPT] Cannot move {direction.upper()}: Obstacle is {current_obstacle_distance:.1f} cm away! Motors kept STOPPED.")
+                stop_motors()
+                shared_telemetry["direction"] = "Obstacle Stop"
+                shared_telemetry["obstacle"] = True
+                return
 
     shared_telemetry["direction"] = direction.capitalize()
     if speed <= 0 and direction in ("forward", "backward", "reverse", "left", "right"):
@@ -922,6 +1148,13 @@ def ai_inference_worker():
             valid_disease_classes = ("HEALTHY", "Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus")
             is_valid_disease = (disease_code in valid_disease_classes) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2)
 
+            # AUTOMATIC TARGETED SPRAY: Actuate DC motor relay ONLY when a diseased leaf is detected!
+            if (disease_code in DISEASE_CLASSES_FOR_SPRAY) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2):
+                trigger_disease_spray(display_label, conf)
+            elif disease_code == "HEALTHY":
+                # Healthy Leaf: Strictly ensure relay / pump is OFF!
+                cancel_disease_spray_for_healthy()
+
             cooldown = UPLOAD_INTERVAL if disease_code == consec_class and last_upload_time > 0 else 1.0
             if is_valid_disease and (now - last_upload_time >= cooldown):
                 snap_path = os.path.join(SAVE_FOLDER, f"leaf_{int(now)}.jpg")
@@ -1200,6 +1433,12 @@ def main():
     cloud_telemetry_thread = threading.Thread(target=cloud_telemetry_worker, daemon=True, name="CloudTelemetryWorker")
     cloud_telemetry_thread.start()
 
+    obstacle_thread = threading.Thread(target=ultrasonic_obstacle_worker, daemon=True, name="ObstacleWorker")
+    obstacle_thread.start()
+
+    spray_monitor_thread = threading.Thread(target=disease_spray_monitor_worker, daemon=True, name="SprayMonitorWorker")
+    spray_monitor_thread.start()
+
     # 3. Asynchronously load high-speed AI engine in parallel (loads in ~0.5s via LiteRT)
     ai_load_thread = threading.Thread(target=load_ai_model, daemon=True, name="ModelLoader")
     ai_load_thread.start()
@@ -1353,6 +1592,23 @@ def main():
             status_bar = f"AgriRover AI | Cam: {camera_type} | FPS: {fps_display:.1f} | Engine: {ai_tag}"
             cv2.putText(display_frame, status_bar, (10, 22),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+
+            # Obstacle warning banner on HUD
+            with obstacle_lock:
+                obs_active = obstacle_detected
+                obs_dist = current_obstacle_distance
+            if obs_active:
+                cv2.rectangle(display_frame, (10, 440), (630, 475), (0, 0, 180), -1)
+                cv2.putText(display_frame, f"OBSTACLE DETECTED: {obs_dist:.1f} CM - MOTORS STOPPED", (20, 465),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2, cv2.LINE_AA)
+
+            # Targeted disease spray banner on HUD
+            with spray_lock:
+                spray_active = is_spraying
+            if spray_active:
+                cv2.rectangle(display_frame, (10, 400), (630, 435), (180, 0, 180), -1)
+                cv2.putText(display_frame, f"SPRAY PUMP ACTIVE: {curr_display_label}", (20, 425),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2, cv2.LINE_AA)
 
             # Encode JPEG for live HTTP stream
             try:
