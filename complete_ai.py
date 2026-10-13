@@ -1427,7 +1427,7 @@ def cloud_telemetry_worker():
 # ============================================================
 
 def main():
-    global running, HEADLESS, latest_jpeg_frame
+    global running, HEADLESS, latest_jpeg_frame, latest_cloud_jpeg_frame
 
     # 1. IMMEDIATELY start HTTP live video streaming server on port 8080!
     # Server goes live within ~10ms so browsers and mobile app connect with zero delay.

@@ -2287,9 +2287,9 @@
                         confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
                         confFill.className = isLiveHealthy ? "conf-fill" : "conf-fill warning";
                     }
-                    if (prescChem && data.rover.disease_chemical) prescChem.textContent = data.rover.disease_chemical;
-                    if (prescFert && data.rover.disease_fertilizer) prescFert.textContent = data.rover.disease_fertilizer;
-                    if (prescTreat && data.rover.disease_treatment) prescTreat.textContent = data.rover.disease_treatment;
+                    if (prescChem) prescChem.textContent = data.rover.disease_chemical || (isLiveHealthy ? "None required (Healthy Crop)" : "Consult agronomist");
+                    if (prescFert) prescFert.textContent = data.rover.disease_fertilizer || (isLiveHealthy ? "Balanced NPK fertilizer" : "Standard NPK");
+                    if (prescTreat) prescTreat.textContent = data.rover.disease_treatment || (isLiveHealthy ? "Plant is healthy and flourishing. Continue routine watering and monitoring." : "Apply targeted treatment.");
                     if (timestamp) timestamp.textContent = "Live Stream Analysis";
                     if (vigor) {
                         vigor.textContent = isLiveHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
@@ -2327,9 +2327,6 @@
 
                     if (headline2D) headline2D.textContent = res.disease || "No Captured Snapshots";
                     if (banner2D) banner2D.className = isHealthy ? "disease-banner" : "disease-banner diseased";
-                    if (prescChem) prescChem.textContent = res.chemical || "None Required";
-                    if (prescFert) prescFert.textContent = res.fertilizer || "Balanced NPK";
-                    if (prescTreat) prescTreat.textContent = res.treatment || "Standard cultivation.";
 
                     // Update Leaf Snapshot image when a new detection arrives
                     if (res.result_id && res.result_id !== lastResultId) {

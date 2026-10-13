@@ -649,31 +649,43 @@ def api_camera_stream_frame():
     elif request.data:
         data = request.data
 
-    if data:
+    if data and len(data) > 100:
         latest_cloud_frame = data
         latest_cloud_frame_time = time.time()
+
         # Fast write to RAM disk (/dev/shm) if available on Linux container
         shm_path = "/dev/shm/latest_cloud_frame.jpg"
         try:
-            with open(shm_path, "wb") as f:
+            with open(shm_path + ".tmp", "wb") as f:
                 f.write(data)
+            os.replace(shm_path + ".tmp", shm_path)
         except Exception:
-            pass
+            try:
+                with open(shm_path, "wb") as f:
+                    f.write(data)
+            except Exception:
+                pass
 
         # Save to disk so all Gunicorn worker processes can share the exact same live frame
         live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
         try:
-            with open(live_path, "wb") as f:
+            with open(live_path + ".tmp", "wb") as f:
                 f.write(data)
+            os.replace(live_path + ".tmp", live_path)
         except Exception:
-            pass
+            try:
+                with open(live_path, "wb") as f:
+                    f.write(data)
+            except Exception:
+                pass
+
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "No frame data"}), 400
 
 
 @app.route("/video_feed")
 def video_feed():
-    """Live camera stream reading from /dev/shm in RAM for high-speed zero-lag streaming."""
+    """Live camera stream reading from shared RAM/disk for high-speed continuous streaming."""
     def generate_stream():
         boundary = b'--FRAME\r\n'
         last_frame = None
@@ -685,8 +697,6 @@ def video_feed():
                         frame = f.read()
                 except Exception:
                     pass
-            elif latest_cloud_frame is not None:
-                frame = latest_cloud_frame
             elif os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
                 try:
                     with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
@@ -701,8 +711,10 @@ def video_feed():
                             frame = f.read()
                     except Exception:
                         pass
+                elif latest_cloud_frame is not None:
+                    frame = latest_cloud_frame
 
-            to_send = frame if frame else (last_frame if last_frame else PLACEHOLDER_JPEG)
+            to_send = frame if (frame and len(frame) > 100) else (last_frame if last_frame else PLACEHOLDER_JPEG)
             last_frame = to_send
 
             yield (boundary +
@@ -720,7 +732,7 @@ def video_feed():
 
 @app.route("/api/camera/live_frame")
 def camera_live_frame():
-    """Instantaneous single live frame for high-speed dynamic refresh."""
+    """Instantaneous single live frame for high-speed dynamic refresh across all Gunicorn workers."""
     # 1. Local RPi RAM disk
     if os.path.exists("/dev/shm/rover_stream.jpg"):
         try:
@@ -730,18 +742,12 @@ def camera_live_frame():
                     resp = Response(data, mimetype='image/jpeg')
                     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
                     resp.headers['Pragma'] = 'no-cache'
+                    resp.headers['Expires'] = '0'
                     return resp
         except Exception:
             pass
 
-    # 2. In-memory cloud frame
-    if latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
-        resp = Response(latest_cloud_frame, mimetype='image/jpeg')
-        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
-        resp.headers['Pragma'] = 'no-cache'
-        return resp
-
-    # 3. RAM disk on Render (/dev/shm)
+    # 2. Cloud RAM disk (/dev/shm) shared across Gunicorn workers
     if os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
         try:
             with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
@@ -750,11 +756,12 @@ def camera_live_frame():
                     resp = Response(data, mimetype='image/jpeg')
                     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
                     resp.headers['Pragma'] = 'no-cache'
+                    resp.headers['Expires'] = '0'
                     return resp
         except Exception:
             pass
 
-    # 4. Disk file shared across all Gunicorn workers on Render
+    # 3. Disk file shared across all Gunicorn workers on Render
     live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
     if os.path.exists(live_path):
         try:
@@ -764,13 +771,24 @@ def camera_live_frame():
                     resp = Response(data, mimetype='image/jpeg')
                     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
                     resp.headers['Pragma'] = 'no-cache'
+                    resp.headers['Expires'] = '0'
                     return resp
         except Exception:
             pass
 
+    # 4. In-memory cloud frame fallback
+    if latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
+        resp = Response(latest_cloud_frame, mimetype='image/jpeg')
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
+
+    # 5. Resilient fallback placeholder
     resp = Response(PLACEHOLDER_JPEG, mimetype='image/jpeg')
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
     return resp
 
 
