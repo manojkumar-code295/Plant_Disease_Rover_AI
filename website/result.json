@@ -1,10 +1,10 @@
 {
-    "result_id": "ready",
-    "image": "",
-    "disease": "Active Scanning (Ready for Leaf)",
-    "chemical": "None required",
-    "fertilizer": "None required",
-    "treatment": "Point camera directly at a chili plant leaf to detect health and view remedies.",
-    "confidence": 0.0,
-    "timestamp": "2026-10-13 11:20:00"
+    "result_id": "889c5f9c28b24a5c96a255992eeb7017",
+    "image": "20261013_134103_f7572b88.jpg",
+    "disease": "Bacterial Spot (89.4%)",
+    "chemical": "Copper oxychloride-based bactericide",
+    "fertilizer": "Balanced NPK fertilizer",
+    "treatment": "Remove infected leaves and avoid overhead watering / excess moisture.",
+    "confidence": 89.4,
+    "timestamp": "2026-10-13 13:41:03"
 }

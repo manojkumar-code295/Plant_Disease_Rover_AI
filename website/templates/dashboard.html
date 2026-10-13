@@ -1567,13 +1567,14 @@
         if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
         if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
 
-        // High-Speed Live Camera Engine (Universal Polling)
+        // High-Speed Live Camera Engine (Adaptive Progressive Stream)
         const cameraImg = document.getElementById("live-dashboard-cam");
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
         let dashCamPolling = true;
         let dashCamInFlight = false;
+        let consecutiveErrors = 0;
 
         function fetchDashboardCameraFrame() {
             if (!dashCamPolling || dashCamInFlight) return;
@@ -1584,15 +1585,22 @@
                 if (cameraFallback) cameraFallback.style.display = "none";
                 if (streamIndicator) streamIndicator.style.background = "#10b981";
                 if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
+                consecutiveErrors = 0;
                 dashCamInFlight = false;
             };
             img.onerror = function() {
+                consecutiveErrors++;
+                if (consecutiveErrors > 6) {
+                    if (streamIndicator) streamIndicator.style.background = "#ef4444";
+                    if (streamStatus) streamStatus.textContent = "Camera Stream Standby";
+                }
                 dashCamInFlight = false;
             };
             img.src = "/api/camera/live_frame?t=" + Date.now();
         }
 
-        setInterval(fetchDashboardCameraFrame, 200);
+        // Fast 120ms polling cadence -> smooth, fluid live video across Render cloud!
+        setInterval(fetchDashboardCameraFrame, 120);
 
         function retryStreamConnection() {
             fetchDashboardCameraFrame();
@@ -2288,42 +2296,28 @@
                         vigor.style.color = isLiveHealthy ? "#34d399" : "#f87171";
                     }
                     if (diagBadge) diagBadge.textContent = "LIVE DETECTION";
-                } else if (data.result && data.result.disease) {
-                    // DISPLAY LATEST PERSISTED SCAN WHEN CAMERA IS TRANSITIONING
-                    const res = data.result;
-                    const isHealthy = Boolean(res.is_healthy) || (res.disease && res.disease.toLowerCase().includes("healthy"));
-                    if (headline) headline.textContent = res.disease;
-                    if (banner) banner.className = isHealthy ? "disease-banner" : "disease-banner diseased";
-                    const cVal = parseFloat(res.confidence) || 0;
-                    if (confVal) confVal.textContent = cVal.toFixed(1) + "%";
-                    if (confFill) {
-                        confFill.style.width = Math.min(100, Math.max(0, cVal)) + "%";
-                        confFill.className = isHealthy ? "conf-fill" : "conf-fill warning";
-                    }
-                    if (prescChem && res.chemical) prescChem.textContent = res.chemical;
-                    if (prescFert && res.fertilizer) prescFert.textContent = res.fertilizer;
-                    if (prescTreat && res.treatment) prescTreat.textContent = res.treatment;
-                    if (timestamp) timestamp.textContent = "Latest Scan: " + (res.timestamp || "Recently detected");
-                    if (vigor) {
-                        vigor.textContent = isHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
-                        vigor.style.color = isHealthy ? "#34d399" : "#f87171";
-                    }
-                    if (diagBadge) diagBadge.textContent = "LATEST RESULT";
                 } else {
-                    // NO PREVIOUS SCANS
-                    if (headline) headline.textContent = "Scanning... (Hold leaf in front of camera)";
+                    // ACTIVE SCANNER: NO LEAF CURRENTLY IN FRONT OF CAMERA
+                    if (headline) headline.textContent = "Active Scanning (Awaiting Chili Leaf)";
                     if (banner) banner.className = "disease-banner";
                     if (confVal) confVal.textContent = "0.0%";
                     if (confFill) {
                         confFill.style.width = "0%";
                         confFill.className = "conf-fill";
                     }
-                    if (timestamp) timestamp.textContent = "Point camera at chili leaf";
+                    if (prescChem) prescChem.textContent = "None required (Scanner Standby)";
+                    if (prescFert) prescFert.textContent = "None required";
+                    if (prescTreat) prescTreat.textContent = "Hold a chili plant leaf steadily in front of the rover camera.";
+                    if (timestamp) timestamp.textContent = "Scanner Active · Awaiting Foliage";
                     if (vigor) {
-                        vigor.textContent = "Scanner: Active (Searching for foliage)";
+                        vigor.textContent = "Scanner: Active (Monitoring crop foliage)";
                         vigor.style.color = "#38bdf8";
                     }
-                    if (diagBadge) diagBadge.textContent = "ACTIVE SCANNER";
+                    if (diagBadge) {
+                        diagBadge.textContent = "ACTIVE SCANNER";
+                        diagBadge.style.background = "rgba(6, 182, 212, 0.2)";
+                        diagBadge.style.color = "#38bdf8";
+                    }
                 }
 
                 // Update Persisted Snapshot & Treatment Matrix

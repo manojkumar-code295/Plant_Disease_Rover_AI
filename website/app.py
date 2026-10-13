@@ -652,6 +652,14 @@ def api_camera_stream_frame():
     if data:
         latest_cloud_frame = data
         latest_cloud_frame_time = time.time()
+        # Fast write to RAM disk (/dev/shm) if available on Linux container
+        shm_path = "/dev/shm/latest_cloud_frame.jpg"
+        try:
+            with open(shm_path, "wb") as f:
+                f.write(data)
+        except Exception:
+            pass
+
         # Save to disk so all Gunicorn worker processes can share the exact same live frame
         live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
         try:
@@ -679,6 +687,12 @@ def video_feed():
                     pass
             elif latest_cloud_frame is not None:
                 frame = latest_cloud_frame
+            elif os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
+                try:
+                    with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
+                        frame = f.read()
+                except Exception:
+                    pass
             else:
                 p = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
                 if os.path.exists(p):
@@ -695,7 +709,7 @@ def video_feed():
                    b'Content-Type: image/jpeg\r\n' +
                    b'Content-Length: ' + str(len(to_send)).encode() + b'\r\n\r\n' +
                    to_send + b'\r\n')
-            time.sleep(0.05)
+            time.sleep(0.04)
 
     resp = Response(generate_stream(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
@@ -727,7 +741,20 @@ def camera_live_frame():
         resp.headers['Pragma'] = 'no-cache'
         return resp
 
-    # 3. Disk file shared across all Gunicorn workers on Render
+    # 3. RAM disk on Render (/dev/shm)
+    if os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
+        try:
+            with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
+                data = f.read()
+                if len(data) > 100:
+                    resp = Response(data, mimetype='image/jpeg')
+                    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                    resp.headers['Pragma'] = 'no-cache'
+                    return resp
+        except Exception:
+            pass
+
+    # 4. Disk file shared across all Gunicorn workers on Render
     live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
     if os.path.exists(live_path):
         try:

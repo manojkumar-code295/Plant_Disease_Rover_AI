@@ -465,6 +465,8 @@ def generate_placeholder_frame(text="CAMERA FEED INITIALIZING..."):
 
 latest_jpeg_frame = generate_placeholder_frame()
 latest_jpeg_lock = threading.Lock()
+latest_cloud_jpeg_frame = generate_placeholder_frame()
+latest_cloud_jpeg_lock = threading.Lock()
 
 class StreamingHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
@@ -1355,8 +1357,15 @@ def cloud_command_worker():
         time.sleep(0.18)
 
 def cloud_frame_streamer_worker():
-    """Streams live camera frames to Render so the remote dashboard & phone see live video."""
+    """
+    Streams live camera frames to Render so the remote dashboard & phone see clear live video.
+    Optimized for high-speed WAN transmission with HTTP keepalive and continuous pusher cadence.
+    """
     session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(pool_connections=2, pool_maxsize=4, max_retries=0)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
     headers = {"Content-Type": "image/jpeg"}
     if RENDER_API_TOKEN:
         headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
@@ -1364,17 +1373,23 @@ def cloud_frame_streamer_worker():
 
     while running:
         try:
-            with latest_jpeg_lock:
-                frame = latest_jpeg_frame
+            with latest_cloud_jpeg_lock:
+                frame = latest_cloud_jpeg_frame
+            if frame is None:
+                with latest_jpeg_lock:
+                    frame = latest_jpeg_frame
+
             if frame is not None:
-                session.post(stream_url, data=frame, headers=headers, timeout=1.2)
-            time.sleep(0.35)
+                session.post(stream_url, data=frame, headers=headers, timeout=2.5)
+                time.sleep(0.035)
+            else:
+                time.sleep(0.1)
         except Exception:
-            time.sleep(0.8)
+            time.sleep(0.15)
 
 
 def local_telemetry_worker():
-    """High-speed local telemetry sender (updates local web dashboard every 0.5s with zero WAN lag)."""
+    """High-speed local telemetry sender (updates local web dashboard every 0.3s with zero WAN lag)."""
     session = requests.Session()
     headers = {"Content-Type": "application/json"}
     while running:
@@ -1387,21 +1402,25 @@ def local_telemetry_worker():
             )
         except Exception:
             pass
-        time.sleep(0.5)
+        time.sleep(0.35)
 
 def cloud_telemetry_worker():
-    """Dedicated cloud telemetry heartbeat sender to Render cloud (every 1.0s)."""
+    """Dedicated cloud telemetry heartbeat sender to Render cloud (every 0.45s for instant UI reaction)."""
     session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(pool_connections=2, pool_maxsize=4, max_retries=0)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+
     headers = {"Content-Type": "application/json"}
     if RENDER_API_TOKEN:
         headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
 
     while running:
         try:
-            session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=1.2)
+            session.post(HEARTBEAT_URL, json=shared_telemetry, headers=headers, timeout=1.8)
         except Exception:
             pass
-        time.sleep(1.0)
+        time.sleep(0.45)
 
 # ============================================================
 # MAIN ENTRY POINT
@@ -1622,6 +1641,14 @@ def main():
                             f.write(frame_bytes)
                     except Exception:
                         pass
+
+                # Optimized High-Speed Cloud Stream Frame (512x384, Quality 70, ~12KB)
+                # Cuts WAN bandwidth in half for silky smooth, clear remote streaming to Render!
+                cloud_small = cv2.resize(display_frame, (512, 384), interpolation=cv2.INTER_AREA)
+                ok_cloud, enc_cloud = cv2.imencode('.jpg', cloud_small, [int(cv2.IMWRITE_JPEG_QUALITY), 70, int(cv2.IMWRITE_JPEG_OPTIMIZE), 1])
+                if ok_cloud:
+                    with latest_cloud_jpeg_lock:
+                        latest_cloud_jpeg_frame = enc_cloud.tobytes()
             except Exception:
                 pass
 

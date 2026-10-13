@@ -923,13 +923,8 @@ async function syncRoverStatus() {
             } else if (data.result && data.result.treatment) {
                 treatTxt.textContent = data.result.treatment;
             }
-        } else if (data.result && data.result.disease) {
-            const resData = data.result;
-            if (leafTxt) leafTxt.textContent = resData.disease;
-            if (confTxt) confTxt.textContent = `Confidence: ${resData.confidence}%`;
-            if (treatTxt && resData.treatment) treatTxt.textContent = resData.treatment;
         } else {
-            if (leafTxt) leafTxt.textContent = "Scanning Foliage... (No Leaf in View)";
+            if (leafTxt) leafTxt.textContent = "Active Scanning (No Leaf in View)";
             if (confTxt) confTxt.textContent = "Confidence: 0.0%";
             if (treatTxt) treatTxt.textContent = "Hold camera over plant leaf to detect diseases.";
         }
@@ -986,8 +981,8 @@ function refreshLiveStream() {
     logMessage("Camera stream refreshed.");
 }
 
-// Start fast camera polling (every 200ms -> smooth live video across internet)
-setInterval(fetchLiveCameraFrame, 200);
+// Start fast camera polling (every 120ms -> smooth live video across internet)
+setInterval(fetchLiveCameraFrame, 120);
 
 // Keyboard arrow controls for PC testing
 window.addEventListener("keydown", (e) => {
