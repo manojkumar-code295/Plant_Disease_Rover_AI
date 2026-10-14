@@ -1376,7 +1376,7 @@
 
                 <!-- LIVE WEBCAM VIDEO STREAM -->
                 <div style="position:relative; width:100%; aspect-ratio:16/9; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px;">
-                    <img id="live-dashboard-cam" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
+                    <img id="live-dashboard-cam" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
                     <div style="position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; color:#ef4444;">
                         <span class="radar-dot" style="background:#ef4444;"></span> LIVE CAM
                     </div>
@@ -1572,38 +1572,43 @@
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
-        let dashCamPolling = true;
-        let dashCamInFlight = false;
+        // Native Continuous MJPEG Streaming (Monitor-grade fluidity)
         let consecutiveErrors = 0;
+        let localStreamTested = false;
 
-        function fetchDashboardCameraFrame() {
-            if (!dashCamPolling || dashCamInFlight) return;
-            dashCamInFlight = true;
-            const img = new Image();
-            img.onload = function() {
-                if (cameraImg) cameraImg.src = img.src;
+        if (cameraImg) {
+            cameraImg.onload = function() {
                 if (cameraFallback) cameraFallback.style.display = "none";
                 if (streamIndicator) streamIndicator.style.background = "#10b981";
                 if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
                 consecutiveErrors = 0;
-                dashCamInFlight = false;
             };
-            img.onerror = function() {
+            cameraImg.onerror = function() {
                 consecutiveErrors++;
-                if (consecutiveErrors > 6) {
+                if (consecutiveErrors > 2) {
                     if (streamIndicator) streamIndicator.style.background = "#ef4444";
-                    if (streamStatus) streamStatus.textContent = "Camera Stream Standby";
+                    if (streamStatus) streamStatus.textContent = "Reconnecting Stream...";
                 }
-                dashCamInFlight = false;
+                setTimeout(() => {
+                    if (cameraImg) cameraImg.src = "/video_feed?_=" + Date.now();
+                }, 1200);
             };
-            img.src = "/api/camera/live_frame?t=" + Date.now();
         }
 
-        // Fast 120ms polling cadence -> smooth, fluid live video across Render cloud!
-        setInterval(fetchDashboardCameraFrame, 120);
+        // Smart LAN detection: If device is on same local Wi-Fi, stream direct from Pi port 8080 at 25 FPS
+        function tryLocalPiStream(piIp) {
+            if (localStreamTested || !piIp) return;
+            localStreamTested = true;
+            const probe = new Image();
+            probe.onload = function() {
+                console.log("Local Raspberry Pi stream reachable on LAN! Switching to full 25 FPS direct feed...");
+                if (cameraImg) cameraImg.src = "http://" + piIp + ":8080/video_feed";
+            };
+            probe.src = "http://" + piIp + ":8080/snapshot?_=" + Date.now();
+        }
 
         function retryStreamConnection() {
-            fetchDashboardCameraFrame();
+            if (cameraImg) cameraImg.src = "/video_feed?_=" + Date.now();
         }
 
         function takeSnapshot() {
@@ -2236,7 +2241,10 @@
                     const nowTime = r.last_seen ? r.last_seen.split(" ")[1] : new Date().toTimeString().split(" ")[0];
                     if (syncClock) syncClock.textContent = nowTime;
 
-                    if (piIp && (r.pi_ip || r.ip)) piIp.textContent = r.pi_ip || r.ip;
+                    if (piIp && (r.pi_ip || r.ip)) {
+                        piIp.textContent = r.pi_ip || r.ip;
+                        tryLocalPiStream(r.pi_ip || r.ip);
+                    }
                     if (motionText && (r.direction || r.movement)) motionText.textContent = (r.direction || r.movement).toUpperCase();
                     if (aiPillText && r.ai_status) aiPillText.textContent = r.ai_status;
                     if (camFpsOverlay && r.fps !== undefined) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;

@@ -1,10 +1,10 @@
 {
-    "result_id": "889c5f9c28b24a5c96a255992eeb7017",
-    "image": "20261013_134103_f7572b88.jpg",
-    "disease": "Bacterial Spot (89.4%)",
-    "chemical": "Copper oxychloride-based bactericide",
-    "fertilizer": "Balanced NPK fertilizer",
-    "treatment": "Remove infected leaves and avoid overhead watering / excess moisture.",
-    "confidence": 89.4,
-    "timestamp": "2026-10-13 13:41:03"
+    "result_id": "51324fdce9ca4c818ee598381d2c9d1c",
+    "image": "20261014_151009_a20fa5bc.jpg",
+    "disease": "Curl Virus (76.9%)",
+    "chemical": "Imidacloprid / Neem oil for whitefly & vector control",
+    "fertilizer": "Balanced NPK fertilizer with micronutrients",
+    "treatment": "Uproot severely stunted plants and control insect vectors immediately.",
+    "confidence": 76.9,
+    "timestamp": "2026-10-14 15:10:09"
 }

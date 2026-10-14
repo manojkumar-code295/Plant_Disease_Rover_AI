@@ -666,19 +666,6 @@ def api_camera_stream_frame():
             except Exception:
                 pass
 
-        # Save to disk so all Gunicorn worker processes can share the exact same live frame
-        live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
-        try:
-            with open(live_path + ".tmp", "wb") as f:
-                f.write(data)
-            os.replace(live_path + ".tmp", live_path)
-        except Exception:
-            try:
-                with open(live_path, "wb") as f:
-                    f.write(data)
-            except Exception:
-                pass
-
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "No frame data"}), 400
 
@@ -689,6 +676,8 @@ def video_feed():
     def generate_stream():
         boundary = b'--FRAME\r\n'
         last_frame = None
+        last_sent = None
+        last_sent_t = 0.0
         while True:
             frame = None
             if os.path.exists("/dev/shm/rover_stream.jpg"):
@@ -697,6 +686,8 @@ def video_feed():
                         frame = f.read()
                 except Exception:
                     pass
+            elif latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
+                frame = latest_cloud_frame
             elif os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
                 try:
                     with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
@@ -711,17 +702,19 @@ def video_feed():
                             frame = f.read()
                     except Exception:
                         pass
-                elif latest_cloud_frame is not None:
-                    frame = latest_cloud_frame
 
             to_send = frame if (frame and len(frame) > 100) else (last_frame if last_frame else PLACEHOLDER_JPEG)
             last_frame = to_send
 
-            yield (boundary +
-                   b'Content-Type: image/jpeg\r\n' +
-                   b'Content-Length: ' + str(len(to_send)).encode() + b'\r\n\r\n' +
-                   to_send + b'\r\n')
-            time.sleep(0.04)
+            now_t = time.time()
+            if to_send != last_sent or (now_t - last_sent_t >= 0.35):
+                last_sent = to_send
+                last_sent_t = now_t
+                yield (boundary +
+                       b'Content-Type: image/jpeg\r\n' +
+                       b'Content-Length: ' + str(len(to_send)).encode() + b'\r\n\r\n' +
+                       to_send + b'\r\n')
+            time.sleep(0.012)
 
     resp = Response(generate_stream(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'

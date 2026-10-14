@@ -29,7 +29,7 @@ PUMP_PIN = 26  # Physical Pin 37
 LEFT_IN1 = 17  # Physical Pin 11
 LEFT_IN2 = 27  # Physical Pin 13
 LEFT_EN  = 12  # Physical Pin 32
-OBSTACLE_THRESHOLD_CM = 30.0
+OBSTACLE_THRESHOLD_CM = 6.0  # Stop threshold 5 to 6 cm
 
 RELAY_ACTIVE_LOW = os.environ.get("RELAY_ACTIVE_LOW", "1") == "1"
 
@@ -99,7 +99,7 @@ def set_pump(state):
 
 try:
     print(f"{YELLOW}{BOLD}[PART 1] Testing Ultrasonic Sensor & Automatic Collision Stop...{RESET}")
-    print(f"Sampling distance for 6 seconds. Place your hand within 30cm to trigger stop:")
+    print(f"Sampling distance for 6 seconds. If object is in 5-6 cm range (<= 6.0 cm), motor is STOPPED; otherwise ALWAYS ON:")
     t_end = time.time() + 6.0
     obstacle_count = 0
     while time.time() < t_end:
@@ -107,10 +107,11 @@ try:
         if d is not None:
             if d <= OBSTACLE_THRESHOLD_CM:
                 obstacle_count += 1
-                status = f"{RED}{BOLD}⚠️ OBSTACLE DETECTED ({d:.1f} cm <= {OBSTACLE_THRESHOLD_CM} cm) -> MOTORS STOPPED!{RESET}"
+                status = f"{RED}{BOLD}⚠️ OBSTACLE (5-6 cm) ({d:.1f} cm <= {OBSTACLE_THRESHOLD_CM} cm) -> MOTOR STOPPED!{RESET}"
                 lgpio.gpio_write(chip, LEFT_EN, 0)
             else:
-                status = f"{GREEN}CLEAR ({d:.1f} cm) -> Motors Allowed{RESET}"
+                status = f"{GREEN}CLEAR ({d:.1f} cm > 6 cm) -> MOTOR ALWAYS ON (Running){RESET}"
+                lgpio.gpio_write(chip, LEFT_EN, 1)
             print(f"  Distance: {d:5.1f} cm | {status}")
         else:
             print(f"  Distance: {DIM}No Echo (open path / sensor disconnected){RESET}")
