@@ -82,8 +82,9 @@ UPDATE_URL = RENDER_URL + "/api/update-result"
 HEARTBEAT_URL = RENDER_URL + "/api/rover/heartbeat"
 COMMAND_URL = RENDER_URL + "/api/rover/command"
 
-# Headless mode detection (systemd or no display)
-HEADLESS = ("--headless" in sys.argv) or (not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"))
+# Headless mode: default to True for maximum 24/7 reliability, zero GUI deadlocks, and lowest CPU usage.
+# GUI preview window opens only if explicitly started with "--gui".
+HEADLESS = ("--gui" not in sys.argv)
 
 def get_local_ip():
     try:
@@ -455,6 +456,30 @@ def disease_spray_monitor_worker():
             pass
         time.sleep(0.05)
 
+last_frame_captured_time = time.time()
+
+def camera_watchdog_worker():
+    """
+    Dedicated Camera Health Watchdog.
+    Continuously monitors frame capture timestamps. If Picamera2 or the main capture loop
+    stalls for > 8.0 seconds (e.g. Unicam kernel lock, CSI frame dropped deadlock),
+    this thread initiates an emergency self-healing restart (os._exit(1)).
+    Systemd automatically relaunches the process, re-initializing the CSI bus cleanly in < 2s.
+    """
+    global last_frame_captured_time, running, camera_type
+    log("🛡️ Camera Hardware Watchdog initialized (8.0s timeout threshold).")
+    time.sleep(10.0)  # Grace period during startup and AI model loading
+    while running:
+        time.sleep(1.0)
+        time_since_frame = time.time() - last_frame_captured_time
+        if time_since_frame > 8.0:
+            log(f"🚨 CRITICAL WATCHDOG: Camera pipeline stalled for {time_since_frame:.1f}s without frames! Performing emergency self-healing restart...")
+            try:
+                shared_telemetry["camera_status"] = "RESTARTING_RECOVERY"
+            except Exception:
+                pass
+            os._exit(1)
+
 shared_telemetry = {
     "device": "Raspberry Pi 4 Model B",
     "pi_online": True,
@@ -499,6 +524,10 @@ class StreamingHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         global latest_jpeg_frame
+        try:
+            self.request.settimeout(2.5)
+        except Exception:
+            pass
         if self.path in ('/video_feed', '/stream', '/'):
             self.send_response(200)
             self.send_header('Age', '0')
@@ -1422,7 +1451,7 @@ def cloud_telemetry_worker():
 # ============================================================
 
 def main():
-    global running, HEADLESS, latest_jpeg_frame, latest_cloud_jpeg_frame, cloud_frame_seq
+    global running, HEADLESS, latest_jpeg_frame, latest_cloud_jpeg_frame, cloud_frame_seq, last_frame_captured_time
 
     # 1. IMMEDIATELY start HTTP live video streaming server on port 8080!
     # Server goes live within ~10ms so browsers and mobile app connect with zero delay.
@@ -1454,6 +1483,9 @@ def main():
     spray_monitor_thread = threading.Thread(target=disease_spray_monitor_worker, daemon=True, name="SprayMonitorWorker")
     spray_monitor_thread.start()
 
+    watchdog_thread = threading.Thread(target=camera_watchdog_worker, daemon=True, name="CameraWatchdog")
+    watchdog_thread.start()
+
     # 3. Asynchronously load high-speed AI engine in parallel (loads in ~0.5s via LiteRT)
     ai_load_thread = threading.Thread(target=load_ai_model, daemon=True, name="ModelLoader")
     ai_load_thread.start()
@@ -1477,6 +1509,7 @@ def main():
         picam2.configure(cam_cfg)
         picam2.start()
         camera_type = "PICAMERA2"
+        last_frame_captured_time = time.time()
         log("CSI Camera started successfully via native Picamera2 pipeline.")
     except Exception as e:
         log(f"Picamera2 initialization failed ({e}). Falling back to OpenCV VideoCapture...")
@@ -1517,14 +1550,41 @@ def main():
         while running:
             # 1. Grab Raw Frame or Generate Resilient Standby Telemetry Frame
             if camera_type == "PICAMERA2":
-                raw_rgb = picam2.capture_array()
-                frame = cv2.cvtColor(raw_rgb, cv2.COLOR_RGB2BGR)
+                try:
+                    raw_rgb = picam2.capture_array()
+                    if raw_rgb is not None:
+                        frame = cv2.cvtColor(raw_rgb, cv2.COLOR_RGB2BGR)
+                        last_frame_captured_time = time.time()
+                    else:
+                        raise RuntimeError("picam2.capture_array returned None")
+                except Exception as e_cap:
+                    log(f"⚠️ Camera capture glitch: {e_cap}. Transitioning to standby auto-recovery...")
+                    try:
+                        picam2.stop()
+                        picam2.close()
+                    except Exception:
+                        pass
+                    picam2 = None
+                    camera_type = "STANDBY"
+                    continue
             elif camera_type == "OPENCV_V4L2" and cap is not None:
-                ret, frame = cap.read()
-                if not ret or frame is None:
-                    time.sleep(0.005)
+                try:
+                    ret, frame = cap.read()
+                    if not ret or frame is None:
+                        time.sleep(0.005)
+                        continue
+                    last_frame_captured_time = time.time()
+                except Exception as e_v4l:
+                    log(f"⚠️ V4L2 capture glitch: {e_v4l}. Transitioning to standby auto-recovery...")
+                    try:
+                        cap.release()
+                    except Exception:
+                        pass
+                    cap = None
+                    camera_type = "STANDBY"
                     continue
             else:
+                last_frame_captured_time = time.time()
                 # Standby mode: Build informative HUD telemetry frame so cloud stream stays active
                 frame = np.zeros((480, 640, 3), dtype=np.uint8)
                 frame[::40, :, :] = (20, 20, 20)
