@@ -730,6 +730,7 @@ def video_feed():
             time.sleep(0.012)
 
     resp = Response(generate_stream(), mimetype='multipart/x-mixed-replace; boundary=FRAME')
+    resp.headers['X-Accel-Buffering'] = 'no'
     resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     resp.headers['Expires'] = '0'

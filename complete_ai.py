@@ -73,6 +73,7 @@ MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 55.0))       # Rejects g
 CAMERA_ROTATION = os.environ.get("CAMERA_ROTATION", "90_CCW")
 PREDICT_EVERY_N_FRAMES = int(os.environ.get("PREDICT_EVERY_N_FRAMES", 2))
 UPLOAD_INTERVAL = float(os.environ.get("UPLOAD_INTERVAL", 1.5))     # Cooldown between cloud uploads for same disease
+RENDER_STREAM_FPS = float(os.environ.get("RENDER_STREAM_FPS", 6.0)) # Stable 6 FPS for smooth Render cloud stream
 
 # Render Cloud Synchronization (Configurable via Environment)
 RENDER_URL = os.environ.get("RENDER_URL", "https://precision-agriculture-smart-rover.onrender.com").rstrip("/")
@@ -1314,55 +1315,53 @@ def cloud_command_worker():
             pass
         time.sleep(0.06)
 
-def cloud_frame_streamer_worker(worker_id=0):
+def cloud_frame_streamer_worker():
     """
-    Streams live camera frames to Render so the remote dashboard & phone see crystal-clear live video.
-    Optimized sequence-based dispatching with automatic session recycling and resilient connection recovery.
+    Streams live camera frames to Render at a controlled, optimal cadence (default 6.0 FPS).
+    Prevents network buffer congestion, avoids Gunicorn worker saturation, and ensures uninterrupted live video.
     """
-    global cloud_dispatched_seq
     stream_url = RENDER_URL + "/api/camera/stream_frame"
     headers = {"Content-Type": "image/jpeg"}
     if RENDER_API_TOKEN:
         headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
 
     session = None
-    consecutive_errs = 0
-
-    if worker_id > 0:
-        time.sleep(0.08 * worker_id)
+    last_upload_time = 0.0
+    min_interval = 1.0 / max(1.0, float(RENDER_STREAM_FPS))
 
     while running:
+        now_t = time.time()
+        elapsed = now_t - last_upload_time
+        if elapsed < min_interval:
+            time.sleep(max(0.01, min_interval - elapsed))
+
         if session is None:
             session = requests.Session()
-            adapter = requests.adapters.HTTPAdapter(pool_connections=2, pool_maxsize=4, max_retries=1)
+            adapter = requests.adapters.HTTPAdapter(pool_connections=1, pool_maxsize=2, max_retries=1)
             session.mount("https://", adapter)
             session.mount("http://", adapter)
 
-        my_frame = None
-        with cloud_seq_lock:
-            if cloud_frame_seq > cloud_dispatched_seq:
-                cloud_dispatched_seq = cloud_frame_seq
-                with latest_cloud_jpeg_lock:
-                    my_frame = latest_cloud_jpeg_frame
+        frame = None
+        with latest_cloud_jpeg_lock:
+            frame = latest_cloud_jpeg_frame
 
-        if my_frame is not None and len(my_frame) > 100:
+        if frame is not None and len(frame) > 100:
             try:
-                resp = session.post(stream_url, data=my_frame, headers=headers, timeout=3.5)
+                resp = session.post(stream_url, data=frame, headers=headers, timeout=2.5)
                 if resp.status_code == 200:
-                    consecutive_errs = 0
+                    last_upload_time = time.time()
                 else:
-                    consecutive_errs += 1
+                    time.sleep(0.05)
             except Exception:
-                consecutive_errs += 1
-                if consecutive_errs >= 2:
-                    try:
+                try:
+                    if session:
                         session.close()
-                    except Exception:
-                        pass
-                    session = None
-                time.sleep(0.05)
-                continue
-        time.sleep(0.025)
+                except Exception:
+                    pass
+                session = None
+                time.sleep(0.15)
+        else:
+            time.sleep(0.04)
 
 
 def local_telemetry_worker():
@@ -1420,11 +1419,9 @@ def main():
     cloud_cmd_thread = threading.Thread(target=cloud_command_worker, daemon=True, name="CloudCmdWorker")
     cloud_cmd_thread.start()
 
-    # Coordinated dual-pipelined cloud streamers for rock-solid, smooth live video relay to Render
-    frame_stream_thread0 = threading.Thread(target=cloud_frame_streamer_worker, args=(0,), daemon=True, name="CloudFrameStreamer-0")
-    frame_stream_thread0.start()
-    frame_stream_thread1 = threading.Thread(target=cloud_frame_streamer_worker, args=(1,), daemon=True, name="CloudFrameStreamer-1")
-    frame_stream_thread1.start()
+    # Dedicated cloud frame streamer uploading at steady 6 FPS to Render
+    frame_stream_thread = threading.Thread(target=cloud_frame_streamer_worker, daemon=True, name="CloudFrameStreamer")
+    frame_stream_thread.start()
 
     local_telemetry_thread = threading.Thread(target=local_telemetry_worker, daemon=True, name="LocalTelemetryWorker")
     local_telemetry_thread.start()

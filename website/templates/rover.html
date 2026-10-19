@@ -504,7 +504,7 @@ input[type="range"] {
         </div>
     </div>
     <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:260px; max-height:460px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center;">
-        <img id="live-webcam-feed" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
+        <img id="live-webcam-feed" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
         <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); padding:2px 8px; border-radius:4px; font-size:10px; font-family:monospace; color:#86efac;">
             Picamera2 · Real-Time Edge Stream
         </div>
@@ -998,35 +998,48 @@ async function clearCurrentDetection() {
     }
 }
 
-/* Native Continuous MJPEG Streaming Engine (Monitor-Grade Fluidity) */
+/* High-Speed Cloud-Optimized Streaming Engine (Paced for Render ~6-8 FPS) */
 const roverCamEl = document.getElementById("live-webcam-feed");
 let roverLocalStreamTested = false;
+let isStreamingActive = true;
+let frameInFlight = false;
 
-if (roverCamEl) {
-    roverCamEl.onload = function() {
-        logMessage("Live Camera Stream active.");
+function fetchLiveFrame() {
+    if (!isStreamingActive || frameInFlight) return;
+    frameInFlight = true;
+    const probe = new Image();
+    probe.onload = function() {
+        if (roverCamEl && isStreamingActive) roverCamEl.src = probe.src;
+        frameInFlight = false;
+        // Paced at 125ms (~8 FPS max) - perfectly matched with Render cloud upload!
+        setTimeout(fetchLiveFrame, 125);
     };
-    roverCamEl.onerror = function() {
-        logMessage("Stream interrupted. Auto-reconnecting...");
-        setTimeout(() => {
-            if (roverCamEl) roverCamEl.src = "/video_feed?_=" + Date.now();
-        }, 1200);
+    probe.onerror = function() {
+        frameInFlight = false;
+        setTimeout(fetchLiveFrame, 350);
     };
+    probe.src = "/api/camera/live_frame?t=" + Date.now();
 }
+
+// Start continuous cloud streaming immediately
+fetchLiveFrame();
 
 function tryRoverLocalPiStream(piIp) {
     if (roverLocalStreamTested || !piIp) return;
     roverLocalStreamTested = true;
     const probe = new Image();
     probe.onload = function() {
-        logMessage("Local Pi stream found! Switching to direct 25 FPS feed.");
+        logMessage("Local Pi stream found! Switching to direct 30 FPS feed.");
+        isStreamingActive = false; // Stop cloud frame polling
         if (roverCamEl) roverCamEl.src = "http://" + piIp + ":8080/video_feed";
     };
     probe.src = "http://" + piIp + ":8080/snapshot?_=" + Date.now();
 }
 
 function refreshLiveStream() {
-    if (roverCamEl) roverCamEl.src = "/video_feed?_=" + Date.now();
+    frameInFlight = false;
+    isStreamingActive = true;
+    fetchLiveFrame();
     logMessage("Camera stream refreshed.");
 }
 

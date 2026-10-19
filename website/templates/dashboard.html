@@ -1376,7 +1376,7 @@
 
                 <!-- LIVE WEBCAM VIDEO STREAM -->
                 <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:280px; max-height:480px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px; display:flex; align-items:center; justify-content:center;">
-                    <img id="live-dashboard-cam" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
+                    <img id="live-dashboard-cam" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
                     <div style="position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; color:#ef4444;">
                         <span class="radar-dot" style="background:#ef4444;"></span> LIVE CAM
                     </div>
@@ -1575,28 +1575,40 @@
         const cameraFallback = document.getElementById("camera-fallback");
         const streamIndicator = document.getElementById("stream-indicator-dot");
         const streamStatus = document.getElementById("stream-status-label");
-        // Native Continuous MJPEG Streaming (Monitor-grade fluidity)
+        // Cloud-Optimized Live Camera Engine (Paced for Render ~6-8 FPS)
         let consecutiveErrors = 0;
         let localStreamTested = false;
+        let dashStreamActive = true;
+        let dashInFlight = false;
 
-        if (cameraImg) {
-            cameraImg.onload = function() {
+        function fetchDashboardLiveFrame() {
+            if (!dashStreamActive || dashInFlight) return;
+            dashInFlight = true;
+            const probe = new Image();
+            probe.onload = function() {
+                if (cameraImg && dashStreamActive) cameraImg.src = probe.src;
                 if (cameraFallback) cameraFallback.style.display = "none";
                 if (streamIndicator) streamIndicator.style.background = "#10b981";
                 if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
                 consecutiveErrors = 0;
+                dashInFlight = false;
+                // 125ms cadence (~8 FPS) perfectly matches Render cloud upload bandwidth!
+                setTimeout(fetchDashboardLiveFrame, 125);
             };
-            cameraImg.onerror = function() {
+            probe.onerror = function() {
                 consecutiveErrors++;
-                if (consecutiveErrors > 2) {
+                if (consecutiveErrors > 3) {
                     if (streamIndicator) streamIndicator.style.background = "#ef4444";
                     if (streamStatus) streamStatus.textContent = "Reconnecting Stream...";
                 }
-                setTimeout(() => {
-                    if (cameraImg) cameraImg.src = "/video_feed?_=" + Date.now();
-                }, 1200);
+                dashInFlight = false;
+                setTimeout(fetchDashboardLiveFrame, 350);
             };
+            probe.src = "/api/camera/live_frame?t=" + Date.now();
         }
+
+        // Start continuous cloud streaming immediately
+        fetchDashboardLiveFrame();
 
         // Smart LAN detection: If device is on same local Wi-Fi, stream direct from Pi port 8080 at 25 FPS
         function tryLocalPiStream(piIp) {
@@ -1605,13 +1617,16 @@
             const probe = new Image();
             probe.onload = function() {
                 console.log("Local Raspberry Pi stream reachable on LAN! Switching to full 25 FPS direct feed...");
+                dashStreamActive = false; // Stop cloud frame polling
                 if (cameraImg) cameraImg.src = "http://" + piIp + ":8080/video_feed";
             };
             probe.src = "http://" + piIp + ":8080/snapshot?_=" + Date.now();
         }
 
         function retryStreamConnection() {
-            if (cameraImg) cameraImg.src = "/video_feed?_=" + Date.now();
+            dashInFlight = false;
+            dashStreamActive = true;
+            fetchDashboardLiveFrame();
         }
 
         function takeSnapshot() {
