@@ -969,6 +969,11 @@
             border-color: rgba(239, 68, 68, 0.35);
         }
 
+        .disease-banner.uncertain {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.45);
+        }
+
         .disease-subhead {
             font-size: 10px;
             text-transform: uppercase;
@@ -985,6 +990,10 @@
 
         .disease-banner.diseased .disease-headline {
             color: #f87171;
+        }
+
+        .disease-banner.uncertain .disease-headline {
+            color: #fbbf24;
         }
 
         /* Confidence Progress Bar */
@@ -2275,7 +2284,9 @@
                 const data = await response.json();
                 if (!data.success) return;
 
-                const hasLiveLeaf = Boolean(data.rover && data.rover.last_detection && data.rover.last_detection !== "NO LEAF DETECTED");
+                const dLive = (data.rover && data.rover.last_detection) ? data.rover.last_detection : "";
+                const isUncertain = !dLive || dLive.toLowerCase().includes("uncertain") || dLive === "NO LEAF DETECTED";
+                const hasLiveLeaf = Boolean(dLive && !isUncertain);
 
                 // 1. Update Rover Telemetry & AI Status (Live Every Second)
                 if (data.rover) {
@@ -2309,12 +2320,11 @@
 
                     // Update 3D state dynamically:
                     if (hasLiveLeaf) {
-                        const dLive = r.last_detection;
                         const cLive = parseFloat(r.last_confidence) || 0;
                         const isLiveHealthy = dLive.toLowerCase().includes("healthy");
                         updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
                     } else {
-                        updateLeaf3DState("NO LEAF DETECTED", 0, false, true);
+                        updateLeaf3DState("UNCERTAIN", 0, false, true);
                     }
                 }
 
@@ -2333,8 +2343,7 @@
                 const diagBadge = document.getElementById("diagnosis-engine-badge");
 
                 if (hasLiveLeaf) {
-                    // LIVE LEAF IN VIEW
-                    const dLive = data.rover.last_detection;
+                    // VERIFIED BOTANICAL LEAF IN VIEW
                     const cLive = parseFloat(data.rover.last_confidence) || 0;
                     const isLiveHealthy = dLive.toLowerCase().includes("healthy");
 
@@ -2353,28 +2362,32 @@
                         vigor.textContent = isLiveHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
                         vigor.style.color = isLiveHealthy ? "#34d399" : "#f87171";
                     }
-                    if (diagBadge) diagBadge.textContent = "LIVE DETECTION";
+                    if (diagBadge) {
+                        diagBadge.textContent = "LIVE DETECTION";
+                        diagBadge.style.background = isLiveHealthy ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)";
+                        diagBadge.style.color = isLiveHealthy ? "#34d399" : "#f87171";
+                    }
                 } else {
-                    // ACTIVE SCANNER: NO LEAF CURRENTLY IN FRONT OF CAMERA
-                    if (headline) headline.textContent = "Active Scanning (Awaiting Chili Leaf)";
-                    if (banner) banner.className = "disease-banner";
+                    // UNCERTAINTY: NON-LEAF OBJECT OR AWAITING CHILI LEAF
+                    if (headline) headline.textContent = "Uncertainty (Awaiting Chili Leaf)";
+                    if (banner) banner.className = "disease-banner uncertain";
                     if (confVal) confVal.textContent = "0.0%";
                     if (confFill) {
                         confFill.style.width = "0%";
                         confFill.className = "conf-fill";
                     }
-                    if (prescChem) prescChem.textContent = "None required (Scanner Standby)";
+                    if (prescChem) prescChem.textContent = "None required (Uncertain)";
                     if (prescFert) prescFert.textContent = "None required";
-                    if (prescTreat) prescTreat.textContent = "Hold a chili plant leaf steadily in front of the rover camera.";
-                    if (timestamp) timestamp.textContent = "Scanner Active · Awaiting Foliage";
+                    if (prescTreat) prescTreat.textContent = "Point camera directly at a chili plant leaf to detect diseases.";
+                    if (timestamp) timestamp.textContent = "Awaiting Foliage";
                     if (vigor) {
-                        vigor.textContent = "Scanner: Active (Monitoring crop foliage)";
-                        vigor.style.color = "#38bdf8";
+                        vigor.textContent = "Awaiting genuine leaf tissue";
+                        vigor.style.color = "#fbbf24";
                     }
                     if (diagBadge) {
-                        diagBadge.textContent = "ACTIVE SCANNER";
-                        diagBadge.style.background = "rgba(6, 182, 212, 0.2)";
-                        diagBadge.style.color = "#38bdf8";
+                        diagBadge.textContent = "UNCERTAINTY";
+                        diagBadge.style.background = "rgba(245, 158, 11, 0.2)";
+                        diagBadge.style.color = "#fbbf24";
                     }
                 }
 

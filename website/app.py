@@ -1128,6 +1128,12 @@ def update_result():
             "Unknown"
         )
 
+        if "uncertain" in disease.lower() or "no leaf" in disease.lower():
+            return jsonify({
+                "success": True,
+                "message": "Uncertainty acknowledged (not stored as a disease record)"
+            })
+
         chemical = request.form.get(
             "chemical",
             "Not available"

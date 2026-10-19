@@ -56,14 +56,14 @@ CLASS_FILE = os.path.join(BASE_DIR, "class_names.txt")
 IMAGE_SIZE = 224
 
 # AI Confidence & Classification Thresholds (Strict Precision Thresholds)
-CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.75))
-CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.20))
+CONFIDENCE_THRESHOLD = float(os.environ.get("CONFIDENCE_THRESHOLD", 0.82))
+CONFIDENCE_MARGIN = float(os.environ.get("CONFIDENCE_MARGIN", 0.25))
 
 # Robust Leaf Filtering Thresholds (Botanical Quality Gate for Chili Leaves)
-MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 3200))           # Min pixels to qualify as a leaf
-MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.98)) # Up to 98% of frame for full-frame closeups
+MIN_LEAF_AREA = int(os.environ.get("MIN_LEAF_AREA", 1600))           # Min pixels to qualify as a leaf
+MAX_LEAF_AREA_RATIO = float(os.environ.get("MAX_LEAF_AREA_RATIO", 0.95)) # Up to 95% of frame for full-frame closeups
 MIN_LEAF_DENSITY = float(os.environ.get("MIN_LEAF_DENSITY", 0.22))   # Foliage density inside bounding box
-MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.20))       # Skin tone ratio threshold for rejecting human face/hand
+MAX_SKIN_RATIO = float(os.environ.get("MAX_SKIN_RATIO", 0.15))       # Skin tone ratio threshold for rejecting human face/hand
 MIN_TEXTURE_VAR = float(os.environ.get("MIN_TEXTURE_VAR", 8.0))      # Laplacian variance to reject flat blank walls
 MIN_EXG_THRESHOLD = float(os.environ.get("MIN_EXG_THRESHOLD", 24.0)) # Excess Green Index (chlorophyll presence)
 MIN_SATURATION = float(os.environ.get("MIN_SATURATION", 55.0))       # Rejects gray/off-white rooms and furniture
@@ -462,7 +462,7 @@ shared_telemetry = {
     "ai_status": "Ready",
     "model_name": "MobileNetV2 (99% Acc) Chili Disease AI",
     "fps": 0.0,
-    "last_detection": "NO LEAF DETECTED",
+    "last_detection": "Uncertainty",
     "last_confidence": 0.0,
     "direction": "Stopped",
     "pump": False,
@@ -808,19 +808,19 @@ def letterbox(img, target_size=IMAGE_SIZE, bg_color=(255, 255, 255)):
 def verify_leaf_structure(crop_bgr):
     """
     Botanical Quality Gate: Verifies that a candidate image contains genuine plant leaf tissue.
-    Strictly rejects desk surfaces, shadows, walls, curtains, carpets, furniture, and hands.
-    Returns: (True, "OK") if genuine foliage; (False, reason) otherwise.
+    Strictly rejects desk surfaces, shadows, walls, curtains, carpets, furniture, hands, and room clutter.
+    Returns: (True, "VALID_LEAF") if genuine foliage; (False, reason) otherwise.
     """
     if crop_bgr is None or crop_bgr.size == 0:
         return False, "Empty image"
 
     h, w = crop_bgr.shape[:2]
     total_px = float(h * w)
-    if w < 35 or h < 35 or total_px < 1200:
+    if w < 40 or h < 40 or total_px < 1600:
         return False, f"Candidate too small ({w}x{h})"
 
     aspect = w / float(h)
-    if aspect < 0.12 or aspect > 8.0:
+    if aspect < 0.20 or aspect > 5.0:
         return False, f"Aspect ratio extreme ({aspect:.2f})"
 
     b = crop_bgr[:, :, 0].astype(np.float32)
@@ -828,30 +828,45 @@ def verify_leaf_structure(crop_bgr):
     r = crop_bgr[:, :, 2].astype(np.float32)
     hsv = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2HSV)
 
-    # 1. Botanical chlorophyll foliage mask:
-    # Green plant foliage: H in [24, 88], S >= 28, V >= 25, G > B + 10, G >= R - 12, 2G - R - B >= 14
-    green_mask = (hsv[:,:,0] >= 24) & (hsv[:,:,0] <= 88) & \
-                 (hsv[:,:,1] >= 28) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 252) & \
-                 (g > b + 10.0) & (g >= r - 12.0) & \
+    # 1. Botanical chlorophyll foliage mask (genuine green plant tissue)
+    # Green plant foliage: H in [26, 88], S >= 30, V >= 25, G > B + 12, G >= R - 8, 2G - R - B >= 14
+    green_mask = (hsv[:,:,0] >= 26) & (hsv[:,:,0] <= 88) & \
+                 (hsv[:,:,1] >= 30) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 252) & \
+                 (g > b + 12.0) & (g >= r - 8.0) & \
                  (2.0 * g - r - b >= 14.0)
 
-    # Yellow chlorotic foliage mask (for viral curl / spot diseases / chlorotic halos)
-    yellow_mask = (hsv[:,:,0] >= 14) & (hsv[:,:,0] < 24) & \
-                  (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 32) & (hsv[:,:,2] <= 252) & \
-                  (g > b + 14.0) & (r > b + 14.0) & \
-                  (2.0 * g - r - b >= 8.0)
+    # 2. Chlorotic foliage mask (for viral curl / spot diseases / chlorotic halos)
+    # Strictly constrained to avoid wood / cardboard / skin
+    yellow_mask = (hsv[:,:,0] >= 19) & (hsv[:,:,0] <= 26) & \
+                  (hsv[:,:,1] >= 45) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 250) & \
+                  (g > b + 22.0) & (r > b + 18.0) & \
+                  (2.0 * g - r - b >= 8.0) & (r - g <= 18.0)
 
-    foliage_mask = green_mask | yellow_mask
+    # 3. Human skin tone & wood / brown surface rejection
+    skin_mask = (((hsv[:,:,0] <= 18) | (hsv[:,:,0] >= 168)) & \
+                 (hsv[:,:,1] >= 25) & (hsv[:,:,1] <= 185) & (hsv[:,:,2] >= 35) & \
+                 (r > g + 10.0) & (g > b)) | \
+                ((r > g + 16.0) & (2.0 * g - r - b < 4.0))
+
+    foliage_mask = (green_mask | yellow_mask) & (~skin_mask)
     foliage_px = int(np.sum(foliage_mask))
+    foliage_ratio = foliage_px / total_px
 
-    if foliage_px < 400:
-        return False, f"Insufficient chlorophyll pixels ({foliage_px} < 400)"
+    # A real leaf must occupy at least 20% of the candidate crop area
+    if foliage_ratio < 0.20 or foliage_px < 600:
+        return False, f"Insufficient plant tissue ({foliage_ratio*100:.1f}% < 20% or {foliage_px}px)"
 
-    # 2. Texture check (real foliage has natural texture/margins, rejects flat featureless walls)
+    # Excess green index (ExG) check on foliage region:
+    exg = 2.0 * g - r - b
+    mean_exg = float(np.mean(exg[foliage_mask])) if foliage_px > 0 else 0.0
+    if mean_exg < 10.0:
+        return False, f"Weak chlorophyll index ({mean_exg:.1f} < 10.0)"
+
+    # 4. Texture check (real foliage has natural vein texture/margins, rejects flat featureless walls)
     gray = cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2GRAY)
     lap_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
-    if lap_var < 8.0:
-        return False, f"Flat texture ({lap_var:.1f} < 8.0)"
+    if lap_var < 10.0:
+        return False, f"Flat texture ({lap_var:.1f} < 10.0)"
 
     return True, "VALID_LEAF"
 
@@ -865,7 +880,7 @@ def detect_leaf(frame_bgr):
         return None, None, "NO_LEAF"
 
     h, w = frame_bgr.shape[:2]
-    # Fast 2x downsample for 4x faster foliage segmentation (takes < 3ms instead of 15ms)
+    # Fast 2x downsample for 4x faster foliage segmentation
     small_w = w // 2
     small_h = h // 2
     small_bgr = cv2.resize(frame_bgr, (small_w, small_h), interpolation=cv2.INTER_LINEAR)
@@ -877,42 +892,40 @@ def detect_leaf(frame_bgr):
     r_full = small_bgr[:, :, 2].astype(np.float32)
 
     # 1. Botanical Foliage Mask with Chlorophyll Discrimination
-    green_bool = (hsv[:,:,0] >= 24) & (hsv[:,:,0] <= 88) & \
-                 (hsv[:,:,1] >= 28) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 252) & \
-                 (g_full > b_full + 10.0) & (g_full >= r_full - 12.0) & \
+    green_bool = (hsv[:,:,0] >= 26) & (hsv[:,:,0] <= 88) & \
+                 (hsv[:,:,1] >= 30) & (hsv[:,:,2] >= 25) & (hsv[:,:,2] <= 252) & \
+                 (g_full > b_full + 12.0) & (g_full >= r_full - 8.0) & \
                  (2.0 * g_full - r_full - b_full >= 14.0)
 
     # Yellow chlorotic foliage mask (for viral curl / spot diseases)
-    yellow_bool = (hsv[:,:,0] >= 14) & (hsv[:,:,0] < 24) & \
-                  (hsv[:,:,1] >= 38) & (hsv[:,:,2] >= 32) & (hsv[:,:,2] <= 252) & \
-                  (g_full > b_full + 14.0) & (r_full > b_full + 14.0) & \
-                  (2.0 * g_full - r_full - b_full >= 8.0)
+    yellow_bool = (hsv[:,:,0] >= 19) & (hsv[:,:,0] <= 26) & \
+                  (hsv[:,:,1] >= 45) & (hsv[:,:,2] >= 35) & (hsv[:,:,2] <= 250) & \
+                  (g_full > b_full + 22.0) & (r_full > b_full + 18.0) & \
+                  (2.0 * g_full - r_full - b_full >= 8.0) & (r_full - g_full <= 18.0)
 
-    foliage_mask = np.uint8(green_bool | yellow_bool) * 255
+    # 2. Strict Human Skin Tone & Wood Mask
+    skin_bool = (((hsv[:,:,0] <= 18) | (hsv[:,:,0] >= 168)) & \
+                 (hsv[:,:,1] >= 25) & (hsv[:,:,1] <= 185) & (hsv[:,:,2] >= 35) & \
+                 (r_full > g_full + 10.0) & (g_full > b_full)) | \
+                ((r_full > g_full + 16.0) & (2.0 * g_full - r_full - b_full < 4.0))
 
-    # 2. Human Skin Tone Mask: catches faces, hands, arms holding leaves
-    skin1 = cv2.inRange(hsv, np.array([0, 25, 45], dtype=np.uint8),
-                             np.array([22, 175, 255], dtype=np.uint8))
-    skin2 = cv2.inRange(hsv, np.array([168, 25, 45], dtype=np.uint8),
-                             np.array([180, 175, 255], dtype=np.uint8))
-    skin_mask = cv2.bitwise_or(skin1, skin2)
-
-    foliage_clean = cv2.bitwise_and(foliage_mask, cv2.bitwise_not(skin_mask))
+    foliage_clean = np.uint8((green_bool | yellow_bool) & (~skin_bool)) * 255
     k_noise = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     foliage_clean = cv2.morphologyEx(foliage_clean, cv2.MORPH_OPEN, k_noise)
 
     total_foliage_px = int(cv2.countNonZero(foliage_clean))
     total_foliage_ratio = total_foliage_px / small_area
 
-    if total_foliage_px < 150 or total_foliage_ratio < 0.015:
+    # Require at least 400 downscaled pixels (1600 full-frame pixels) and 2.5% frame coverage
+    if total_foliage_px < 400 or total_foliage_ratio < 0.025:
         return None, None, "NO_LEAF"
 
     # Full frame coverage / Macro close-up
-    if total_foliage_ratio >= 0.12:
+    if total_foliage_ratio >= 0.18:
         pts = cv2.findNonZero(foliage_clean)
         if pts is not None:
             fx, fy, fw, fh = cv2.boundingRect(pts)
-            if fw >= 25 and fh >= 25:
+            if fw >= 35 and fh >= 35:
                 gx, gy, gw, gh = fx * 2, fy * 2, min(w - fx * 2, fw * 2), min(h - fy * 2, fh * 2)
                 crop = frame_bgr[gy:gy+gh, gx:gx+gw]
                 is_valid, _ = verify_leaf_structure(crop)
@@ -926,32 +939,35 @@ def detect_leaf(frame_bgr):
     if contours:
         for c in contours:
             area = cv2.contourArea(c)
-            if area < 100:
+            if area < 300:
                 continue
 
             bx, by, bw, bh = cv2.boundingRect(c)
-            if bw < 18 or bh < 18:
+            if bw < 25 or bh < 25:
                 continue
 
             aspect = bw / float(bh)
-            if aspect < 0.15 or aspect > 6.5:
+            if aspect < 0.22 or aspect > 4.5:
                 continue
 
             score = area
             if score > best_score:
-                best_score = score
                 pad = 4
                 cx1 = max(0, bx - pad); cy1 = max(0, by - pad)
                 cx2 = min(small_w, bx + bw + pad); cy2 = min(small_h, by + bh + pad)
-                best_candidate = (cx1 * 2, cy1 * 2, min(w, cx2 * 2), min(h, cy2 * 2))
+                candidate_box = (cx1 * 2, cy1 * 2, min(w, cx2 * 2), min(h, cy2 * 2))
+                x1, y1, x2, y2 = candidate_box
+                test_crop = frame_bgr[y1:y2, x1:x2]
+                is_valid, _ = verify_leaf_structure(test_crop)
+                if is_valid:
+                    best_score = score
+                    best_candidate = candidate_box
 
     if best_candidate is not None:
         x1, y1, x2, y2 = best_candidate
         crop = frame_bgr[y1:y2, x1:x2].copy()
         if crop.size > 0:
-            is_valid, _ = verify_leaf_structure(crop)
-            if is_valid:
-                return crop, (x1, y1, x2, y2), "LEAF_DETECTED"
+            return crop, (x1, y1, x2, y2), "LEAF_DETECTED"
 
     return None, None, "NO_LEAF"
 
@@ -966,12 +982,12 @@ def predict_crop(crop_bgr):
     DO NOT divide by 255.0 (dividing causes solid-black mode collapse).
     """
     if crop_bgr is None or crop_bgr.size == 0:
-        return "NO_LEAF", "No Leaf Detected", 0.0, None
+        return "UNCERTAIN", "Uncertainty", 0.0, None
 
     # Quality Gate: strictly verify botanical leaf properties
-    is_leaf, _ = verify_leaf_structure(crop_bgr)
+    is_leaf, reason = verify_leaf_structure(crop_bgr)
     if not is_leaf:
-        return "NO_LEAF", "No Leaf Detected", 0.0, None
+        return "UNCERTAIN", "Uncertainty", 0.0, None
 
     with model_loading_lock:
         if not model_ready:
@@ -984,7 +1000,6 @@ def predict_crop(crop_bgr):
 
     try:
         # Symmetrically letterbox crop to IMAGE_SIZE x IMAGE_SIZE to preserve natural aspect ratio
-        # and eliminate artificial edge distortion/curling artifacts.
         resized = letterbox(crop_bgr, target_size=IMAGE_SIZE, bg_color=(255, 255, 255))
         # Convert BGR to RGB (model expects RGB)
         img = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB).astype(np.float32)
@@ -1008,8 +1023,12 @@ def predict_crop(crop_bgr):
         second_conf = float(sorted_preds[-2]) if len(sorted_preds) > 1 else 0.0
         margin = conf - second_conf
 
-        if conf < CONFIDENCE_THRESHOLD or margin < CONFIDENCE_MARGIN:
-            return "UNCERTAIN", f"Uncertain ({conf*100:.1f}%)", conf, preds
+        # Shannon Entropy check: out-of-distribution ambiguity detection
+        clipped_preds = np.clip(preds, 1e-7, 1.0)
+        entropy = float(-np.sum(clipped_preds * np.log(clipped_preds)))
+
+        if conf < CONFIDENCE_THRESHOLD or margin < CONFIDENCE_MARGIN or entropy > 0.85:
+            return "UNCERTAIN", f"Uncertainty ({conf*100:.1f}%)", conf, preds
 
         if raw_class == "Healthy_Leaf":
             return "HEALTHY", f"Healthy Leaf ({conf*100:.1f}%)", conf, preds
@@ -1027,8 +1046,8 @@ def predict_crop(crop_bgr):
 
 ai_inference_queue = queue.Queue(maxsize=1)
 latest_ai_result = {
-    "disease_code": "NO_LEAF",
-    "display_label": "NO LEAF DETECTED",
+    "disease_code": "UNCERTAIN",
+    "display_label": "Uncertainty",
     "conf": 0.0,
     "last_leaf_seen": 0.0
 }
@@ -1068,13 +1087,13 @@ def ai_inference_worker():
                 consec_count = 1
 
             if disease_code in ("NO_LEAF", "LOADING", "UNCERTAIN", "ERROR"):
-                shared_telemetry["last_detection"] = display_label
+                shared_telemetry["last_detection"] = "Uncertainty"
                 shared_telemetry["last_confidence"] = round(conf * 100.0 if conf <= 1.0 else conf, 1)
-                shared_telemetry["ai_status"] = display_label
-                shared_telemetry["disease_name"] = display_label
-                shared_telemetry["disease_chemical"] = ""
-                shared_telemetry["disease_fertilizer"] = ""
-                shared_telemetry["disease_treatment"] = "Point camera directly at a chili plant leaf" if disease_code == "NO_LEAF" else "Hold camera steady near leaf"
+                shared_telemetry["ai_status"] = "Uncertainty (Awaiting Chili Leaf)"
+                shared_telemetry["disease_name"] = "Uncertainty"
+                shared_telemetry["disease_chemical"] = "None (Uncertain)"
+                shared_telemetry["disease_fertilizer"] = "None"
+                shared_telemetry["disease_treatment"] = "Point camera directly at a chili plant leaf to detect diseases."
             else:
                 info_key = disease_code.lower()
                 if "bacterial" in info_key:
@@ -1107,8 +1126,8 @@ def ai_inference_worker():
             # AUTOMATIC TARGETED SPRAY: Actuate DC motor relay ONLY when a diseased leaf is detected!
             if (disease_code in DISEASE_CLASSES_FOR_SPRAY) and (conf >= CONFIDENCE_THRESHOLD) and (consec_count >= 2):
                 trigger_disease_spray(display_label, conf)
-            elif disease_code == "HEALTHY":
-                # Healthy Leaf: Strictly ensure relay / pump is OFF!
+            elif disease_code in ("HEALTHY", "UNCERTAIN", "NO_LEAF", "LOADING", "ERROR"):
+                # Healthy Leaf or Uncertainty: Strictly ensure relay / pump is OFF!
                 cancel_disease_spray_for_healthy()
 
             cooldown = UPLOAD_INTERVAL if disease_code == consec_class and last_upload_time > 0 else 1.0
@@ -1598,21 +1617,30 @@ def main():
             leaf_currently_visible = (mode == "LEAF_DETECTED" and box is not None)
             
             # Smooth detection retention window (2.0s): keeps diagnosis steady on HUD & cloud telemetry
-            if leaf_currently_visible or (now - ai_last_seen < 2.0 and ai_disease_code not in ("NO_LEAF", "LOADING", "INITIALIZING", "UNCERTAIN")):
+            if leaf_currently_visible and ai_disease_code not in ("NO_LEAF", "LOADING", "INITIALIZING", "UNCERTAIN"):
                 curr_disease_code = ai_disease_code
                 curr_display_label = ai_display_label
                 curr_conf = ai_conf
                 shared_telemetry["last_detection"] = ai_display_label
                 shared_telemetry["last_confidence"] = round(ai_conf * 100.0 if ai_conf <= 1.0 else ai_conf, 1)
                 shared_telemetry["ai_status"] = f"Classified: {ai_display_label}"
+            elif leaf_currently_visible and ai_disease_code == "UNCERTAIN":
+                curr_disease_code = "UNCERTAIN"
+                curr_display_label = "Uncertainty"
+                curr_conf = ai_conf
+                shared_telemetry["last_detection"] = "Uncertainty"
+                shared_telemetry["last_confidence"] = round(ai_conf * 100.0 if ai_conf <= 1.0 else ai_conf, 1)
+                shared_telemetry["ai_status"] = "Uncertainty (Non-Leaf or Ambiguous)"
+                shared_telemetry["disease_name"] = "Uncertainty"
+                shared_telemetry["disease_treatment"] = "Point camera at chili plant leaf"
             else:
-                curr_disease_code = "NO_LEAF"
-                curr_display_label = "NO LEAF DETECTED"
+                curr_disease_code = "UNCERTAIN"
+                curr_display_label = "Uncertainty"
                 curr_conf = 0.0
-                shared_telemetry["last_detection"] = "NO LEAF DETECTED"
+                shared_telemetry["last_detection"] = "Uncertainty"
                 shared_telemetry["last_confidence"] = 0.0
-                shared_telemetry["ai_status"] = "Active Scanning (No Leaf in View)"
-                shared_telemetry["disease_name"] = "Scanning Active"
+                shared_telemetry["ai_status"] = "Uncertainty (No Leaf in View)"
+                shared_telemetry["disease_name"] = "Uncertainty"
                 shared_telemetry["disease_chemical"] = ""
                 shared_telemetry["disease_fertilizer"] = ""
                 shared_telemetry["disease_treatment"] = "Point camera at chili plant leaf"
@@ -1622,18 +1650,24 @@ def main():
 
             if leaf_currently_visible:
                 x1, y1, x2, y2 = box
-                box_color = (0, 255, 0) if curr_disease_code == "HEALTHY" else (0, 69, 255)
-                if curr_disease_code == "UNCERTAIN":
-                    box_color = (0, 215, 255)
-                elif curr_disease_code == "LOADING":
-                    box_color = (255, 200, 0)
-
-                cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
-                cv2.putText(display_frame, curr_display_label, (x1, max(28, y1 - 10)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
+                if curr_disease_code == "HEALTHY":
+                    box_color = (0, 255, 0)
+                    cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
+                    cv2.putText(display_frame, curr_display_label, (x1, max(28, y1 - 10)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
+                elif curr_disease_code in ("Bacterial_Spot", "Cercospora_Leaf_Spot", "Curl_Virus"):
+                    box_color = (0, 69, 255)
+                    cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
+                    cv2.putText(display_frame, curr_display_label, (x1, max(28, y1 - 10)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
+                else:
+                    box_color = (0, 215, 255) # Amber for Uncertainty
+                    cv2.rectangle(display_frame, (x1, y1), (x2, y2), box_color, 2)
+                    cv2.putText(display_frame, "UNCERTAINTY", (x1, max(28, y1 - 10)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.7, box_color, 2)
             else:
-                cv2.putText(display_frame, "NO LEAF DETECTED", (20, 50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 140, 255), 2)
+                cv2.putText(display_frame, "UNCERTAINTY: NO LEAF DETECTED", (20, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 190, 255), 2)
                 cv2.putText(display_frame, "Point camera at chili plant leaf", (20, 80),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
 

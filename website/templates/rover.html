@@ -933,7 +933,8 @@ async function syncRoverStatus() {
         const imgEl = document.getElementById("leaf-preview-img");
 
         // Continuous Live AI Disease Diagnosis (Real-Time Auto-Update Every Second)
-        if (r && r.last_detection && r.last_detection !== "NO LEAF DETECTED") {
+        const isLiveUncertain = !r || !r.last_detection || r.last_detection.toLowerCase().includes("uncertain") || r.last_detection === "NO LEAF DETECTED";
+        if (!isLiveUncertain) {
             if (leafTxt) leafTxt.textContent = r.last_detection;
             if (confTxt) confTxt.textContent = `Confidence: ${(r.last_confidence || 0).toFixed(1)}%`;
             if (treatTxt && r.disease_treatment) {
@@ -942,9 +943,9 @@ async function syncRoverStatus() {
                 treatTxt.textContent = data.result.treatment;
             }
         } else {
-            if (leafTxt) leafTxt.textContent = "Active Scanning (No Leaf in View)";
+            if (leafTxt) leafTxt.textContent = "Uncertainty (Awaiting Chili Leaf)";
             if (confTxt) confTxt.textContent = "Confidence: 0.0%";
-            if (treatTxt) treatTxt.textContent = "Hold camera over plant leaf to detect diseases.";
+            if (treatTxt) treatTxt.textContent = "Point camera directly at a chili plant leaf to detect diseases.";
         }
 
         // Continuous Leaf Photo Auto-Refresh
