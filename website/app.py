@@ -321,6 +321,9 @@ def add_history_record(result):
         print("[DB ADD HISTORY WARNING]", e)
 
     history = get_history()
+    history.insert(0, result)
+    if len(history) > 500:
+        history = history[:500]
     save_history(history)
     return history
 
