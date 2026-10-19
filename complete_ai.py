@@ -488,6 +488,9 @@ latest_jpeg_frame = generate_placeholder_frame()
 latest_jpeg_lock = threading.Lock()
 latest_cloud_jpeg_frame = generate_placeholder_frame()
 latest_cloud_jpeg_lock = threading.Lock()
+cloud_frame_seq = 0
+cloud_dispatched_seq = 0
+cloud_seq_lock = threading.Lock()
 
 class StreamingHandler(BaseHTTPRequestHandler):
     def do_HEAD(self):
@@ -1313,39 +1316,53 @@ def cloud_command_worker():
 
 def cloud_frame_streamer_worker(worker_id=0):
     """
-    Streams live camera frames to Render so the remote dashboard & phone see clear live video.
-    Optimized for high-speed WAN transmission with HTTP keepalive and triple-pipelined pusher cadence.
+    Streams live camera frames to Render so the remote dashboard & phone see crystal-clear live video.
+    Optimized sequence-based dispatching with automatic session recycling and resilient connection recovery.
     """
-    session = requests.Session()
-    adapter = requests.adapters.HTTPAdapter(pool_connections=4, pool_maxsize=8, max_retries=0)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
-
+    global cloud_dispatched_seq
+    stream_url = RENDER_URL + "/api/camera/stream_frame"
     headers = {"Content-Type": "image/jpeg"}
     if RENDER_API_TOKEN:
         headers["Authorization"] = f"Bearer {RENDER_API_TOKEN}"
-    stream_url = RENDER_URL + "/api/camera/stream_frame"
+
+    session = None
+    consecutive_errs = 0
 
     if worker_id > 0:
-        time.sleep(0.035 * worker_id)
+        time.sleep(0.08 * worker_id)
 
-    last_sent_bytes = None
     while running:
-        try:
-            with latest_cloud_jpeg_lock:
-                frame = latest_cloud_jpeg_frame
-            if frame is None:
-                with latest_jpeg_lock:
-                    frame = latest_jpeg_frame
+        if session is None:
+            session = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(pool_connections=2, pool_maxsize=4, max_retries=1)
+            session.mount("https://", adapter)
+            session.mount("http://", adapter)
 
-            if frame is not None and frame != last_sent_bytes:
-                session.post(stream_url, data=frame, headers=headers, timeout=1.5)
-                last_sent_bytes = frame
-                time.sleep(0.01)
-            else:
-                time.sleep(0.02)
-        except Exception:
-            time.sleep(0.04)
+        my_frame = None
+        with cloud_seq_lock:
+            if cloud_frame_seq > cloud_dispatched_seq:
+                cloud_dispatched_seq = cloud_frame_seq
+                with latest_cloud_jpeg_lock:
+                    my_frame = latest_cloud_jpeg_frame
+
+        if my_frame is not None and len(my_frame) > 100:
+            try:
+                resp = session.post(stream_url, data=my_frame, headers=headers, timeout=3.5)
+                if resp.status_code == 200:
+                    consecutive_errs = 0
+                else:
+                    consecutive_errs += 1
+            except Exception:
+                consecutive_errs += 1
+                if consecutive_errs >= 2:
+                    try:
+                        session.close()
+                    except Exception:
+                        pass
+                    session = None
+                time.sleep(0.05)
+                continue
+        time.sleep(0.025)
 
 
 def local_telemetry_worker():
@@ -1387,7 +1404,7 @@ def cloud_telemetry_worker():
 # ============================================================
 
 def main():
-    global running, HEADLESS, latest_jpeg_frame, latest_cloud_jpeg_frame
+    global running, HEADLESS, latest_jpeg_frame, latest_cloud_jpeg_frame, cloud_frame_seq
 
     # 1. IMMEDIATELY start HTTP live video streaming server on port 8080!
     # Server goes live within ~10ms so browsers and mobile app connect with zero delay.
@@ -1403,13 +1420,11 @@ def main():
     cloud_cmd_thread = threading.Thread(target=cloud_command_worker, daemon=True, name="CloudCmdWorker")
     cloud_cmd_thread.start()
 
-    # Triple pipelined cloud streamers for smooth, continuous live video relay to Render
+    # Coordinated dual-pipelined cloud streamers for rock-solid, smooth live video relay to Render
     frame_stream_thread0 = threading.Thread(target=cloud_frame_streamer_worker, args=(0,), daemon=True, name="CloudFrameStreamer-0")
     frame_stream_thread0.start()
     frame_stream_thread1 = threading.Thread(target=cloud_frame_streamer_worker, args=(1,), daemon=True, name="CloudFrameStreamer-1")
     frame_stream_thread1.start()
-    frame_stream_thread2 = threading.Thread(target=cloud_frame_streamer_worker, args=(2,), daemon=True, name="CloudFrameStreamer-2")
-    frame_stream_thread2.start()
 
     local_telemetry_thread = threading.Thread(target=local_telemetry_worker, daemon=True, name="LocalTelemetryWorker")
     local_telemetry_thread.start()
@@ -1648,26 +1663,37 @@ def main():
                 cv2.putText(display_frame, f"SPRAY PUMP ACTIVE: {curr_display_label}", (20, 425),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2, cv2.LINE_AA)
 
-            # Encode JPEG for live HTTP stream (Quality 70, fast non-blocking encode)
+            # Encode JPEG for live HTTP stream (Quality 75, fast non-blocking encode)
             try:
-                ret_enc, enc_jpeg = cv2.imencode('.jpg', display_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+                ret_enc, enc_jpeg = cv2.imencode('.jpg', display_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
                 if ret_enc:
                     frame_bytes = enc_jpeg.tobytes()
                     with latest_jpeg_lock:
                         latest_jpeg_frame = frame_bytes
                     try:
-                        with open("/dev/shm/rover_stream.jpg", "wb") as f:
+                        with open("/dev/shm/rover_stream.jpg.tmp", "wb") as f:
                             f.write(frame_bytes)
+                        os.replace("/dev/shm/rover_stream.jpg.tmp", "/dev/shm/rover_stream.jpg")
                     except Exception:
                         pass
 
-                # Ultra-Smooth High-Speed Cloud Stream Frame (420x315, INTER_LINEAR, Quality 58, ~7KB)
-                # Cuts WAN bandwidth in half for fluid, high-frame-rate live video on Render!
-                cloud_small = cv2.resize(display_frame, (420, 315), interpolation=cv2.INTER_LINEAR)
-                ok_cloud, enc_cloud = cv2.imencode('.jpg', cloud_small, [int(cv2.IMWRITE_JPEG_QUALITY), 58])
+                # Crystal-Clear Cloud Stream Frame (Strictly Preserves Natural Aspect Ratio)
+                # Avoids squishing or stretching camera image on Render dashboard!
+                dh, dw = display_frame.shape[:2]
+                max_dim = max(dw, dh)
+                if max_dim > 480:
+                    scale = 480.0 / float(max_dim)
+                    target_w = int(dw * scale)
+                    target_h = int(dh * scale)
+                    cloud_frame = cv2.resize(display_frame, (target_w, target_h), interpolation=cv2.INTER_AREA)
+                else:
+                    cloud_frame = display_frame
+
+                ok_cloud, enc_cloud = cv2.imencode('.jpg', cloud_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
                 if ok_cloud:
                     with latest_cloud_jpeg_lock:
                         latest_cloud_jpeg_frame = enc_cloud.tobytes()
+                    cloud_frame_seq += 1
             except Exception:
                 pass
 

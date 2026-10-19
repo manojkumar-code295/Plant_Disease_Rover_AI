@@ -503,8 +503,8 @@ input[type="range"] {
             <button onclick="refreshLiveStream()" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer;">🔄 Refresh</button>
         </div>
     </div>
-    <div style="position:relative; width:100%; aspect-ratio:4/3; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.2);">
-        <img id="live-webcam-feed" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
+    <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:260px; max-height:460px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center;">
+        <img id="live-webcam-feed" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
         <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); padding:2px 8px; border-radius:4px; font-size:10px; font-family:monospace; color:#86efac;">
             Picamera2 · Real-Time Edge Stream
         </div>
@@ -601,7 +601,10 @@ input[type="range"] {
 <section class="diagnosis-card">
     <div class="card-title-row">
         <span class="card-title-txt">🔬 Latest Detected Plant Health</span>
-        <button onclick="requestFreshSnapshot()" style="background:none; border:none; color:#34d399; font-size:11px; font-weight:700; cursor:pointer;">📸 Snapshot</button>
+        <div style="display:flex; gap:6px;">
+            <button onclick="requestFreshSnapshot()" style="background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); color:#34d399; font-size:11px; font-weight:700; border-radius:6px; padding:3px 8px; cursor:pointer;">📸 Snapshot</button>
+            <button onclick="clearCurrentDetection()" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:11px; font-weight:700; border-radius:6px; padding:3px 8px; cursor:pointer;">🗑️ Clear Result</button>
+        </div>
     </div>
     <div class="diagnosis-content">
         <img id="leaf-preview-img" 
@@ -969,6 +972,29 @@ async function requestFreshSnapshot() {
         }
     } catch (e) {
         logMessage("Snapshot failed.");
+    }
+}
+
+async function clearCurrentDetection() {
+    logMessage("Clearing scan result...");
+    try {
+        const res = await fetch("/api/result/clear", { method: "POST" });
+        const data = await res.json();
+        if (data.success) {
+            logMessage("Result cleared: Ready for next scan.");
+            const leafTxt = document.getElementById("leaf-disease-txt");
+            const confTxt = document.getElementById("leaf-confidence-txt");
+            const treatTxt = document.getElementById("leaf-treatment-txt");
+            const imgEl = document.getElementById("leaf-preview-img");
+            if (leafTxt) leafTxt.textContent = "Active Scanning (No Leaf in View)";
+            if (confTxt) confTxt.textContent = "Confidence: 0.0%";
+            if (treatTxt) treatTxt.textContent = "Hold camera over plant leaf to detect diseases.";
+            if (imgEl) imgEl.src = "/static/app_photo.png";
+        } else {
+            logMessage("Failed to clear result.");
+        }
+    } catch (e) {
+        logMessage("Error contacting clear API.");
     }
 }
 

@@ -666,6 +666,15 @@ def api_camera_stream_frame():
             except Exception:
                 pass
 
+        # Also write to disk backup for worker synchronization
+        try:
+            live_path = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
+            with open(live_path + ".tmp", "wb") as f:
+                f.write(data)
+            os.replace(live_path + ".tmp", live_path)
+        except Exception:
+            pass
+
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "No frame data"}), 400
 
@@ -680,21 +689,25 @@ def video_feed():
         last_sent_t = 0.0
         while True:
             frame = None
+            # 1. Local RPi RAM disk (Direct on Raspberry Pi)
             if os.path.exists("/dev/shm/rover_stream.jpg"):
                 try:
                     with open("/dev/shm/rover_stream.jpg", "rb") as f:
                         frame = f.read()
                 except Exception:
                     pass
-            elif latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
-                frame = latest_cloud_frame
-            elif os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
+            # 2. Shared Cloud RAM disk (Fastest across all Gunicorn workers on Render)
+            if not frame and os.path.exists("/dev/shm/latest_cloud_frame.jpg"):
                 try:
                     with open("/dev/shm/latest_cloud_frame.jpg", "rb") as f:
                         frame = f.read()
                 except Exception:
                     pass
-            else:
+            # 3. In-memory cloud frame buffer
+            if not frame and latest_cloud_frame is not None and len(latest_cloud_frame) > 100:
+                frame = latest_cloud_frame
+            # 4. Disk backup file
+            if not frame:
                 p = os.path.join(IMAGE_FOLDER, "latest_live_frame.jpg")
                 if os.path.exists(p):
                     try:
@@ -1925,31 +1938,24 @@ def clear_history():
     methods=["POST"]
 )
 def clear_result():
-
     try:
-
-        save_latest_result(
-            DEFAULT_RESULT.copy()
-        )
+        clean_res = DEFAULT_RESULT.copy()
+        clean_res["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        save_json_file(RESULT_FILE, clean_res)
+        try:
+            db.clear_all_detections()
+        except Exception:
+            pass
 
         return jsonify({
-
             "success": True,
-
-            "message":
-                "Latest result cleared"
-
+            "message": "Detection result and history cleared.",
+            "result": clean_res
         })
-
     except Exception as e:
-
         return jsonify({
-
             "success": False,
-
-            "message":
-                str(e)
-
+            "message": str(e)
         }), 500
 
 

@@ -1375,8 +1375,8 @@
                 </div>
 
                 <!-- LIVE WEBCAM VIDEO STREAM -->
-                <div style="position:relative; width:100%; aspect-ratio:16/9; background:#040d09; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px;">
-                    <img id="live-dashboard-cam" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:cover; display:block;">
+                <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:280px; max-height:480px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px; display:flex; align-items:center; justify-content:center;">
+                    <img id="live-dashboard-cam" src="/video_feed" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
                     <div style="position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; color:#ef4444;">
                         <span class="radar-dot" style="background:#ef4444;"></span> LIVE CAM
                     </div>
@@ -1422,7 +1422,10 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title">🔬 Plant Leaf Health Diagnosis</h2>
-                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="diagnosis-engine-badge">AI SCAN</span>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="diagnosis-engine-badge">AI SCAN</span>
+                        <button onclick="clearDashboardDetection()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🗑️ Clear Result</button>
+                    </div>
                 </div>
 
                 <!-- 2D High Resolution Snapshot Container -->
@@ -1613,6 +1616,38 @@
 
         function takeSnapshot() {
             window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
+        }
+
+        async function clearDashboardDetection() {
+            try {
+                const res = await fetch("/api/result/clear", { method: "POST" });
+                const data = await res.json();
+                if (data.success) {
+                    const headline = document.getElementById("disease-headline");
+                    const headline2D = document.getElementById("disease-headline-2d");
+                    const banner = document.getElementById("disease-banner");
+                    const banner2D = document.getElementById("disease-banner-2d");
+                    const confVal = document.getElementById("conf-val");
+                    const confFill = document.getElementById("conf-fill");
+                    const prescChem = document.getElementById("presc-chemical");
+                    const prescFert = document.getElementById("presc-fertilizer");
+                    const prescTreat = document.getElementById("presc-treatment");
+                    const leafBox = document.getElementById("leaf-img-box");
+
+                    if (headline) headline.textContent = "Scanning Active (No Leaf in View)";
+                    if (headline2D) headline2D.textContent = "No Captured Snapshots";
+                    if (banner) banner.className = "disease-banner";
+                    if (banner2D) banner2D.className = "disease-banner";
+                    if (confVal) confVal.textContent = "0.0%";
+                    if (confFill) confFill.style.width = "0%";
+                    if (prescChem) prescChem.textContent = "None Required";
+                    if (prescFert) prescFert.textContent = "Balanced NPK";
+                    if (prescTreat) prescTreat.textContent = "Point camera at chili plant leaf to detect diseases.";
+                    if (leafBox) leafBox.innerHTML = '<img id="latest-leaf-img" src="/static/app_photo.png" alt="Real-time Chili Leaf" style="opacity: 0.85;">';
+                }
+            } catch (e) {
+                console.error("Clear failed", e);
+            }
         }
 
         // Quick Rover Movement Command Handler
