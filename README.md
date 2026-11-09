@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # AgriVision AI: Live Plant Leaf Detection & Automatic Smart Spraying System
 
 An upgraded, production-grade AI precision agriculture and smart rover system featuring:
@@ -140,3 +141,6 @@ Run the comprehensive integration test suite anytime:
 python test_project_upgrade.py
 ```
 All 7 subsystem integration tests pass with 100% success!
+=======
+# Plant_Disease_Rover_AI
+>>>>>>> 84efb4ac519e3259ebb94927153b0bcbff113536
