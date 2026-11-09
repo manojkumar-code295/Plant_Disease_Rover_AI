@@ -177,6 +177,10 @@ class PlantDiseaseDetectionPipeline:
                 "box": obj["box"]
             })
 
+        # Clean intermediate memory
+        import gc
+        gc.collect()
+
         # If non-leaf rejected
         if not is_valid_leaf:
             return {

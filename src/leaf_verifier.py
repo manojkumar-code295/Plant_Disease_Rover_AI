@@ -166,6 +166,7 @@ class LeafVerifier:
 
             leaf_prob = float(probs[leaf_idx].item())
             nonleaf_prob = float(probs[nonleaf_idx].item())
+        del tensor, outputs, probs
 
         # Reject confirmed non-leaf objects (cars, buildings, animals, random objects)
         if nonleaf_prob > 0.85 and foliage_ratio < 0.15 and pigment_ratio < 0.20:

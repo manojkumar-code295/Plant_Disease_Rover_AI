@@ -142,6 +142,7 @@ class DiseaseClassifier:
         with torch.no_grad():
             outputs = self.model(tensor)
             probs = torch.softmax(outputs, dim=1)[0].cpu().numpy()
+        del tensor, outputs
 
         best_idx = int(np.argmax(probs))
         best_class = self.idx_to_class[best_idx]

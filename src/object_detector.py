@@ -70,7 +70,7 @@ class LiveObjectDetector:
         # 1. Run YOLO Object Detection for Obstacles / Surroundings
         if self.model_loaded and self.model is not None:
             try:
-                results = self.model.predict(cv_img, conf=conf_threshold, verbose=False)
+                results = self.model.predict(cv_img, imgsz=320, conf=conf_threshold, verbose=False)
                 for r in results:
                     boxes = r.boxes
                     for box in boxes:
@@ -103,6 +103,7 @@ class LiveObjectDetector:
                             detected_objects.append(obj_info)
                             if primary_leaf_box is None:
                                 primary_leaf_box = [x1, y1, x2, y2]
+                del results
             except Exception as e:
                 pass
 

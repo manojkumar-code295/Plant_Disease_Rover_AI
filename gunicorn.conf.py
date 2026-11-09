@@ -4,7 +4,7 @@ import os
 port = os.environ.get("PORT", "5000")
 bind = f"0.0.0.0:{port}"
 workers = 1
-threads = 2
+threads = 1
 timeout = 180  # 3 minutes for AI inference operations
 graceful_timeout = 30
 keepalive = 5
