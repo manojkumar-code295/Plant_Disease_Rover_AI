@@ -1,4 +1,12 @@
-Flask
-gunicorn
-Werkzeug
-requests
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2+cpu
+torchvision==0.17.2+cpu
+flask>=3.0.0
+gunicorn>=21.2.0
+pillow>=9.5.0
+opencv-python-headless>=4.8.0
+ultralytics>=8.0.0
+numpy<2.0.0,>=1.24.0
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+requests>=2.28.0
