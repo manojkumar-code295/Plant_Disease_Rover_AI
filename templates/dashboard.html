@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>Dashboard | AgriRover Precision Agriculture</title>
+
+    <!-- PWA & App Icons -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Three.js 3D WebGL Engine -->
+    <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+    <script>if (typeof THREE === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>'); }</script>
+
+    <style>
+        /* =========================================================
+           DESIGN TOKENS & RESET
+        ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Subtle Cyber Scanlines */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1.5px solid rgba(52, 211, 153, 0.5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+            animation: pulseGlow 3s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Desktop Nav */
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        /* Mobile Hamburger */
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           MAIN CONTAINER
+        ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* =========================================================
+           TELEMETRY HUD ROW
+        ========================================================= */
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .hud-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            transition: var(--transition-smooth);
+        }
+
+        .hud-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-card-bright);
+            background: var(--bg-card-hover);
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hud-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .hud-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .hud-val {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .status-pill.online {
+            background: rgba(34, 197, 94, 0.18);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .status-pill.offline {
+            background: rgba(239, 68, 68, 0.18);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .radar-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            position: relative;
+        }
+
+        .status-pill.online .radar-dot::after {
+            content: "";
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.5;
+            animation: radarPing 1.6s infinite ease-out;
+        }
+
+        /* =========================================================
+           PRIMARY TWO-COLUMN GRID
+        ========================================================= */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* =========================================================
+           SYSTEM HERO SHOWCASE CARD (OFFICIAL APP PHOTO)
+        ========================================================= */
+        .system-hero-card {
+            background: linear-gradient(135deg, rgba(14, 38, 28, 0.92) 0%, rgba(6, 20, 14, 0.96) 100%);
+            border: 1px solid var(--border-card-bright);
+            border-radius: var(--radius-lg);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 30px rgba(16, 185, 129, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .system-hero-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: relative;
+            z-index: 1;
+            flex: 1;
+        }
+
+        .hero-photo-wrap {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid rgba(52, 211, 153, 0.6);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.4), inset 0 0 14px rgba(0, 0, 0, 0.5);
+            background: #04140c;
+        }
+
+        .hero-app-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .hero-photo-wrap:hover .hero-app-photo {
+            transform: scale(1.08);
+        }
+
+        .hero-badge-tag {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(6, 20, 14, 0.88);
+            backdrop-filter: blur(4px);
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-align: center;
+            color: #86efac;
+            padding: 3px 0;
+            border-top: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-subhead {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #86efac;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .hero-tag-pill {
+            background: rgba(6, 182, 212, 0.15);
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            color: #38bdf8;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ecfdf5;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+            background: linear-gradient(90deg, #ffffff 40%, #a7f3d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-width: 640px;
+        }
+
+        .hero-features-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hero-feat-chip {
+            background: rgba(14, 38, 28, 0.7);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #a7f3d0;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hero-right-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-hero-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+        }
+
+        .btn-hero-action.primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+            border: 1px solid #34d399;
+        }
+        .btn-hero-action.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-hero-action.secondary {
+            background: rgba(14, 38, 28, 0.8);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .btn-hero-action.secondary:hover {
+            background: rgba(20, 52, 38, 0.95);
+            color: #ffffff;
+            border-color: #34d399;
+        }
+
+        @media (max-width: 900px) {
+            .system-hero-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-right-actions {
+                flex-direction: row;
+                width: 100%;
+            }
+            .btn-hero-action {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-left {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-photo-wrap {
+                width: 100px;
+                height: 100px;
+            }
+            .hero-title {
+                font-size: 17px;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ecfdf5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           LIVE CAMERA STREAM PLAYER
+        ========================================================= */
+        .camera-stream-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #020c07;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-stream-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .camera-fallback {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(3, 10, 7, 0.95);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .hud-overlay-live {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hud-overlay-fps {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            z-index: 12;
+        }
+
+        /* Cyber Laser Scanline */
+        .camera-scanline {
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.9), transparent);
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.9);
+            pointer-events: none;
+            z-index: 10;
+            animation: cameraScanline 3.2s ease-in-out infinite alternate;
+        }
+        @keyframes cameraScanline {
+            0% { top: 4%; opacity: 0.85; }
+            50% { opacity: 0.25; }
+            100% { top: 96%; opacity: 0.85; }
+        }
+
+        /* HUD Corner Brackets */
+        .hud-corner {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-color: rgba(52, 211, 153, 0.75);
+            border-style: solid;
+            pointer-events: none;
+            z-index: 11;
+        }
+        .hud-corner-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+        .hud-corner-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+        .hud-corner-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+        .hud-corner-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+        @keyframes spinTurbine {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .camera-controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stream-status-text {
+            font-size: 12px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-stream-action {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .btn-stream-action:hover {
+            background: rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-stream-action:active {
+            transform: scale(0.95);
+        }
+
+        .btn-dpad-quick {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-dpad-quick:hover {
+            transform: translateY(-2px);
+            border-color: rgba(52, 211, 153, 0.7);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+        .btn-dpad-quick:active {
+            transform: scale(0.93);
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+        }
+
+        /* =========================================================
+           LATEST DETECTION & 3D HOLOGRAPHIC BIOMETRICS CARD
+        ========================================================= */
+        .leaf-view-mode-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(6, 20, 14, 0.7);
+            padding: 6px 10px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-card);
+            margin-bottom: 14px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .leaf-mode-toggle {
+            display: inline-flex;
+            background: rgba(4, 14, 10, 0.85);
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .leaf-mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .leaf-mode-btn.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .leaf-3d-cam-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .leaf-cam-btn {
+            background: rgba(14, 38, 28, 0.6);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #86efac;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .leaf-cam-btn:hover, .leaf-cam-btn.active {
+            background: rgba(34, 197, 94, 0.22);
+            border-color: #34d399;
+            color: #ecfdf5;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .leaf-3d-viewport {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            background: radial-gradient(circle at 50% 50%, rgba(14, 46, 33, 0.5) 0%, rgba(3, 12, 8, 0.96) 85%);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
+            margin-bottom: 16px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.85);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .leaf-3d-viewport:active {
+            cursor: grabbing;
+        }
+
+        #leaf-3d-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .leaf-3d-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(6, 20, 14, 0.85);
+            backdrop-filter: blur(6px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .leaf-3d-status-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(148, 163, 184, 0.8);
+            pointer-events: none;
+            z-index: 2;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .leaf-preview-container {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 16px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+
+        @media (max-width: 480px) {
+            .leaf-preview-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .leaf-img-box {
+            width: 100%;
+            height: 120px;
+            background: #04100b;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .leaf-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .leaf-placeholder {
+            font-size: 38px;
+            opacity: 0.6;
+        }
+
+        .disease-banner {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin-bottom: 14px;
+        }
+
+        .disease-banner.diseased {
+            background: rgba(239, 68, 68, 0.14);
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
+        .disease-banner.uncertain {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.45);
+        }
+
+        .disease-subhead {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .disease-headline {
+            font-size: 20px;
+            font-weight: 800;
+            color: #34d399;
+        }
+
+        .disease-banner.diseased .disease-headline {
+            color: #f87171;
+        }
+
+        .disease-banner.uncertain .disease-headline {
+            color: #fbbf24;
+        }
+
+        /* Confidence Progress Bar */
+        .conf-box {
+            margin-bottom: 16px;
+        }
+
+        .conf-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-dim);
+        }
+
+        .conf-header span:last-child {
+            color: #34d399;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .conf-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .conf-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .conf-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        /* Prescription Grid */
+        .prescription-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .presc-item {
+            background: rgba(8, 26, 19, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .presc-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 3px;
+        }
+
+        .presc-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f0fdf4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .treatment-box {
+            background: rgba(6, 22, 15, 0.8);
+            border-left: 3px solid var(--accent-emerald);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #d1fae5;
+        }
+
+        /* =========================================================
+           ROVER QUICK CONTROLS & TELEMETRY
+        ========================================================= */
+        .rover-quick-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(6, 20, 14, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .quick-nav-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 24px rgba(16, 185, 129, 0.55);
+        }
+
+        /* =========================================================
+           SUMMARY STATISTICS GRID
+        ========================================================= */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-card-bright);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            font-size: 18px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #f0fdf4;
+            margin-bottom: 4px;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: #86efac;
+        }
+
+        /* =========================================================
+           ANIMATIONS & UTILITIES
+        ========================================================= */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
+        }
+
+        @keyframes radarPing {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.6); opacity: 0; }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+            </div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
+            </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link active">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </nav>
+
+        <!-- Mobile Hamburger Toggle -->
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
+
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 34px; height: 34px;">
+                    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+                </div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="/" class="nav-link active">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MAIN DASHBOARD
+    ========================================================= -->
+    <main>
+
+        <!-- AGRIROVER SYSTEM SHOWCASE HERO (OFFICIAL APP PHOTO) -->
+        <section class="system-hero-card">
+            <div class="hero-left">
+                <div class="hero-photo-wrap">
+                    <img src="{{ url_for('static', filename='images/app_photo.png') }}" alt="AgriRover Smart Robot" class="hero-app-photo">
+                    <div class="hero-badge-tag">AUTONOMOUS ROBOT</div>
+                </div>
+                <div class="hero-content">
+                    <div class="hero-subhead">
+                        <span class="radar-dot" style="background:#10b981;"></span>
+                        <span>PRECISION AG-TECH PLATFORM</span>
+                        <span class="hero-tag-pill">v2.4 LiteRT</span>
+                    </div>
+                    <h2 class="hero-title">Smart Autonomous Plant Pathology Rover</h2>
+                    <p class="hero-desc">
+                        Edge AI-driven chili leaf disease diagnostics with 99.0% neural accuracy, real-time chlorophyll botanical validation, differential drive actuation, and automated precision spray targeting.
+                    </p>
+                    <div class="hero-features-row">
+                        <div class="hero-feat-chip">🌱 Botanical Foliage Gate</div>
+                        <div class="hero-feat-chip">⚡ 2-Thread XNNPACK</div>
+                        <div class="hero-feat-chip">🛸 Three.js 3D Holograms</div>
+                        <div class="hero-feat-chip">☁️ Cloud + Pi Dual Sync</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-right-actions">
+                <a href="/rover" class="btn-hero-action primary">
+                    <span>🛸 Drive Rover 3D</span>
+                </a>
+                <a href="/daily-data" class="btn-hero-action secondary">
+                    <span>📊 Scans Archive</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- TELEMETRY HUD ROW -->
+        <section class="hud-grid">
+            <!-- PI 4 STATUS -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon">🍓</div>
+                    <div>
+                        <div class="hud-label">Raspberry Pi 4</div>
+                        <div class="hud-val" id="pi-ip-text">{{ rover.pi_ip or rover.ip or "192.168.14.138" }}</div>
+                    </div>
+                </div>
+                <div class="status-pill {% if rover.connected %}online{% else %}offline{% endif %}" id="pi-pill">
+                    <span class="radar-dot"></span>
+                    <span id="pi-pill-text">{% if rover.connected %}Online{% else %}Standby{% endif %}</span>
+                </div>
+            </div>
+
+            <!-- AI ENGINE STATUS -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(6, 182, 212, 0.35);">🧠</div>
+                    <div>
+                        <div class="hud-label">Edge AI Model</div>
+                        <div class="hud-val">MobileNetV2 INT8</div>
+                    </div>
+                </div>
+                <div class="status-pill online" id="ai-pill">
+                    <span class="radar-dot"></span>
+                    <span id="ai-pill-text">Active (22 FPS)</span>
+                </div>
+            </div>
+
+            <!-- HARDWARE ACTUATION -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.35);">⚡</div>
+                    <div>
+                        <div class="hud-label">Rover Motion</div>
+                        <div class="hud-val" id="rover-motion-text">{{ rover.movement or "STOPPED" }}</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span>L298N Ready</span>
+                </div>
+            </div>
+
+            <!-- DATABASE STORAGE -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.35);">💾</div>
+                    <div>
+                        <div class="hud-label">Daily Data DB</div>
+                        <div class="hud-val" id="total-scans-mini">{{ statistics.total or 0 }} Scans</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span>SQLite WAL</span>
+                </div>
+            </div>
+
+            <!-- LIVE TELEMETRY TICKER (UPDATED BY SECONDS) -->
+            <div class="hud-card">
+                <div class="hud-left">
+                    <div class="hud-icon" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.35);">⏱️</div>
+                    <div>
+                        <div class="hud-label">Live Link Clock</div>
+                        <div class="hud-val" id="hud-sync-time" style="font-family: monospace; color: #86efac;">--:--:--</div>
+                    </div>
+                </div>
+                <div class="status-pill online">
+                    <span class="radar-dot"></span>
+                    <span id="hud-sync-rate">1.0s Live</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRIMARY TWO-COLUMN SECTION -->
+        <section class="dashboard-grid">
+
+            <!-- LEFT COLUMN: ROVER COMMAND & LIVE WEBCAM CENTER -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📹 Live Camera & Command Center</h2>
+                    <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="quick-signal-badge">LIVE CSI</span>
+                </div>
+
+                <!-- LIVE WEBCAM VIDEO STREAM -->
+                <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:280px; max-height:480px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); margin-bottom:14px; display:flex; align-items:center; justify-content:center;">
+                    <img id="live-dashboard-cam" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
+                    <div style="position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,0.65); padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; color:#ef4444;">
+                        <span class="radar-dot" style="background:#ef4444;"></span> LIVE CAM
+                    </div>
+                </div>
+
+                <!-- Signal Status & Quick Telemetry HUD -->
+                <div style="background: rgba(10, 26, 19, 0.9); border: 1px solid var(--border-card); border-radius: 14px; padding: 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Drive Status:</span>
+                        <span id="quick-motion-status" style="font-size: 13px; font-weight: 800; color: #34d399;">STOPPED</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; font-family: monospace;">
+                        <span>Link Latency: <strong id="quick-latency-val" style="color:#38bdf8;">-- ms</strong></span>
+                        <span>Motor Power: <strong id="quick-speed-val" style="color:#86efac;">60% PWM</strong></span>
+                    </div>
+                </div>
+
+                <!-- Direct Touch D-Pad -->
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 14px;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 220px; height: 220px;">
+                        <div></div>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('forward')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #154c37, #0d3625); border-color: rgba(52, 211, 153, 0.5); color: #86efac;">▲<span style="font-size:10px; display:block;">FWD</span></button>
+                        <div></div>
+
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('left')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #133a2a, #0b261b); border-color: rgba(52, 211, 153, 0.3); color: #ecfdf5;">◀<span style="font-size:10px; display:block;">LEFT</span></button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('stop')" style="justify-content: center; font-size: 20px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #7f1d1d, #450a0a); border-color: #ef4444; color: #fee2e2; box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);">■<span style="font-size:10px; display:block;">STOP</span></button>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('right')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #133a2a, #0b261b); border-color: rgba(52, 211, 153, 0.3); color: #ecfdf5;">▶<span style="font-size:10px; display:block;">RIGHT</span></button>
+
+                        <div></div>
+                        <button class="btn-stream-action btn-dpad-quick" onclick="sendQuickCommand('backward')" style="justify-content: center; font-size: 18px; font-weight: 800; border-radius: 14px; background: linear-gradient(145deg, #37230b, #1f1406); border-color: rgba(245, 158, 11, 0.4); color: #fde68a;">▼<span style="font-size:10px; display:block;">REV</span></button>
+                        <div></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Pump Toggle + Mobile Controller Link -->
+                <div style="display: flex; gap: 8px;">
+                    <button id="quick-pump-btn" class="btn-stream-action" onclick="toggleQuickPump()" style="flex: 1; justify-content: center; padding: 10px; font-size: 12px; font-weight: 800;">💦 Spray Pump: OFF</button>
+                    <a href="/rover" class="btn-stream-action" style="flex: 1; justify-content: center; padding: 10px; font-size: 12px; font-weight: 800; background: rgba(6, 182, 212, 0.2); border-color: rgba(6, 182, 212, 0.5); color: #67e8f9; text-decoration: none;">📱 Mobile Cockpit ↗</a>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: LATEST DETECTION RESULT -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔬 Plant Leaf Health Diagnosis</h2>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;" id="diagnosis-engine-badge">AI SCAN</span>
+                        <button onclick="clearDashboardDetection()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🗑️ Clear Result</button>
+                    </div>
+                </div>
+
+                <!-- 2D High Resolution Snapshot Container -->
+                <div class="leaf-preview-container" id="leaf-2d-container" style="display: flex; margin-bottom: 14px;">
+                    <div class="leaf-img-box" id="leaf-img-box">
+                        {% if detection.image %}
+                            <img id="latest-leaf-img" src="{{ url_for('static', filename='images/' + detection.image) }}?v={{ detection.timestamp }}" alt="Latest Plant Leaf">
+
+                        {% else %}
+                            <img id="latest-leaf-img" src="{{ url_for('static', filename='images/20261006_141712_ba202fd4.jpg') }}" alt="Real-time Chili Leaf" style="opacity: 0.85;">
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner-2d">
+                            <div class="disease-subhead">CAPTURED SNAPSHOT</div>
+                            <div class="disease-headline" id="disease-headline-2d" style="font-size: 16px;">{{ detection.disease or "Healthy Leaf" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaf Preview & Classification Headline -->
+                <div class="disease-banner {% if detection.is_healthy == false or (detection.disease and 'Healthy' not in detection.disease) %}diseased{% endif %}" id="disease-banner">
+                    <div class="disease-subhead">IDENTIFIED CLASSIFICATION</div>
+                    <div class="disease-headline" id="disease-headline">{{ detection.disease or "Healthy Leaf" }}</div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-dim); margin-top: -6px; margin-bottom: 14px; display: flex; justify-content: space-between;" id="detection-meta">
+                    <span id="detection-timestamp">Scanned: {{ detection.timestamp or "Real-time" }}</span>
+                    <span id="leaf-biometric-vigor" style="color: #34d399; font-weight: 700;">Chlorophyll: Optimal</span>
+                </div>
+
+                <!-- AI Confidence Meter -->
+                <div class="conf-box">
+                    <div class="conf-header">
+                        <span>MODEL CONFIDENCE</span>
+                        <span id="conf-val">{{ detection.confidence or 98.4 }}%</span>
+                    </div>
+                    <div class="conf-track">
+                        <div class="conf-fill" id="conf-fill" style="width: {{ detection.confidence or 98.4 }}%;"></div>
+                    </div>
+                </div>
+
+                <!-- Prescription Matrix -->
+                <div class="prescription-grid">
+                    <div class="presc-item">
+                        <div class="presc-label">Recommended Chemical</div>
+                        <div class="presc-val" id="presc-chemical">{{ detection.chemical or "None Required" }}</div>
+                    </div>
+                    <div class="presc-item">
+                        <div class="presc-label">Recommended Fertilizer</div>
+                        <div class="presc-val" id="presc-fertilizer">{{ detection.fertilizer or "Balanced NPK" }}</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Agronomy Treatment -->
+                <div class="treatment-box">
+                    <div style="font-weight: 700; margin-bottom: 4px; color: #6ee7b7;">🛡️ Recommended Agronomic Action:</div>
+                    <div id="presc-treatment">{{ detection.treatment or "Plant is in optimal vigor. Maintain standard irrigation schedule and monitor weekly." }}</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ROVER ACTION BANNER -->
+        <section class="rover-quick-strip">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="font-size: 28px;">🚜</div>
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 700;">Precision Rover Telemetry & Actuation</h3>
+                    <p style="font-size: 12px; color: var(--text-dim);">Navigate the rover across crop rows, control spray pumps, and monitor real-time GPIO actuation.</p>
+                </div>
+            </div>
+            <a href="/rover" class="quick-nav-btn">
+                Launch Rover Command Center ↗
+            </a>
+        </section>
+
+        <!-- STATISTICS GRID -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Total Field Scans</span>
+                    <span class="stat-icon">📋</span>
+                </div>
+                <div class="stat-number" id="stat-total">{{ statistics.total or 0 }}</div>
+                <div class="stat-sub">Persisted in SQLite database</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Healthy Plants</span>
+                    <span class="stat-icon" style="color: #4ade80;">🌿</span>
+                </div>
+                <div class="stat-number" id="stat-healthy" style="color: #4ade80;">{{ statistics.healthy or 0 }}</div>
+                <div class="stat-sub" id="stat-healthy-pct">Vigor: {{ statistics.healthy_percent or 100 }}%</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Diseased Plants</span>
+                    <span class="stat-icon" style="color: #f87171;">⚠️</span>
+                </div>
+                <div class="stat-number" id="stat-diseased" style="color: #f87171;">{{ statistics.diseased or 0 }}</div>
+                <div class="stat-sub" id="stat-diseased-pct">Infection: {{ statistics.diseased_percent or 0 }}%</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Daily History</span>
+                    <span class="stat-icon">📅</span>
+                </div>
+                <div class="stat-number" style="font-size: 22px; margin-top: 6px;">Daily Log</div>
+                <div class="stat-sub">
+                    <a href="/daily-data" style="color: #38bdf8; text-decoration: none; font-weight: 700;">View Daily Breakdown &rarr;</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         LIGHTWEIGHT FRONTEND JAVASCRIPT ENGINE
+    ========================================================= */
+    -->
+    <script>
+        // Navigation Drawer Controls
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
+        }
+
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
+        }
+
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+
+        // High-Speed Live Camera Engine (Adaptive Progressive Stream)
+        const cameraImg = document.getElementById("live-dashboard-cam");
+        const cameraFallback = document.getElementById("camera-fallback");
+        const streamIndicator = document.getElementById("stream-indicator-dot");
+        const streamStatus = document.getElementById("stream-status-label");
+        // Cloud-Optimized Live Camera Engine (Paced for Render ~6-8 FPS)
+        let consecutiveErrors = 0;
+        let localStreamTested = false;
+        let dashStreamActive = true;
+        let dashInFlight = false;
+
+        function fetchDashboardLiveFrame() {
+            if (!dashStreamActive || dashInFlight) return;
+            dashInFlight = true;
+            const probe = new Image();
+            probe.onload = function() {
+                if (cameraImg && dashStreamActive) cameraImg.src = probe.src;
+                if (cameraFallback) cameraFallback.style.display = "none";
+                if (streamIndicator) streamIndicator.style.background = "#10b981";
+                if (streamStatus) streamStatus.textContent = "Live Edge AI Camera Streaming";
+                consecutiveErrors = 0;
+                dashInFlight = false;
+                // 125ms cadence (~8 FPS) perfectly matches Render cloud upload bandwidth!
+                setTimeout(fetchDashboardLiveFrame, 125);
+            };
+            probe.onerror = function() {
+                consecutiveErrors++;
+                if (consecutiveErrors > 3) {
+                    if (streamIndicator) streamIndicator.style.background = "#ef4444";
+                    if (streamStatus) streamStatus.textContent = "Reconnecting Stream...";
+                }
+                dashInFlight = false;
+                setTimeout(fetchDashboardLiveFrame, 350);
+            };
+            probe.src = "/api/camera/live_frame?t=" + Date.now();
+        }
+
+        // Start continuous cloud streaming immediately
+        fetchDashboardLiveFrame();
+
+        // Smart LAN detection: If device is on same local Wi-Fi, stream direct from Pi port 8080 at 25 FPS
+        function tryLocalPiStream(piIp) {
+            if (localStreamTested || !piIp) return;
+            localStreamTested = true;
+            const probe = new Image();
+            probe.onload = function() {
+                console.log("Local Raspberry Pi stream reachable on LAN! Switching to full 25 FPS direct feed...");
+                dashStreamActive = false; // Stop cloud frame polling
+                if (cameraImg) cameraImg.src = "http://" + piIp + ":8080/video_feed";
+            };
+            probe.src = "http://" + piIp + ":8080/snapshot?_=" + Date.now();
+        }
+
+        function retryStreamConnection() {
+            dashInFlight = false;
+            dashStreamActive = true;
+            fetchDashboardLiveFrame();
+        }
+
+        function takeSnapshot() {
+            window.open("/api/camera/snapshot?t=" + Date.now(), "_blank");
+        }
+
+        async function clearDashboardDetection() {
+            try {
+                const res = await fetch("/api/result/clear", { method: "POST" });
+                const data = await res.json();
+                if (data.success) {
+                    const headline = document.getElementById("disease-headline");
+                    const headline2D = document.getElementById("disease-headline-2d");
+                    const banner = document.getElementById("disease-banner");
+                    const banner2D = document.getElementById("disease-banner-2d");
+                    const confVal = document.getElementById("conf-val");
+                    const confFill = document.getElementById("conf-fill");
+                    const prescChem = document.getElementById("presc-chemical");
+                    const prescFert = document.getElementById("presc-fertilizer");
+                    const prescTreat = document.getElementById("presc-treatment");
+                    const leafBox = document.getElementById("leaf-img-box");
+
+                    if (headline) headline.textContent = "Scanning Active (No Leaf in View)";
+                    if (headline2D) headline2D.textContent = "No Captured Snapshots";
+                    if (banner) banner.className = "disease-banner";
+                    if (banner2D) banner2D.className = "disease-banner";
+                    if (confVal) confVal.textContent = "0.0%";
+                    if (confFill) confFill.style.width = "0%";
+                    if (prescChem) prescChem.textContent = "None Required";
+                    if (prescFert) prescFert.textContent = "Balanced NPK";
+                    if (prescTreat) prescTreat.textContent = "Point camera at chili plant leaf to detect diseases.";
+                    if (leafBox) leafBox.innerHTML = '<img id="latest-leaf-img" src="/static/app_photo.png" alt="Real-time Chili Leaf" style="opacity: 0.85;">';
+                }
+            } catch (e) {
+                console.error("Clear failed", e);
+            }
+        }
+
+        // Quick Rover Movement Command Handler
+        async function sendQuickCommand(cmd) {
+            const statusText = document.getElementById("quick-motion-status");
+            const latencyText = document.getElementById("quick-latency-val");
+            if (statusText) {
+                if (cmd === 'forward') {
+                    statusText.textContent = 'FORWARD';
+                    statusText.style.color = '#34d399';
+                } else if (cmd === 'backward') {
+                    statusText.textContent = 'BACKWARD';
+                    statusText.style.color = '#f87171';
+                } else if (cmd === 'left') {
+                    statusText.textContent = 'TURNING LEFT';
+                    statusText.style.color = '#38bdf8';
+                } else if (cmd === 'right') {
+                    statusText.textContent = 'TURNING RIGHT';
+                    statusText.style.color = '#38bdf8';
+                } else if (cmd === 'stop') {
+                    statusText.textContent = 'STOPPED';
+                    statusText.style.color = '#ef4444';
+                }
+            }
+            const t0 = performance.now();
+            try {
+                const res = await fetch("/api/rover/control", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        command: cmd,
+                        speed: 60
+                    })
+                });
+                const latency = Math.round(performance.now() - t0);
+                if (latencyText) latencyText.textContent = `${latency} ms`;
+                const data = await res.json();
+                if (data.success && statusText) {
+                    if (cmd === 'stop') {
+                        statusText.textContent = 'STOPPED';
+                        statusText.style.color = '#ef4444';
+                    } else if (cmd === 'forward') {
+                        statusText.textContent = 'FORWARD';
+                        statusText.style.color = '#34d399';
+                    } else if (cmd === 'backward') {
+                        statusText.textContent = 'BACKWARD';
+                        statusText.style.color = '#f87171';
+                    } else if (cmd === 'left') {
+                        statusText.textContent = 'TURNING LEFT';
+                        statusText.style.color = '#38bdf8';
+                    } else if (cmd === 'right') {
+                        statusText.textContent = 'TURNING RIGHT';
+                        statusText.style.color = '#38bdf8';
+                    }
+                }
+            } catch (e) {
+                if (statusText) statusText.textContent = "ERR: NO LINK";
+            }
+        }
+
+        let quickPumpActive = false;
+        async function toggleQuickPump() {
+            quickPumpActive = !quickPumpActive;
+            const btn = document.getElementById("quick-pump-btn");
+            if (btn) {
+                btn.textContent = quickPumpActive ? "💦 Spray Pump: ON" : "💦 Spray Pump: OFF";
+                btn.style.color = quickPumpActive ? "#38bdf8" : "#f0fdf4";
+                btn.style.borderColor = quickPumpActive ? "#06b6d4" : "rgba(34, 197, 94, 0.3)";
+            }
+            try {
+                await fetch("/api/rover/pump", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ state: quickPumpActive })
+                });
+            } catch (e) {}
+        }
+        // =========================================================
+        // 3D HOLOGRAPHIC PLANT LEAF BIOMETRIC VISUALIZER (Three.js)
+        // =========================================================
+        let leaf3D = {
+            scene: null,
+            camera: null,
+            renderer: null,
+            leafGroup: null,
+            leafMesh: null,
+            leafMat: null,
+            stemMesh: null,
+            veinGroup: null,
+            lesionGroup: null,
+            scannerMesh: null,
+            particles: null,
+            clock: null,
+            autoRotate: true,
+            isScanning: true,
+            rotY: 0,
+            rotX: 0.15,
+            targetRotY: 0,
+            targetRotX: 0.15,
+            zoom: 5.2,
+            isDragging: false,
+            lastPointerX: 0,
+            lastPointerY: 0,
+            touchDist: 0,
+            currentState: "SCANNING"
+        };
+
+        function switchLeafView(mode) {
+            const btn3D = document.getElementById("btn-leaf-3d");
+            const btn2D = document.getElementById("btn-leaf-2d");
+            const viewport3D = document.getElementById("leaf-3d-viewport");
+            const container2D = document.getElementById("leaf-2d-container");
+            const camControls = document.getElementById("leaf-cam-controls");
+
+            if (mode === "3d") {
+                if (btn3D) btn3D.classList.add("active");
+                if (btn2D) btn2D.classList.remove("active");
+                if (viewport3D) viewport3D.style.display = "block";
+                if (container2D) container2D.style.display = "none";
+                if (camControls) camControls.style.display = "flex";
+                onLeaf3DResize();
+            } else {
+                if (btn2D) btn2D.classList.add("active");
+                if (btn3D) btn3D.classList.remove("active");
+                if (viewport3D) viewport3D.style.display = "none";
+                if (container2D) container2D.style.display = "grid";
+                if (camControls) camControls.style.display = "none";
+            }
+        }
+
+        function toggleLeafAutoRotate() {
+            leaf3D.autoRotate = !leaf3D.autoRotate;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) {
+                if (leaf3D.autoRotate) btn.classList.add("active");
+                else btn.classList.remove("active");
+            }
+        }
+
+        function setLeafCamAngle(angle) {
+            leaf3D.autoRotate = false;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) btn.classList.remove("active");
+
+            if (angle === 'top') {
+                leaf3D.targetRotX = 0.95;
+                leaf3D.targetRotY = 0;
+            } else if (angle === 'underside') {
+                leaf3D.targetRotX = -0.85;
+                leaf3D.targetRotY = Math.PI;
+            }
+        }
+
+        function resetLeafCam() {
+            leaf3D.targetRotX = 0.18;
+            leaf3D.targetRotY = 0;
+            leaf3D.zoom = 5.2;
+            leaf3D.autoRotate = true;
+            const btn = document.getElementById("leaf-cam-rotate");
+            if (btn) btn.classList.add("active");
+        }
+
+        function createChiliLeafGeometry() {
+            const uSegs = 22;
+            const vSegs = 34;
+            const positions = [];
+            const uvs = [];
+            const indices = [];
+
+            for (let j = 0; j <= vSegs; j++) {
+                const v = j / vSegs;
+                const y = -2.1 + v * 4.3;
+
+                let width = 0;
+                if (v < 0.08) {
+                    width = 0.08 + v * 1.6;
+                } else {
+                    const bladeT = (v - 0.08) / 0.92;
+                    width = Math.sin(Math.pow(bladeT, 0.65) * Math.PI) * 1.48 * (1.0 - 0.16 * bladeT);
+                }
+
+                const arch = Math.sin(v * Math.PI) * 0.44 - Math.pow(v, 2) * 0.28;
+
+                for (let i = 0; i <= uSegs; i++) {
+                    const uNorm = (i / uSegs) * 2 - 1;
+                    const x = uNorm * width;
+                    const trough = Math.pow(Math.abs(uNorm), 1.65) * 0.26;
+                    const edgeWave = Math.sin(v * 22.0 + Math.abs(uNorm) * 3.5) * 0.02 * Math.abs(uNorm);
+                    const z = arch + trough + edgeWave;
+
+                    positions.push(x, y, z);
+                    uvs.push(i / uSegs, v);
+                }
+            }
+
+            for (let j = 0; j < vSegs; j++) {
+                for (let i = 0; i < uSegs; i++) {
+                    const a = j * (uSegs + 1) + i;
+                    const b = (j + 1) * (uSegs + 1) + i;
+                    const c = (j + 1) * (uSegs + 1) + (i + 1);
+                    const d = j * (uSegs + 1) + (i + 1);
+
+                    indices.push(a, b, d);
+                    indices.push(b, c, d);
+                }
+            }
+
+            const geom = new THREE.BufferGeometry();
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+            geom.setIndex(indices);
+            geom.computeVertexNormals();
+            return geom;
+        }
+
+        function initLeaf3D() {
+            const container = document.getElementById("leaf-3d-viewport");
+            const canvas = document.getElementById("leaf-3d-canvas");
+            if (!container || !canvas || typeof THREE === "undefined") return;
+
+            const w = container.clientWidth || 380;
+            const h = container.clientHeight || 240;
+
+            leaf3D.clock = new THREE.Clock();
+            leaf3D.scene = new THREE.Scene();
+
+            leaf3D.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
+            leaf3D.camera.position.set(0, 0, leaf3D.zoom);
+
+            leaf3D.renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                alpha: true,
+                antialias: true,
+                powerPreference: "high-performance"
+            });
+            leaf3D.renderer.setSize(w, h);
+            leaf3D.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+            // Lighting
+            const ambient = new THREE.AmbientLight(0xd1fae5, 0.75);
+            leaf3D.scene.add(ambient);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+            keyLight.position.set(3, 4, 4);
+            leaf3D.scene.add(keyLight);
+
+            const backLight = new THREE.DirectionalLight(0x06b6d4, 0.6);
+            backLight.position.set(-3, -2, -3);
+            leaf3D.scene.add(backLight);
+
+            // Leaf Scene Root Group
+            leaf3D.leafGroup = new THREE.Group();
+            leaf3D.scene.add(leaf3D.leafGroup);
+
+            // 1. Leaf Blade
+            const leafGeom = createChiliLeafGeometry();
+            leaf3D.leafMat = new THREE.MeshStandardMaterial({
+                color: 0x10b981,
+                roughness: 0.38,
+                metalness: 0.08,
+                side: THREE.DoubleSide,
+                emissive: 0x064e3b,
+                emissiveIntensity: 0.25
+            });
+            leaf3D.leafMesh = new THREE.Mesh(leafGeom, leaf3D.leafMat);
+            leaf3D.leafGroup.add(leaf3D.leafMesh);
+
+            // 2. Central Midrib Stem
+            const stemCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, -2.25, -0.06),
+                new THREE.Vector3(0, -1.1, 0.18),
+                new THREE.Vector3(0, 0.3, 0.42),
+                new THREE.Vector3(0, 1.4, 0.24),
+                new THREE.Vector3(0, 2.15, 0.04)
+            ]);
+            const stemGeom = new THREE.TubeGeometry(stemCurve, 24, 0.05, 8, false);
+            const stemMat = new THREE.MeshStandardMaterial({
+                color: 0x22c55e,
+                roughness: 0.4,
+                metalness: 0.05
+            });
+            leaf3D.stemMesh = new THREE.Mesh(stemGeom, stemMat);
+            leaf3D.leafGroup.add(leaf3D.stemMesh);
+
+            // 3. Lateral Vein Network
+            leaf3D.veinGroup = new THREE.Group();
+            const veinMat = new THREE.LineBasicMaterial({
+                color: 0x34d399,
+                transparent: true,
+                opacity: 0.65,
+                linewidth: 2
+            });
+
+            const veinLevels = [-1.0, -0.4, 0.2, 0.8, 1.4];
+            veinLevels.forEach((vy, idx) => {
+                const spread = 0.85 + (idx * 0.1);
+                // Left vein
+                const ptsL = [
+                    new THREE.Vector3(0, vy, 0.25),
+                    new THREE.Vector3(-0.45 * spread, vy + 0.32, 0.30),
+                    new THREE.Vector3(-0.95 * spread, vy + 0.58, 0.22)
+                ];
+                const gL = new THREE.BufferGeometry().setFromPoints(ptsL);
+                leaf3D.veinGroup.add(new THREE.Line(gL, veinMat));
+
+                // Right vein
+                const ptsR = [
+                    new THREE.Vector3(0, vy, 0.25),
+                    new THREE.Vector3(0.45 * spread, vy + 0.32, 0.30),
+                    new THREE.Vector3(0.95 * spread, vy + 0.58, 0.22)
+                ];
+                const gR = new THREE.BufferGeometry().setFromPoints(ptsR);
+                leaf3D.veinGroup.add(new THREE.Line(gR, veinMat));
+            });
+            leaf3D.leafGroup.add(leaf3D.veinGroup);
+
+            // 4. Disease Necrosis Lesions System
+            leaf3D.lesionGroup = new THREE.Group();
+            leaf3D.lesionGroup.visible = false;
+
+            const spotCoords = [
+                { x: 0.35, y: 0.4, z: 0.38, r: 0.16 },
+                { x: -0.42, y: -0.2, z: 0.32, r: 0.22 },
+                { x: 0.55, y: -0.7, z: 0.26, r: 0.18 },
+                { x: -0.25, y: 0.9, z: 0.28, r: 0.14 },
+                { x: 0.15, y: -1.2, z: 0.15, r: 0.12 }
+            ];
+
+            spotCoords.forEach(sc => {
+                const spotGeom = new THREE.CircleGeometry(sc.r, 12);
+                const spotMat = new THREE.MeshBasicMaterial({
+                    color: 0x78350f,
+                    side: THREE.DoubleSide
+                });
+                const spotMesh = new THREE.Mesh(spotGeom, spotMat);
+                spotMesh.position.set(sc.x, sc.y, sc.z + 0.02);
+                spotMesh.rotation.x = -0.15;
+                leaf3D.lesionGroup.add(spotMesh);
+
+                // Halo ring
+                const haloGeom = new THREE.RingGeometry(sc.r * 0.9, sc.r * 1.35, 12);
+                const haloMat = new THREE.MeshBasicMaterial({
+                    color: 0xf59e0b,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: 0.75
+                });
+                const haloMesh = new THREE.Mesh(haloGeom, haloMat);
+                haloMesh.position.set(sc.x, sc.y, sc.z + 0.022);
+                haloMesh.rotation.x = -0.15;
+                leaf3D.lesionGroup.add(haloMesh);
+            });
+            leaf3D.leafGroup.add(leaf3D.lesionGroup);
+
+            // 5. Laser Scanning Beam
+            const scanGeom = new THREE.PlaneGeometry(3.2, 0.08);
+            const scanMat = new THREE.MeshBasicMaterial({
+                color: 0x06b6d4,
+                transparent: true,
+                opacity: 0.75,
+                side: THREE.DoubleSide,
+                blending: THREE.AdditiveBlending
+            });
+            leaf3D.scannerMesh = new THREE.Mesh(scanGeom, scanMat);
+            leaf3D.scannerMesh.position.set(0, 0, 0.45);
+            leaf3D.leafGroup.add(leaf3D.scannerMesh);
+
+            // 6. Bio-Energy Particle Cloud
+            const partCount = 55;
+            const partGeom = new THREE.BufferGeometry();
+            const partPos = new Float32Array(partCount * 3);
+            for (let i = 0; i < partCount; i++) {
+                partPos[i * 3] = (Math.random() - 0.5) * 3.2;
+                partPos[i * 3 + 1] = (Math.random() - 0.5) * 4.6;
+                partPos[i * 3 + 2] = (Math.random() - 0.5) * 1.6;
+            }
+            partGeom.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+            const partMat = new THREE.PointsMaterial({
+                color: 0x34d399,
+                size: 0.08,
+                transparent: true,
+                opacity: 0.65,
+                blending: THREE.AdditiveBlending
+            });
+            leaf3D.particles = new THREE.Points(partGeom, partMat);
+            leaf3D.leafGroup.add(leaf3D.particles);
+
+            // Touch / Drag Interaction
+            setupLeaf3DInteraction(container);
+
+            // Resize Listener
+            window.addEventListener("resize", onLeaf3DResize);
+
+            // Start Animation Loop
+            requestAnimationFrame(animateLeaf3D);
+        }
+
+        function setupLeaf3DInteraction(container) {
+            container.addEventListener("pointerdown", e => {
+                leaf3D.isDragging = true;
+                leaf3D.autoRotate = false;
+                const btn = document.getElementById("leaf-cam-rotate");
+                if (btn) btn.classList.remove("active");
+                leaf3D.lastPointerX = e.clientX;
+                leaf3D.lastPointerY = e.clientY;
+                container.setPointerCapture(e.pointerId);
+            });
+
+            container.addEventListener("pointermove", e => {
+                if (!leaf3D.isDragging) return;
+                const dx = e.clientX - leaf3D.lastPointerX;
+                const dy = e.clientY - leaf3D.lastPointerY;
+                leaf3D.targetRotY += dx * 0.012;
+                leaf3D.targetRotX += dy * 0.012;
+                leaf3D.targetRotX = Math.max(-1.3, Math.min(1.3, leaf3D.targetRotX));
+                leaf3D.lastPointerX = e.clientX;
+                leaf3D.lastPointerY = e.clientY;
+            });
+
+            const stopDrag = () => { leaf3D.isDragging = false; };
+            container.addEventListener("pointerup", stopDrag);
+            container.addEventListener("pointercancel", stopDrag);
+
+            container.addEventListener("wheel", e => {
+                e.preventDefault();
+                leaf3D.zoom += e.deltaY * 0.004;
+                leaf3D.zoom = Math.max(3.0, Math.min(8.5, leaf3D.zoom));
+                if (leaf3D.camera) leaf3D.camera.position.z = leaf3D.zoom;
+            }, { passive: false });
+        }
+
+        function onLeaf3DResize() {
+            const container = document.getElementById("leaf-3d-viewport");
+            if (!container || !leaf3D.camera || !leaf3D.renderer) return;
+            const w = container.clientWidth || 380;
+            const h = container.clientHeight || 240;
+            leaf3D.camera.aspect = w / h;
+            leaf3D.camera.updateProjectionMatrix();
+            leaf3D.renderer.setSize(w, h);
+        }
+
+        function updateLeaf3DState(diseaseName, confidence, isHealthy, isScanningMode) {
+            if (!leaf3D.leafMat || !leaf3D.lesionGroup) return;
+
+            const badge = document.getElementById("leaf-3d-badge");
+            const badgeDot = document.getElementById("leaf-badge-dot");
+            const badgeText = document.getElementById("leaf-badge-text");
+            const vigorText = document.getElementById("leaf-biometric-vigor");
+
+            if (isScanningMode || !diseaseName || diseaseName === "NO LEAF DETECTED") {
+                leaf3D.currentState = "SCANNING";
+                leaf3D.leafMat.color.setHex(0x06b6d4);
+                leaf3D.leafMat.emissive.setHex(0x083344);
+                leaf3D.leafMat.wireframe = true;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) {
+                    leaf3D.scannerMesh.visible = true;
+                    leaf3D.scannerMesh.material.color.setHex(0x06b6d4);
+                }
+                if (badgeDot) badgeDot.style.background = "#06b6d4";
+                if (badgeText) badgeText.textContent = "SCANNING CHILI FOLIAGE...";
+                if (vigorText) {
+                    vigorText.textContent = "Scanner: Active (No Leaf)";
+                    vigorText.style.color = "#38bdf8";
+                }
+                return;
+            }
+
+            leaf3D.leafMat.wireframe = false;
+            const dLower = (diseaseName || "").toLowerCase();
+
+            if (isHealthy || dLower.includes("healthy")) {
+                leaf3D.currentState = "HEALTHY";
+                leaf3D.leafMat.color.setHex(0x10b981);
+                leaf3D.leafMat.emissive.setHex(0x064e3b);
+                leaf3D.leafMat.roughness = 0.38;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0x10b981);
+                if (badgeDot) badgeDot.style.background = "#10b981";
+                if (badgeText) badgeText.textContent = `HEALTHY LEAF (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Chlorophyll Vigor: 98.4% (Optimal)";
+                    vigorText.style.color = "#34d399";
+                }
+            } else if (dLower.includes("cercospora")) {
+                leaf3D.currentState = "CERCOSPORA";
+                leaf3D.leafMat.color.setHex(0x84cc16);
+                leaf3D.leafMat.emissive.setHex(0x365314);
+                leaf3D.leafMat.roughness = 0.55;
+                leaf3D.lesionGroup.visible = true;
+                leaf3D.lesionGroup.children.forEach(c => {
+                    if (c.material) c.material.color.setHex(0x78350f);
+                });
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xf59e0b);
+                if (badgeDot) badgeDot.style.background = "#f59e0b";
+                if (badgeText) badgeText.textContent = `CERCOSPORA DETECTED (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Necrotic Spot Lesions Active";
+                    vigorText.style.color = "#fbbf24";
+                }
+            } else if (dLower.includes("bacterial")) {
+                leaf3D.currentState = "BACTERIAL";
+                leaf3D.leafMat.color.setHex(0x65a30d);
+                leaf3D.leafMat.emissive.setHex(0x450a0a);
+                leaf3D.leafMat.roughness = 0.62;
+                leaf3D.lesionGroup.visible = true;
+                leaf3D.lesionGroup.children.forEach(c => {
+                    if (c.material) c.material.color.setHex(0xef4444);
+                });
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xef4444);
+                if (badgeDot) badgeDot.style.background = "#ef4444";
+                if (badgeText) badgeText.textContent = `BACTERIAL SPOT (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Pathogen Infection Alert";
+                    vigorText.style.color = "#f87171";
+                }
+            } else if (dLower.includes("curl")) {
+                leaf3D.currentState = "CURL";
+                leaf3D.leafMat.color.setHex(0xeab308);
+                leaf3D.leafMat.emissive.setHex(0x713f12);
+                leaf3D.leafMat.roughness = 0.48;
+                leaf3D.lesionGroup.visible = false;
+                if (leaf3D.scannerMesh) leaf3D.scannerMesh.material.color.setHex(0xeab308);
+                if (badgeDot) badgeDot.style.background = "#eab308";
+                if (badgeText) badgeText.textContent = `CURL VIRUS (${confidence.toFixed(1)}%)`;
+                if (vigorText) {
+                    vigorText.textContent = "Viral Margin Stunting Alert";
+                    vigorText.style.color = "#facc15";
+                }
+            }
+        }
+
+        function animateLeaf3D() {
+            requestAnimationFrame(animateLeaf3D);
+
+            if (document.hidden) return;
+            if (!leaf3D.renderer || !leaf3D.scene || !leaf3D.camera) return;
+
+            const delta = leaf3D.clock ? leaf3D.clock.getDelta() : 0.016;
+            const elapsed = leaf3D.clock ? leaf3D.clock.getElapsedTime() : 0;
+
+            if (leaf3D.autoRotate) {
+                leaf3D.targetRotY += delta * 0.45;
+            }
+
+            // Smooth interpolation
+            leaf3D.rotY += (leaf3D.targetRotY - leaf3D.rotY) * 0.1;
+            leaf3D.rotX += (leaf3D.targetRotX - leaf3D.rotX) * 0.1;
+
+            if (leaf3D.leafGroup) {
+                leaf3D.leafGroup.rotation.y = leaf3D.rotY;
+                leaf3D.leafGroup.rotation.x = leaf3D.rotX;
+
+                // Gentle organic breathing bob
+                leaf3D.leafGroup.position.y = Math.sin(elapsed * 1.8) * 0.06;
+            }
+
+            // Laser scanner sweep
+            if (leaf3D.scannerMesh) {
+                leaf3D.scannerMesh.position.y = Math.sin(elapsed * 2.8) * 2.0;
+                leaf3D.scannerMesh.material.opacity = 0.45 + Math.sin(elapsed * 6.0) * 0.25;
+            }
+
+            // Bio-particle drift
+            if (leaf3D.particles) {
+                leaf3D.particles.rotation.y = elapsed * 0.15;
+            }
+
+            leaf3D.renderer.render(leaf3D.scene, leaf3D.camera);
+        }
+
+        // Initialize 3D Leaf Hologram immediately
+        initLeaf3D();
+
+        // 3D Perspective Card Tilt on Mouse / Pointer Move
+        document.querySelectorAll('.card, .hud-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -4.5;
+                const rotateY = ((x - centerX) / centerX) * 4.5;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+            });
+        });
+
+        // Real-Time Second-by-Second Telemetry & Detection State Poller
+        let isDashboardPolling = false;
+        let lastResultId = "";
+
+        async function pollDashboardState() {
+            if (isDashboardPolling) return;
+            isDashboardPolling = true;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+            try {
+                const response = await fetch("/api/dashboard-state?_=" + Date.now(), {
+                    cache: "no-store",
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (!response.ok) return;
+                const data = await response.json();
+                if (!data.success) return;
+
+                const dLive = (data.rover && data.rover.last_detection) ? data.rover.last_detection : "";
+                const isUncertain = !dLive || dLive.toLowerCase().includes("uncertain") || dLive === "NO LEAF DETECTED";
+                const hasLiveLeaf = Boolean(dLive && !isUncertain);
+
+                // 1. Update Rover Telemetry & AI Status (Live Every Second)
+                if (data.rover) {
+                    const r = data.rover;
+                    const piPill = document.getElementById("pi-pill");
+                    const piPillText = document.getElementById("pi-pill-text");
+                    const piIp = document.getElementById("pi-ip-text");
+                    const motionText = document.getElementById("rover-motion-text");
+                    const aiPillText = document.getElementById("ai-pill-text");
+                    const camFpsOverlay = document.getElementById("cam-fps-overlay");
+                    const syncClock = document.getElementById("hud-sync-time");
+
+                    const nowTime = r.last_seen ? r.last_seen.split(" ")[1] : new Date().toTimeString().split(" ")[0];
+                    if (syncClock) syncClock.textContent = nowTime;
+
+                    if (piIp && (r.pi_ip || r.ip)) {
+                        piIp.textContent = r.pi_ip || r.ip;
+                        tryLocalPiStream(r.pi_ip || r.ip);
+                    }
+                    if (motionText && (r.direction || r.movement)) motionText.textContent = (r.direction || r.movement).toUpperCase();
+                    if (aiPillText && r.ai_status) aiPillText.textContent = r.ai_status;
+                    if (camFpsOverlay && r.fps !== undefined) camFpsOverlay.textContent = `Picamera2 640x480 · ${r.fps} FPS`;
+
+                    if (r.connected) {
+                        if (piPill) piPill.className = "status-pill online";
+                        if (piPillText) piPillText.textContent = "Online";
+                    } else {
+                        if (piPill) piPill.className = "status-pill offline";
+                        if (piPillText) piPillText.textContent = "Standby";
+                    }
+
+                    // Update 3D state dynamically:
+                    if (hasLiveLeaf) {
+                        const cLive = parseFloat(r.last_confidence) || 0;
+                        const isLiveHealthy = dLive.toLowerCase().includes("healthy");
+                        updateLeaf3DState(dLive, cLive, isLiveHealthy, false);
+                    } else {
+                        updateLeaf3DState("UNCERTAIN", 0, false, true);
+                    }
+                }
+
+                // 2. Real-Time Plant Detection & Prescription Matrix
+                const headline = document.getElementById("disease-headline");
+                const headline2D = document.getElementById("disease-headline-2d");
+                const banner = document.getElementById("disease-banner");
+                const banner2D = document.getElementById("disease-banner-2d");
+                const confVal = document.getElementById("conf-val");
+                const confFill = document.getElementById("conf-fill");
+                const prescChem = document.getElementById("presc-chemical");
+                const prescFert = document.getElementById("presc-fertilizer");
+                const prescTreat = document.getElementById("presc-treatment");
+                const timestamp = document.getElementById("detection-timestamp");
+                const vigor = document.getElementById("leaf-biometric-vigor");
+                const diagBadge = document.getElementById("diagnosis-engine-badge");
+
+                if (hasLiveLeaf) {
+                    // VERIFIED BOTANICAL LEAF IN VIEW
+                    const cLive = parseFloat(data.rover.last_confidence) || 0;
+                    const isLiveHealthy = dLive.toLowerCase().includes("healthy");
+
+                    if (headline) headline.textContent = dLive;
+                    if (banner) banner.className = isLiveHealthy ? "disease-banner" : "disease-banner diseased";
+                    if (confVal) confVal.textContent = cLive.toFixed(1) + "%";
+                    if (confFill) {
+                        confFill.style.width = Math.min(100, Math.max(0, cLive)) + "%";
+                        confFill.className = isLiveHealthy ? "conf-fill" : "conf-fill warning";
+                    }
+                    if (prescChem) prescChem.textContent = data.rover.disease_chemical || (isLiveHealthy ? "None required (Healthy Crop)" : "Consult agronomist");
+                    if (prescFert) prescFert.textContent = data.rover.disease_fertilizer || (isLiveHealthy ? "Balanced NPK fertilizer" : "Standard NPK");
+                    if (prescTreat) prescTreat.textContent = data.rover.disease_treatment || (isLiveHealthy ? "Plant is healthy and flourishing. Continue routine watering and monitoring." : "Apply targeted treatment.");
+                    if (timestamp) timestamp.textContent = "Live Stream Analysis";
+                    if (vigor) {
+                        vigor.textContent = isLiveHealthy ? "Chlorophyll: Optimal (Healthy Leaf)" : "Pathology Alert Detected";
+                        vigor.style.color = isLiveHealthy ? "#34d399" : "#f87171";
+                    }
+                    if (diagBadge) {
+                        diagBadge.textContent = "LIVE DETECTION";
+                        diagBadge.style.background = isLiveHealthy ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)";
+                        diagBadge.style.color = isLiveHealthy ? "#34d399" : "#f87171";
+                    }
+                } else {
+                    // UNCERTAINTY: NON-LEAF OBJECT OR AWAITING CHILI LEAF
+                    if (headline) headline.textContent = "Uncertainty (Awaiting Chili Leaf)";
+                    if (banner) banner.className = "disease-banner uncertain";
+                    if (confVal) confVal.textContent = "0.0%";
+                    if (confFill) {
+                        confFill.style.width = "0%";
+                        confFill.className = "conf-fill";
+                    }
+                    if (prescChem) prescChem.textContent = "None required (Uncertain)";
+                    if (prescFert) prescFert.textContent = "None required";
+                    if (prescTreat) prescTreat.textContent = "Point camera directly at a chili plant leaf to detect diseases.";
+                    if (timestamp) timestamp.textContent = "Awaiting Foliage";
+                    if (vigor) {
+                        vigor.textContent = "Awaiting genuine leaf tissue";
+                        vigor.style.color = "#fbbf24";
+                    }
+                    if (diagBadge) {
+                        diagBadge.textContent = "UNCERTAINTY";
+                        diagBadge.style.background = "rgba(245, 158, 11, 0.2)";
+                        diagBadge.style.color = "#fbbf24";
+                    }
+                }
+
+                // Update Persisted Snapshot & Treatment Matrix
+                if (data.result) {
+                    const res = data.result;
+                    const isHealthy = Boolean(res.is_healthy) || (res.disease && res.disease.toLowerCase().includes("healthy"));
+
+                    if (headline2D) headline2D.textContent = res.disease || "No Captured Snapshots";
+                    if (banner2D) banner2D.className = isHealthy ? "disease-banner" : "disease-banner diseased";
+
+                    // Update Leaf Snapshot image when a new detection arrives
+                    if (res.result_id && res.result_id !== lastResultId) {
+                        lastResultId = res.result_id;
+                        const leafBox = document.getElementById("leaf-img-box");
+                        if (leafBox && res.image) {
+                            leafBox.innerHTML = `<img src="/static/images/${res.image}?v=${Date.now()}" alt="Latest Leaf" style="width:100%;height:100%;object-fit:cover;">`;
+                        }
+                    }
+                }
+
+                // 3. Update Statistics
+                if (data.statistics) {
+                    const s = data.statistics;
+                    const elTotal = document.getElementById("stat-total");
+                    const elHealthy = document.getElementById("stat-healthy");
+                    const elDiseased = document.getElementById("stat-diseased");
+                    const elHealthyPct = document.getElementById("stat-healthy-pct");
+                    const elDiseasedPct = document.getElementById("stat-diseased-pct");
+                    const elMini = document.getElementById("total-scans-mini");
+
+                    if (elTotal) elTotal.textContent = s.total || 0;
+                    if (elHealthy) elHealthy.textContent = s.healthy || 0;
+                    if (elDiseased) elDiseased.textContent = s.diseased || 0;
+                    if (elHealthyPct) elHealthyPct.textContent = "Vigor: " + (s.healthy_percent || 100) + "%";
+                    if (elDiseasedPct) elDiseasedPct.textContent = "Infection: " + (s.diseased_percent || 0) + "%";
+                    if (elMini) elMini.textContent = (s.total || 0) + " Scans";
+                }
+
+            } catch (err) {
+                // Silently swallow fetch blips during page transitions or timeouts
+            } finally {
+                clearTimeout(timeoutId);
+                isDashboardPolling = false;
+            }
+        }
+
+        // Start background polling every 1 second (1000ms)
+        pollDashboardState();
+        setInterval(pollDashboardState, 1000);
+    </script>
+</body>
+</html>

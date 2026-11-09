@@ -925,3 +925,370 @@ input:checked + .slider:before { transform: translateX(18px); background-color: 
 .modal-img { width: 100%; height: auto; display: block; }
 
 .app-footer { text-align: center; padding: 14px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); margin-top: 24px; }
+
+/* =========================================================
+   EXTENDED STYLES FOR UNIFIED 12-SECTION DASHBOARD & PWA
+   ========================================================= */
+
+/* Top Navigation Tabs */
+.nav-tabs-container {
+  max-width: 1440px;
+  margin: 12px auto 0 auto;
+  padding: 0 24px;
+}
+
+.nav-tabs-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+.nav-tabs-scroll::-webkit-scrollbar { height: 4px; }
+.nav-tabs-scroll::-webkit-scrollbar-thumb { background: rgba(34, 197, 94, 0.3); border-radius: 4px; }
+
+.tab-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  background: var(--bg-hover);
+  color: #fff;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(6, 182, 212, 0.15));
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.tab-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+}
+
+/* Tab Panels Visibility */
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Status Badges */
+.badge-connected {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+.badge-disconnected {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.badge-reconnecting {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+/* Sensor Grid */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.sensor-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.sensor-card:hover {
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.sensor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sensor-icon { font-size: 22px; }
+.sensor-name { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.sensor-val {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--text-main);
+  margin-top: 4px;
+}
+.sensor-disconnected {
+  color: #fbbf24 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sensor-desc { font-size: 10px; color: var(--text-dim); }
+
+/* Rover Live Monitoring 3D & Telemetry View */
+.rover-view-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+@media (max-width: 992px) {
+  .rover-view-container { grid-template-columns: 1fr; }
+}
+
+.rover-digital-twin-box {
+  background: #030806;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  height: 380px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rover-digital-twin-box canvas { width: 100% !important; height: 100% !important; }
+
+.rover-telemetry-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.telemetry-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.telemetry-card h4 {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* History Table */
+.history-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+.filter-pill {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.filter-pill.active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: #34d399;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.styled-table th {
+  background: var(--bg-primary);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.styled-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+}
+.styled-table tr:hover td {
+  background: var(--bg-card-alt);
+}
+.thumb-mini {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #000;
+}
+
+/* Gallery Grid */
+.gallery-cat-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+.gallery-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.gallery-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+.gallery-img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  background: #000;
+}
+.gallery-meta {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.gallery-title { font-size: 11px; font-weight: 700; }
+.gallery-sub { font-size: 9px; color: var(--text-muted); }
+
+/* System Status Grid */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+/* Operator Arming Switch */
+.arm-banner {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.arm-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+/* Stream Source Selector */
+.stream-source-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+/* Mobile Sticky Bottom Navigation */
+.mobile-bottom-nav {
+  display: none;
+}
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(9, 14, 23, 0.96);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 1000;
+  }
+  .mobile-nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 9px;
+    font-weight: 600;
+    gap: 3px;
+    cursor: pointer;
+  }
+  .mobile-nav-btn.active {
+    color: var(--primary);
+  }
+  .mobile-nav-icon {
+    font-size: 18px;
+  }
+  body {
+    padding-bottom: 64px;
+  }
+}

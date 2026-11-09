@@ -17,13 +17,10 @@ const CACHE_NAME = "smart-rover-v8-live-continuous";
 ============================================================ */
 
 const APP_SHELL = [
-
     "/",
-
+    "/offline.html",
     "/static/manifest.json",
-
     "/static/service-worker.js"
-
 ];
 
 

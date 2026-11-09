@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>Daily Plant Data | AgriRover Precision Agriculture</title>
+
+    <!-- PWA & App Icons -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+        /* =========================================================
+           DESIGN TOKENS & RESET
+        ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1.5px solid rgba(52, 211, 153, 0.5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+            animation: pulseGlow 3s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           MAIN CONTAINER & TOOLBAR
+        ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* Filter & Action Toolbar */
+        .toolbar-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background: rgba(6, 20, 14, 0.8);
+            border: 1px solid var(--border-card);
+            color: #f0fdf4;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            width: 220px;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-emerald);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .select-filter {
+            background: rgba(6, 20, 14, 0.8);
+            border: 1px solid var(--border-card);
+            color: #f0fdf4;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-action {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            background: rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .btn-action.danger {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-action.danger:hover {
+            background: rgba(239, 68, 68, 0.35);
+            color: #ffffff;
+        }
+
+        /* =========================================================
+           DAILY GROUP ACCORDIONS & DETECTIONS
+        ========================================================= */
+        .daily-groups-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .date-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: var(--transition-smooth);
+        }
+
+        .date-section:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .date-header {
+            background: rgba(10, 32, 23, 0.9);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .date-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-calendar-icon {
+            font-size: 22px;
+        }
+
+        .date-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f0fdf4;
+        }
+
+        .date-badges {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-count {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-total {
+            background: rgba(6, 182, 212, 0.16);
+            color: #67e8f9;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .badge-healthy {
+            background: rgba(34, 197, 94, 0.16);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .badge-diseased {
+            background: rgba(239, 68, 68, 0.16);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Detection Cards Grid */
+        .detections-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .detection-card {
+            background: rgba(6, 20, 14, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: var(--transition-smooth);
+        }
+
+        .detection-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-card-bright);
+            background: rgba(10, 30, 21, 0.85);
+        }
+
+        .card-top {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .card-thumbnail {
+            width: 72px;
+            height: 72px;
+            border-radius: 10px;
+            background: #020c07;
+            border: 1px solid var(--border-card);
+            overflow: hidden;
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .card-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-thumbnail-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            opacity: 0.6;
+        }
+
+        .card-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .disease-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .disease-tag.healthy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+
+        .disease-tag.bacterial {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .disease-tag.cercospora {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .disease-tag.curl {
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+        }
+
+        .scan-time {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        /* Confidence bar inside detection card */
+        .card-conf {
+            margin-top: 4px;
+        }
+
+        .card-conf-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 3px;
+        }
+
+        .card-conf-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .card-conf-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 3px;
+        }
+
+        .card-conf-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #ef4444);
+        }
+
+        /* Prescription summary pills */
+        .card-presc {
+            background: rgba(3, 12, 8, 0.6);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .card-presc-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-presc-label {
+            color: var(--text-dim);
+        }
+
+        .card-presc-val {
+            color: #ecfdf5;
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-history {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        /* Modal Preview */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0a2016;
+            border: 1px solid var(--border-card-bright);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .modal-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-img {
+            width: 100%;
+            max-height: 340px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border-card);
+            margin-bottom: 16px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
+            .toolbar-card { flex-direction: column; align-items: stretch; }
+            .toolbar-group { width: 100%; }
+            .search-input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+            </div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
+            </div>
+        </a>
+
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link active">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </nav>
+
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
+
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 34px; height: 34px;">
+                    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+                </div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link active">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================= -->
+    <main>
+
+        <div class="page-header-row">
+            <div class="page-title">
+                <h2>📅 Daily Plant Health Log</h2>
+                <p>Complete historical records of plant disease detections grouped by calendar date (SQLite WAL engine).</p>
+            </div>
+        </div>
+
+        <!-- TOOLBAR: SEARCH, FILTERS & ACTIONS -->
+        <div class="toolbar-card">
+            <div class="toolbar-group">
+                <input type="text" id="filter-search" class="search-input" placeholder="🔍 Search disease or time..." oninput="applyFilters()">
+                <select id="filter-disease" class="select-filter" onchange="applyFilters()">
+                    <option value="ALL">All Classifications</option>
+                    <option value="Healthy_Leaf">Healthy Leaf Only</option>
+                    <option value="Bacterial_Spot">Bacterial Spot</option>
+                    <option value="Cercospora_Leaf_Spot">Cercospora Leaf Spot</option>
+                    <option value="Curl_Virus">Curl Virus</option>
+                </select>
+            </div>
+
+            <div class="toolbar-group">
+                <button class="btn-action" onclick="refreshDailyData()">🔄 Refresh Data</button>
+                <button class="btn-action" onclick="exportToCSV()">📥 Export CSV</button>
+                <button class="btn-action danger" onclick="confirmClearHistory()">🗑️ Clear History</button>
+            </div>
+        </div>
+
+        <!-- DAILY GROUPS CONTAINER -->
+        <div class="daily-groups-container" id="daily-groups-container">
+
+            {% if daily_data and daily_data|length > 0 %}
+                {% for day in daily_data %}
+                <div class="date-section" data-date="{{ day.date }}">
+                    <div class="date-header">
+                        <div class="date-title-group">
+                            <span class="date-calendar-icon">📅</span>
+                            <span class="date-text">{{ day.date }}</span>
+                        </div>
+                        <div class="date-badges">
+                            <span class="badge-count badge-total">{{ day.total }} Scans</span>
+                            <span class="badge-count badge-healthy">{{ day.healthy }} Healthy</span>
+                            <span class="badge-count badge-diseased">{{ day.diseased }} Infected</span>
+                        </div>
+                    </div>
+
+                    <div class="detections-grid">
+                        {% for item in day.records or day.items %}
+                        <div class="detection-card" data-disease="{{ item.disease }}" data-time="{{ item.timestamp }}">
+                            <div class="card-top">
+                                <div class="card-thumbnail" onclick="openImageModal('/static/images/{{ item.image }}', '{{ item.disease }}', '{{ item.confidence }}%', '{{ item.timestamp }}')">
+                                    {% if item.image %}
+                                        <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="Plant Leaf" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'card-thumbnail-fallback\'>🌿</div>'">
+                                    {% else %}
+                                        <div class="card-thumbnail-fallback">🌿</div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-meta">
+                                    {% set d_class = "healthy" %}
+                                    {% if "Bacterial" in item.disease %}{% set d_class = "bacterial" %}
+                                    {% elif "Cercospora" in item.disease %}{% set d_class = "cercospora" %}
+                                    {% elif "Curl" in item.disease %}{% set d_class = "curl" %}
+                                    {% endif %}
+                                    <span class="disease-tag {{ d_class }}">{{ item.disease }}</span>
+                                    <div class="scan-time">🕒 {{ item.timestamp }}</div>
+                                </div>
+                            </div>
+
+                            <div class="card-conf">
+                                <div class="card-conf-text">
+                                    <span>Model Confidence</span>
+                                    <span style="font-weight: 700; color: #6ee7b7;">{{ item.confidence }}%</span>
+                                </div>
+                                <div class="card-conf-bar">
+                                    <div class="card-conf-fill {% if 'Healthy' not in item.disease %}warning{% endif %}" style="width: {{ item.confidence }}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="card-presc">
+                                <div class="card-presc-row">
+                                    <span class="card-presc-label">Chemical:</span>
+                                    <span class="card-presc-val">{{ item.chemical or "None" }}</span>
+                                </div>
+                                <div class="card-presc-row">
+                                    <span class="card-presc-label">Fertilizer:</span>
+                                    <span class="card-presc-val">{{ item.fertilizer or "Balanced" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-history" id="empty-state">
+                    <div class="empty-icon">🌿</div>
+                    <h3 style="color: #ecfdf5; font-size: 18px; margin-bottom: 8px;">No Field Detections Recorded Yet</h3>
+                    <p style="color: var(--text-dim); max-width: 420px; margin: 0 auto 18px; font-size: 13px;">
+                        Once the camera and AI inference process chili leaves in the field, daily records will automatically be saved to local SQLite storage and appear here.
+                    </p>
+                    <a href="/" class="btn-action" style="display: inline-flex;">Go to Dashboard</a>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </main>
+
+    <!-- IMAGE PREVIEW MODAL -->
+    <div class="modal-overlay" id="img-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="font-size: 15px; color: #ecfdf5;" id="modal-title">Leaf Image Preview</h3>
+                <button style="background:transparent; border:none; color:var(--text-dim); font-size:22px; cursor:pointer;" onclick="closeImageModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-img-tag" src="" alt="Full Leaf" class="modal-img">
+                <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim);">
+                    <span id="modal-conf">Confidence: --</span>
+                    <span id="modal-time">Time: --</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTWEIGHT JAVASCRIPT LOGIC -->
+    <script>
+        // Drawer Logic
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
+        }
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+
+        // Filter / Search Logic
+        function applyFilters() {
+            const query = (document.getElementById("filter-search").value || "").toLowerCase().trim();
+            const diseaseFilter = document.getElementById("filter-disease").value;
+
+            const cards = document.querySelectorAll(".detection-card");
+            cards.forEach(card => {
+                const disease = (card.getAttribute("data-disease") || "");
+                const time = (card.getAttribute("data-time") || "");
+                
+                const matchesSearch = disease.toLowerCase().includes(query) || time.toLowerCase().includes(query);
+                const matchesDisease = (diseaseFilter === "ALL") || (disease === diseaseFilter);
+
+                if (matchesSearch && matchesDisease) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            // Hide empty date sections
+            const sections = document.querySelectorAll(".date-section");
+            sections.forEach(sec => {
+                const visibleInSec = sec.querySelectorAll('.detection-card:not([style*="display: none"])');
+                sec.style.display = (visibleInSec.length > 0) ? "block" : "none";
+            });
+        }
+
+        // Image Modal
+        function openImageModal(src, disease, conf, time) {
+            document.getElementById("modal-img-tag").src = src;
+            document.getElementById("modal-title").textContent = disease;
+            document.getElementById("modal-conf").textContent = "Confidence: " + conf;
+            document.getElementById("modal-time").textContent = "Time: " + time;
+            document.getElementById("img-modal").classList.add("open");
+        }
+
+        function closeImageModal() {
+            document.getElementById("img-modal").classList.remove("open");
+        }
+
+        document.getElementById("img-modal").addEventListener("click", (e) => {
+            if (e.target.id === "img-modal") closeImageModal();
+        });
+
+        // Refresh Data via API
+        async function refreshDailyData() {
+            try {
+                const res = await fetch("/api/daily-data");
+                if (res.ok) {
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error("Refresh error:", e);
+            }
+        }
+
+        // Clear History
+        async function confirmClearHistory() {
+            if (!confirm("Are you sure you want to permanently clear all plant detection records from the local SQLite database? This cannot be undone.")) {
+                return;
+            }
+            try {
+                const res = await fetch("/api/daily-data/clear", { method: "POST" });
+                const json = await res.json();
+                if (json.success) {
+                    alert("Daily history cleared successfully.");
+                    window.location.reload();
+                } else {
+                    alert("Error clearing history: " + (json.message || "Unknown error"));
+                }
+            } catch (e) {
+                alert("Failed to communicate with local server: " + e.message);
+            }
+        }
+
+        // Client-side CSV Export
+        function exportToCSV() {
+            const cards = document.querySelectorAll(".detection-card");
+            if (!cards || cards.length === 0) {
+                alert("No records to export.");
+                return;
+            }
+
+            let csv = "Date,Timestamp,Disease,Confidence,Chemical,Fertilizer\n";
+            const sections = document.querySelectorAll(".date-section");
+
+            sections.forEach(sec => {
+                const date = sec.getAttribute("data-date") || "";
+                sec.querySelectorAll(".detection-card").forEach(c => {
+                    const disease = c.getAttribute("data-disease") || "";
+                    const time = c.getAttribute("data-time") || "";
+                    const conf = c.querySelector(".card-conf-text span:last-child")?.textContent || "";
+                    const rows = c.querySelectorAll(".card-presc-val");
+                    const chem = rows[0]?.textContent || "";
+                    const fert = rows[1]?.textContent || "";
+                    csv += `"${date}","${time}","${disease}","${conf}","${chem}","${fert}"\n`;
+                });
+            });
+
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `agrirover_field_records_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

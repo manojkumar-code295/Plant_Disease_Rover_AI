@@ -22,15 +22,44 @@ from src.terminal_logger import terminal_logger
 from src.image_logger import image_logger
 
 class PlantDiseaseDetectionPipeline:
-    def __init__(self):
+    def __init__(self, lazy=True):
         print("Initializing AgriVision Upgraded Real-Time AI Pipeline...")
-        self.verifier = LeafVerifier()
-        self.classifier = DiseaseClassifier()
-        self.object_detector = object_detector
+        self._lazy = lazy
+        self._verifier = None
+        self._classifier = None
+        self._object_detector = None
         self.hardware = hardware_controller
         self.term_logger = terminal_logger
         self.img_logger = image_logger
+        if not lazy:
+            self._ensure_models()
         print("Pipeline components successfully integrated and ready for live execution!")
+
+    def _ensure_models(self):
+        if self._verifier is None:
+            self._verifier = LeafVerifier()
+        if self._classifier is None:
+            self._classifier = DiseaseClassifier()
+        if self._object_detector is None:
+            self._object_detector = object_detector
+
+    @property
+    def verifier(self):
+        if self._verifier is None:
+            self._verifier = LeafVerifier()
+        return self._verifier
+
+    @property
+    def classifier(self):
+        if self._classifier is None:
+            self._classifier = DiseaseClassifier()
+        return self._classifier
+
+    @property
+    def object_detector(self):
+        if self._object_detector is None:
+            self._object_detector = object_detector
+        return self._object_detector
 
     def process_image(self, pil_image, run_object_detection=True, run_disease_detection=True):
         """

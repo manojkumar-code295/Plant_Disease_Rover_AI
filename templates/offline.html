@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#06140e">
+  <title>Offline | Plant Disease AI</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #06140e;
+      color: #f0fdf4;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: rgba(14, 38, 28, 0.95);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 20px;
+      padding: 36px 28px;
+      max-width: 440px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h1 { font-size: 24px; color: #4ade80; margin-bottom: 12px; }
+    p { font-size: 15px; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+    .notice {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 13px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .btn {
+      display: inline-block;
+      background: #10b981;
+      color: #06140e;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📡</div>
+    <h1>You are Offline</h1>
+    <p>Plant Disease AI is running in offline cached mode. Previously cached documentation and historical views remain available.</p>
+    <div class="notice">
+      ⚠️ <strong>Notice:</strong> Real-time rover telemetry, live video streaming, DC motor actuation, and precision water spraying require an active network connection to the rover.
+    </div>
+    <button class="btn" onclick="window.location.reload()">Retry Connection</button>
+  </div>
+</body>
+</html>

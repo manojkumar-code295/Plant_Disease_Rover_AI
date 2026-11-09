@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>System Settings & Hardware | AgriRover Precision Agriculture</title>
+
+    <!-- PWA & App Icons -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+        /* =========================================================
+           DESIGN TOKENS & RESET
+        ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1.5px solid rgba(52, 211, 153, 0.5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+            animation: pulseGlow 3s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           MAIN CONTAINER
+        ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* Settings Grid Layout */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ecfdf5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Settings Row */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+        }
+
+        .setting-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            max-width: 65%;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f0fdf4;
+            margin-bottom: 3px;
+        }
+
+        .setting-desc {
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.16);
+            color: #86efac;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Hardware Pinout Table */
+        .pinout-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .pinout-table th {
+            text-align: left;
+            padding: 8px 10px;
+            background: rgba(6, 20, 14, 0.8);
+            color: var(--text-dim);
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .pinout-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.08);
+            color: #f0fdf4;
+        }
+
+        .pin-tag {
+            font-family: monospace;
+            background: rgba(6, 182, 212, 0.18);
+            color: #67e8f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* Warning Callout Box */
+        .callout-box {
+            background: rgba(245, 158, 11, 0.12);
+            border-left: 3px solid var(--accent-amber);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 12px 14px;
+            margin: 14px 0;
+            font-size: 12px;
+            color: #fef3c7;
+            line-height: 1.5;
+        }
+
+        .callout-box strong {
+            color: #fbbf24;
+        }
+
+        .code-box {
+            background: #020b06;
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #86efac;
+            margin-top: 8px;
+            overflow-x: auto;
+        }
+
+        .btn-action {
+            background: rgba(16, 185, 129, 0.16);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover {
+            background: rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .btn-action.danger {
+            background: rgba(239, 68, 68, 0.16);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .btn-action.danger:hover {
+            background: rgba(239, 68, 68, 0.35);
+            color: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+            </div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
+            </div>
+        </a>
+
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/settings" class="nav-link active">⚙️ Settings</a>
+        </nav>
+
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
+
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 34px; height: 34px;">
+                    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+                </div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link active">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MAIN SETTINGS
+    ========================================================= -->
+    <main>
+
+        <div class="page-header-row">
+            <div class="page-title">
+                <h2>⚙️ System Hardware & Configuration</h2>
+                <p>Raspberry Pi 4 GPIO assignments, L298N/L293D motor driver topology, AI model parameters, and database storage.</p>
+            </div>
+        </div>
+
+        <section class="settings-grid">
+
+            <!-- HARDWARE PINOUT & MOTOR TOPOLOGY (Requirement 4) -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🏎️ Motor Driver (L298N) GPIO Pinout</h3>
+                    <span class="setting-badge">HARDWARE</span>
+                </div>
+
+                <div class="callout-box">
+                    <strong>⚠️ CRITICAL COMMON GROUND:</strong> Raspberry Pi <strong>Physical Pin 6 (GND)</strong> MUST connect directly to the L298N GND terminal. Without shared ground, control signals float and motors will not trigger!
+                </div>
+
+                <table class="pinout-table">
+                    <thead>
+                        <tr>
+                            <th>Signal</th>
+                            <th>BCM GPIO</th>
+                            <th>Physical Pin</th>
+                            <th>Motor Function</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>IN1</strong></td>
+                            <td><span class="pin-tag">GPIO 17</span></td>
+                            <td>Pin 11</td>
+                            <td>Left Motor Forward</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN2</strong></td>
+                            <td><span class="pin-tag">GPIO 27</span></td>
+                            <td>Pin 13</td>
+                            <td>Left Motor Backward</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN3</strong></td>
+                            <td><span class="pin-tag">GPIO 22</span></td>
+                            <td>Pin 15</td>
+                            <td>Right Motor Forward</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IN4</strong></td>
+                            <td><span class="pin-tag">GPIO 23</span></td>
+                            <td>Pin 16</td>
+                            <td>Right Motor Backward</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ENA</strong></td>
+                            <td><span class="pin-tag">GPIO 12</span></td>
+                            <td>Pin 32</td>
+                            <td>Left Enable / PWM (or jumper ON)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ENB</strong></td>
+                            <td><span class="pin-tag">GPIO 13</span></td>
+                            <td>Pin 33</td>
+                            <td>Right Enable / PWM (or jumper ON)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PUMP</strong></td>
+                            <td><span class="pin-tag">GPIO 26</span></td>
+                            <td>Pin 37</td>
+                            <td>Spray Pump Relay</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 14px;">
+                    <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 700;">Manual Pin Toggle Command:</span>
+                    <div class="code-box">pinctrl set 17,27,22,23,12,13 op dh</div>
+                </div>
+            </div>
+
+            <!-- AI INFERENCE & CAMERA CONFIGURATION -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🧠 Edge AI & Camera Stream</h3>
+                    <span class="setting-badge" style="background: rgba(6,182,212,0.18); color: #67e8f9; border-color: rgba(6,182,212,0.35);">AI INFERENCE</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Neural Network Model</div>
+                        <div class="setting-desc">MobileNetV2 (TFLite INT8 Quantized edge inference model).</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">chili_disease_model.tflite</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Inference Resolution</div>
+                        <div class="setting-desc">CSI camera input dimension pre-processed for model input.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">224 × 224 RGB</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Confidence Gate Threshold</div>
+                        <div class="setting-desc">Minimum softmax probability required to trigger treatment action.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">60.0%</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Live Video Stream Endpoints</div>
+                        <div class="setting-desc">Low-latency MJPEG stream server for live vision feed.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">Port 8080 &amp; /video_feed</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Target Disease Classes</div>
+                        <div class="setting-desc">Healthy Leaf, Bacterial Spot, Cercospora Leaf Spot, Curl Virus.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">4 Classes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DATABASE & LOCAL STORAGE -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">💾 Plant Data Storage Engine</h3>
+                    <span class="setting-badge" style="background: rgba(168,85,247,0.18); color: #d8b4fe; border-color: rgba(168,85,247,0.35);">SQLITE WAL</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Database File</div>
+                        <div class="setting-desc">Persistent local database file on Raspberry Pi SSD/microSD.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">website/plants_data.db</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Concurrency Mode</div>
+                        <div class="setting-desc">Write-Ahead Logging enabled for non-blocking concurrent writes.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge" style="color: #4ade80;">PRAGMA journal_mode = WAL</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Clear Detection Database</div>
+                        <div class="setting-desc">Permanently erase all historical plant disease records.</div>
+                    </div>
+                    <div class="setting-control">
+                        <button class="btn-action danger" onclick="clearDb()">🗑️ Wipe Database</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM DAEMONS & SERVICES -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">⚡ Background Daemons & Services</h3>
+                    <span class="setting-badge">SYSTEMD</span>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">agrirover-ai.service</div>
+                        <div class="setting-desc">Main inference loop, Picamera2 stream, and GPIO actuation worker.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge" style="color: #4ade80;">Active (Running)</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">agrirover-web.service</div>
+                        <div class="setting-desc">Flask web application, REST API, SQLite queries, and video proxy.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge" style="color: #4ade80;">Active (Port 5000)</span>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Hardware Controller</div>
+                        <div class="setting-desc">Raspberry Pi 4 Model B (4GB RAM) Linux kernel 6.6.</div>
+                    </div>
+                    <div class="setting-control">
+                        <span class="setting-badge">RPi 4B</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- LIGHTWEIGHT JAVASCRIPT -->
+    <script>
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
+        }
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+
+        async function clearDb() {
+            if (!confirm("Are you sure you want to clear all detections in plants_data.db?")) return;
+            try {
+                const res = await fetch("/api/daily-data/clear", { method: "POST" });
+                const json = await res.json();
+                if (json.success) {
+                    alert("Database cleared successfully.");
+                } else {
+                    alert("Error: " + (json.message || "Could not clear"));
+                }
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

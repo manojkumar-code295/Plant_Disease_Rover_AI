@@ -71,6 +71,8 @@ def run_tests():
 
     # 5. Continuous Live Frame Detection (Leaf with Disease)
     print("\n5. Testing Live Frame Continuous Detection (Anthracnose Leaf):")
+    # Allow sprayer cooldown to elapse
+    time.sleep(4.2)
     with open("test_samples/sample_anthracnose.jpg", "rb") as f:
         anth_b64 = base64.b64encode(f.read()).decode('utf-8')
 

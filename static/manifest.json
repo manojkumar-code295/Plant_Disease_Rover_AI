@@ -1,0 +1,61 @@
+{
+  "name": "Plant Disease AI",
+  "short_name": "Plant AI",
+  "description": "AI-Powered Plant Leaf Disease Detection, Live Rover Telemetry & Precision Water Sprayer",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#06140e",
+  "theme_color": "#06140e",
+  "orientation": "any",
+  "categories": ["agriculture", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/static/icons/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Live Camera",
+      "short_name": "Camera",
+      "url": "/#tab-camera",
+      "icons": [{ "src": "/static/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Rover Control",
+      "short_name": "Rover",
+      "url": "/rover",
+      "icons": [{ "src": "/static/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Disease Detection",
+      "short_name": "Diagnosis",
+      "url": "/#tab-detection",
+      "icons": [{ "src": "/static/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}

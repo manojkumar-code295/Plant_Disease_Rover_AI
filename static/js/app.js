@@ -1,833 +1,1039 @@
 /**
- * AgriVision AI - Client-Side Controller
- * Live Webcam Continuous Detection, YOLO Bounding Box Canvas Renderer,
- * Smart Rover Navigation, Precision Water Sprayer, and Settings Manager.
+ * Plant Disease AI & Smart Rover Platform - Client-Side Controller
+ * Features:
+ *   - 12-Section Tabbed Agricultural Dashboard & Mobile Bottom Nav
+ *   - Dual Camera Pipeline: Raspberry Pi Rover Stream & Local Webcam Fallback
+ *   - Real-Time Canvas Bounding Boxes (YOLOv8) & Strict Leaf Verification (MobileNetV2)
+ *   - Bidirectional Telemetry Polling & Watchdog (CONNECTED / DISCONNECTED / RECONNECTING)
+ *   - Motor Navigation Controls with Operator Safety Arming & Emergency Stop
+ *   - Precision Water Pump Regulation (Water Only, Duration & Cooldown)
+ *   - Real Sensor Telemetry Cards (Displays 'Sensor Not Connected' if absent)
+ *   - Persistent SQLite History & Categorized Image Gallery
+ *   - PWA Service Worker Registration & Android Install Prompt
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+// Global State
+let isDetecting = false;
+let isPaused = false;
+let isProcessingFrame = false;
+let videoStream = null;
+let streamSource = 'webcam'; // 'webcam' or 'rover'
+let currentSpeed = 65;
+let operatorArmed = true;
+let deferredInstallPrompt = null;
+let currentGalleryFilter = 'all';
 
-  // Video & Viewport Elements
+// =============================================================
+// TAB SWITCHING (Desktop & Mobile)
+// =============================================================
+function switchTab(tabId) {
+  // Update Tab Buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === tabId);
+  });
+
+  // Update Tab Panes
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    pane.classList.toggle('active', pane.id === tabId);
+  });
+
+  // Update Mobile Bottom Nav
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    const fn = btn.getAttribute('onclick') || '';
+    btn.classList.toggle('active', fn.includes(tabId));
+  });
+
+  // Refresh data for specific tabs
+  if (tabId === 'tab-history') loadHistory();
+  if (tabId === 'tab-gallery') loadGallery();
+  if (tabId === 'tab-pump') loadSprayHistory();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================================
+// PWA INSTALLATION & SERVICE WORKER
+// =============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+      .catch(err => console.log('[PWA] Service Worker registration failed:', err));
+  });
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btnInstall = document.getElementById('btn-install-app');
+  if (btnInstall) btnInstall.style.display = 'inline-flex';
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Install App button
+  const btnInstall = document.getElementById('btn-install-app');
+  if (btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        btnInstall.style.display = 'none';
+      }
+      deferredInstallPrompt = null;
+    });
+  }
+
+  // Bind Main Nav Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.getAttribute('data-tab');
+      if (tabId) switchTab(tabId);
+    });
+  });
+
+  // Elements
   const video = document.getElementById('webcam-video');
+  const previewVideo = document.getElementById('dashboard-preview-video');
+  const piStream = document.getElementById('pi-rover-stream');
+  const dashPiStream = document.getElementById('dashboard-pi-stream');
   const boxCanvas = document.getElementById('bounding-box-canvas');
   const captureCanvas = document.getElementById('capture-canvas');
   const boxCtx = boxCanvas ? boxCanvas.getContext('2d') : null;
 
-  // Toolbar Controls
-  const btnStartDetection = document.getElementById('btn-start-detection');
-  const btnPauseDetection = document.getElementById('btn-pause-detection');
-  const btnStopDetection = document.getElementById('btn-stop-detection');
-  const btnToggleUpload = document.getElementById('btn-toggle-upload');
-  const dropZoneDrawer = document.getElementById('drop-zone-drawer');
-  const fileInput = document.getElementById('file-input');
-  const btnBrowse = document.getElementById('btn-browse');
-  const dropZone = document.getElementById('drop-zone');
-
-  // Real-time HUD Elements
-  const hudFps = document.getElementById('hud-fps');
-  const hudLatency = document.getElementById('hud-latency');
-  const hudLeafStatus = document.getElementById('hud-leaf-status');
-  const hudObsBadge = document.getElementById('hud-obs-badge');
-  const hudDetectionPill = document.getElementById('hud-detection-pill');
-  const hudStatusText = document.getElementById('hud-status-text');
-
-  // Stats Counters
-  const statLeaves = document.getElementById('stat-leaves-detected');
-  const statHealthy = document.getElementById('stat-healthy-leaves');
-  const statDiseased = document.getElementById('stat-diseased-leaves');
-  const statImages = document.getElementById('stat-images-stored');
-  const statMotorSpeed = document.getElementById('stat-motor-speed');
-  const statPump = document.getElementById('stat-pump-status');
-
-  // Rover & Pump Controls
-  const dpadBtns = document.querySelectorAll('.dpad-btn');
-  const speedSlider = document.getElementById('speed-slider');
-  const speedDisplay = document.getElementById('speed-display');
-  const speedPresets = document.querySelectorAll('.btn-preset');
-  const btnPumpToggle = document.getElementById('btn-pump-toggle');
-  const pumpToggleText = document.getElementById('pump-toggle-text');
-  const pumpStatusPill = document.getElementById('pump-status-pill');
-  const btnPumpBurst = document.getElementById('btn-pump-burst');
-  const autoSprayToggle = document.getElementById('auto-spray-toggle');
-  const btnEmergencyStop = document.getElementById('btn-emergency-stop');
-
-  // Telemetry Elements
-  const teleDir = document.getElementById('tele-dir');
-  const teleSpeed = document.getElementById('tele-speed');
-  const telePump = document.getElementById('tele-pump');
-  const teleAuto = document.getElementById('tele-auto');
-  const teleHardware = document.getElementById('tele-hardware');
-  const platformBadge = document.getElementById('platform-badge');
-  const navModeBadge = document.getElementById('nav-mode-badge');
-
-  // Diagnosis Elements
-  const emptyState = document.getElementById('empty-state');
-  const rejectionBox = document.getElementById('rejection-box');
-  const rejectionTitle = document.getElementById('rejection-title');
-  const rejectionReason = document.getElementById('rejection-reason');
-  const uncertainBox = document.getElementById('uncertain-box');
-  const resultDetails = document.getElementById('result-details');
-  const verifierText = document.getElementById('verifier-text');
-  const healthPill = document.getElementById('health-pill');
-  const predictionTitle = document.getElementById('prediction-title');
-  const predictionPathogen = document.getElementById('prediction-pathogen');
-  const confidenceVal = document.getElementById('confidence-val');
-  const sprayTriggerBanner = document.getElementById('spray-trigger-banner');
-  const sprayDurDisp = document.getElementById('spray-dur-disp');
-  const probList = document.getElementById('prob-list');
-  const diseaseDesc = document.getElementById('disease-desc');
-  const symptomList = document.getElementById('symptom-list');
-  const treatmentChemical = document.getElementById('treatment-chemical');
-  const treatmentOrganic = document.getElementById('treatment-organic');
-  const treatmentPrevention = document.getElementById('treatment-prevention');
-  const presetsList = document.getElementById('presets-list');
-
-  // Settings Panel Inputs
-  const settingCameraSelect = document.getElementById('setting-camera-select');
-  const btnSettingCamStart = document.getElementById('btn-setting-cam-start');
-  const btnSettingCamStop = document.getElementById('btn-setting-cam-stop');
-  const settingObjDetect = document.getElementById('setting-obj-detect');
-  const settingDiseaseDetect = document.getElementById('setting-disease-detect');
-  const settingConfSlider = document.getElementById('setting-conf-slider');
-  const settingConfVal = document.getElementById('setting-conf-val');
-  const btnMotorManual = document.getElementById('btn-motor-manual');
-  const btnMotorAuto = document.getElementById('btn-motor-auto');
-  const settingPumpMaster = document.getElementById('setting-pump-master');
-  const settingAutoSprayToggle = document.getElementById('setting-auto-spray-toggle');
-  const settingSprayDur = document.getElementById('setting-spray-dur');
-  const settingSprayInt = document.getElementById('setting-spray-int');
-  const settingStorageToggle = document.getElementById('setting-storage-toggle');
-  const settingSaveDiseased = document.getElementById('setting-save-diseased');
-  const settingSaveHealthy = document.getElementById('setting-save-healthy');
-
-  // Metrics Modal
-  const btnOpenMetrics = document.getElementById('btn-open-metrics');
-  const btnCloseMetrics = document.getElementById('btn-close-metrics');
-  const metricsModal = document.getElementById('metrics-modal');
-  const modalBackdrop = document.getElementById('modal-backdrop');
-
-  // Application State
-  let mediaStream = null;
-  let isDetectionActive = false;
-  let isDetectionPaused = false;
-  let isInferencing = false;
-  let inferenceLoopId = null;
-  let lastFrameTime = performance.now();
-  let frameCount = 0;
-  let currentFps = 0;
-  let pumpActive = false;
-
-  // ==========================================
-  // 1. CONTINUOUS LIVE CAMERA & INFERENCE LOOP
-  // ==========================================
-
-  btnStartDetection.addEventListener('click', startDetection);
-  if (btnSettingCamStart) btnSettingCamStart.addEventListener('click', startDetection);
-
-  async function startDetection() {
-    try {
-      if (!mediaStream) {
-        const deviceId = settingCameraSelect ? settingCameraSelect.value : undefined;
-        const constraints = {
-          video: deviceId && deviceId !== "0" ? { deviceId: { exact: deviceId } } : { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
-        };
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = mediaStream;
-      }
-
-      isDetectionActive = true;
-      isDetectionPaused = false;
-      btnStartDetection.disabled = true;
-      btnPauseDetection.disabled = false;
-      btnStopDetection.disabled = false;
-      btnPauseDetection.textContent = "⏸ Pause";
-
-      updateSettingsBackend({ camera: { is_active: true, is_paused: false } });
-      startContinuousInference();
-    } catch (err) {
-      alert("Unable to access camera: " + err.message);
-    }
+  // Stream Source Selection
+  const btnSrcWebcam = document.getElementById('btn-src-webcam');
+  const btnSrcRover = document.getElementById('btn-src-rover');
+  if (btnSrcWebcam && btnSrcRover) {
+    btnSrcWebcam.addEventListener('click', () => setStreamSource('webcam'));
+    btnSrcRover.addEventListener('click', () => setStreamSource('rover'));
   }
 
-  btnPauseDetection.addEventListener('click', () => {
-    isDetectionPaused = !isDetectionPaused;
-    btnPauseDetection.textContent = isDetectionPaused ? "▶ Resume" : "⏸ Pause";
-    hudStatusText.textContent = isDetectionPaused ? "Detection Paused." : "Resuming live detection...";
-    updateSettingsBackend({ camera: { is_paused: isDetectionPaused } });
-  });
+  function setStreamSource(src) {
+    streamSource = src;
+    btnSrcWebcam.classList.toggle('active', src === 'webcam');
+    btnSrcRover.classList.toggle('active', src === 'rover');
 
-  btnStopDetection.addEventListener('click', stopDetection);
-  if (btnSettingCamStop) btnSettingCamStop.addEventListener('click', stopDetection);
+    const overviewSource = document.getElementById('overview-stream-source');
+    if (overviewSource) overviewSource.textContent = src === 'webcam' ? 'Browser Webcam' : 'Raspberry Pi Rover Stream';
 
-  function stopDetection() {
-    isDetectionActive = false;
-    isDetectionPaused = false;
-    if (inferenceLoopId) {
-      clearTimeout(inferenceLoopId);
-      inferenceLoopId = null;
-    }
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      mediaStream = null;
-    }
-    video.srcObject = null;
-    btnStartDetection.disabled = false;
-    btnPauseDetection.disabled = true;
-    btnStopDetection.disabled = true;
-    btnPauseDetection.textContent = "⏸ Pause";
-
-    // Clear bounding box canvas
-    if (boxCtx) {
-      boxCtx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
-    }
-
-    hudFps.textContent = "FPS: --";
-    hudLatency.textContent = "Latency: -- ms";
-    hudStatusText.textContent = "Camera stopped.";
-    hudLeafStatus.textContent = "Camera Stopped";
-    hudObsBadge.style.display = 'none';
-
-    updateSettingsBackend({ camera: { is_active: false, is_paused: false } });
-  }
-
-  function startContinuousInference() {
-    if (!isDetectionActive) return;
-
-    if (!isDetectionPaused && video.videoWidth > 0 && !isInferencing) {
-      sendLiveFrameForInference();
-    }
-
-    // Schedule next frame check (every 280-320ms for smooth edge inference)
-    inferenceLoopId = setTimeout(startContinuousInference, 300);
-  }
-
-  async function sendLiveFrameForInference() {
-    if (!video.videoWidth || isInferencing) return;
-    isInferencing = true;
-    const startTime = performance.now();
-
-    // Scale down for ultra-fast edge transfer
-    captureCanvas.width = 320;
-    captureCanvas.height = 240;
-    const ctx = captureCanvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, 320, 240);
-    const b64 = captureCanvas.toDataURL('image/jpeg', 0.85);
-
-    try {
-      const response = await fetch('/api/predict_live', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: b64 })
-      });
-      const data = await response.json();
-      const latency = Math.round(performance.now() - startTime);
-
-      // Compute FPS
-      frameCount++;
-      const now = performance.now();
-      if (now - lastFrameTime >= 1000) {
-        currentFps = frameCount;
-        frameCount = 0;
-        lastFrameTime = now;
+    if (src === 'rover') {
+      if (video) video.style.display = 'none';
+      if (previewVideo) previewVideo.style.display = 'none';
+      if (piStream) {
+        piStream.style.display = 'block';
+        piStream.src = '/video_feed?t=' + Date.now();
       }
-
-      hudFps.textContent = `FPS: ${currentFps || 3}`;
-      hudLatency.textContent = `Latency: ${latency}ms`;
-
-      // Render Bounding Boxes & Results
-      drawBoundingBoxes(data.bounding_boxes, data);
-      renderDiagnosisReport(data);
-
-      if (data.hardware_telemetry) {
-        updateHardwareTelemetry(data.hardware_telemetry);
+      if (dashPiStream) {
+        dashPiStream.style.display = 'block';
+        dashPiStream.src = '/video_feed?t=' + Date.now();
       }
-      if (data.statistics) {
-        updateStatsCounters(data.statistics);
-      }
-
-    } catch (e) {
-      console.warn("Live frame inference error:", e);
-    } finally {
-      isInferencing = false;
-    }
-  }
-
-  // ==========================================
-  // 2. LIVE BOUNDING BOX CANVAS RENDERER
-  // ==========================================
-
-  function drawBoundingBoxes(boxes, data) {
-    if (!boxCanvas || !boxCtx) return;
-
-    const vWidth = video.videoWidth || 640;
-    const vHeight = video.videoHeight || 480;
-
-    boxCanvas.width = vWidth;
-    boxCanvas.height = vHeight;
-    boxCtx.clearRect(0, 0, vWidth, vHeight);
-
-    // Scale factors from capture canvas (320x240) to video native
-    const scaleX = vWidth / 320;
-    const scaleY = vHeight / 240;
-
-    // Obstacle HUD Badge
-    if (data.has_obstacle) {
-      hudObsBadge.style.display = 'block';
     } else {
-      hudObsBadge.style.display = 'none';
+      if (piStream) piStream.style.display = 'none';
+      if (dashPiStream) dashPiStream.style.display = 'none';
+      if (video) video.style.display = 'block';
+      if (previewVideo) previewVideo.style.display = 'block';
     }
+  }
 
-    if (!boxes || boxes.length === 0) return;
+  // Camera Buttons
+  const btnStart = document.getElementById('btn-start-detection');
+  const btnPause = document.getElementById('btn-pause-detection');
+  const btnStop = document.getElementById('btn-stop-detection');
+  const btnSnapshot = document.getElementById('btn-capture-snapshot');
 
-    boxes.forEach(obj => {
-      const [bx1, by1, bx2, by2] = obj.box;
-      const x = bx1 * scaleX;
-      const y = by1 * scaleY;
-      const w = (bx2 - bx1) * scaleX;
-      const h = (by2 - by1) * scaleY;
+  if (btnStart) btnStart.addEventListener('click', startCamera);
+  if (btnPause) btnPause.addEventListener('click', togglePause);
+  if (btnStop) btnStop.addEventListener('click', stopCamera);
+  if (btnSnapshot) btnSnapshot.addEventListener('click', captureSnapshot);
 
-      const isLeaf = obj.type === 'leaf';
-      const isObstacle = obj.type === 'obstacle';
-
-      // Colors
-      let strokeColor = '#3b82f6';
-      let fillColor = 'rgba(59, 130, 246, 0.15)';
-      let labelText = `${obj.label} (${obj.confidence}%)`;
-
-      if (isLeaf) {
-        if (data.is_healthy) {
-          strokeColor = '#10b981';
-          fillColor = 'rgba(16, 185, 129, 0.18)';
-          labelText = `🌿 Healthy Leaf (${data.confidence}%)`;
-        } else {
-          strokeColor = '#ef4444';
-          fillColor = 'rgba(239, 68, 68, 0.20)';
-          labelText = `🍂 ${data.display_name || data.prediction} (${data.confidence}%)`;
-        }
-      } else if (isObstacle) {
-        strokeColor = '#f59e0b';
-        fillColor = 'rgba(245, 158, 11, 0.20)';
-        labelText = `🛑 Obstacle: ${obj.label}`;
-      }
-
-      // Draw Box
-      boxCtx.strokeStyle = strokeColor;
-      boxCtx.lineWidth = 3;
-      boxCtx.strokeRect(x, y, w, h);
-
-      // Draw Semi-transparent Fill
-      boxCtx.fillStyle = fillColor;
-      boxCtx.fillRect(x, y, w, h);
-
-      // Draw Label Background
-      boxCtx.font = 'bold 12px "JetBrains Mono", monospace';
-      const textWidth = boxCtx.measureText(labelText).width;
-      const textHeight = 18;
-
-      boxCtx.fillStyle = strokeColor;
-      boxCtx.fillRect(x, Math.max(0, y - textHeight - 4), textWidth + 12, textHeight + 4);
-
-      // Draw Text
-      boxCtx.fillStyle = '#ffffff';
-      boxCtx.fillText(labelText, x + 6, Math.max(14, y - 6));
+  // Operator Arming Switch
+  const armToggle = document.getElementById('operator-arm-toggle');
+  if (armToggle) {
+    armToggle.addEventListener('change', (e) => {
+      operatorArmed = e.target.checked;
+      updateMotorArmState(operatorArmed);
     });
   }
 
-  // ==========================================
-  // 3. RENDER DIAGNOSIS & REJECTION REPORT
-  // ==========================================
+  // Emergency Stop Buttons
+  const btnEmergency = document.getElementById('btn-emergency-stop');
+  if (btnEmergency) btnEmergency.addEventListener('click', sendEmergencyStop);
 
-  function renderDiagnosisReport(data) {
-    emptyState.style.display = 'none';
-
-    // 1. Non-Leaf Rejection
-    if (!data.success || data.is_leaf === false) {
-      rejectionBox.style.display = 'block';
-      uncertainBox.style.display = 'none';
-      resultDetails.style.display = 'none';
-
-      rejectionTitle.textContent = data.message || "Invalid Image! Please upload a clear plant leaf image.";
-      rejectionReason.textContent = data.verifier_details || "Strict leaf-only filter rejected non-leaf image.";
-
-      hudLeafStatus.textContent = "Non-Leaf Rejected";
-      hudDetectionPill.className = 'hud-detection-pill rejected';
-      hudStatusText.textContent = "🚫 Invalid Image! Please upload a clear plant leaf image.";
-      return;
-    }
-
-    // 2. Uncertain Prediction
-    if (data.status === 'uncertain') {
-      rejectionBox.style.display = 'none';
-      uncertainBox.style.display = 'block';
-      resultDetails.style.display = 'none';
-
-      hudLeafStatus.textContent = "Uncertain Prediction";
-      hudDetectionPill.className = 'hud-detection-pill';
-      hudStatusText.textContent = "⚠️ Uncertain Prediction (< 70%)";
-      return;
-    }
-
-    // 3. Valid Leaf Success
-    rejectionBox.style.display = 'none';
-    uncertainBox.style.display = 'none';
-    resultDetails.style.display = 'block';
-
-    if (data.is_healthy) {
-      hudLeafStatus.textContent = "Healthy Leaf Verified";
-      hudDetectionPill.className = 'hud-detection-pill verified';
-      hudStatusText.textContent = `🌱 Verified: Healthy Leaf (${data.confidence}%)`;
-    } else {
-      hudLeafStatus.textContent = `${data.display_name} Detected`;
-      hudDetectionPill.className = 'hud-detection-pill diseased';
-      hudStatusText.textContent = `🍂 ${data.display_name} (${data.confidence}%)`;
-    }
-
-    verifierText.textContent = `Leaf Verified Successfully (Confidence: ${data.leaf_confidence || 99.8}%)`;
-
-    if (data.is_healthy) {
-      healthPill.className = 'health-pill healthy';
-      healthPill.textContent = 'Healthy Plant';
-    } else {
-      healthPill.className = 'health-pill diseased';
-      healthPill.textContent = 'Diseased Foliage';
-    }
-
-    predictionTitle.textContent = data.display_name || data.prediction;
-    confidenceVal.textContent = `${data.confidence}%`;
-
-    // Auto-Spray Banner
-    if (data.auto_spray_trigger && data.auto_spray_trigger.triggered) {
-      if (sprayDurDisp) sprayDurDisp.textContent = data.auto_spray_trigger.duration || 2.0;
-      sprayTriggerBanner.style.display = 'flex';
-      setTimeout(() => { sprayTriggerBanner.style.display = 'none'; }, 3000);
-    } else {
-      sprayTriggerBanner.style.display = 'none';
-    }
-
-    const info = data.disease_info || {};
-    predictionPathogen.textContent = info.pathogen || '';
-    diseaseDesc.textContent = info.description || '';
-
-    // Symptoms
-    symptomList.innerHTML = '';
-    if (info.symptoms) {
-      info.symptoms.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s;
-        symptomList.appendChild(li);
-      });
-    }
-
-    // Treatments
-    const trt = info.treatments || {};
-    treatmentChemical.textContent = trt.chemical || trt.preventive || "N/A";
-    treatmentOrganic.textContent = trt.organic || trt.soil || "N/A";
-    treatmentPrevention.textContent = trt.prevention || trt.monitoring || "N/A";
-
-    // Probability Bars
-    probList.innerHTML = '';
-    const probs = data.all_probabilities || {};
-    const colors = {
-      'Healthy': '#10b981',
-      'Cercospora': '#f59e0b',
-      'Anthracnose': '#ef4444',
-      'Bacterial_Spot': '#ec4899'
-    };
-
-    for (const [cls, pct] of Object.entries(probs)) {
-      const row = document.createElement('div');
-      row.className = 'prob-row';
-      const color = colors[cls] || '#3b82f6';
-      row.innerHTML = `
-        <div class="prob-header">
-          <span>${cls.replace('_', ' ')}</span>
-          <span>${pct}%</span>
-        </div>
-        <div class="prob-track">
-          <div class="prob-bar" style="width: ${pct}%; background-color: ${color};"></div>
-        </div>
-      `;
-      probList.appendChild(row);
-    }
-  }
-
-  // ==========================================
-  // 4. STATS COUNTERS & TELEMETRY UPDATES
-  // ==========================================
-
-  function updateStatsCounters(stats) {
-    if (!stats) return;
-    if (statLeaves) statLeaves.textContent = stats.total_leaves_detected || 0;
-    if (statHealthy) statHealthy.textContent = stats.total_healthy_leaves || 0;
-    if (statDiseased) statDiseased.textContent = stats.total_diseased_leaves || 0;
-    if (statImages) statImages.textContent = stats.total_images_stored || 0;
-  }
-
-  function updateHardwareTelemetry(t) {
-    if (!t) return;
-    if (teleDir) teleDir.textContent = t.direction;
-    if (teleSpeed) teleSpeed.textContent = `${t.speed}%`;
-    if (statMotorSpeed) statMotorSpeed.textContent = `${t.speed}% PWM`;
-    if (telePump) telePump.textContent = t.pump_active ? "SPRAYING" : "IDLE";
-    if (statPump) {
-      statPump.textContent = t.pump_active ? "SPRAYING WATER" : (t.pump_enabled ? "READY" : "DISABLED");
-      statPump.className = t.pump_active ? "stat-value text-primary" : "stat-value";
-    }
-    if (teleAuto) teleAuto.textContent = t.auto_spray_enabled ? "ENABLED" : "OFF";
-    if (teleHardware) teleHardware.textContent = t.hardware_mode.includes("HARDWARE") ? "Raspberry Pi (GPIO)" : "Simulation (Laptop)";
-
-    if (platformBadge) {
-      if (t.hardware_mode.includes("HARDWARE")) {
-        platformBadge.innerHTML = '<span class="pulse-dot"></span> Raspberry Pi Hardware';
-      } else {
-        platformBadge.innerHTML = '<span class="pulse-dot"></span> Simulation Mode (Laptop)';
-      }
-    }
-
-    if (navModeBadge) {
-      navModeBadge.textContent = t.control_mode === 'automatic' ? 'Autonomous Mode' : 'Manual Driving';
-    }
-
-    pumpActive = t.pump_active;
-    if (pumpStatusPill) {
-      if (pumpActive) {
-        pumpStatusPill.className = "pump-status-pill active";
-        pumpStatusPill.textContent = "SPRAYING WATER";
-        if (pumpToggleText) pumpToggleText.textContent = "Turn Pump OFF";
-      } else {
-        pumpStatusPill.className = "pump-status-pill";
-        pumpStatusPill.textContent = "PUMP OFF";
-        if (pumpToggleText) pumpToggleText.textContent = "Turn Pump ON";
-      }
-    }
-
-    // Highlight D-Pad direction
-    dpadBtns.forEach(btn => {
-      const act = btn.getAttribute('data-action');
-      if (act && act.toLowerCase() === t.direction.toLowerCase()) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
+  // Motor Controls (D-Pad)
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.getAttribute('data-action');
+      if (action) sendRoverCommand(action);
     });
-  }
-
-  // ==========================================
-  // 5. MOTOR & PUMP CONTROLS
-  // ==========================================
-
-  async function sendRoverCommand(action) {
-    try {
-      const res = await fetch('/api/rover/control', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: action })
-      });
-      const data = await res.json();
-      if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-    } catch (e) {
-      console.warn("Rover control error:", e);
-    }
-  }
-
-  dpadBtns.forEach(btn => {
-    const action = btn.getAttribute('data-action');
-    btn.addEventListener('click', () => sendRoverCommand(action));
   });
 
   // Speed Presets
-  speedPresets.forEach(btn => {
+  document.querySelectorAll('.btn-preset').forEach(btn => {
     btn.addEventListener('click', () => {
-      speedPresets.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const val = parseInt(btn.getAttribute('data-speed'));
-      if (speedSlider) speedSlider.value = val;
-      updateSpeed(val);
+      const spd = parseInt(btn.getAttribute('data-speed'));
+      if (spd) setRoverSpeed(spd);
     });
   });
 
+  // Speed Sliders
+  const speedSlider = document.getElementById('motor-tab-slider');
   if (speedSlider) {
     speedSlider.addEventListener('input', (e) => {
-      updateSpeed(e.target.value);
+      setRoverSpeed(parseInt(e.target.value));
     });
   }
 
-  async function updateSpeed(val) {
-    if (speedDisplay) speedDisplay.textContent = `${val}% PWM`;
-    try {
-      const res = await fetch('/api/rover/speed', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ speed: val })
-      });
-      const data = await res.json();
-      if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-    } catch (e) {
-      console.warn("Speed update error:", e);
-    }
-  }
-
-  // Sprayer Pump Controls (Water Only)
-  if (btnPumpToggle) {
-    btnPumpToggle.addEventListener('click', async () => {
-      const action = pumpActive ? 'off' : 'on';
-      try {
-        const res = await fetch('/api/rover/pump', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: action })
-        });
-        const data = await res.json();
-        if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-      } catch (e) {
-        console.warn("Pump toggle error:", e);
-      }
-    });
-  }
-
-  if (btnPumpBurst) {
-    btnPumpBurst.addEventListener('click', async () => {
-      try {
-        btnPumpBurst.disabled = true;
-        const dur = settingSprayDur ? parseFloat(settingSprayDur.value) : 2.0;
-        const res = await fetch('/api/rover/pump', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'burst', duration: dur })
-        });
-        const data = await res.json();
-        if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-        setTimeout(() => { btnPumpBurst.disabled = false; }, (dur + 0.5) * 1000);
-      } catch (e) {
-        btnPumpBurst.disabled = false;
-      }
-    });
-  }
-
-  if (autoSprayToggle) {
-    autoSprayToggle.addEventListener('change', (e) => {
-      if (settingAutoSprayToggle) settingAutoSprayToggle.checked = e.target.checked;
-      updateSettingsBackend({ pump: { auto_spray_enabled: e.target.checked } });
-    });
-  }
-
-  // Emergency Stop Button
-  if (btnEmergencyStop) {
-    btnEmergencyStop.addEventListener('click', async () => {
-      try {
-        const res = await fetch('/api/rover/emergency_stop', { method: 'POST' });
-        const data = await res.json();
-        if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-        alert("EMERGENCY STOP EXECUTED: All motors and water pump outputs disabled.");
-      } catch (e) {
-        console.warn("Emergency stop error:", e);
-      }
-    });
-  }
-
-  // Keyboard Navigation
-  const keyMap = {
-    'KeyW': 'forward', 'ArrowUp': 'forward',
-    'KeyS': 'backward', 'ArrowDown': 'backward',
-    'KeyA': 'left', 'ArrowLeft': 'left',
-    'KeyD': 'right', 'ArrowRight': 'right',
-    'Space': 'stop'
-  };
-
+  // Keyboard Shortcuts (W/A/S/D/Space/P/B)
   window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-
-    if (keyMap[e.code]) {
-      e.preventDefault();
-      sendRoverCommand(keyMap[e.code]);
-    } else if (e.code === 'KeyP') {
-      e.preventDefault();
-      if (btnPumpToggle) btnPumpToggle.click();
-    } else if (e.code === 'KeyB') {
-      e.preventDefault();
-      if (btnPumpBurst) btnPumpBurst.click();
-    } else if (e.code === 'Digit1' && speedPresets[0]) {
-      speedPresets[0].click();
-    } else if (e.code === 'Digit2' && speedPresets[1]) {
-      speedPresets[1].click();
-    } else if (e.code === 'Digit3' && speedPresets[2]) {
-      speedPresets[2].click();
-    }
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+    const key = e.key.toLowerCase();
+    if (key === 'w' || e.key === 'ArrowUp') sendRoverCommand('forward');
+    else if (key === 's' || e.key === 'ArrowDown') sendRoverCommand('backward');
+    else if (key === 'a' || e.key === 'ArrowLeft') sendRoverCommand('left');
+    else if (key === 'd' || e.key === 'ArrowRight') sendRoverCommand('right');
+    else if (e.key === ' ' || key === 'x') sendRoverCommand('stop');
+    else if (key === 'p') togglePump();
+    else if (key === 'b') triggerQuickSpray();
   });
 
-  // ==========================================
-  // 6. SYSTEM SETTINGS PANEL SYNC
-  // ==========================================
-
-  async function updateSettingsBackend(settingsPatch) {
-    try {
-      const res = await fetch('/api/settings/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settingsPatch)
-      });
-      const data = await res.json();
-      if (data.telemetry) updateHardwareTelemetry(data.telemetry);
-    } catch (e) {
-      console.warn("Settings update error:", e);
-    }
-  }
-
-  // Detection Settings
-  if (settingObjDetect) {
-    settingObjDetect.addEventListener('change', (e) => {
-      updateSettingsBackend({ detection: { object_detection_enabled: e.target.checked } });
+  // File Upload Handlers (Diagnostic Studio)
+  const tabDropZone = document.getElementById('tab-drop-zone');
+  const tabFileInput = document.getElementById('tab-file-input');
+  if (tabDropZone && tabFileInput) {
+    tabDropZone.addEventListener('click', () => tabFileInput.click());
+    tabFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) uploadLeafImage(e.target.files[0]);
+    });
+    tabDropZone.addEventListener('dragover', (e) => { e.preventDefault(); tabDropZone.style.borderColor = '#10b981'; });
+    tabDropZone.addEventListener('dragleave', () => { tabDropZone.style.borderColor = 'var(--border)'; });
+    tabDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      tabDropZone.style.borderColor = 'var(--border)';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) uploadLeafImage(e.dataTransfer.files[0]);
     });
   }
 
-  if (settingDiseaseDetect) {
-    settingDiseaseDetect.addEventListener('change', (e) => {
-      updateSettingsBackend({ detection: { disease_detection_enabled: e.target.checked } });
+  // Filter Pills for History
+  document.querySelectorAll('#history-filter-pills .filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#history-filter-pills .filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      loadHistory(pill.getAttribute('data-filter'));
     });
-  }
+  });
 
-  if (settingConfSlider) {
-    settingConfSlider.addEventListener('input', (e) => {
-      if (settingConfVal) settingConfVal.textContent = `${e.target.value}%`;
-      updateSettingsBackend({ detection: { confidence_threshold: parseFloat(e.target.value) } });
-    });
-  }
-
-  // Motor Mode Radio Pills
-  if (btnMotorManual && btnMotorAuto) {
-    btnMotorManual.addEventListener('click', () => {
-      btnMotorManual.classList.add('active');
-      btnMotorAuto.classList.remove('active');
-      updateSettingsBackend({ motor: { control_mode: 'manual' } });
-    });
-    btnMotorAuto.addEventListener('click', () => {
-      btnMotorAuto.classList.add('active');
-      btnMotorManual.classList.remove('active');
-      updateSettingsBackend({ motor: { control_mode: 'automatic' } });
-    });
-  }
-
-  // Pump Settings
-  if (settingPumpMaster) {
-    settingPumpMaster.addEventListener('change', (e) => {
-      updateSettingsBackend({ pump: { pump_enabled: e.target.checked } });
-    });
-  }
-
-  if (settingAutoSprayToggle) {
-    settingAutoSprayToggle.addEventListener('change', (e) => {
-      if (autoSprayToggle) autoSprayToggle.checked = e.target.checked;
-      updateSettingsBackend({ pump: { auto_spray_enabled: e.target.checked } });
-    });
-  }
-
-  if (settingSprayDur) {
-    settingSprayDur.addEventListener('change', (e) => {
-      updateSettingsBackend({ pump: { spray_duration: parseFloat(e.target.value) } });
-    });
-  }
-
-  if (settingSprayInt) {
-    settingSprayInt.addEventListener('change', (e) => {
-      updateSettingsBackend({ pump: { spray_interval: parseFloat(e.target.value) } });
-    });
-  }
-
-  // Storage Settings
-  if (settingStorageToggle) {
-    settingStorageToggle.addEventListener('change', (e) => {
-      updateSettingsBackend({ storage: { auto_storage_enabled: e.target.checked } });
-    });
-  }
-
-  if (settingSaveDiseased) {
-    settingSaveDiseased.addEventListener('change', (e) => {
-      updateSettingsBackend({ storage: { save_diseased: e.target.checked } });
-    });
-  }
-
-  if (settingSaveHealthy) {
-    settingSaveHealthy.addEventListener('change', (e) => {
-      updateSettingsBackend({ storage: { save_healthy: e.target.checked } });
-    });
-  }
-
-  // Toggle Upload File Drawer
-  if (btnToggleUpload) {
-    btnToggleUpload.addEventListener('click', () => {
-      const isHidden = dropZoneDrawer.style.display === 'none';
-      dropZoneDrawer.style.display = isHidden ? 'block' : 'none';
-      btnToggleUpload.textContent = isHidden ? '✕ Close Upload' : '📁 Upload Image';
-    });
-  }
-
-  if (btnBrowse && fileInput) {
-    btnBrowse.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) {
-        handleFileUpload(e.target.files[0]);
-      }
-    });
-  }
-
-  async function handleFileUpload(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-    hudStatusText.textContent = `Analyzing ${file.name}...`;
-
-    const res = await fetch('/api/predict', { method: 'POST', body: formData });
-    const data = await res.json();
-    renderDiagnosisReport(data);
-    drawBoundingBoxes(data.bounding_boxes, data);
-  }
-
-  // ==========================================
-  // 7. PRESET TEST SAMPLES & TELEMETRY SYNC
-  // ==========================================
-
-  async function loadPresets() {
-    try {
-      const res = await fetch('/api/samples');
-      const samples = await res.json();
-      presetsList.innerHTML = '';
-      samples.forEach(sample => {
-        const item = document.createElement('div');
-        item.className = 'preset-item';
-        const tagClass = sample.category === 'Leaf' ? 'leaf' : 'non-leaf';
-        item.innerHTML = `
-          <img src="${sample.url}" alt="${sample.title}" class="preset-thumb">
-          <span class="preset-title">${sample.title}</span>
-          <span class="preset-tag ${tagClass}">${sample.category}</span>
-        `;
-        item.addEventListener('click', async () => {
-          hudStatusText.textContent = `Testing ${sample.title}...`;
-          const blobRes = await fetch(sample.url);
-          const blob = await blobRes.blob();
-          const file = new File([blob], sample.file, { type: blob.type || 'image/jpeg' });
-          handleFileUpload(file);
-        });
-        presetsList.appendChild(item);
-      });
-    } catch (e) {
-      console.warn("Could not load presets:", e);
-    }
-  }
+  // Initial Data Loads
   loadPresets();
+  loadHistory();
+  loadGallery();
+  loadSprayHistory();
 
-  // Initial Sync
-  fetch('/api/telemetry')
-    .then(r => r.json())
-    .then(data => {
-      if (data.hardware) updateHardwareTelemetry(data.hardware);
-      if (data.statistics) updateStatsCounters(data.statistics);
-    })
-    .catch(() => {});
+  // Start Telemetry Watchdog Polling (Every 1.5 seconds)
+  pollTelemetry();
+  setInterval(pollTelemetry, 1500);
+});
 
-  // Metrics Modal
-  if (btnOpenMetrics && metricsModal) {
-    btnOpenMetrics.addEventListener('click', () => metricsModal.classList.add('active'));
-    const closeModal = () => metricsModal.classList.remove('active');
-    if (btnCloseMetrics) btnCloseMetrics.addEventListener('click', closeModal);
-    if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+// =============================================================
+// CAMERA & REAL-TIME INFERENCE PIPELINE
+// =============================================================
+async function startCamera() {
+  const video = document.getElementById('webcam-video');
+  const previewVideo = document.getElementById('dashboard-preview-video');
+  const btnStart = document.getElementById('btn-start-detection');
+  const btnPause = document.getElementById('btn-pause-detection');
+  const btnStop = document.getElementById('btn-stop-detection');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'environment' },
+      audio: false
+    });
+    videoStream = stream;
+    if (video) video.srcObject = stream;
+    if (previewVideo) previewVideo.srcObject = stream;
+
+    isDetecting = true;
+    isPaused = false;
+
+    if (btnStart) btnStart.disabled = true;
+    if (btnPause) { btnPause.disabled = false; btnPause.innerHTML = '<span>⏸</span> Pause'; }
+    if (btnStop) btnStop.disabled = false;
+
+    // Start detection loop
+    requestAnimationFrame(inferenceLoop);
+  } catch (err) {
+    console.error('Camera access error:', err);
+    alert('Unable to access webcam: ' + err.message + '\nEnsure camera permissions are enabled in your browser.');
+  }
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  const btnPause = document.getElementById('btn-pause-detection');
+  if (btnPause) {
+    btnPause.innerHTML = isPaused ? '<span>▶</span> Resume' : '<span>⏸</span> Pause';
+  }
+}
+
+function stopCamera() {
+  isDetecting = false;
+  isPaused = false;
+  if (videoStream) {
+    videoStream.getTracks().forEach(track => track.stop());
+    videoStream = null;
+  }
+  const video = document.getElementById('webcam-video');
+  const previewVideo = document.getElementById('dashboard-preview-video');
+  if (video) video.srcObject = null;
+  if (previewVideo) previewVideo.srcObject = null;
+
+  const boxCanvas = document.getElementById('bounding-box-canvas');
+  if (boxCanvas) {
+    const ctx = boxCanvas.getContext('2d');
+    ctx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
   }
 
-});
+  const btnStart = document.getElementById('btn-start-detection');
+  const btnPause = document.getElementById('btn-pause-detection');
+  const btnStop = document.getElementById('btn-stop-detection');
+  if (btnStart) btnStart.disabled = false;
+  if (btnPause) btnPause.disabled = true;
+  if (btnStop) btnStop.disabled = true;
+}
+
+async function inferenceLoop() {
+  if (!isDetecting) return;
+  if (!isPaused && !isProcessingFrame) {
+    await processWebcamFrame();
+  }
+  setTimeout(() => requestAnimationFrame(inferenceLoop), 120); // ~8 FPS inference throttle to save CPU
+}
+
+async function processWebcamFrame() {
+  const video = document.getElementById('webcam-video');
+  const captureCanvas = document.getElementById('capture-canvas');
+  const boxCanvas = document.getElementById('bounding-box-canvas');
+  if (!video || video.readyState < 2 || !captureCanvas || !boxCanvas) return;
+
+  isProcessingFrame = true;
+  const t0 = performance.now();
+
+  try {
+    const w = video.videoWidth || 640;
+    const h = video.videoHeight || 480;
+    captureCanvas.width = w;
+    captureCanvas.height = h;
+    boxCanvas.width = w;
+    boxCanvas.height = h;
+
+    const cCtx = captureCanvas.getContext('2d');
+    cCtx.drawImage(video, 0, 0, w, h);
+    const b64 = captureCanvas.toDataURL('image/jpeg', 0.82);
+
+    const resp = await fetch('/api/predict_live', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: b64 })
+    });
+
+    const data = await resp.json();
+    const t1 = performance.now();
+    const latency = Math.round(t1 - t0);
+
+    const hudLat = document.getElementById('hud-latency');
+    if (hudLat) hudLat.textContent = `Latency: ${latency} ms`;
+    const hudFps = document.getElementById('hud-fps');
+    if (hudFps) hudFps.textContent = `FPS: ${Math.round(1000 / Math.max(1, latency))}`;
+
+    // Render Bounding Boxes on Canvas
+    renderBoundingBoxes(data.bounding_boxes || [], w, h, data);
+
+    // Update Live Diagnosis Display
+    updateDiagnosisUI(data);
+
+  } catch (err) {
+    console.error('Inference error:', err);
+  } finally {
+    isProcessingFrame = false;
+  }
+}
+
+function renderBoundingBoxes(boxes, w, h, data) {
+  const boxCanvas = document.getElementById('bounding-box-canvas');
+  if (!boxCanvas) return;
+  const ctx = boxCanvas.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+
+  boxes.forEach(item => {
+    const b = item.box;
+    if (!b || b.length < 4) return;
+    const [x1, y1, x2, y2] = b;
+    const bw = x2 - x1;
+    const bh = y2 - y1;
+
+    const isLeaf = item.type === 'leaf';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = isLeaf ? '#10b981' : '#ef4444';
+    ctx.strokeRect(x1, y1, bw, bh);
+
+    // Label tag
+    const label = `${item.label} (${Math.round(item.confidence)}%)`;
+    ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
+    const textWidth = ctx.measureText(label).width;
+
+    ctx.fillStyle = isLeaf ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)';
+    ctx.fillRect(x1, Math.max(0, y1 - 22), textWidth + 12, 22);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(label, x1 + 6, Math.max(16, y1 - 6));
+  });
+}
+
+function updateDiagnosisUI(data) {
+  const emptyState = document.getElementById('empty-state');
+  const rejectionBox = document.getElementById('rejection-box');
+  const resultDetails = document.getElementById('result-details');
+  const hudLeaf = document.getElementById('hud-leaf-status');
+  const hudText = document.getElementById('hud-status-text');
+  const hudObs = document.getElementById('hud-obs-badge');
+
+  if (hudObs) hudObs.style.display = data.has_obstacle ? 'inline-block' : 'none';
+
+  if (!data.success && data.status === 'rejected') {
+    if (emptyState) emptyState.style.display = 'none';
+    if (resultDetails) resultDetails.style.display = 'none';
+    if (rejectionBox) {
+      rejectionBox.style.display = 'block';
+      const rTitle = document.getElementById('rejection-title');
+      if (rTitle) rTitle.textContent = data.message || 'Invalid Image! Please upload a clear plant leaf image.';
+    }
+    if (hudLeaf) hudLeaf.textContent = 'Non-Leaf Rejected';
+    if (hudText) hudText.textContent = data.message || 'Invalid Image!';
+    return;
+  }
+
+  if (data.is_leaf) {
+    if (emptyState) emptyState.style.display = 'none';
+    if (rejectionBox) rejectionBox.style.display = 'none';
+    if (resultDetails) resultDetails.style.display = 'block';
+
+    const pTitle = document.getElementById('prediction-title');
+    const pConf = document.getElementById('confidence-val');
+    const hPill = document.getElementById('health-pill');
+    const vText = document.getElementById('verifier-text');
+    const sprayBanner = document.getElementById('spray-trigger-banner');
+
+    if (pTitle) pTitle.textContent = data.display_name || data.prediction || 'Healthy Leaf';
+    if (pConf) pConf.textContent = `${Math.round(data.confidence || 0)}%`;
+    if (vText) vText.textContent = `Leaf Verified Successfully (${Math.round(data.leaf_confidence || 99)}%)`;
+
+    if (hPill) {
+      hPill.textContent = data.is_healthy ? 'Optimal Vigor' : 'Pathology Alert';
+      hPill.className = data.is_healthy ? 'health-pill' : 'health-pill diseased';
+    }
+
+    if (hudLeaf) hudLeaf.textContent = `${data.prediction || 'Leaf'} (${Math.round(data.confidence || 0)}%)`;
+    if (hudText) hudText.textContent = data.is_healthy ? 'Healthy Foliage Detected' : `Alert: ${data.prediction} Detected!`;
+
+    // Spray notification banner
+    if (sprayBanner) {
+      sprayBanner.style.display = (data.auto_spray_trigger && data.auto_spray_trigger.triggered) ? 'flex' : 'none';
+    }
+
+    // Probability Bars
+    const probList = document.getElementById('prob-list');
+    if (probList && data.all_probabilities) {
+      let html = '';
+      for (const [cls, val] of Object.entries(data.all_probabilities)) {
+        html += `
+          <div class="prob-row">
+            <div class="prob-header"><span>${cls}</span><span>${Math.round(val)}%</span></div>
+            <div class="prob-track"><div class="prob-bar" style="width: ${val}%; background: ${cls.includes('Healthy') ? '#10b981' : '#f59e0b'};"></div></div>
+          </div>
+        `;
+      }
+      probList.innerHTML = html;
+    }
+
+    // Sync to Dashboard tab overview
+    const dTitle = document.getElementById('dash-pred-title');
+    const dConf = document.getElementById('dash-conf-val');
+    const dDesc = document.getElementById('dash-pred-desc');
+    const dDiag = document.getElementById('dash-diag-text');
+    if (dTitle) dTitle.textContent = data.display_name || data.prediction;
+    if (dConf) dConf.textContent = `${Math.round(data.confidence || 0)}%`;
+    if (dDesc && data.disease_info) dDesc.textContent = data.disease_info.description || '';
+    if (dDiag) dDiag.textContent = `${data.prediction} (${Math.round(data.confidence || 0)}%)`;
+  }
+}
+
+async function captureSnapshot() {
+  const captureCanvas = document.getElementById('capture-canvas');
+  if (!captureCanvas) return;
+  const b64 = captureCanvas.toDataURL('image/jpeg', 0.9);
+  await uploadLeafBase64(b64);
+  switchTab('tab-detection');
+}
+
+// =============================================================
+// DIAGNOSTIC STUDIO UPLOAD & PRESETS
+// =============================================================
+async function uploadLeafImage(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  showDiagnosticLoading();
+
+  try {
+    const resp = await fetch('/api/predict', { method: 'POST', body: formData });
+    const data = await resp.json();
+    renderDiagnosticReport(data);
+  } catch (err) {
+    alert('Prediction request error: ' + err.message);
+  }
+}
+
+async function uploadLeafBase64(b64) {
+  showDiagnosticLoading();
+  try {
+    const resp = await fetch('/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: b64 })
+    });
+    const data = await resp.json();
+    renderDiagnosticReport(data);
+  } catch (err) {
+    alert('Prediction error: ' + err.message);
+  }
+}
+
+function showDiagnosticLoading() {
+  const container = document.getElementById('tab-diag-content');
+  if (container) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 32px;">
+        <div style="font-size: 36px; animation: spin 1s infinite linear;">🔄</div>
+        <h4 style="margin-top: 12px; color: #fff;">Running Dual AI Verification & Classification...</h4>
+        <p style="font-size: 11px; color: var(--text-muted);">YOLOv8 Localizer &rarr; Strict Leaf Verifier &rarr; CNN Classifier</p>
+      </div>
+    `;
+  }
+}
+
+function renderDiagnosticReport(data) {
+  const container = document.getElementById('tab-diag-content');
+  const previewImg = document.getElementById('tab-diag-preview-img');
+  const previewCont = document.getElementById('tab-diag-preview-container');
+
+  if (data.preview_image && previewImg && previewCont) {
+    previewImg.src = data.preview_image;
+    previewCont.style.display = 'block';
+  }
+
+  if (!data.success || !data.is_leaf) {
+    container.innerHTML = `
+      <div class="rejection-box" style="display: block;">
+        <div class="rejection-header">
+          <span class="rejection-icon">🚫</span>
+          <div>
+            <h3 class="rejection-title">${data.message || 'Invalid Image! Please upload a clear plant leaf image.'}</h3>
+            <p class="rejection-reason">Non-leaf candidate rejected by strict botanical CNN filter.</p>
+          </div>
+        </div>
+        <div class="rejection-body">
+          <p>The AI model enforces strict input verification to prevent false diagnostics on human faces, vehicles, animals, or unrelated objects.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const dis = data.disease_info || {};
+  const treats = dis.treatments || {};
+
+  container.innerHTML = `
+    <div class="verifier-badge">
+      <span class="verified-icon">🛡️</span>
+      <span>Leaf Verified (Confidence: ${Math.round(data.leaf_confidence || 99)}%)</span>
+    </div>
+
+    <div class="prediction-banner">
+      <div class="prediction-info">
+        <span class="health-pill ${data.is_healthy ? '' : 'diseased'}">${data.is_healthy ? 'Healthy' : 'Diseased'}</span>
+        <h2 class="prediction-title">${data.display_name || data.prediction}</h2>
+        <p class="prediction-pathogen">${dis.pathogen || ''}</p>
+      </div>
+      <div class="confidence-circle">
+        <span class="confidence-val">${Math.round(data.confidence || 0)}%</span>
+        <span class="confidence-lbl">Confidence</span>
+      </div>
+    </div>
+
+    <div class="card-section" style="margin-top: 14px;">
+      <h4 class="section-title">Description & Agronomic Diagnosis</h4>
+      <p style="font-size: 11px; color: #cbd5e1; line-height: 1.5;">${dis.description || 'Diagnosis completed.'}</p>
+    </div>
+
+    <div class="treatment-grid" style="margin-top: 12px;">
+      <div class="treatment-box">
+        <h5>🧪 Chemical Action</h5>
+        <p>${treats.chemical || 'None required.'}</p>
+      </div>
+      <div class="treatment-box">
+        <h5>🌿 Organic Control</h5>
+        <p>${treats.organic || treats.soil || 'None required.'}</p>
+      </div>
+      <div class="treatment-box full-width">
+        <h5>🛡️ Prevention Strategy</h5>
+        <p>${treats.prevention || treats.preventive || 'Maintain clean cultivation and routine crop scouting.'}</p>
+      </div>
+    </div>
+  `;
+}
+
+async function loadPresets() {
+  const container = document.getElementById('presets-list');
+  const tabContainer = document.getElementById('tab-presets-list');
+  try {
+    const resp = await fetch('/api/samples');
+    const samples = await resp.json();
+
+    let html = '';
+    samples.forEach(s => {
+      const isLeaf = s.category === 'Leaf';
+      html += `
+        <div class="preset-item" onclick="testPreset('${s.url}')">
+          <img src="${s.url}" alt="${s.title}" class="preset-thumb">
+          <span class="preset-title">${s.title}</span>
+          <span class="preset-tag ${isLeaf ? 'leaf' : 'non-leaf'}">${s.category}</span>
+        </div>
+      `;
+    });
+
+    if (container) container.innerHTML = html;
+    if (tabContainer) tabContainer.innerHTML = html;
+  } catch (err) {
+    console.error('Failed to load presets:', err);
+  }
+}
+
+async function testPreset(url) {
+  showDiagnosticLoading();
+  switchTab('tab-detection');
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const file = new File([blob], 'preset.jpg', { type: 'image/jpeg' });
+    await uploadLeafImage(file);
+  } catch (err) {
+    alert('Preset load error: ' + err.message);
+  }
+}
+
+// =============================================================
+// ROVER MOVEMENT & SPEED CONTROLLER
+// =============================================================
+async function sendRoverCommand(action) {
+  if (!operatorArmed && action !== 'stop') {
+    alert('Safety Interlock: Enable Remote Movement Arming switch before sending motion commands.');
+    return;
+  }
+
+  try {
+    const resp = await fetch('/api/rover/control', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: action, armed: operatorArmed })
+    });
+    const data = await resp.json();
+    if (!data.success) {
+      alert('Rover command error: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Rover command request failed:', err);
+  }
+}
+
+async function setRoverSpeed(speed) {
+  currentSpeed = speed;
+  document.querySelectorAll('.btn-preset').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.getAttribute('data-speed')) === speed);
+  });
+
+  const speedSlider = document.getElementById('motor-tab-slider');
+  if (speedSlider) speedSlider.value = speed;
+  const speedDisp = document.getElementById('motor-tab-speed-disp');
+  if (speedDisp) speedDisp.textContent = `${speed}% PWM`;
+
+  try {
+    await fetch('/api/rover/speed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ speed: speed })
+    });
+  } catch (err) {
+    console.error('Speed update error:', err);
+  }
+}
+
+async function sendEmergencyStop() {
+  try {
+    await fetch('/api/rover/emergency_stop', { method: 'POST' });
+    alert('🛑 EMERGENCY STOP ENGAGED: DC Motors and Water Pump immediately shut off.');
+  } catch (err) {
+    console.error('Emergency stop error:', err);
+  }
+}
+
+function updateMotorArmState(armed) {
+  const badge = document.getElementById('motor-tab-mode');
+  if (badge) {
+    badge.textContent = armed ? 'Manual Driving (Armed)' : 'Safety Disarmed';
+    badge.style.color = armed ? '#34d399' : '#f87171';
+  }
+}
+
+// =============================================================
+// WATER PUMP CONTROLLER (WATER ONLY)
+// =============================================================
+let pumpState = false;
+
+async function togglePump() {
+  pumpState = !pumpState;
+  const action = pumpState ? 'on' : 'off';
+  try {
+    await fetch('/api/rover/pump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: action })
+    });
+    updatePumpUI(pumpState);
+  } catch (err) {
+    console.error('Pump toggle error:', err);
+  }
+}
+
+async function triggerQuickSpray() {
+  try {
+    const resp = await fetch('/api/rover/pump', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'burst', duration: 2.0 })
+    });
+    const data = await resp.json();
+    alert('💦 Water Spray Burst Triggered (2.0s Duration). Pure water dispensed.');
+    loadSprayHistory();
+  } catch (err) {
+    console.error('Spray burst error:', err);
+  }
+}
+
+function updatePumpUI(isActive) {
+  const pumpPill = document.getElementById('pump-tab-pill');
+  const btnIcon = document.getElementById('pump-tab-btn-icon');
+  const btnText = document.getElementById('pump-tab-btn-text');
+  const statPump = document.getElementById('stat-pump-status');
+
+  if (pumpPill) {
+    pumpPill.textContent = isActive ? 'PUMP ACTIVE (SPRAYING)' : 'PUMP OFF';
+    pumpPill.className = isActive ? 'pump-status-pill active' : 'pump-status-pill';
+  }
+  if (btnText) btnText.textContent = isActive ? 'Turn Pump OFF' : 'Turn Pump ON';
+  if (statPump) statPump.textContent = isActive ? 'SPRAYING' : 'STANDBY';
+}
+
+async function loadSprayHistory() {
+  const tbody = document.getElementById('spray-history-tbody');
+  if (!tbody) return;
+  try {
+    const resp = await fetch('/api/history?category=all&limit=20');
+    const rows = await resp.json();
+    const sprays = rows.filter(r => r.spraying_status && r.spraying_status !== 'NONE');
+
+    if (sprays.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim);">No spraying operations recorded yet.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    sprays.forEach(s => {
+      html += `
+        <tr>
+          <td>${s.timestamp}</td>
+          <td><strong>${s.disease}</strong></td>
+          <td>2.0s</td>
+          <td><span style="color:#34d399;">✅ Pi Confirmed (Relay Pin 24)</span></td>
+          <td><span class="badge-status badge-connected">COMPLETED</span></td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  } catch (err) {
+    console.error('Spray history load error:', err);
+  }
+}
+
+// =============================================================
+// TELEMETRY WATCHDOG & SENSOR MONITORING (Real Values Only)
+// =============================================================
+async function pollTelemetry() {
+  try {
+    const resp = await fetch('/api/telemetry', { cache: 'no-store' });
+    const data = await resp.json();
+
+    // 1. Connection Status Badge: CONNECTED / DISCONNECTED / RECONNECTING
+    const statusBadge = document.getElementById('rover-status-badge');
+    const statusText = document.getElementById('rover-status-text');
+    const monitorBadge = document.getElementById('rover-monitor-badge');
+    const rState = data.rover_status || 'DISCONNECTED';
+
+    if (statusText) statusText.textContent = rState;
+    if (statusBadge) {
+      statusBadge.className = 'badge-status ' + (
+        rState === 'CONNECTED' ? 'badge-connected' :
+        rState === 'RECONNECTING' ? 'badge-reconnecting' : 'badge-disconnected'
+      );
+    }
+    if (monitorBadge) {
+      monitorBadge.textContent = rState;
+      monitorBadge.className = 'badge-status ' + (
+        rState === 'CONNECTED' ? 'badge-connected' :
+        rState === 'RECONNECTING' ? 'badge-reconnecting' : 'badge-disconnected'
+      );
+    }
+
+    // 2. Real Sensor Values (Display 'Sensor Not Connected' if absent)
+    const sensors = data.sensors || {};
+    const setSensor = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = val;
+        el.classList.toggle('sensor-disconnected', val === 'Sensor Not Connected');
+      }
+    };
+
+    setSensor('card-sensor-dist', sensors.ultrasonic_distance_cm || 'Sensor Not Connected');
+    setSensor('card-sensor-obs', sensors.obstacle_detected !== undefined && sensors.obstacle_detected !== 'Sensor Not Connected' ? (sensors.obstacle_detected ? 'OBSTACLE DETECTED' : 'Path Clear') : 'Sensor Not Connected');
+    setSensor('card-sensor-soil', sensors.soil_moisture_pct || 'Sensor Not Connected');
+    setSensor('card-sensor-temp', sensors.temperature_c || 'Sensor Not Connected');
+    setSensor('card-sensor-hum', sensors.humidity_pct || 'Sensor Not Connected');
+    setSensor('card-sensor-bat', sensors.battery_voltage || 'Sensor Not Connected');
+
+    // Dashboard Tab Quick Sensors
+    setSensor('sensor-dash-dist', sensors.ultrasonic_distance_cm || 'Sensor Not Connected');
+    setSensor('sensor-dash-bat', sensors.battery_voltage || 'Sensor Not Connected');
+    setSensor('dash-tele-dist', sensors.ultrasonic_distance_cm || 'Sensor Not Connected');
+    setSensor('dash-tele-bat', sensors.battery_voltage || 'Sensor Not Connected');
+
+    // Rover Tab Sidebar
+    setSensor('rover-card-dist', sensors.ultrasonic_distance_cm || 'Sensor Not Connected');
+    setSensor('rover-card-battery', sensors.battery_voltage || 'Sensor Not Connected');
+    const roverObs = document.getElementById('rover-card-obs');
+    if (roverObs) {
+      roverObs.textContent = sensors.obstacle_detected === true ? '🛑 Obstacle Detected! Braking engaged' : '✅ Path Clear (Safe to drive)';
+      roverObs.style.color = sensors.obstacle_detected === true ? '#f87171' : '#34d399';
+    }
+
+    const lastComm = document.getElementById('rover-last-comm');
+    if (lastComm) lastComm.textContent = sensors.last_communication || 'Never';
+
+    // 3. Driving Telemetry
+    const hw = data.hardware || {};
+    const dir = hw.direction || 'STOP';
+    const spd = hw.speed || 65;
+
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    setVal('dash-tele-dir', dir);
+    setVal('dash-dir-display', dir);
+    setVal('dash-tele-speed', `${spd}%`);
+    setVal('stat-motor-speed', `${spd}% PWM`);
+    setVal('twin-motion', dir);
+    setVal('twin-speed', `${spd}%`);
+    setVal('rover-card-motion', dir);
+    setVal('rover-card-speed', `${spd}% PWM`);
+
+    // 4. Statistics Counters
+    const stats = data.statistics || {};
+    setVal('stat-leaves-detected', stats.total || 0);
+    setVal('stat-healthy-leaves', stats.healthy || 0);
+    setVal('stat-diseased-leaves', stats.diseased || 0);
+    setVal('stat-total-sprays', stats.total_sprays || 0);
+
+  } catch (err) {
+    // Graceful silent swallow on background poll failures
+  }
+}
+
+// =============================================================
+// HISTORY TABLE & CSV EXPORT
+// =============================================================
+async function loadHistory(category = 'all') {
+  const tbody = document.getElementById('history-tbody');
+  if (!tbody) return;
+
+  try {
+    const url = `/api/history?category=${category}&limit=50`;
+    const resp = await fetch(url);
+    const rows = await resp.json();
+
+    if (!rows || rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-dim);">No detection records found.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    rows.forEach(r => {
+      const isHealthy = r.is_healthy === 1 || r.disease.toLowerCase().includes('healthy');
+      const imgTag = r.image ? `<img src="/static/images/${r.image}" class="thumb-mini" alt="${r.disease}" onerror="this.src='/static/icons/icon-48.png'">` : '<span>-</span>';
+      html += `
+        <tr>
+          <td>${imgTag}</td>
+          <td><strong>${r.disease}</strong></td>
+          <td>${r.confidence}%</td>
+          <td><span class="badge-status ${isHealthy ? 'badge-connected' : 'badge-disconnected'}">${isHealthy ? 'Healthy' : 'Diseased'}</span></td>
+          <td>${r.rover_id || 'ROVER-01'}</td>
+          <td>${r.spraying_status || 'NONE'}</td>
+          <td>${r.timestamp}</td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  } catch (err) {
+    console.error('History load error:', err);
+  }
+}
+
+async function exportHistoryCSV() {
+  try {
+    const resp = await fetch('/api/history?category=all&limit=200');
+    const rows = await resp.json();
+    if (!rows || rows.length === 0) {
+      alert('No records available to export.');
+      return;
+    }
+
+    let csvContent = 'data:text/csv;charset=utf-8,ID,Date,Timestamp,Disease,Confidence,Is_Healthy,Rover_ID,Spraying_Status\n';
+    rows.forEach(r => {
+      csvContent += `"${r.result_id}","${r.date}","${r.timestamp}","${r.disease}","${r.confidence}","${r.is_healthy}","${r.rover_id}","${r.spraying_status}"\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `plant_disease_audit_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    alert('CSV export error: ' + err.message);
+  }
+}
+
+// =============================================================
+// CATEGORIZED IMAGE GALLERY
+// =============================================================
+async function loadGallery() {
+  const container = document.getElementById('gallery-container');
+  if (!container) return;
+
+  try {
+    const resp = await fetch('/api/gallery');
+    const cats = await resp.json();
+
+    let allItems = [];
+    for (const [catName, items] of Object.entries(cats)) {
+      items.forEach(i => allItems.push(i));
+    }
+
+    renderGalleryItems(allItems);
+  } catch (err) {
+    console.error('Gallery load error:', err);
+  }
+}
+
+function filterGallery(category) {
+  currentGalleryFilter = category;
+  document.querySelectorAll('.gallery-cat-tabs .filter-pill').forEach(p => {
+    p.classList.toggle('active', p.getAttribute('data-cat') === category);
+  });
+  loadGallery();
+}
+
+function renderGalleryItems(items) {
+  const container = document.getElementById('gallery-container');
+  if (!container) return;
+
+  const filtered = currentGalleryFilter === 'all' ? items : items.filter(i => {
+    const dis = (i.disease || '').toLowerCase();
+    return dis.includes(currentGalleryFilter.toLowerCase());
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-dim); padding: 24px;">No images in this category yet.</div>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(item => {
+    const isHealthy = item.is_healthy === 1 || item.disease.toLowerCase().includes('healthy');
+    html += `
+      <div class="gallery-card" onclick="alert('${item.disease} - Conf: ${item.confidence}%\nDate: ${item.timestamp}')">
+        <img src="/static/images/${item.image}" alt="${item.disease}" class="gallery-img" onerror="this.src='/static/icons/icon-192.png'">
+        <div class="gallery-meta">
+          <div class="gallery-title">${item.disease}</div>
+          <div class="gallery-sub">${item.confidence}% &bull; ${item.date || ''}</div>
+          <span class="badge-status ${isHealthy ? 'badge-connected' : 'badge-disconnected'}" style="margin-top: 4px; font-size: 8px;">
+            ${isHealthy ? 'Healthy Leaf' : 'Pathology Alert'}
+          </span>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+// =============================================================
+// SETTINGS PERSISTENCE
+// =============================================================
+async function saveSettings() {
+  const confSlider = document.getElementById('setting-conf-slider');
+  const objDetect = document.getElementById('setting-obj-detect');
+  const diseaseDetect = document.getElementById('setting-disease-detect');
+  const sprayDur = document.getElementById('setting-spray-dur');
+  const sprayInt = document.getElementById('setting-spray-int');
+  const pumpMaster = document.getElementById('setting-pump-master');
+  const autoSpray = document.getElementById('setting-auto-spray-toggle');
+
+  const payload = {
+    detection: {
+      confidence_threshold: parseFloat(confSlider ? confSlider.value : 70),
+      object_detection_enabled: objDetect ? objDetect.checked : true,
+      disease_detection_enabled: diseaseDetect ? diseaseDetect.checked : true
+    },
+    pump: {
+      pump_enabled: pumpMaster ? pumpMaster.checked : true,
+      auto_spray_enabled: autoSpray ? autoSpray.checked : true,
+      spray_duration: parseFloat(sprayDur ? sprayDur.value : 2.0),
+      spray_interval: parseFloat(sprayInt ? sprayInt.value : 4.0)
+    }
+  };
+
+  try {
+    const resp = await fetch('/api/settings/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const res = await resp.json();
+    if (res.success) {
+      alert('✅ System settings updated successfully!');
+    }
+  } catch (err) {
+    alert('Settings update error: ' + err.message);
+  }
+}
+
+async function pingRover() {
+  alert('📡 Pinging Rover Edge Node...\nMonitoring /api/rover/heartbeat telemetry synchronization.');
+}

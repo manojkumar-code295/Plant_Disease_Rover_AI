@@ -1,25 +1,43 @@
-<<<<<<< HEAD
-# AgriVision AI: Live Plant Leaf Detection & Automatic Smart Spraying System
+# Plant Disease AI: Live Crop Pathology & Smart Rover Platform
 
-An upgraded, production-grade AI precision agriculture and smart rover system featuring:
-1. **Continuous Live Webcam Detection**: Real-time video frame stream processing without requiring manual snapshot clicks.
-2. **Dual-Model Computer Vision Pipeline**:
+A production-grade Precision Agriculture and Smart Rover system featuring:
+1. **Unified 12-Section Agricultural Dashboard**: Complete web interface with executive summary, live camera feeds, 3D rover telemetry, disease diagnosis, DC motor controls, water pump regulations, live sensor telemetry, detection history, categorized image gallery, model performance metrics, system settings, and cloud health monitoring.
+2. **Dual-Model Computer Vision AI Pipeline**:
    - **YOLOv8 Object Detection**: High-speed localization of plant leaves and dynamic obstacle detection in front of the rover.
-   - **Strict Leaf-Only Verification CNN**: Binary classifier rejecting non-leaf objects (faces, hands, vehicles, furniture, room walls).
+   - **Strict Leaf-Only Verification CNN**: MobileNetV2 binary classifier rejecting non-leaf objects (faces, hands, vehicles, animals, buildings, fruits).
    - **Deep Plant Disease CNN**: Accurate 4-class disease diagnostic (**Healthy Leaf**, **Cercospora**, **Anthracnose**, **Bacterial Spot**).
-3. **Live VS Code Terminal Logging**: Formatted real-time telemetry streaming cleanly in the terminal with duplicate suppression.
-4. **Automatic Water Spraying System (WATER ONLY)**: Precision spraying activated upon disease verification with configurable spray duration, cooldown intervals, and safety cutoffs.
-5. **Differential Drive Motor Speed Control**: Low, Medium, and High PWM throttle speeds with automatic obstacle braking and clear-path resumption.
-6. **Automatic Image Archiving & CSV History**: Automatic saving into `detected_images/<Disease>/` and appending audit logs to `detection_logs/detection_history.csv`.
-7. **Interactive Web Dashboard**: Video HUD with dynamic canvas bounding boxes, live telemetry indicators, rover D-pad, manual water spray toggle, and settings panel.
-8. **Render Cloud Deployment**: Live 24/7 web service running at `https://precision-agriculture-smart-rover.onrender.com`.
+3. **Live Camera Monitoring with Fallback Webcam**:
+   - High-definition live video relay from Raspberry Pi Rover camera.
+   - Seamless fallback browser webcam access with HTML5 Canvas bounding box rendering.
+   - Start, pause, resume, stop, and snapshot capture capabilities.
+4. **Autonomous Edge-Cloud Bridge**:
+   - Bi-directional synchronization between Render Cloud backend and Raspberry Pi Edge Node.
+   - Real-time command queue (`/api/rover/command`), heartbeat sync (`/api/rover/heartbeat`), and video streaming.
+   - Heartbeat watchdog with live status indicator: `CONNECTED`, `DISCONNECTED`, and `RECONNECTING`.
+5. **Differential Drive Motor Navigation**:
+   - Dual BTS7960 / L298N motor driver support with PWM speed throttling (Low 35%, Medium 65%, High 100%).
+   - Operator arming safety interlock switch and immediate Emergency Stop override.
+   - Obstacle auto-braking (path clearance resumption).
+6. **Automatic Precision Water Sprayer (WATER ONLY)**:
+   - Pure water foliar spraying triggered upon disease diagnosis above confidence threshold.
+   - Maximum runtime cutoff (6s), cooldown protection (4s), and emergency auto-shutoff.
+   - Hardware confirmation logging: operations are only marked confirmed after the Raspberry Pi energizes the relay pin.
+7. **Live Hardware Sensor Monitoring**:
+   - Actual telemetry for Ultrasonic Distance, Obstacle Sensor, Soil Moisture, Ambient Temperature, Humidity, and Battery Power.
+   - Honest reporting: displays **"Sensor Not Connected"** if a sensor is disconnected. Never generates fake readings.
+8. **Persistent SQLite Database**:
+   - Thread-safe WAL mode storage (`plants_data.db`) for detection history, confirmed spraying operations, and telemetry.
+9. **Progressive Web App (PWA)**:
+   - Installable on Android and Desktop with `manifest.json` ("Plant Disease AI").
+   - Offline fallback page (`/offline.html`) and service worker caching.
+   - Full-screen responsive layout with mobile bottom navigation bar.
 
 ---
 
-## 📁 Project Directory Structure
+## 📁 Repository Directory Structure
 
 ```text
-Plant_Leaf_Disease_Detection/
+Plant_Disease_Rover_AI/
 │
 ├── detected_images/                 # Stored leaf detection images
 │   ├── Healthy/
@@ -27,8 +45,8 @@ Plant_Leaf_Disease_Detection/
 │   ├── Anthracnose/
 │   └── Bacterial_Spot/
 │
-├── detection_logs/                  # Detection history & audit records
-│   ├── detection_history.csv        # Detailed CSV history of every detection
+├── detection_logs/                  # Audit history logs
+│   ├── detection_history.csv        # Detailed CSV history of detections
 │   └── system_logs.txt              # Timestamped system events
 │
 ├── models/
@@ -41,6 +59,7 @@ Plant_Leaf_Disease_Detection/
 │
 ├── src/
 │   ├── config.py                    # Pinouts, thresholds, and limits
+│   ├── db.py                        # Persistent SQLite database operations
 │   ├── hardware_controller.py       # Motor PWM & water pump relay controller
 │   ├── object_detector.py           # YOLOv8 leaf & obstacle detection
 │   ├── leaf_verifier.py             # Strict Leaf-Only verification filter
@@ -51,24 +70,30 @@ Plant_Leaf_Disease_Detection/
 │   └── pipeline.py                  # Integrated multi-stage inference pipeline
 │
 ├── templates/
-│   └── index.html                   # Live Web Dashboard HUD & Control Panel
+│   ├── index.html                   # Main 12-Section Dashboard
+│   ├── rover.html                   # Dedicated Mobile Touch Controller
+│   ├── analytics.html               # Data Analytics & Model Performance
+│   ├── dataset.html                 # Dataset & Image Archive Browser
+│   ├── daily_data.html              # Daily Inspection Logs
+│   ├── settings.html                # System Configuration
+│   └── offline.html                 # PWA Offline Fallback
 │
 ├── static/
-│   ├── css/style.css                # Modern responsive UI & HUD styling
-│   └── js/app.js                    # Continuous stream controller & canvas renderer
+│   ├── css/style.css                # Responsive UI & Dashboard Styling
+│   ├── js/app.js                    # Client-side controller & real-time canvas
+│   ├── js/three.min.js              # Three.js 3D WebGL Engine
+│   ├── icons/                       # PWA Application Icons (48, 96, 144, 192, 512)
+│   ├── manifest.json                # Web App Manifest ("Plant Disease AI")
+│   └── service-worker.js            # PWA Service Worker
 │
-├── website/                         # Render Cloud Deployment Service
-│   ├── app.py                       # Cloud Flask server & telemetry aggregator
-│   ├── requirements.txt             # Lightweight cloud dependencies
-│   ├── templates/                   # Cloud web pages
-│   └── static/                      # Cloud static assets
-│
-├── app.py                           # Full local Flask web application
-├── test_project_upgrade.py          # Complete system integration test suite
-├── run_tests.py                     # Offline AI verification test suite
-├── requirements.txt                 # Python dependencies
-├── Procfile                         # Render process specification
-├── render.yaml                      # Render Blueprint configuration
+├── app.py                           # Master Unified Flask Web Server & API
+├── db.py                            # SQLite WAL Data Layer
+├── bts7960_render_controller.py     # Standalone High-Power BTS7960 Rover Controller
+├── run_tests.py                     # Offline AI Verification Test Suite
+├── test_rover_system.py             # End-to-End Rover & API Test Suite
+├── requirements.txt                 # Pinned CPU dependencies (Render optimized)
+├── Procfile                         # Gunicorn Web Process definition
+├── render.yaml                      # Render Blueprint Configuration
 └── README.md                        # Documentation
 ```
 
@@ -76,13 +101,13 @@ Plant_Leaf_Disease_Detection/
 
 ## 🌿 Supported Disease Classes & Treatments
 
-| Classification | Category | Recommended Treatment (Water + Organic Soluble) |
-| :--- | :--- | :--- |
-| **Healthy Leaf** | Healthy | Plant foliage is vigorous; continue routine irrigation. |
-| **Cercospora** | Disease | Water spray with organic copper-based fungicide; improve plant spacing. |
-| **Anthracnose** | Disease | Water spray with neem extract or bio-fungicide; remove fallen debris. |
-| **Bacterial Spot** | Disease | Water spray with copper bactericide; avoid overhead high-pressure watering. |
-| **NO LEAF DETECTED** | Rejection | No identifiable leaf in frame; non-plant objects ignored. |
+| Classification | Category | Pathogen Details | Recommended Treatment (Water Only Protocol) |
+| :--- | :--- | :--- | :--- |
+| **Healthy Leaf** | Healthy | Optimal vigor | Vigorous foliage; continue standard irrigation. |
+| **Cercospora** | Disease | *Cercospora spp.* | Foliar water spray with organic copper-based fungicide; improve row ventilation. |
+| **Anthracnose** | Disease | *Colletotrichum spp.* | Water spray with neem seed extract or bio-fungicide; prune infected tissue. |
+| **Bacterial Spot** | Disease | *Xanthomonas spp.* | Water spray with copper bactericide + bio-bactericide; avoid overhead high-pressure watering. |
+| **NON-LEAF REJECTED** | Rejection | Faces, Animals, Objects | Rejected: *"Invalid Image! Please upload a clear plant leaf image."* |
 
 ---
 
@@ -97,50 +122,54 @@ Plant_Leaf_Disease_Detection/
 | | `RIGHT_IN2` | `GPIO 23` | Pin 16 | Reverse Direction |
 | | `RIGHT_EN` | `GPIO 13` | Pin 33 | Speed PWM1 |
 | **Water Spray Pump** | `PUMP_PIN` | `GPIO 26` | Pin 37 | 5V Relay Trigger (Water Only) |
-| **Ultrasonic Distance Sensor** | `TRIG_PIN` | `GPIO 24` | Pin 18 | Trigger (10 µs pulse) |
-| | `ECHO_PIN` | `GPIO 25` | Pin 22 | Echo (1kΩ/2kΩ divider) |
+| **Ultrasonic Sensor** | `TRIG_PIN` | `GPIO 20` | Pin 38 | Trigger Pulse (10 µs) |
+| | `ECHO_PIN` | `GPIO 21` | Pin 40 | Echo Input (via 1kΩ/2kΩ divider) |
 | **Camera** | `CAM_PORT` | `CSI-2` / USB | Ribbon / USB 3.0 | 30 FPS Live Stream |
 
 ---
 
-## ⚡ How to Run in Visual Studio Code (VS Code)
+## ⚡ How to Run Locally
 
-### Step 1: Open the Project in VS Code
-Open your VS Code terminal and navigate to the project directory:
-```powershell
-cd "C:\Users\B Siddarth\Desktop\Plant_Leaf_Disease_Detection"
-```
-
-### Step 2: Run the Application
+### 1. Start the Unified Web Application
 ```powershell
 python app.py
 ```
-Visit the local dashboard at:
-👉 **`http://127.0.0.1:5000`**
+Open **`http://127.0.0.1:5000`** in your browser.
 
-### Step 3: Run the Edge Client on Raspberry Pi (or Laptop Edge Mode)
+### 2. Run the Raspberry Pi Rover Agent
+On the Raspberry Pi:
 ```bash
 python src/pi_agent.py
+# Or for the BTS7960 high-power controller:
+python bts7960_render_controller.py
 ```
 
----
-
-## 🌐 Render Cloud Deployment
-
-* **Live Cloud URL**: `https://precision-agriculture-smart-rover.onrender.com`
-* **Health Check**: `GET https://precision-agriculture-smart-rover.onrender.com/api/health`
-* **Rover Command Queue**: `GET https://precision-agriculture-smart-rover.onrender.com/api/rover/command`
-* **Telemetry Sync**: `POST https://precision-agriculture-smart-rover.onrender.com/api/rover/heartbeat`
-
----
-
-## 🧪 Automated Test Verification
-
-Run the comprehensive integration test suite anytime:
+### 3. Run Test Suites
 ```powershell
-python test_project_upgrade.py
+# 1. AI Verifier & 4-Class CNN Test Suite:
+python run_tests.py
+
+# 2. Rover Navigation, Motors, Pump & API Test Suite:
+python test_rover_system.py
 ```
-All 7 subsystem integration tests pass with 100% success!
-=======
-# Plant_Disease_Rover_AI
->>>>>>> 84efb4ac519e3259ebb94927153b0bcbff113536
+
+---
+
+## 📱 Progressive Web App (PWA) Mobile Installation
+
+1. Open the website on your mobile device (Chrome for Android / Safari on iOS).
+2. Tap the **"📲 Install App"** button in the header (or select **"Add to Home Screen"** in the browser menu).
+3. The app installs as a standalone application named **"Plant Disease AI"**.
+4. Features full offline capability with cached application views and an honest offline indicator for live hardware controls.
+
+---
+
+## 🌐 Cloud Deployment (Render)
+
+- **Live URL**: `https://precision-agriculture-smart-rover.onrender.com`
+- **Health Check**: `GET /api/health` (HTTP 200)
+- **Status Overview**: `GET /api/status`
+- **Rover Telemetry**: `GET /api/telemetry`
+- **Sensors Endpoint**: `GET /api/sensor_data`
+- **Command Queue**: `GET /api/rover/command`
+- **Heartbeat Endpoint**: `POST /api/rover/heartbeat`

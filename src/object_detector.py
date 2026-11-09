@@ -24,14 +24,22 @@ class LiveObjectDetector:
         return cls._instance
 
     def __init__(self):
+        self.model = None
+        self.model_loaded = False
+
+    def load_model(self):
+        if self.model_loaded and self.model is not None:
+            return True
         print(f"[Object Detector] Initializing YOLOv8 Object Detector ({YOLO_MODEL_PATH})...")
         try:
             self.model = YOLO(YOLO_MODEL_PATH)
             self.model_loaded = True
             print("[Object Detector] YOLOv8 Model initialized successfully!")
+            return True
         except Exception as e:
             print(f"[Object Detector] Warning: Could not load YOLOv8 model ({e}). Using fallback contour detector.")
             self.model_loaded = False
+            return False
 
     def detect(self, pil_image, conf_threshold=0.35):
         """
@@ -46,6 +54,9 @@ class LiveObjectDetector:
         """
         if pil_image is None:
             return {"detected_objects": [], "has_leaf": False, "has_obstacle": False, "primary_leaf_box": None, "primary_obstacle": None}
+
+        if not self.model_loaded and self.model is None:
+            self.load_model()
 
         w, h = pil_image.size
         detected_objects = []

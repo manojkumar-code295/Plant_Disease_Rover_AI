@@ -54,7 +54,7 @@ PUMP_PIN = 26   # Physical Pin 37 (Spray Pump Relay)
 PWM_FREQ = 1000 # 1000 Hz PWM for smooth 300 RPM motor torque
 
 # URLs
-CLOUD_BASE = "https://precision-agriculture-smart-rover.onrender.com"
+CLOUD_BASE = os.environ.get("RENDER_URL", os.environ.get("CLOUD_BASE", "https://precision-agriculture-smart-rover.onrender.com")).rstrip("/")
 CLOUD_CMD_URL = f"{CLOUD_BASE}/api/rover/command"
 CLOUD_HEARTBEAT_URL = f"{CLOUD_BASE}/api/rover/heartbeat"
 LOCAL_STATUS_URL = "http://127.0.0.1:5000/api/rover/status"
