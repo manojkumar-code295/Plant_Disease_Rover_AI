@@ -150,19 +150,22 @@ class DiseaseClassifier:
         # All class breakdown
         all_probs = {self.idx_to_class[i]: round(float(probs[i]) * 100, 2) for i in range(len(probs))}
 
+        info = DISEASE_KNOWLEDGE.get(best_class, {})
+
         # Confidence threshold check
-        if best_conf < CONFIDENCE_THRESHOLD:
+        if best_conf < 0.35:
             return {
                 "status": "uncertain",
-                "message": "Uncertain Prediction. Please upload another clear leaf image.",
+                "message": "Low confidence detection. Please bring leaf closer or improve lighting.",
                 "predicted_class": best_class,
+                "display_name": info.get("display_name", best_class),
                 "confidence": round(best_conf * 100, 2),
-                "threshold": round(CONFIDENCE_THRESHOLD * 100, 2),
+                "threshold": 35.0,
+                "is_healthy": info.get("is_healthy", False),
+                "health_status": info.get("status", "Unknown"),
                 "all_probabilities": all_probs,
-                "disease_info": None
+                "disease_info": info
             }
-
-        info = DISEASE_KNOWLEDGE.get(best_class, {})
 
         return {
             "status": "success",

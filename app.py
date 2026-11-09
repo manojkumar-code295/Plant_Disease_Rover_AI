@@ -286,6 +286,8 @@ def predict_live():
             run_object_detection=system_settings["detection"]["object_detection_enabled"],
             run_disease_detection=system_settings["detection"]["disease_detection_enabled"]
         )
+        result["frame_width"] = pil_img.width
+        result["frame_height"] = pil_img.height
 
         global latest_ai_result
         if result.get("is_leaf"):
@@ -444,6 +446,16 @@ def video_feed():
             time.sleep(0.066)  # ~15 FPS
 
     return Response(generate_stream(), mimetype="multipart/x-mixed-replace; boundary=FRAME")
+
+
+@app.route("/api/camera/log_event", methods=["POST"])
+def api_camera_log_event():
+    """Receives camera life-cycle events from browser and logs to terminal."""
+    data = request.get_json(silent=True) or {}
+    event = data.get("event", "")
+    if event:
+        term_logger.log_camera_event(event)
+    return jsonify({"success": True})
 
 
 @app.route("/api/camera/status", methods=["GET"])

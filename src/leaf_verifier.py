@@ -76,18 +76,41 @@ class LeafVerifier:
         return model
 
     def check_face(self, pil_image):
-        """Checks if the image contains any human face."""
+        """
+        Checks if the image contains any real human face using skin chrominance verification.
+        Eliminates false face detections caused by leaf veins, spots, or natural foliage shadows.
+        """
         if self.face_cascade is None or self.face_cascade.empty():
-            return False
-        # Convert PIL to OpenCV grayscale
+            return False, []
         cv_img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
         gray = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(30, 30))
-        return len(faces) > 0
+        faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
+        
+        real_faces = []
+        for (fx, fy, fw, fh) in faces:
+            roi = cv_img[fy:fy+fh, fx:fx+fw]
+            if roi.size == 0:
+                continue
+            # Human skin detection in YCrCb color space
+            ycrcb = cv2.cvtColor(roi, cv2.COLOR_BGR2YCrCb)
+            cr, cb = ycrcb[:, :, 1], ycrcb[:, :, 2]
+            skin_mask = (cr >= 133) & (cr <= 173) & (cb >= 77) & (cb <= 127)
+            skin_pct = np.mean(skin_mask) * 100
+
+            # Plant chlorophyll / foliage detection in HSV
+            hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+            green_mask = (hsv[:, :, 0] >= 25) & (hsv[:, :, 0] <= 95) & (hsv[:, :, 1] >= 25)
+            green_pct = np.mean(green_mask) * 100
+
+            # A genuine human face has substantial human skin and lack of plant chlorophyll
+            if skin_pct >= 18.0 and green_pct < 25.0:
+                real_faces.append([int(fx), int(fy), int(fx + fw), int(fy + fh)])
+
+        return len(real_faces) > 0, real_faces
 
     def verify_leaf(self, pil_image):
         """
-        Runs the complete multi-tier leaf verification pipeline.
+        Runs the complete botanical leaf verification pipeline.
         Returns:
             dict: {
                 "is_leaf": bool,
@@ -106,9 +129,26 @@ class LeafVerifier:
             }
 
         pil_image = pil_image.convert("RGB")
+        cv_img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        h, w = cv_img.shape[:2]
 
-        # Tier 1: Strict Human Face Detection
-        if self.check_face(pil_image):
+        # Tier 1: Real Human Face Detection (Skin-chrominance validated)
+        has_face, real_faces = self.check_face(pil_image)
+
+        # Botanical vegetation analysis: Excess Green Index (ExG)
+        rgb_f = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        r, g, b = rgb_f[:, :, 0], rgb_f[:, :, 1], rgb_f[:, :, 2]
+        exg = 2.0 * g - r - b
+        foliage_ratio = float(np.mean(exg > 0.03))
+
+        # Also check HSV leaf pigment (chlorophyll, yellow chlorosis, brown necrotic lesions)
+        hsv = cv2.cvtColor(cv_img, cv2.COLOR_BGR2HSV)
+        h_ch, s_ch, v_ch = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+        leaf_pigment_mask = (h_ch >= 15) & (h_ch <= 100) & (s_ch >= 20) & (v_ch >= 20)
+        pigment_ratio = float(np.mean(leaf_pigment_mask))
+
+        # If a real human face dominates the image and no plant foliage exists (pure selfie)
+        if has_face and foliage_ratio < 0.04 and pigment_ratio < 0.08:
             return {
                 "is_leaf": False,
                 "confidence": 0.0,
@@ -121,14 +161,14 @@ class LeafVerifier:
         with torch.no_grad():
             outputs = self.model(tensor)
             probs = torch.softmax(outputs, dim=1)[0]
-            leaf_idx = self.class_to_idx.get("leaf", 1)
-            nonleaf_idx = self.class_to_idx.get("non_leaf", 0)
+            leaf_idx = self.class_to_idx.get("leaf", 0)
+            nonleaf_idx = self.class_to_idx.get("non_leaf", 1)
 
             leaf_prob = float(probs[leaf_idx].item())
             nonleaf_prob = float(probs[nonleaf_idx].item())
 
-        # If the verifier CNN indicates non-leaf or leaf probability is below threshold
-        if leaf_prob < 0.70 or nonleaf_prob > 0.30:
+        # Reject confirmed non-leaf objects (cars, buildings, animals, random objects)
+        if nonleaf_prob > 0.85 and foliage_ratio < 0.15 and pigment_ratio < 0.20:
             return {
                 "is_leaf": False,
                 "confidence": round(leaf_prob * 100, 2),
@@ -136,10 +176,28 @@ class LeafVerifier:
                 "details": f"CNN verifier classified as non-leaf (Leaf Prob: {leaf_prob*100:.1f}%, Non-Leaf Prob: {nonleaf_prob*100:.1f}%)."
             }
 
-        # Tier 3: Passed all checks
+        # Severe non-leaf certainty
+        if nonleaf_prob > 0.96 and leaf_prob < 0.04:
+            return {
+                "is_leaf": False,
+                "confidence": round(leaf_prob * 100, 2),
+                "message": INVALID_MESSAGE,
+                "details": f"CNN verifier classified as non-leaf (Leaf Prob: {leaf_prob*100:.1f}%, Non-Leaf Prob: {nonleaf_prob*100:.1f}%)."
+            }
+
+        # Valid leaf confirmation: passes if CNN confirms or botanical vegetation index confirms leaf tissue
+        if leaf_prob >= 0.35 or foliage_ratio >= 0.04 or pigment_ratio >= 0.10:
+            computed_conf = max(leaf_prob * 100, min(99.9, max(foliage_ratio, pigment_ratio) * 150))
+            return {
+                "is_leaf": True,
+                "confidence": round(computed_conf, 2),
+                "message": "Leaf verified successfully.",
+                "details": f"Leaf confidence: {computed_conf:.2f}%"
+            }
+
         return {
-            "is_leaf": True,
+            "is_leaf": False,
             "confidence": round(leaf_prob * 100, 2),
-            "message": "Leaf verified successfully.",
-            "details": f"Leaf confidence: {leaf_prob*100:.2f}%"
+            "message": INVALID_MESSAGE,
+            "details": "No verified plant leaf foliage detected."
         }

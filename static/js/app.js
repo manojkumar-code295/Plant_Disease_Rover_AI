@@ -347,13 +347,75 @@ function updateCameraPermissionUI(state) {
   }
 }
 
+function setCameraBadges({ conn, stream, capture } = {}) {
+  const badgeConn = document.getElementById('camera-status-badge');
+  const badgeStream = document.getElementById('badge-camera-stream');
+  const badgeCapture = document.getElementById('badge-camera-capture');
+
+  if (conn !== undefined) {
+    if (conn === true) {
+      if (badgeConn) {
+        badgeConn.textContent = 'CAMERA CONNECTED';
+        badgeConn.className = 'badge-hud status-online';
+      }
+    } else if (conn === 'error') {
+      if (badgeConn) {
+        badgeConn.textContent = 'CAMERA ERROR';
+        badgeConn.className = 'badge-hud status-danger';
+      }
+    } else {
+      if (badgeConn) {
+        badgeConn.textContent = 'CAMERA DISCONNECTED';
+        badgeConn.className = 'badge-hud';
+      }
+    }
+  }
+
+  if (stream !== undefined) {
+    if (stream === true) {
+      if (badgeStream) {
+        badgeStream.textContent = 'CAMERA STREAM ACTIVE';
+        badgeStream.className = 'badge-hud status-online';
+      }
+    } else if (stream === 'paused') {
+      if (badgeStream) {
+        badgeStream.textContent = 'CAMERA STREAM PAUSED';
+        badgeStream.className = 'badge-hud status-warning';
+      }
+    } else {
+      if (badgeStream) {
+        badgeStream.textContent = 'CAMERA STREAM INACTIVE';
+        badgeStream.className = 'badge-hud';
+      }
+    }
+  }
+
+  if (capture !== undefined) {
+    if (capture === true) {
+      if (badgeCapture) {
+        badgeCapture.textContent = 'FRAME CAPTURE ACTIVE';
+        badgeCapture.className = 'badge-hud status-online';
+      }
+    } else if (capture === 'paused') {
+      if (badgeCapture) {
+        badgeCapture.textContent = 'FRAME CAPTURE PAUSED';
+        badgeCapture.className = 'badge-hud status-warning';
+      }
+    } else {
+      if (badgeCapture) {
+        badgeCapture.textContent = 'FRAME CAPTURE INACTIVE';
+        badgeCapture.className = 'badge-hud';
+      }
+    }
+  }
+}
+
 async function startCamera(deviceId = null) {
   const video = document.getElementById('webcam-video');
   const previewVideo = document.getElementById('dashboard-preview-video');
   const btnStart = document.getElementById('btn-start-detection');
   const btnPause = document.getElementById('btn-pause-detection');
   const btnStop = document.getElementById('btn-stop-detection');
-  const statusBadge = document.getElementById('camera-status-badge');
   const alertBox = document.getElementById('camera-permission-alert');
 
   const select = document.getElementById('camera-device-select');
@@ -365,7 +427,6 @@ async function startCamera(deviceId = null) {
   };
 
   try {
-    // If an existing stream is active, stop tracks first
     if (videoStream) {
       videoStream.getTracks().forEach(track => track.stop());
     }
@@ -381,24 +442,45 @@ async function startCamera(deviceId = null) {
     if (btnStart) btnStart.disabled = true;
     if (btnPause) { btnPause.disabled = false; btnPause.innerHTML = '<span>⏸</span> Pause'; }
     if (btnStop) btnStop.disabled = false;
-
-    if (statusBadge) {
-      statusBadge.textContent = 'Camera Active (Laptop Webcam)';
-      statusBadge.className = 'badge-hud status-online';
-    }
     if (alertBox) alertBox.style.display = 'none';
 
-    // Populate camera labels now that permission has been granted
+    // Update verified camera status
+    setCameraBadges({ conn: true, stream: false, capture: false });
+    console.log('[CAMERA] Connected');
+    fetch('/api/camera/log_event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'connected' })
+    }).catch(() => {});
+
+    const onStreamActive = () => {
+      setCameraBadges({ stream: true });
+      console.log('[VIDEO] Live stream active');
+      fetch('/api/camera/log_event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'video_active' })
+      }).catch(() => {});
+    };
+
+    if (video) {
+      if (video.readyState >= 2) {
+        onStreamActive();
+      } else {
+        video.onloadedmetadata = () => {
+          video.play().catch(() => {});
+          onStreamActive();
+        };
+      }
+    }
+
     await populateCameraDevices();
 
     // Start continuous inference loop
     requestAnimationFrame(inferenceLoop);
   } catch (err) {
     console.error('Camera access error:', err);
-    if (statusBadge) {
-      statusBadge.textContent = 'Camera Error';
-      statusBadge.className = 'badge-hud status-danger';
-    }
+    setCameraBadges({ conn: 'error', stream: false, capture: false });
     if (alertBox) alertBox.style.display = 'block';
     alert('Unable to access laptop webcam: ' + err.message + '\nPlease allow camera access when prompted by the browser.');
   }
@@ -407,13 +489,13 @@ async function startCamera(deviceId = null) {
 function togglePause() {
   isPaused = !isPaused;
   const btnPause = document.getElementById('btn-pause-detection');
-  const statusBadge = document.getElementById('camera-status-badge');
   if (btnPause) {
     btnPause.innerHTML = isPaused ? '<span>▶</span> Resume' : '<span>⏸</span> Pause';
   }
-  if (statusBadge) {
-    statusBadge.textContent = isPaused ? 'Camera Paused' : 'Camera Active (Laptop Webcam)';
-    statusBadge.className = isPaused ? 'badge-hud status-warning' : 'badge-hud status-online';
+  if (isPaused) {
+    setCameraBadges({ stream: 'paused', capture: 'paused' });
+  } else {
+    setCameraBadges({ stream: true, capture: true });
   }
 }
 
@@ -438,16 +520,18 @@ function stopCamera() {
   const btnStart = document.getElementById('btn-start-detection');
   const btnPause = document.getElementById('btn-pause-detection');
   const btnStop = document.getElementById('btn-stop-detection');
-  const statusBadge = document.getElementById('camera-status-badge');
 
   if (btnStart) btnStart.disabled = false;
   if (btnPause) btnPause.disabled = true;
   if (btnStop) btnStop.disabled = true;
 
-  if (statusBadge) {
-    statusBadge.textContent = 'Camera Stopped';
-    statusBadge.className = 'badge-hud';
-  }
+  setCameraBadges({ conn: false, stream: false, capture: false });
+  console.log('[CAMERA] Disconnected');
+  fetch('/api/camera/log_event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event: 'disconnected' })
+  }).catch(() => {});
 }
 
 async function inferenceLoop() {
@@ -468,16 +552,24 @@ async function processWebcamFrame() {
   const t0 = performance.now();
 
   try {
-    const w = video.videoWidth || 640;
-    const h = video.videoHeight || 480;
-    captureCanvas.width = w;
-    captureCanvas.height = h;
-    boxCanvas.width = w;
-    boxCanvas.height = h;
+    const capW = 320;
+    const capH = 240;
+    captureCanvas.width = capW;
+    captureCanvas.height = capH;
+
+    const dispW = video.clientWidth || video.videoWidth || 640;
+    const dispH = video.clientHeight || video.videoHeight || 480;
+    boxCanvas.width = dispW;
+    boxCanvas.height = dispH;
 
     const cCtx = captureCanvas.getContext('2d');
-    cCtx.drawImage(video, 0, 0, w, h);
-    const b64 = captureCanvas.toDataURL('image/jpeg', 0.82);
+    cCtx.drawImage(video, 0, 0, capW, capH);
+    const b64 = captureCanvas.toDataURL('image/jpeg', 0.70);
+
+    setCameraBadges({ capture: true });
+    console.log('[FRAME] Frame captured');
+    console.log('[AI] Frame sent for processing');
+    console.log('[OBJECT DETECTION] Processing started');
 
     const resp = await fetch('/api/predict_live', {
       method: 'POST',
@@ -494,10 +586,19 @@ async function processWebcamFrame() {
     const hudFps = document.getElementById('hud-fps');
     if (hudFps) hudFps.textContent = `FPS: ${Math.round(1000 / Math.max(1, latency))}`;
 
-    // Render Bounding Boxes on Canvas
-    renderBoundingBoxes(data.bounding_boxes || [], w, h, data);
+    const scaleX = dispW / (data.frame_width || capW);
+    const scaleY = dispH / (data.frame_height || capH);
+    renderBoundingBoxes(data.bounding_boxes || [], dispW, dispH, scaleX, scaleY, data);
 
-    // Update Live Diagnosis Display
+    if (data.is_leaf) {
+      console.log('[LEAF DETECTION] Leaf detected');
+      console.log('[CNN] Classification started');
+      console.log('[RESULT] ' + (data.prediction || 'Healthy'));
+      console.log('[CONFIDENCE] ' + (data.confidence || 0).toFixed(1) + '%');
+    } else {
+      console.log('[LEAF DETECTION] No leaf detected');
+    }
+
     updateDiagnosisUI(data);
 
   } catch (err) {
@@ -507,34 +608,37 @@ async function processWebcamFrame() {
   }
 }
 
-function renderBoundingBoxes(boxes, w, h, data) {
+function renderBoundingBoxes(boxes, dispW, dispH, scaleX, scaleY, data) {
   const boxCanvas = document.getElementById('bounding-box-canvas');
   if (!boxCanvas) return;
   const ctx = boxCanvas.getContext('2d');
-  ctx.clearRect(0, 0, w, h);
+  ctx.clearRect(0, 0, dispW, dispH);
 
   boxes.forEach(item => {
     const b = item.box;
     if (!b || b.length < 4) return;
     const [x1, y1, x2, y2] = b;
-    const bw = x2 - x1;
-    const bh = y2 - y1;
+    const rx1 = Math.round(x1 * scaleX);
+    const ry1 = Math.round(y1 * scaleY);
+    const rx2 = Math.round(x2 * scaleX);
+    const ry2 = Math.round(y2 * scaleY);
+    const bw = rx2 - rx1;
+    const bh = ry2 - ry1;
 
     const isLeaf = item.type === 'leaf';
     ctx.lineWidth = 3;
     ctx.strokeStyle = isLeaf ? '#10b981' : '#ef4444';
-    ctx.strokeRect(x1, y1, bw, bh);
+    ctx.strokeRect(rx1, ry1, bw, bh);
 
-    // Label tag
     const label = `${item.label} (${Math.round(item.confidence)}%)`;
     ctx.font = 'bold 12px Plus Jakarta Sans, sans-serif';
     const textWidth = ctx.measureText(label).width;
 
     ctx.fillStyle = isLeaf ? 'rgba(16, 185, 129, 0.85)' : 'rgba(239, 68, 68, 0.85)';
-    ctx.fillRect(x1, Math.max(0, y1 - 22), textWidth + 12, 22);
+    ctx.fillRect(rx1, Math.max(0, ry1 - 22), textWidth + 12, 22);
 
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(label, x1 + 6, Math.max(16, y1 - 6));
+    ctx.fillText(label, rx1 + 6, Math.max(16, ry1 - 6));
   });
 }
 
@@ -547,19 +651,6 @@ function updateDiagnosisUI(data) {
   const hudObs = document.getElementById('hud-obs-badge');
 
   if (hudObs) hudObs.style.display = data.has_obstacle ? 'inline-block' : 'none';
-
-  if (!data.success && data.status === 'rejected') {
-    if (emptyState) emptyState.style.display = 'none';
-    if (resultDetails) resultDetails.style.display = 'none';
-    if (rejectionBox) {
-      rejectionBox.style.display = 'block';
-      const rTitle = document.getElementById('rejection-title');
-      if (rTitle) rTitle.textContent = data.message || 'Invalid Image! Please upload a clear plant leaf image.';
-    }
-    if (hudLeaf) hudLeaf.textContent = 'Non-Leaf Rejected';
-    if (hudText) hudText.textContent = data.message || 'Invalid Image!';
-    return;
-  }
 
   if (data.is_leaf) {
     if (emptyState) emptyState.style.display = 'none';
@@ -584,12 +675,10 @@ function updateDiagnosisUI(data) {
     if (hudLeaf) hudLeaf.textContent = `${data.prediction || 'Leaf'} (${Math.round(data.confidence || 0)}%)`;
     if (hudText) hudText.textContent = data.is_healthy ? 'Healthy Foliage Detected' : `Alert: ${data.prediction} Detected!`;
 
-    // Spray notification banner
     if (sprayBanner) {
       sprayBanner.style.display = (data.auto_spray_trigger && data.auto_spray_trigger.triggered) ? 'flex' : 'none';
     }
 
-    // Probability Bars
     const probList = document.getElementById('prob-list');
     if (probList && data.all_probabilities) {
       let html = '';
@@ -613,6 +702,18 @@ function updateDiagnosisUI(data) {
     if (dConf) dConf.textContent = `${Math.round(data.confidence || 0)}%`;
     if (dDesc && data.disease_info) dDesc.textContent = data.disease_info.description || '';
     if (dDiag) dDiag.textContent = `${data.prediction} (${Math.round(data.confidence || 0)}%)`;
+  } else {
+    if (hudLeaf) hudLeaf.textContent = 'Scanning for Leaves...';
+    if (hudText) hudText.textContent = 'Hold a plant leaf in front of the camera';
+    if (rejectionBox) rejectionBox.style.display = 'none';
+    if (resultDetails) resultDetails.style.display = 'none';
+    if (emptyState) {
+      emptyState.style.display = 'block';
+      const eh = emptyState.querySelector('h4');
+      if (eh) eh.textContent = 'Camera Active - Scanning';
+      const ep = emptyState.querySelector('p');
+      if (ep) ep.textContent = 'Hold a clear plant leaf in front of the camera to detect disease.';
+    }
   }
 }
 

@@ -67,8 +67,8 @@ class LiveObjectDetector:
 
         cv_img = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
-        # 1. Run YOLO Object Detection
-        if self.model_loaded:
+        # 1. Run YOLO Object Detection for Obstacles / Surroundings
+        if self.model_loaded and self.model is not None:
             try:
                 results = self.model.predict(cv_img, conf=conf_threshold, verbose=False)
                 for r in results:
@@ -106,40 +106,71 @@ class LiveObjectDetector:
             except Exception as e:
                 pass
 
-        # 2. Plant Leaf Color / Contour ROI Detection
-        # Since close-up camera frames of a leaf might not trigger COCO's 'potted plant' class,
-        # we perform plant foliage contour detection to locate the leaf boundary
+        # 2. Plant Leaf Botanical Saliency & Contour Localization
+        # Computes Excess Green Index (ExG = 2G - R - B) and foliage color features
+        rgb_f = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+        r, g, b = rgb_f[:, :, 0], rgb_f[:, :, 1], rgb_f[:, :, 2]
+        exg = 2.0 * g - r - b
+
+        # HSV foliage mask (covers chlorophyll green, chlorosis yellow, and lesion margins)
         hsv = cv2.cvtColor(cv_img, cv2.COLOR_BGR2HSV)
-        # Green & plant foliage mask (hue 25 - 95, saturation > 35, value > 35)
-        lower_foliage = np.array([25, 35, 35])
-        upper_foliage = np.array([95, 255, 255])
-        mask = cv2.inRange(hsv, lower_foliage, upper_foliage)
-        foliage_ratio = np.sum(mask > 0) / (w * h)
+        h_ch, s_ch, v_ch = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+        foliage_mask = (h_ch >= 15) & (h_ch <= 100) & (s_ch >= 20) & (v_ch >= 20)
 
-        if foliage_ratio > 0.08:
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            if contours:
-                largest = max(contours, key=cv2.contourArea)
-                if cv2.contourArea(largest) > (w * h * 0.05):
-                    lx, ly, lw, lh = cv2.boundingRect(largest)
-                    has_leaf = True
-                    leaf_box = [lx, ly, lx + lw, ly + lh]
-                    if primary_leaf_box is None:
-                        primary_leaf_box = leaf_box
-                        detected_objects.insert(0, {
-                            "label": "leaf",
-                            "confidence": round(min(99.0, foliage_ratio * 140), 1),
-                            "box": leaf_box,
-                            "type": "leaf"
-                        })
+        # Combined botanical presence mask
+        combined_leaf_mask = ((exg > 0.03) | foliage_mask).astype(np.uint8) * 255
+        foliage_ratio = float(np.mean(combined_leaf_mask > 0))
 
-        # If full leaf fills the frame
-        if primary_leaf_box is None and foliage_ratio > 0.15:
+        # Morphological closing to consolidate leaf blade
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        clean_mask = cv2.morphologyEx(combined_leaf_mask, cv2.MORPH_CLOSE, kernel)
+        clean_mask = cv2.morphologyEx(clean_mask, cv2.MORPH_OPEN, kernel)
+
+        contours, _ = cv2.findContours(clean_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        candidate_boxes = []
+
+        if contours:
+            for c in contours:
+                area = cv2.contourArea(c)
+                # Leaf region must occupy at least 1.5% of the frame
+                if area > (w * h * 0.015):
+                    bx, by, bw, bh = cv2.boundingRect(c)
+                    # 5% safety padding
+                    px = int(bw * 0.05)
+                    py = int(bh * 0.05)
+                    x1 = max(0, bx - px)
+                    y1 = max(0, by - py)
+                    x2 = min(w, bx + bw + px)
+                    y2 = min(h, by + bh + py)
+                    candidate_boxes.append((area, [x1, y1, x2, y2]))
+
+        candidate_boxes.sort(key=lambda item: item[0], reverse=True)
+
+        # If localized leaf contours exist
+        if candidate_boxes:
+            has_leaf = True
+            for area, box in candidate_boxes[:3]:
+                conf_score = round(min(99.8, max(75.0, (area / (w * h)) * 250)), 1)
+                leaf_obj = {
+                    "label": "leaf",
+                    "confidence": conf_score,
+                    "box": box,
+                    "type": "leaf"
+                }
+                # Put primary leaf at the top
+                if primary_leaf_box is None:
+                    primary_leaf_box = box
+                    detected_objects.insert(0, leaf_obj)
+                else:
+                    detected_objects.append(leaf_obj)
+
+        # If no localized contour but strong global foliage exists (e.g., leaf close-up fills camera view)
+        elif foliage_ratio > 0.10:
             has_leaf = True
             primary_leaf_box = [int(w * 0.05), int(h * 0.05), int(w * 0.95), int(h * 0.95)]
-            detected_objects.append({
+            detected_objects.insert(0, {
                 "label": "leaf",
-                "confidence": 92.0,
+                "confidence": round(min(99.0, max(75.0, foliage_ratio * 120)), 1),
                 "box": primary_leaf_box,
                 "type": "leaf"
             })
