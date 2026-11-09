@@ -14,8 +14,10 @@ Features:
 import os
 import io
 import json
+import time
 import base64
 import csv
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from PIL import Image
 
@@ -36,6 +38,17 @@ pipeline = PlantDiseaseDetectionPipeline()
 hardware = hardware_controller
 img_logger = image_logger
 term_logger = terminal_logger
+
+# Global state for cloud-edge synchronization
+pending_rover_command = {"command": "none", "speed": 65, "pump": "off", "timestamp": 0}
+last_rover_heartbeat = {"timestamp": 0, "telemetry": {}}
+latest_ai_result = {
+    "disease": "No leaf scanned yet",
+    "confidence": 0.0,
+    "status": "Ready",
+    "treatment": "Waiting for live camera frame...",
+    "timestamp": ""
+}
 
 # Runtime Settings State
 system_settings = {
@@ -103,6 +116,17 @@ def predict_live():
             run_disease_detection=system_settings["detection"]["disease_detection_enabled"]
         )
 
+        global latest_ai_result
+        leaf_res = result.get("leaf_disease")
+        if leaf_res and leaf_res.get("is_leaf"):
+            latest_ai_result = {
+                "disease": leaf_res.get("predicted_class", "Healthy"),
+                "confidence": leaf_res.get("confidence", 0.0),
+                "is_leaf": True,
+                "treatment": leaf_res.get("treatment_notes", ""),
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+
         return jsonify(result)
 
     except Exception as e:
@@ -146,6 +170,7 @@ def predict():
 def rover_control():
     data = request.get_json() or {}
     action = data.get("action", "").lower()
+    global pending_rover_command
 
     if action == "forward":
         telemetry = hardware.forward()
@@ -160,38 +185,52 @@ def rover_control():
     else:
         return jsonify({"success": False, "error": f"Invalid action '{action}'"}), 400
 
+    pending_rover_command["command"] = action
+    pending_rover_command["timestamp"] = time.time()
     return jsonify({"success": True, "telemetry": telemetry})
 
 @app.route("/api/rover/speed", methods=["POST"])
 def rover_speed():
     data = request.get_json() or {}
     speed = data.get("speed", 65)
+    global pending_rover_command
     telemetry = hardware.set_speed(speed)
     system_settings["motor"]["speed"] = telemetry["speed"]
+    pending_rover_command["speed"] = telemetry["speed"]
+    pending_rover_command["timestamp"] = time.time()
     return jsonify({"success": True, "telemetry": telemetry})
 
 @app.route("/api/rover/pump", methods=["POST"])
 def rover_pump():
     data = request.get_json() or {}
     action = data.get("action", "").lower()
+    global pending_rover_command
 
     if action == "on":
         telemetry = hardware.pump_on()
+        pending_rover_command["pump"] = "on"
     elif action == "off":
         telemetry = hardware.pump_off()
+        pending_rover_command["pump"] = "off"
     elif action == "burst":
         duration = float(data.get("duration", system_settings["pump"]["spray_duration"]))
         burst_info = hardware.trigger_spray_burst(duration)
         telemetry = hardware.get_telemetry()
         telemetry["burst_info"] = burst_info
+        pending_rover_command["pump"] = "burst"
     else:
         return jsonify({"success": False, "error": f"Invalid pump action '{action}'"}), 400
 
+    pending_rover_command["timestamp"] = time.time()
     return jsonify({"success": True, "telemetry": telemetry})
 
 @app.route("/api/rover/emergency_stop", methods=["POST"])
 def rover_emergency_stop():
+    global pending_rover_command
     telemetry = hardware.emergency_stop()
+    pending_rover_command["command"] = "stop"
+    pending_rover_command["pump"] = "off"
+    pending_rover_command["timestamp"] = time.time()
     return jsonify({"success": True, "telemetry": telemetry})
 
 @app.route("/api/telemetry", methods=["GET"])
@@ -199,8 +238,95 @@ def get_telemetry():
     return jsonify({
         "hardware": hardware.get_telemetry(),
         "statistics": img_logger.get_stats(),
-        "settings": system_settings
+        "settings": system_settings,
+        "latest_ai": latest_ai_result,
+        "last_heartbeat": last_rover_heartbeat
     })
+
+# ==========================================
+# CLOUD & RASPBERRY PI BRIDGE ENDPOINTS
+# ==========================================
+
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    return jsonify({
+        "status": "online",
+        "service": "Precision Agriculture Smart Rover & AgriVision AI",
+        "api": "working",
+        "hardware_mode": hardware.hardware_mode
+    })
+
+@app.route("/api/result", methods=["GET"])
+def get_result():
+    return jsonify(latest_ai_result)
+
+@app.route("/api/rover/command", methods=["GET"])
+def get_rover_command():
+    global pending_rover_command
+    # Return current pending command
+    cmd_to_send = dict(pending_rover_command)
+    # Clear one-shot command after reading if older than 5 seconds
+    if cmd_to_send["command"] in ["burst", "stop"]:
+        pending_rover_command["command"] = "none"
+    return jsonify(cmd_to_send)
+
+@app.route("/api/rover/heartbeat", methods=["POST"])
+def rover_heartbeat():
+    global last_rover_heartbeat
+    data = request.get_json(silent=True) or {}
+    last_rover_heartbeat = {
+        "timestamp": time.time(),
+        "telemetry": data.get("telemetry", {})
+    }
+    return jsonify({"success": True, "status": "acknowledged"})
+
+@app.route("/api/rover/gpio-config", methods=["GET"])
+def rover_gpio_config():
+    return jsonify({
+        "left_in1": config.MOTOR_LEFT_IN1,
+        "left_in2": config.MOTOR_LEFT_IN2,
+        "left_en": config.MOTOR_LEFT_ENA,
+        "right_in1": config.MOTOR_RIGHT_IN3,
+        "right_in2": config.MOTOR_RIGHT_IN4,
+        "right_en": config.MOTOR_RIGHT_ENB,
+        "pump_pin": config.PUMP_RELAY_PIN,
+        "hardware_mode": hardware.hardware_mode,
+        "is_raspberry_pi": config.IS_RASPBERRY_PI
+    })
+
+@app.route("/api/update-result", methods=["POST"])
+def update_result():
+    global latest_ai_result
+    disease = request.form.get("disease", "Unknown")
+    confidence = float(request.form.get("confidence", 0.0))
+    treatment = request.form.get("treatment", "")
+    is_leaf = request.form.get("is_leaf", "true").lower() == "true"
+    
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    latest_ai_result = {
+        "disease": disease,
+        "confidence": confidence,
+        "is_leaf": is_leaf,
+        "treatment": treatment,
+        "timestamp": timestamp
+    }
+    
+    # Save image if provided
+    if "file" in request.files:
+        file = request.files["file"]
+        if file.filename != "":
+            try:
+                pil_img = Image.open(file.stream)
+                img_logger.save_detection(pil_img, {
+                    "is_leaf": is_leaf,
+                    "predicted_class": disease,
+                    "confidence": confidence,
+                    "treatment_notes": treatment
+                })
+            except Exception as e:
+                print(f"[Storage] Error saving uploaded result image: {e}")
+
+    return jsonify({"success": True, "result": latest_ai_result})
 
 # ==========================================
 # SYSTEM SETTINGS ENDPOINTS
