@@ -135,7 +135,10 @@ def background_model_warmup():
         print("[AI Pipeline] Background warming up models...")
         _ = pipeline.verifier
         _ = pipeline.classifier
-        _ = pipeline.object_detector
+        if hasattr(pipeline.object_detector, "load_model"):
+            pipeline.object_detector.load_model()
+        dummy = Image.new("RGB", (64, 64), color=(34, 139, 34))
+        _ = pipeline.process_image(dummy)
         print("[AI Pipeline] AI models ready for instant inference.")
     except Exception as e:
         print(f"[AI Pipeline] Warmup background notice: {e}")
@@ -256,6 +259,7 @@ def serve_favicon():
 # =============================================================
 
 @app.route("/api/predict_live", methods=["POST"])
+@app.route("/predict_live", methods=["POST"])
 def predict_live():
     """High-speed endpoint for continuous live video frames (browser or edge)."""
     try:
@@ -326,12 +330,16 @@ def predict_live():
 
 
 @app.route("/api/predict", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict():
     """Manual upload or frame snapshot endpoint."""
     try:
         pil_img = None
         if "file" in request.files and request.files["file"].filename != "":
             file = request.files["file"]
+            pil_img = Image.open(file.stream)
+        elif "image" in request.files and request.files["image"].filename != "":
+            file = request.files["image"]
             pil_img = Image.open(file.stream)
         elif request.is_json and "image" in request.json:
             b64_str = request.json["image"]
