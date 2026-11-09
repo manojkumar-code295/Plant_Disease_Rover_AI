@@ -22,6 +22,8 @@ let currentSpeed = 65;
 let operatorArmed = true;
 let deferredInstallPrompt = null;
 let currentGalleryFilter = 'all';
+let stagedUploadFile = null;
+let selectedCameraDeviceId = null;
 
 // =============================================================
 // TAB SWITCHING (Desktop & Mobile)
@@ -200,17 +202,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // File Upload Handlers (Diagnostic Studio)
   const tabDropZone = document.getElementById('tab-drop-zone');
   const tabFileInput = document.getElementById('tab-file-input');
+  const btnTriggerDetect = document.getElementById('btn-trigger-detection');
+  const btnClearStaged = document.getElementById('btn-clear-staged');
+
   if (tabDropZone && tabFileInput) {
-    tabDropZone.addEventListener('click', () => tabFileInput.click());
     tabFileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) uploadLeafImage(e.target.files[0]);
+      if (e.target.files && e.target.files[0]) handleFileSelected(e.target.files[0]);
     });
     tabDropZone.addEventListener('dragover', (e) => { e.preventDefault(); tabDropZone.style.borderColor = '#10b981'; });
     tabDropZone.addEventListener('dragleave', () => { tabDropZone.style.borderColor = 'var(--border)'; });
     tabDropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       tabDropZone.style.borderColor = 'var(--border)';
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) uploadLeafImage(e.dataTransfer.files[0]);
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFileSelected(e.dataTransfer.files[0]);
+    });
+  }
+
+  if (btnTriggerDetect) {
+    btnTriggerDetect.addEventListener('click', () => {
+      if (stagedUploadFile) uploadLeafImage(stagedUploadFile);
+    });
+  }
+
+  if (btnClearStaged) {
+    btnClearStaged.addEventListener('click', clearStagedFile);
+  }
+
+  // Camera Device Selectors
+  const camDevSelect = document.getElementById('camera-device-select');
+  if (camDevSelect) {
+    camDevSelect.addEventListener('change', (e) => {
+      selectedCameraDeviceId = e.target.value;
+      if (isDetecting) {
+        startCamera(selectedCameraDeviceId);
+      }
     });
   }
 
@@ -229,6 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadGallery();
   loadSprayHistory();
 
+  // Populate Cameras & Check Permission for Auto-Initialization
+  populateCameraDevices();
+  checkCameraPermissionAndAutoInit();
+
   // Start Telemetry Watchdog Polling (Every 1.5 seconds)
   pollTelemetry();
   setInterval(pollTelemetry, 1500);
@@ -237,18 +266,111 @@ document.addEventListener('DOMContentLoaded', () => {
 // =============================================================
 // CAMERA & REAL-TIME INFERENCE PIPELINE
 // =============================================================
-async function startCamera() {
+async function populateCameraDevices() {
+  const select = document.getElementById('camera-device-select');
+  const settingSelect = document.getElementById('setting-camera-select');
+  if (!select && !settingSelect) return;
+
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+    const updateSelect = (sel) => {
+      if (!sel) return;
+      sel.innerHTML = '';
+      if (videoDevices.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Default Laptop Camera';
+        sel.appendChild(opt);
+        return;
+      }
+      videoDevices.forEach((dev, idx) => {
+        const opt = document.createElement('option');
+        opt.value = dev.deviceId;
+        opt.textContent = dev.label || `Camera ${idx + 1} (${dev.deviceId ? dev.deviceId.substring(0, 8) + '...' : 'Built-in'})`;
+        sel.appendChild(opt);
+      });
+    };
+
+    updateSelect(select);
+    updateSelect(settingSelect);
+  } catch (err) {
+    console.warn('Could not enumerate camera devices:', err);
+  }
+}
+
+async function checkCameraPermissionAndAutoInit() {
+  if (!navigator.permissions || !navigator.permissions.query) return;
+  try {
+    const result = await navigator.permissions.query({ name: 'camera' });
+    updateCameraPermissionUI(result.state);
+    result.onchange = () => updateCameraPermissionUI(result.state);
+    if (result.state === 'granted') {
+      console.log('[Camera] Permission already granted, auto-initializing...');
+      startCamera();
+    }
+  } catch (err) {
+    console.log('[Camera] Permission query notice:', err);
+  }
+}
+
+function updateCameraPermissionUI(state) {
+  const alertBox = document.getElementById('camera-permission-alert');
+  const statusBadge = document.getElementById('camera-status-badge');
+  if (state === 'prompt') {
+    if (alertBox) alertBox.style.display = 'block';
+    if (statusBadge) {
+      statusBadge.textContent = 'Permission Required';
+      statusBadge.className = 'badge-hud status-warning';
+    }
+  } else if (state === 'denied') {
+    if (alertBox) {
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">🚫</span>
+          <div style="flex: 1;">
+            <strong style="color: #ef4444; font-size: 12px;">Camera Access Denied</strong>
+            <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Please click the camera icon in your browser address bar and enable camera access for this site.</p>
+          </div>
+        </div>
+      `;
+    }
+    if (statusBadge) {
+      statusBadge.textContent = 'Access Denied';
+      statusBadge.className = 'badge-hud status-danger';
+    }
+  } else if (state === 'granted') {
+    if (alertBox) alertBox.style.display = 'none';
+  }
+}
+
+async function startCamera(deviceId = null) {
   const video = document.getElementById('webcam-video');
   const previewVideo = document.getElementById('dashboard-preview-video');
   const btnStart = document.getElementById('btn-start-detection');
   const btnPause = document.getElementById('btn-pause-detection');
   const btnStop = document.getElementById('btn-stop-detection');
+  const statusBadge = document.getElementById('camera-status-badge');
+  const alertBox = document.getElementById('camera-permission-alert');
+
+  const select = document.getElementById('camera-device-select');
+  const targetId = deviceId || (select ? select.value : null);
+
+  const constraints = {
+    video: targetId ? { deviceId: { exact: targetId } } : { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'environment' },
+    audio: false
+  };
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'environment' },
-      audio: false
-    });
+    // If an existing stream is active, stop tracks first
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
     videoStream = stream;
     if (video) video.srcObject = stream;
     if (previewVideo) previewVideo.srcObject = stream;
@@ -260,19 +382,38 @@ async function startCamera() {
     if (btnPause) { btnPause.disabled = false; btnPause.innerHTML = '<span>⏸</span> Pause'; }
     if (btnStop) btnStop.disabled = false;
 
-    // Start detection loop
+    if (statusBadge) {
+      statusBadge.textContent = 'Camera Active (Laptop Webcam)';
+      statusBadge.className = 'badge-hud status-online';
+    }
+    if (alertBox) alertBox.style.display = 'none';
+
+    // Populate camera labels now that permission has been granted
+    await populateCameraDevices();
+
+    // Start continuous inference loop
     requestAnimationFrame(inferenceLoop);
   } catch (err) {
     console.error('Camera access error:', err);
-    alert('Unable to access webcam: ' + err.message + '\nEnsure camera permissions are enabled in your browser.');
+    if (statusBadge) {
+      statusBadge.textContent = 'Camera Error';
+      statusBadge.className = 'badge-hud status-danger';
+    }
+    if (alertBox) alertBox.style.display = 'block';
+    alert('Unable to access laptop webcam: ' + err.message + '\nPlease allow camera access when prompted by the browser.');
   }
 }
 
 function togglePause() {
   isPaused = !isPaused;
   const btnPause = document.getElementById('btn-pause-detection');
+  const statusBadge = document.getElementById('camera-status-badge');
   if (btnPause) {
     btnPause.innerHTML = isPaused ? '<span>▶</span> Resume' : '<span>⏸</span> Pause';
+  }
+  if (statusBadge) {
+    statusBadge.textContent = isPaused ? 'Camera Paused' : 'Camera Active (Laptop Webcam)';
+    statusBadge.className = isPaused ? 'badge-hud status-warning' : 'badge-hud status-online';
   }
 }
 
@@ -297,9 +438,16 @@ function stopCamera() {
   const btnStart = document.getElementById('btn-start-detection');
   const btnPause = document.getElementById('btn-pause-detection');
   const btnStop = document.getElementById('btn-stop-detection');
+  const statusBadge = document.getElementById('camera-status-badge');
+
   if (btnStart) btnStart.disabled = false;
   if (btnPause) btnPause.disabled = true;
   if (btnStop) btnStop.disabled = true;
+
+  if (statusBadge) {
+    statusBadge.textContent = 'Camera Stopped';
+    statusBadge.className = 'badge-hud';
+  }
 }
 
 async function inferenceLoop() {
@@ -479,9 +627,59 @@ async function captureSnapshot() {
 // =============================================================
 // DIAGNOSTIC STUDIO UPLOAD & PRESETS
 // =============================================================
+function handleFileSelected(file) {
+  if (!file) return;
+  stagedUploadFile = file;
+
+  const actionBar = document.getElementById('upload-action-bar');
+  const thumb = document.getElementById('upload-staged-thumb');
+  const nameEl = document.getElementById('upload-staged-name');
+  const sizeEl = document.getElementById('upload-staged-size');
+  const previewImg = document.getElementById('tab-diag-preview-img');
+  const previewCont = document.getElementById('tab-diag-preview-container');
+
+  if (nameEl) nameEl.textContent = file.name;
+  if (sizeEl) sizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (thumb) thumb.src = e.target.result;
+    if (previewImg && previewCont) {
+      previewImg.src = e.target.result;
+      previewCont.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(file);
+
+  if (actionBar) actionBar.style.display = 'block';
+}
+
+function clearStagedFile() {
+  stagedUploadFile = null;
+  const actionBar = document.getElementById('upload-action-bar');
+  const fileInput = document.getElementById('tab-file-input');
+  const previewCont = document.getElementById('tab-diag-preview-container');
+  const container = document.getElementById('tab-diag-content');
+
+  if (actionBar) actionBar.style.display = 'none';
+  if (fileInput) fileInput.value = '';
+  if (previewCont) previewCont.style.display = 'none';
+
+  if (container) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🍃</div>
+        <h4>Awaiting Leaf Image</h4>
+        <p>Upload an image or select a preset from the left to run strict leaf verification and disease diagnosis.</p>
+      </div>
+    `;
+  }
+}
+
 async function uploadLeafImage(file) {
   const formData = new FormData();
   formData.append('file', file);
+  formData.append('image', file); // Include both keys for complete backward compatibility
   showDiagnosticLoading();
 
   try {

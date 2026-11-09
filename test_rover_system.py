@@ -98,5 +98,28 @@ def run_tests():
     print("  ALL SMART ROVER & CONTINUOUS AI TESTS PASSED SUCCESSFULLY! 🎉")
     print("=" * 65 + "\n")
 
+import threading
+import time
+
+def ensure_server_running():
+    try:
+        urllib.request.urlopen("http://127.0.0.1:5000/api/health", timeout=1)
+        return
+    except Exception:
+        pass
+    print("[Test Harness] Spawning local Flask background server on port 5000...")
+    from app import app
+    srv = threading.Thread(target=lambda: app.run(host="127.0.0.1", port=5000, debug=False, use_reloader=False), daemon=True)
+    srv.start()
+    for _ in range(20):
+        time.sleep(0.5)
+        try:
+            urllib.request.urlopen("http://127.0.0.1:5000/api/health", timeout=1)
+            print("[Test Harness] Local Flask server online and ready!")
+            return
+        except Exception:
+            pass
+
 if __name__ == "__main__":
+    ensure_server_running()
     run_tests()

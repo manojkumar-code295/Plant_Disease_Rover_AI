@@ -217,17 +217,40 @@
                 <h3>Continuous Live Camera Feed</h3>
               </div>
               <div class="live-fps-group">
+                <span class="badge-hud" id="camera-status-badge">Camera Stopped</span>
                 <span class="badge-hud" id="hud-fps">FPS: --</span>
                 <span class="badge-hud" id="hud-latency">Latency: -- ms</span>
               </div>
             </div>
 
-            <!-- Stream Source Switcher -->
-            <div class="stream-source-box">
-              <span style="font-size: 11px; font-weight: 600;">Streaming Source:</span>
-              <div class="radio-pill-group">
-                <button class="radio-pill active" id="btn-src-webcam">💻 Fallback Webcam</button>
-                <button class="radio-pill" id="btn-src-rover">🚜 Raspberry Pi Rover Camera</button>
+            <!-- Permission Alert Banner -->
+            <div id="camera-permission-alert" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; border-radius: var(--radius-sm); margin: 12px 14px 0 14px; padding: 12px 16px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 20px;">📷</span>
+                  <div>
+                    <strong style="color: #f59e0b; font-size: 12px;">Camera Permission Notice</strong>
+                    <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Browser camera permission is required for live leaf monitoring. Click Start Camera to initialize.</p>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="startCamera()">Grant & Start</button>
+              </div>
+            </div>
+
+            <!-- Stream Source & Camera Selector -->
+            <div class="stream-source-box" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 11px; font-weight: 600;">Streaming Source:</span>
+                <div class="radio-pill-group">
+                  <button class="radio-pill active" id="btn-src-webcam">💻 Laptop Webcam (Default)</button>
+                  <button class="radio-pill" id="btn-src-rover">🚜 Raspberry Pi Rover Camera</button>
+                </div>
+              </div>
+              <div id="camera-device-container" style="display: flex; align-items: center; gap: 6px;">
+                <label for="camera-device-select" style="font-size: 11px; font-weight: 600; color: var(--text-muted);">Device:</label>
+                <select id="camera-device-select" class="form-control" style="font-size: 11px; padding: 4px 8px; height: 30px; border-radius: 6px; max-width: 190px;">
+                  <option value="">Default Laptop Camera</option>
+                </select>
               </div>
             </div>
 
@@ -255,10 +278,10 @@
             </div>
 
             <!-- Camera Control Toolbar -->
-            <div class="camera-control-toolbar">
-              <button class="btn btn-primary" id="btn-start-detection"><span>▶</span> Start Camera</button>
+            <div class="camera-control-toolbar" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <button class="btn btn-primary" id="btn-start-detection"><span>▶</span> Start Live Camera</button>
               <button class="btn btn-secondary" id="btn-pause-detection" disabled><span>⏸</span> Pause</button>
-              <button class="btn btn-outline" id="btn-stop-detection" disabled><span>⏹</span> Stop</button>
+              <button class="btn btn-outline" id="btn-stop-detection" disabled><span>⏹</span> Stop Camera</button>
               <button class="btn btn-outline" id="btn-capture-snapshot"><span>📸</span> Take Snapshot</button>
             </div>
           </section>
@@ -383,7 +406,7 @@
     </div>
 
     <!-- =========================================================
-         SECTION D: PLANT DISEASE DETECTION (AI Diagnostic Studio)
+         SECTION D: PLANT DISEASE DETECTION & UPLOAD STUDIO
          ========================================================= -->
     <div class="tab-pane" id="tab-detection">
       <div class="workspace-grid">
@@ -395,12 +418,34 @@
               <span class="badge-subhead">Strict Leaf Verifier + Disease CNN</span>
             </div>
 
-            <!-- Upload Area -->
-            <div class="drop-zone-mini" id="tab-drop-zone" style="cursor: pointer; padding: 24px; text-align: center; border: 2px dashed var(--border); border-radius: var(--radius-sm); margin-bottom: 14px;">
-              <input type="file" id="tab-file-input" accept="image/jpeg,image/png,image/webp" hidden>
-              <div style="font-size: 36px; margin-bottom: 6px;">📤</div>
-              <h4 style="font-size: 13px; color: #fff; margin-bottom: 4px;">Upload Plant Leaf Image</h4>
-              <p style="font-size: 11px; color: var(--text-muted);">Drag and drop a leaf photo or click to browse</p>
+            <!-- Upload Area & Controls -->
+            <div class="upload-studio-container" style="margin-bottom: 16px;">
+              <div class="drop-zone-mini" id="tab-drop-zone" style="cursor: pointer; padding: 26px; text-align: center; border: 2px dashed var(--border); border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.04); transition: var(--transition);">
+                <input type="file" id="tab-file-input" accept="image/jpeg,image/png,image/webp" hidden>
+                <div style="font-size: 38px; margin-bottom: 6px;">📤</div>
+                <h4 style="font-size: 14px; color: #fff; margin-bottom: 4px;">Drag & Drop Plant Leaf Photo</h4>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Drop any clear leaf image here, or use the button below</p>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-browse-file" onclick="document.getElementById('tab-file-input').click()">
+                  📁 Browse From Device
+                </button>
+              </div>
+
+              <!-- Action Bar & Preview for Selected Image -->
+              <div id="upload-action-bar" style="display: none; margin-top: 12px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--bg-card-alt); border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 12px; justify-content: space-between; flex-wrap: wrap;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <img id="upload-staged-thumb" style="width: 54px; height: 54px; object-fit: cover; border-radius: 6px; border: 2px solid var(--primary);" alt="Staged Preview">
+                    <div>
+                      <h5 id="upload-staged-name" style="font-size: 12px; color: #fff; margin: 0 0 2px 0; word-break: break-all;">leaf.jpg</h5>
+                      <span id="upload-staged-size" style="font-size: 10px; color: var(--text-muted);">0 KB</span>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary btn-sm" id="btn-trigger-detection">🔬 Detect Disease</button>
+                    <button class="btn btn-outline btn-sm" id="btn-clear-staged">🗑️ Clear Image</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Curated Test Presets -->
