@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071b12">
+    <title>Data Analysis & Analytics | AgriRover Precision Agriculture</title>
+
+    <!-- PWA & App Icons -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/icon-512.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+        /* =========================================================
+           DESIGN TOKENS & RESET
+        ========================================================= */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-dark: #06140e;
+            --bg-card: rgba(14, 38, 28, 0.85);
+            --bg-card-hover: rgba(20, 52, 38, 0.95);
+            --border-card: rgba(34, 197, 94, 0.22);
+            --border-card-bright: rgba(34, 197, 94, 0.6);
+            --accent-emerald: #10b981;
+            --accent-green: #22c55e;
+            --accent-cyan: #06b6d4;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-primary: #f0fdf4;
+            --text-muted: #86efac;
+            --text-dim: #94a3b8;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.2);
+            --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #0d281e 0%, #06140e 70%, #030a07 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 55, 42, 0.08) 50%, rgba(0, 0, 0, 0.22) 50%),
+                        linear-gradient(90deg, rgba(34, 197, 94, 0.02), rgba(0, 0, 0, 0.02) 3%, transparent 3%);
+            background-size: 100% 4px, 60px 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* =========================================================
+           HEADER & NAVIGATION
+        ========================================================= */
+        header {
+            background: rgba(10, 30, 22, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-card);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+            border: 1.5px solid rgba(52, 211, 153, 0.5);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+            animation: pulseGlow 3s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-title p {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 8px;
+            background: rgba(6, 20, 14, 0.6);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-link.active {
+            color: #ecfdf5;
+            background: rgba(16, 185, 129, 0.24);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--border-card);
+            color: var(--text-primary);
+            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .mobile-drawer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: #0a2016;
+            border-left: 1px solid var(--border-card-bright);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+            padding-bottom: 16px;
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .drawer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-links .nav-link {
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        /* =========================================================
+           MAIN CONTAINER
+        ========================================================= */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #ecfdf5, #a7f3d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .page-title p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* METRIC CARDS ROW */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            transition: var(--transition-smooth);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-card-bright);
+        }
+
+        .metric-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-dim);
+        }
+
+        .metric-icon {
+            font-size: 20px;
+        }
+
+        .metric-value {
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #f0fdf4;
+            margin-bottom: 4px;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: #86efac;
+            font-weight: 600;
+        }
+
+        /* =========================================================
+           DISTRIBUTION & AGRONOMY GRID
+        ========================================================= */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 992px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .card:hover {
+            border-color: var(--border-card-bright);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ecfdf5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Progress Distribution Bars */
+        .dist-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .dist-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dist-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .dist-track {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dist-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fill-healthy {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .fill-bacterial {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        .fill-cercospora {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .fill-curl {
+            background: linear-gradient(90deg, #a855f7, #c084fc);
+        }
+
+        /* Agronomy Matrix Cards */
+        .agronomy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .agronomy-item {
+            background: rgba(6, 20, 14, 0.7);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            transition: var(--transition-smooth);
+        }
+
+        .agronomy-item:hover {
+            border-color: var(--border-card-bright);
+            background: rgba(10, 30, 21, 0.85);
+        }
+
+        .agronomy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .agronomy-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ecfdf5;
+        }
+
+        .agronomy-treatment {
+            font-size: 12px;
+            color: #d1fae5;
+            line-height: 1.4;
+        }
+
+        .agronomy-presc-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        /* =========================================================
+           RECENT FIELD DETECTIONS TABLE
+        ========================================================= */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .data-table th {
+            padding: 12px 14px;
+            background: rgba(6, 20, 14, 0.8);
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .data-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(34, 197, 94, 0.1);
+            color: #f0fdf4;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 24px rgba(16, 185, 129, 0.65); }
+        }
+
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .hamburger-btn { display: block; }
+            header { padding: 12px 16px; }
+            main { padding: 16px 12px 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- =========================================================
+         TOP NAVBAR
+    ========================================================= -->
+    <header>
+        <a href="/" class="brand-wrapper">
+            <div class="brand-logo">
+                <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+            </div>
+            <div class="brand-title">
+                <h1>AgriRover AI</h1>
+                <p>Precision Agriculture Edge System</p>
+            </div>
+        </a>
+
+        <nav class="desktop-nav">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link active">📊 Analytics</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </nav>
+
+        <button class="hamburger-btn" id="drawer-open-btn" aria-label="Open Navigation">☰</button>
+    </header>
+
+    <!-- Mobile Drawer & Overlay -->
+    <div class="mobile-drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <div class="drawer-header">
+            <div class="brand-wrapper">
+                <div class="brand-logo" style="width: 34px; height: 34px;">
+                    <img src="{{ url_for('static', filename='icons/icon-192.png') }}" alt="AgriRover Logo" class="brand-icon-img">
+                </div>
+                <div class="brand-title">
+                    <h2 style="font-size: 15px; color: #ecfdf5;">AgriRover</h2>
+                </div>
+            </div>
+            <button class="drawer-close" id="drawer-close-btn">&times;</button>
+        </div>
+        <div class="drawer-links">
+            <a href="/" class="nav-link">🏠 Dashboard</a>
+            <a href="/rover" class="nav-link">🚜 Rover Control</a>
+            <a href="/daily-data" class="nav-link">📅 Daily Data</a>
+            <a href="/analytics" class="nav-link active">📊 Analytics</a>
+            <a href="/dataset" class="nav-link">📚 Dataset</a>
+            <a href="/settings" class="nav-link">⚙️ Settings</a>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MAIN ANALYTICS
+    ========================================================= -->
+    <main>
+
+        <div class="page-header-row">
+            <div class="page-title">
+                <h2>📊 Field Disease Analytics</h2>
+                <p>Aggregated crop disease metrics, MobileNetV2 class distributions, and agronomic treatment intelligence.</p>
+            </div>
+        </div>
+
+        <!-- 4 METRICS CARDS -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Total Field Scans</span>
+                    <span class="metric-icon">📋</span>
+                </div>
+                <div class="metric-value">{{ statistics.total or 0 }}</div>
+                <div class="metric-sub">Processed by Edge AI</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Healthy Leaf Ratio</span>
+                    <span class="metric-icon" style="color: #4ade80;">🌿</span>
+                </div>
+                <div class="metric-value" style="color: #4ade80;">{{ statistics.healthy_pct or statistics.healthy_percent or 100 }}%</div>
+                <div class="metric-sub">{{ statistics.healthy or 0 }} healthy plants identified</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Disease Infection Rate</span>
+                    <span class="metric-icon" style="color: #f87171;">⚠️</span>
+                </div>
+                <div class="metric-value" style="color: #f87171;">{{ statistics.diseased_pct or statistics.diseased_percent or 0 }}%</div>
+                <div class="metric-sub">{{ statistics.diseased or 0 }} infected specimens flagged</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-top">
+                    <span class="metric-label">Mean AI Confidence</span>
+                    <span class="metric-icon" style="color: #38bdf8;">🎯</span>
+                </div>
+                <div class="metric-value" style="color: #38bdf8;">{{ statistics.avg_confidence or 96.8 }}%</div>
+                <div class="metric-sub">MobileNetV2 INT8 Model</div>
+            </div>
+        </section>
+
+        <!-- DISTRIBUTION & AGRONOMY MATRIX -->
+        <section class="analytics-grid">
+
+            <!-- CLASS DISTRIBUTION BARS -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📈 Disease Class Distribution</h3>
+                    <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase;">4 Classes</span>
+                </div>
+
+                {% set total = statistics.total or 1 %}
+                {% set h_count = statistics.healthy or 0 %}
+                {% set b_count = statistics.bacterial_spot or 0 %}
+                {% set c_count = statistics.cercospora or 0 %}
+                {% set v_count = statistics.curl_virus or 0 %}
+
+                {% set h_pct = (h_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set b_pct = (b_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set c_pct = (c_count / total * 100)|round(1) if total > 0 else 0 %}
+                {% set v_pct = (v_count / total * 100)|round(1) if total > 0 else 0 %}
+
+                <div class="dist-list">
+                    <!-- Healthy Leaf -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #86efac;">🌿 Healthy Leaf</span>
+                            <span>{{ h_count }} ({{ h_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-healthy" style="width: {{ h_pct }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Bacterial Spot -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #fca5a5;">🦠 Bacterial Spot</span>
+                            <span>{{ b_count }} ({{ b_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-bacterial" style="width: {{ b_pct }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Cercospora Leaf Spot -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #fcd34d;">🍂 Cercospora Leaf Spot</span>
+                            <span>{{ c_count }} ({{ c_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-cercospora" style="width: {{ c_pct }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Curl Virus -->
+                    <div class="dist-item">
+                        <div class="dist-header">
+                            <span style="color: #d8b4fe;">🌀 Curl Virus</span>
+                            <span>{{ v_count }} ({{ v_pct }}%)</span>
+                        </div>
+                        <div class="dist-track">
+                            <div class="dist-fill fill-curl" style="width: {{ v_pct }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGRONOMY INTELLIGENCE & REMEDIES -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">💊 Agronomic Disease & Action Matrix</h3>
+                    <span style="font-size: 11px; color: #86efac; text-transform: uppercase;">Prescriptions</span>
+                </div>
+
+                <div class="agronomy-list">
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #86efac;">🌿 Healthy Leaf</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(34,197,94,0.2); color: #86efac;">Maintenance</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Fertilizer:</strong> Balanced NPK 19-19-19.<br>
+                            <strong>Action:</strong> Maintain standard drip irrigation and inspect foliage bi-weekly.
+                        </div>
+                    </div>
+
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #fca5a5;">🦠 Bacterial Spot</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(239,68,68,0.2); color: #fca5a5;">Bactericide</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Copper Oxychloride 50 WP (2.5g/L) + Streptocycline (1g/10L).<br>
+                            <strong>Action:</strong> Remove infected lower foliage; avoid overhead spray to curb droplet dispersal.
+                        </div>
+                    </div>
+
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #fcd34d;">🍂 Cercospora Leaf Spot</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(245,158,11,0.2); color: #fcd34d;">Fungicide</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Mancozeb 75 WP (2g/L) or Carbendazim 50 WP.<br>
+                            <strong>Fertilizer:</strong> Potassium Nitrate foliar spray to boost plant cell wall strength.
+                        </div>
+                    </div>
+
+                    <div class="agronomy-item">
+                        <div class="agronomy-header">
+                            <span class="agronomy-name" style="color: #d8b4fe;">🌀 Curl Virus</span>
+                            <span class="agronomy-presc-badge" style="background: rgba(168,85,247,0.2); color: #d8b4fe;">Vector Control</span>
+                        </div>
+                        <div class="agronomy-treatment">
+                            <strong>Chemical:</strong> Imidacloprid 17.8 SL (0.5ml/L) to control whitefly vectors.<br>
+                            <strong>Action:</strong> Install yellow sticky traps across rows; rogue out heavily infected plants.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RECENT ACTIVITY TABLE -->
+        <section class="table-card">
+            <h3 style="font-size: 16px; font-weight: 700; color: #ecfdf5; margin-bottom: 16px;">
+                📋 Recent Detection History
+            </h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Classification</th>
+                        <th>Confidence</th>
+                        <th>Recommended Chemical</th>
+                        <th>Fertilizer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if history and history|length > 0 %}
+                        {% for item in history[:10] %}
+                        <tr>
+                            <td style="font-family: monospace; color: var(--text-dim);">{{ item.timestamp or "--" }}</td>
+                            <td>
+                                {% if "Healthy" in (item.disease or "") %}
+                                    <span style="color: #86efac; font-weight: 700;">{{ item.disease }}</span>
+                                {% else %}
+                                    <span style="color: #f87171; font-weight: 700;">{{ item.disease }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.confidence or 0 }}%</td>
+                            <td>{{ item.chemical or "None" }}</td>
+                            <td>{{ item.fertilizer or "Standard" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-dim); padding: 24px;">
+                                No recent detection records available in history.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </section>
+
+    </main>
+
+    <!-- LIGHTWEIGHT JAVASCRIPT -->
+    <script>
+        const drawerOpenBtn = document.getElementById("drawer-open-btn");
+        const drawerCloseBtn = document.getElementById("drawer-close-btn");
+        const mobileDrawer = document.getElementById("mobile-drawer");
+        const drawerOverlay = document.getElementById("drawer-overlay");
+
+        function openDrawer() {
+            mobileDrawer.classList.add("open");
+            drawerOverlay.classList.add("open");
+        }
+        function closeDrawer() {
+            mobileDrawer.classList.remove("open");
+            drawerOverlay.classList.remove("open");
+        }
+        if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openDrawer);
+        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+    </script>
+</body>
+</html>

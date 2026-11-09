@@ -1,16 +1,47 @@
-# Python
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
-venv/
-.env
+*.pyc
+*.pyo
+*.pyd
 
-# Raw Dataset images (kept locally; trained models are committed in models/)
+# Virtual environments & secrets
+venv/
+.env/
+ai_env/
+.venv/
+env/
+.env
+*.env
+
+# Raw Dataset images (kept locally; models committed in models/)
 dataset/
+
+# Android / Gradle build files
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.idsig
+*.keystore
+*.jks
+
+# Generated/runtime camera data
+captured_leaves/
+cropped_leaves/
+camera_predictions/
+website/static/images/202*.jpg
 
 # Logs & temp files
 *.log
-
-# OS & Editor
+*.tmp
+*.temp
 .DS_Store
 Thumbs.db
+
+# SQLite databases
+*.db
+*.db-shm
+*.db-wal

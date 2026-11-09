@@ -1,0 +1,20 @@
+[Unit]
+Description=AgriRover AI Chili Disease Detection & Rover Service
+After=network.target network-online.target time-sync.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=agrirover
+Group=agrirover
+WorkingDirectory=/home/agrirover/Desktop/chili_disease_ai
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/home/agrirover/Desktop/chili_disease_ai/.env
+ExecStart=/home/agrirover/Desktop/chili_disease_ai/ai_env/bin/python /home/agrirover/Desktop/chili_disease_ai/complete_ai.py --headless
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

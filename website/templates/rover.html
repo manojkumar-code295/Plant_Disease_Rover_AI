@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#06140e">
+<title>AgriRover | Fast Mobile Controller</title>
+
+<!-- PWA & App Icons -->
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="manifest" href="/manifest.json">
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background: #06140e;
+    color: #f0fdf4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+/* TOP STATUS BAR */
+.top-bar {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(14, 38, 28, 0.95);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.brand-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: #4ade80;
+}
+
+.brand-title a {
+    color: #4ade80;
+    text-decoration: none;
+}
+
+.pill-group {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-pill.offline {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: pulse 1.5s infinite;
+}
+
+.status-pill.offline .pulse-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px #ef4444;
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* SIGNAL FEEDBACK BANNER */
+.signal-banner {
+    width: 100%;
+    max-width: 520px;
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.5), rgba(15, 23, 42, 0.6));
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.signal-live-txt {
+    font-weight: 800;
+    color: #34d399;
+    letter-spacing: 0.5px;
+}
+
+.signal-latency-txt {
+    color: #94a3b8;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+/* MAIN CONTROLLER CONTAINER */
+.controller-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(14, 38, 28, 0.85);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 18px;
+    padding: 18px 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* DRIVE MODE & SPEED SELECTOR */
+.drive-mode-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    gap: 8px;
+}
+
+.btn-mode-toggle {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #86efac;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.speed-badge-wrap {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.speed-badge-wrap span {
+    color: #38bdf8;
+    font-size: 13px;
+    font-family: monospace;
+}
+
+/* GIANT TOUCH D-PAD (3x3 CROSS) */
+.dpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    width: 270px;
+    height: 270px;
+    margin: 8px auto 16px auto;
+}
+
+.dpad-btn {
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    background: linear-gradient(145deg, #133a2a, #0b261b);
+    color: #f0fdf4;
+    border-radius: 16px;
+    font-size: 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: transform 0.08s ease, background 0.08s ease;
+}
+
+.dpad-btn span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.dpad-btn:active, .dpad-btn.active {
+    transform: scale(0.92);
+    background: #059669 !important;
+    border-color: #34d399 !important;
+    box-shadow: 0 0 20px rgba(52, 211, 153, 0.8) !important;
+}
+
+.dpad-fwd {
+    grid-column: 2;
+    grid-row: 1;
+    background: linear-gradient(145deg, #154c37, #0d3625);
+    border-color: rgba(52, 211, 153, 0.5);
+    color: #86efac;
+}
+
+.dpad-lft {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.dpad-stp {
+    grid-column: 2;
+    grid-row: 2;
+    background: linear-gradient(145deg, #7f1d1d, #450a0a);
+    border-color: #ef4444;
+    color: #fee2e2;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+}
+
+.dpad-stp:active, .dpad-stp.active {
+    background: #dc2626 !important;
+    border-color: #f87171 !important;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.9) !important;
+}
+
+.dpad-stp span {
+    color: #fca5a5;
+}
+
+.dpad-rgt {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.dpad-rev {
+    grid-column: 2;
+    grid-row: 3;
+    background: linear-gradient(145deg, #37230b, #1f1406);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #fde68a;
+}
+
+.dpad-rev span {
+    color: #fcd34d;
+}
+
+/* HARDWARE ACTION CONTROLS */
+.actions-row {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.btn-action-hardware {
+    flex: 1;
+    padding: 12px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    background: rgba(16, 185, 129, 0.12);
+    color: #86efac;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.12s ease;
+}
+
+.btn-action-hardware:active {
+    transform: scale(0.95);
+}
+
+.btn-action-hardware.pump-active {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(8, 145, 178, 0.5));
+    border-color: #06b6d4;
+    color: #cffafe;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+}
+
+/* SPEED SLIDER & PRESETS */
+.speed-control-box {
+    width: 100%;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.speed-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+input[type="range"] {
+    flex: 1;
+    accent-color: #10b981;
+    height: 8px;
+    background: #0f2c1f;
+    border-radius: 4px;
+}
+
+.speed-presets {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-speed-chip {
+    flex: 1;
+    padding: 6px;
+    background: rgba(14, 38, 28, 0.9);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: #94a3b8;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-speed-chip.active {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: #34d399;
+    color: #ecfdf5;
+}
+
+/* LATEST LEAF DIAGNOSIS CARD (REPLACES LIVE WEBCAM) */
+.diagnosis-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(14, 38, 28, 0.85);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.card-title-txt {
+    font-size: 13px;
+    font-weight: 800;
+    color: #4ade80;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.diagnosis-content {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.leaf-thumb {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    object-fit: cover;
+    background: #0b1f16;
+}
+
+.leaf-meta {
+    flex: 1;
+}
+
+.disease-name-badge {
+    font-size: 15px;
+    font-weight: 800;
+    color: #f0fdf4;
+    margin-bottom: 4px;
+}
+
+.confidence-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.2);
+    color: #86efac;
+    margin-bottom: 6px;
+}
+
+.treatment-txt {
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.3;
+}
+
+/* PIN MONITOR & LOG STRIP */
+.pin-monitor-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(10, 26, 19, 0.9);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 14px;
+    font-size: 11px;
+}
+
+.pin-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+.pin-row span.val {
+    color: #34d399;
+    font-weight: 700;
+}
+
+.console-strip {
+    width: 100%;
+    max-width: 520px;
+    background: #030a07;
+    border: 1px solid rgba(52, 211, 153, 0.15);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 10px;
+    color: #86efac;
+    height: 50px;
+    overflow-y: hidden;
+    line-height: 1.4;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP STATUS BAR -->
+<header class="top-bar">
+    <div class="brand-title">
+        <span>🚜</span>
+        <a href="/">AgriRover Mobile</a>
+    </div>
+    <div class="pill-group">
+        <div class="status-pill {% if rover.connected %}online{% else %}offline{% endif %}" id="pi-status-pill">
+            <span class="pulse-dot"></span>
+            <span id="pi-status-label">{{ "Pi Online" if rover.connected else "Pi Offline" }}</span>
+        </div>
+        <a href="/" style="text-decoration:none; color:#86efac; font-size:11px; font-weight:700; padding:4px 8px; border:1px solid rgba(34,197,94,0.3); border-radius:6px; background:rgba(16,185,129,0.1);">Dashboard ↗</a>
+    </div>
+</header>
+
+<!-- ROVER DIRECTION & MOTION STATUS BANNER -->
+<section class="signal-banner">
+    <div>
+        <span style="color:#94a3b8; font-weight:700;">DIRECTION: </span>
+        <span class="signal-live-txt" id="signal-state-txt" style="font-size:15px; font-weight:900;">STOPPED</span>
+    </div>
+    <div class="signal-latency-txt" id="signal-latency-txt">PING: -- ms</div>
+</section>
+
+<!-- LIVE WEBCAM VIDEO STREAM -->
+<section style="width:100%; max-width:520px; background:rgba(14,38,28,0.9); border:1px solid rgba(34,197,94,0.3); border-radius:18px; padding:12px; margin-bottom:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#4ade80;">
+            <span class="pulse-dot" style="background:#ef4444; box-shadow:0 0 6px #ef4444;"></span>
+            <span>📹 LIVE ROVER CAM (CSI)</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+            <button onclick="refreshLiveStream()" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#86efac; border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer;">🔄 Refresh</button>
+        </div>
+    </div>
+    <div style="position:relative; width:100%; aspect-ratio:4/3; min-height:260px; max-height:460px; background:#020704; border-radius:12px; overflow:hidden; border:1px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center;">
+        <img id="live-webcam-feed" src="/api/camera/live_frame" alt="AgriRover Live Video" style="width:100%; height:100%; object-fit:contain; display:block;">
+        <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.65); padding:2px 8px; border-radius:4px; font-size:10px; font-family:monospace; color:#86efac;">
+            Picamera2 · Real-Time Edge Stream
+        </div>
+    </div>
+    <div id="local-lan-banner" style="display:none; justify-content:space-between; align-items:center; background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); border-radius:8px; padding:6px 10px; margin-top:8px; font-size:11px;">
+        <span style="color:#67e8f9;">⚡ <strong>Local Wi-Fi Fast Mode:</strong></span>
+        <a id="local-lan-link" href="#" target="_blank" style="color:#38bdf8; text-decoration:underline; font-weight:700;">Open Direct 30 FPS Stream ↗</a>
+    </div>
+</section>
+
+<!-- MAIN TOUCH CONTROLLER -->
+<main class="controller-card">
+    <div class="drive-mode-bar">
+        <button class="btn-mode-toggle" id="btn-drive-mode" onclick="toggleDriveMode()">
+            Mode: 🟢 Continuous (Tap)
+        </button>
+        <div class="speed-badge-wrap">
+            SPEED: <span id="speed-val-badge">60%</span>
+        </div>
+    </div>
+
+    <!-- TACTICAL TOUCH D-PAD -->
+    <div class="dpad-grid">
+        <button class="dpad-btn dpad-fwd" id="btn-forward"
+            onclick="handleDpadPress('forward')"
+            ontouchstart="handleTouchStart('forward', event)" ontouchend="handleTouchEnd('forward', event)">
+            ▲
+            <span>FWD</span>
+        </button>
+
+        <button class="dpad-btn dpad-lft" id="btn-left"
+            onclick="handleDpadPress('left')"
+            ontouchstart="handleTouchStart('left', event)" ontouchend="handleTouchEnd('left', event)">
+            ◀
+            <span>LEFT</span>
+        </button>
+
+        <button class="dpad-btn dpad-stp" id="btn-stop"
+            onclick="emergencyBrake()"
+            ontouchstart="handleTouchBrake(event)">
+            ■
+            <span>STOP</span>
+        </button>
+
+        <button class="dpad-btn dpad-rgt" id="btn-right"
+            onclick="handleDpadPress('right')"
+            ontouchstart="handleTouchStart('right', event)" ontouchend="handleTouchEnd('right', event)">
+            ▶
+            <span>RIGHT</span>
+        </button>
+
+        <button class="dpad-btn dpad-rev" id="btn-backward"
+            onclick="handleDpadPress('backward')"
+            ontouchstart="handleTouchStart('backward', event)" ontouchend="handleTouchEnd('backward', event)">
+            ▼
+            <span>REV</span>
+        </button>
+    </div>
+
+    <!-- HARDWARE ACTIONS -->
+    <div class="actions-row">
+        <button class="btn-action-hardware" id="btn-pump-toggle" onclick="togglePump()">
+            <span>💦</span>
+            <span id="pump-btn-txt">SPRAY PUMP: OFF</span>
+        </button>
+        <button class="btn-action-hardware" onclick="emergencyBrake()" style="border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.15);">
+            <span>🛑</span>
+            <span>EMERGENCY BRAKE</span>
+        </button>
+    </div>
+    <div style="display:flex; justify-content:center; margin-top:-6px; margin-bottom:12px;">
+        <button type="button" id="btn-relay-invert" onclick="toggleRelayPolarity()" style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8; font-size:11px; font-weight:700; border-radius:6px; padding:4px 10px; cursor:pointer;">
+            ⚡ Relay Polarity: Active-Low (0V) [Tap to Invert]
+        </button>
+    </div>
+
+    <!-- SPEED SLIDER & PRESETS -->
+    <div class="speed-control-box">
+        <div class="speed-slider-wrap">
+            <span style="font-size:11px; color:#94a3b8;">PWM</span>
+            <input type="range" id="speed-slider" min="20" max="100" value="60" oninput="onSpeedSlider(this.value)">
+            <span style="font-size:12px; font-weight:800; color:#38bdf8;" id="speed-slider-label">60%</span>
+        </div>
+        <div class="speed-presets">
+            <button class="btn-speed-chip" onclick="setSpeedPreset(35)">35% Crawl</button>
+            <button class="btn-speed-chip active" id="chip-60" onclick="setSpeedPreset(60)">60% Cruise</button>
+            <button class="btn-speed-chip" onclick="setSpeedPreset(85)">85% Turbo</button>
+            <button class="btn-speed-chip" onclick="setSpeedPreset(100)">100% Max</button>
+        </div>
+    </div>
+</main>
+
+<!-- LATEST LEAF DIAGNOSIS (ZERO WEBCAM BANDWIDTH) -->
+<section class="diagnosis-card">
+    <div class="card-title-row">
+        <span class="card-title-txt">🔬 Latest Detected Plant Health</span>
+        <div style="display:flex; gap:6px;">
+            <button onclick="requestFreshSnapshot()" style="background:rgba(52,211,153,0.15); border:1px solid rgba(52,211,153,0.3); color:#34d399; font-size:11px; font-weight:700; border-radius:6px; padding:3px 8px; cursor:pointer;">📸 Snapshot</button>
+            <button onclick="clearCurrentDetection()" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:11px; font-weight:700; border-radius:6px; padding:3px 8px; cursor:pointer;">🗑️ Clear Result</button>
+        </div>
+    </div>
+    <div class="diagnosis-content">
+        <img id="leaf-preview-img" 
+             src="{% if latest_result and latest_result.image %}{{ url_for('static', filename='images/' + latest_result.image) }}{% else %}{{ url_for('static', filename='app_photo.png') }}{% endif %}" 
+             alt="Latest Scanned Leaf" class="leaf-thumb"
+             onerror="this.src='/static/app_photo.png'">
+        <div class="leaf-meta">
+            <div class="disease-name-badge" id="leaf-disease-txt">{{ (latest_result.disease if latest_result else "Active Scanning (No Leaf in View)") }}</div>
+            <div class="confidence-pill" id="leaf-confidence-txt">Confidence: {{ (latest_result.confidence if latest_result else "0.0") }}%</div>
+            <div class="treatment-txt" id="leaf-treatment-txt">{{ (latest_result.treatment if latest_result else "Waiting for botanical leaf in front of AI lens.") }}</div>
+        </div>
+    </div>
+</section>
+
+<!-- BTS7960 HARDWARE PIN MONITOR -->
+<section class="pin-monitor-card">
+    <div style="font-weight:800; color:#4ade80; margin-bottom:6px;">⚡ BTS7960 H-Bridge GPIO Monitor</div>
+    <div class="pin-row">
+        <span>LEFT MOTOR (Driver 1)</span>
+        <span class="val" id="pin-left-val">RPWM: Pin 11 | LPWM: Pin 13 | EN: Pin 32</span>
+    </div>
+    <div class="pin-row">
+        <span>RIGHT MOTOR (Driver 2)</span>
+        <span class="val" id="pin-right-val">RPWM: Pin 15 | LPWM: Pin 16 | EN: Pin 33</span>
+    </div>
+    <div class="pin-row">
+        <span>SPRAY RELAY (Pump)</span>
+        <span class="val" id="pin-pump-val">GPIO 26: OFF</span>
+    </div>
+</section>
+
+<!-- REALTIME SIGNAL CONSOLE LOG -->
+<footer class="console-strip" id="console-strip">
+    <div>[READY] Controller initialized. Direct phone signals enabled.</div>
+</footer>
+
+<script>
+let currentSpeed = 60;
+let pumpActive = false;
+let driveMode = 'continuous'; // 'continuous' or 'momentary'
+let activeDirection = 'stop';
+let touchHandled = false;
+
+function logMessage(msg) {
+    const strip = document.getElementById("console-strip");
+    if (!strip) return;
+    const now = new Date().toTimeString().split(' ')[0];
+    const line = document.createElement("div");
+    line.textContent = `[${now}] ${msg}`;
+    strip.prepend(line);
+    if (strip.children.length > 8) strip.removeChild(strip.lastChild);
+}
+
+/* Instant Direct Command Sender */
+async function sendSignal(cmd, speedOverride) {
+    const spd = speedOverride !== undefined ? speedOverride : currentSpeed;
+    const bannerTxt = document.getElementById("signal-state-txt");
+    const pingTxt = document.getElementById("signal-latency-txt");
+    
+    // Immediate direction update on screen
+    if (bannerTxt) {
+        if (cmd === 'forward') {
+            bannerTxt.textContent = "FORWARD";
+            bannerTxt.style.color = "#10b981";
+        } else if (cmd === 'backward') {
+            bannerTxt.textContent = "BACKWARD";
+            bannerTxt.style.color = "#f59e0b";
+        } else if (cmd === 'left') {
+            bannerTxt.textContent = "LEFT (SLOW CRAWL)";
+            bannerTxt.style.color = "#06b6d4";
+        } else if (cmd === 'right') {
+            bannerTxt.textContent = "RIGHT (SLOW CRAWL)";
+            bannerTxt.style.color = "#06b6d4";
+        } else if (cmd === 'stop') {
+            bannerTxt.textContent = "STOPPED";
+            bannerTxt.style.color = "#ef4444";
+        } else {
+            bannerTxt.textContent = cmd.toUpperCase();
+            bannerTxt.style.color = "#10b981";
+        }
+    }
+    
+    const t0 = performance.now();
+    try {
+        const res = await fetch("/api/rover/control", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                command: cmd,
+                speed: spd
+            })
+        });
+        
+        const latency = Math.round(performance.now() - t0);
+        if (pingTxt) pingTxt.textContent = `PING: ${latency} ms`;
+        
+        const data = await res.json();
+        if (data.success) {
+            activeDirection = cmd;
+            logMessage(`Direction: ${cmd.toUpperCase()} | Speed: ${spd}% (${latency}ms)`);
+            updateActiveButton(cmd);
+            updatePinMonitor(cmd, spd);
+        } else {
+            if (bannerTxt) bannerTxt.textContent = `REJECTED: ${data.message || 'Error'}`;
+            logMessage(`ERR: ${data.message}`);
+        }
+    } catch (err) {
+        if (bannerTxt) bannerTxt.textContent = `NETWORK ERROR`;
+        logMessage(`FAILED: Cannot reach Pi (${err.message})`);
+    }
+}
+
+/* Touch & Click Handlers */
+function handleTouchStart(dir, event) {
+    if (event && event.cancelable) event.preventDefault();
+    touchHandled = true;
+    if (navigator.vibrate) navigator.vibrate(25);
+    sendSignal(dir, currentSpeed);
+}
+
+function handleTouchEnd(dir, event) {
+    if (event && event.cancelable) event.preventDefault();
+    setTimeout(() => { touchHandled = false; }, 400);
+    
+    if (driveMode === 'momentary') {
+        sendSignal('stop', 0);
+    }
+}
+
+function handleTouchBrake(event) {
+    if (event && event.cancelable) event.preventDefault();
+    touchHandled = true;
+    emergencyBrake();
+}
+
+function handleDpadPress(dir) {
+    if (touchHandled) return;
+    sendSignal(dir, currentSpeed);
+}
+
+function emergencyBrake() {
+    if (navigator.vibrate) navigator.vibrate(50);
+    sendSignal('stop', 0);
+}
+
+function toggleDriveMode() {
+    driveMode = (driveMode === 'continuous') ? 'momentary' : 'continuous';
+    const btn = document.getElementById("btn-drive-mode");
+    if (btn) {
+        btn.textContent = (driveMode === 'continuous') ? "Mode: 🟢 Continuous (Tap)" : "Mode: 🔵 Momentary (Hold)";
+    }
+    logMessage(`Mode switched to ${driveMode}`);
+}
+
+/* Spray Pump Toggle */
+async function togglePump() {
+    pumpActive = !pumpActive;
+    const btn = document.getElementById("btn-pump-toggle");
+    const txt = document.getElementById("pump-btn-txt");
+    const pinVal = document.getElementById("pin-pump-val");
+    
+    if (btn) {
+        if (pumpActive) {
+            btn.classList.add("pump-active");
+            if (txt) txt.textContent = "SPRAY PUMP: ON (SPRAYING)";
+            if (pinVal) pinVal.textContent = "GPIO 26: HIGH (12V ON)";
+        } else {
+            btn.classList.remove("pump-active");
+            if (txt) txt.textContent = "SPRAY PUMP: OFF";
+            if (pinVal) pinVal.textContent = "GPIO 26: LOW (OFF)";
+        }
+    }
+    
+    try {
+        await fetch("/api/rover/pump", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ state: pumpActive })
+        });
+        logMessage(`PUMP -> ${pumpActive ? 'STARTED' : 'STOPPED'}`);
+    } catch (e) {
+        logMessage(`PUMP ERR: ${e}`);
+    }
+}
+
+async function toggleRelayPolarity() {
+    try {
+        const res = await fetch("/api/rover/invert_relay", { method: "POST" });
+        const data = await res.json();
+        const btn = document.getElementById("btn-relay-invert");
+        if (btn) {
+            btn.textContent = data.relay_active_low ? "⚡ Relay Polarity: Active-Low (0V) [Tap to Invert]" : "⚡ Relay Polarity: Active-High (3.3V) [Tap to Invert]";
+        }
+        logMessage(data.message || "Relay polarity flipped");
+    } catch (e) {
+        logMessage("Failed to flip relay: " + e);
+    }
+}
+
+
+/* Speed Slider & Presets */
+function onSpeedSlider(val) {
+    currentSpeed = parseInt(val);
+    document.getElementById("speed-slider-label").textContent = `${currentSpeed}%`;
+    document.getElementById("speed-val-badge").textContent = `${currentSpeed}%`;
+    updatePresetChips(currentSpeed);
+    if (activeDirection !== 'stop') {
+        sendSignal(activeDirection, currentSpeed);
+    }
+}
+
+function setSpeedPreset(val) {
+    document.getElementById("speed-slider").value = val;
+    onSpeedSlider(val);
+}
+
+function updatePresetChips(val) {
+    document.querySelectorAll(".btn-speed-chip").forEach(c => c.classList.remove("active"));
+    if (val === 60) {
+        const c = document.getElementById("chip-60");
+        if (c) c.classList.add("active");
+    }
+}
+
+function updateActiveButton(cmd) {
+    document.querySelectorAll(".dpad-btn").forEach(b => b.classList.remove("active"));
+    if (cmd !== 'stop') {
+        const btn = document.getElementById("btn-" + cmd);
+        if (btn) btn.classList.add("active");
+    }
+}
+
+function updatePinMonitor(dir, spd) {
+    const leftVal = document.getElementById("pin-left-val");
+    const rightVal = document.getElementById("pin-right-val");
+    
+    if (dir === 'forward') {
+        if (leftVal) leftVal.textContent = `RPWM: HIGH | LPWM: LOW | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: HIGH | ENB: ${spd}%`;
+    } else if (dir === 'backward') {
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: HIGH | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: HIGH | LPWM: LOW | ENB: ${spd}%`;
+    } else if (dir === 'left') {
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: HIGH | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: HIGH | ENB: ${spd}%`;
+    } else if (dir === 'right') {
+        if (leftVal) leftVal.textContent = `RPWM: HIGH | LPWM: LOW | ENA: ${spd}%`;
+        if (rightVal) rightVal.textContent = `RPWM: HIGH | LPWM: LOW | ENB: ${spd}%`;
+    } else {
+        if (leftVal) leftVal.textContent = `RPWM: LOW | LPWM: LOW | ENA: 0 (STOP)`;
+        if (rightVal) rightVal.textContent = `RPWM: LOW | LPWM: LOW | ENB: 0 (STOP)`;
+    }
+}
+
+/* Polling Status & Detection Updates (1s Real-Time Auto-Refresh) */
+let isSyncing = false;
+async function syncRoverStatus() {
+    if (isSyncing) return;
+    isSyncing = true;
+    try {
+        const res = await fetch("/api/rover/status?_=" + Date.now(), { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        const r = data.rover;
+        const pill = document.getElementById("pi-status-pill");
+        const pillTxt = document.getElementById("pi-status-label");
+        
+        if (r && r.connected) {
+            if (pill) pill.className = "status-pill online";
+            if (pillTxt) pillTxt.textContent = "Pi Online";
+            const piIp = r.pi_ip || r.ip;
+            if (piIp) {
+                tryRoverLocalPiStream(piIp);
+                const lanBanner = document.getElementById("local-lan-banner");
+                const lanLink = document.getElementById("local-lan-link");
+                if (lanBanner && lanLink && window.location.hostname !== piIp && window.location.hostname !== "127.0.0.1") {
+                    lanBanner.style.display = "flex";
+                    lanLink.href = "http://" + piIp + ":5000/rover";
+                    lanLink.textContent = "Open http://" + piIp + ":5000/rover ↗";
+                }
+            }
+        } else {
+            if (pill) pill.className = "status-pill offline";
+            if (pillTxt) pillTxt.textContent = "Pi Offline";
+        }
+
+        // Keep direction display accurate to live rover hardware state
+        const bannerTxt = document.getElementById("signal-state-txt");
+        if (bannerTxt && r && r.direction && !touchHandled) {
+            const d = r.direction.toLowerCase();
+            if (d === 'forward') {
+                bannerTxt.textContent = "FORWARD";
+                bannerTxt.style.color = "#10b981";
+            } else if (d === 'backward' || d === 'reverse') {
+                bannerTxt.textContent = "BACKWARD";
+                bannerTxt.style.color = "#f59e0b";
+            } else if (d === 'left') {
+                bannerTxt.textContent = "LEFT (SLOW CRAWL)";
+                bannerTxt.style.color = "#06b6d4";
+            } else if (d === 'right') {
+                bannerTxt.textContent = "RIGHT (SLOW CRAWL)";
+                bannerTxt.style.color = "#06b6d4";
+            } else if (d === 'stopped' || d === 'stop') {
+                bannerTxt.textContent = "STOPPED";
+                bannerTxt.style.color = "#ef4444";
+            }
+        }
+
+        // Update spray pump state
+        const pumpBtnTxt = document.getElementById("pump-btn-txt");
+        if (pumpBtnTxt && r && r.pump !== undefined) {
+            pumpActive = Boolean(r.pump);
+            pumpBtnTxt.textContent = pumpActive ? "SPRAY PUMP: ON (SPRAYING)" : "SPRAY PUMP: OFF";
+        }
+        if (r && r.relay_active_low !== undefined) {
+            const btn = document.getElementById("btn-relay-invert");
+            if (btn) {
+                btn.textContent = r.relay_active_low ? "⚡ Relay Polarity: Active-Low (0V) [Tap to Invert]" : "⚡ Relay Polarity: Active-High (3.3V) [Tap to Invert]";
+            }
+        }
+        
+        const leafTxt = document.getElementById("leaf-disease-txt");
+        const confTxt = document.getElementById("leaf-confidence-txt");
+        const treatTxt = document.getElementById("leaf-treatment-txt");
+        const imgEl = document.getElementById("leaf-preview-img");
+
+        // Continuous Live AI Disease Diagnosis (Real-Time Auto-Update Every Second)
+        const isLiveUncertain = !r || !r.last_detection || r.last_detection.toLowerCase().includes("uncertain") || r.last_detection === "NO LEAF DETECTED";
+        if (!isLiveUncertain) {
+            if (leafTxt) leafTxt.textContent = r.last_detection;
+            if (confTxt) confTxt.textContent = `Confidence: ${(r.last_confidence || 0).toFixed(1)}%`;
+            if (treatTxt && r.disease_treatment) {
+                treatTxt.textContent = `Rx: ${r.disease_chemical || 'Standard Care'} | ${r.disease_treatment}`;
+            } else if (data.result && data.result.treatment) {
+                treatTxt.textContent = data.result.treatment;
+            }
+        } else {
+            if (leafTxt) leafTxt.textContent = "Uncertainty (Awaiting Chili Leaf)";
+            if (confTxt) confTxt.textContent = "Confidence: 0.0%";
+            if (treatTxt) treatTxt.textContent = "Point camera directly at a chili plant leaf to detect diseases.";
+        }
+
+        // Continuous Leaf Photo Auto-Refresh
+        if (data.result && data.result.image && imgEl && !imgEl.dataset.custom) {
+            const newSrc = "/static/images/" + data.result.image;
+            if (!imgEl.src.includes(data.result.image)) {
+                imgEl.src = newSrc;
+            }
+        }
+    } catch (e) {
+    } finally {
+        isSyncing = false;
+    }
+}
+
+async function requestFreshSnapshot() {
+    logMessage("Triggering on-demand leaf snapshot...");
+    try {
+        const res = await fetch("/api/camera/snapshot");
+        const data = await res.json();
+        if (data.success && data.filename) {
+            const imgEl = document.getElementById("leaf-preview-img");
+            if (imgEl) imgEl.src = "/static/images/" + data.filename + "?_=" + Date.now();
+            logMessage("Fresh snapshot captured.");
+        }
+    } catch (e) {
+        logMessage("Snapshot failed.");
+    }
+}
+
+async function clearCurrentDetection() {
+    logMessage("Clearing scan result...");
+    try {
+        const res = await fetch("/api/result/clear", { method: "POST" });
+        const data = await res.json();
+        if (data.success) {
+            logMessage("Result cleared: Ready for next scan.");
+            const leafTxt = document.getElementById("leaf-disease-txt");
+            const confTxt = document.getElementById("leaf-confidence-txt");
+            const treatTxt = document.getElementById("leaf-treatment-txt");
+            const imgEl = document.getElementById("leaf-preview-img");
+            if (leafTxt) leafTxt.textContent = "Active Scanning (No Leaf in View)";
+            if (confTxt) confTxt.textContent = "Confidence: 0.0%";
+            if (treatTxt) treatTxt.textContent = "Hold camera over plant leaf to detect diseases.";
+            if (imgEl) imgEl.src = "/static/app_photo.png";
+        } else {
+            logMessage("Failed to clear result.");
+        }
+    } catch (e) {
+        logMessage("Error contacting clear API.");
+    }
+}
+
+/* High-Speed Cloud-Optimized Streaming Engine (Paced for Render ~6-8 FPS) */
+const roverCamEl = document.getElementById("live-webcam-feed");
+let roverLocalStreamTested = false;
+let isStreamingActive = true;
+let frameInFlight = false;
+
+function fetchLiveFrame() {
+    if (!isStreamingActive || frameInFlight) return;
+    frameInFlight = true;
+    const probe = new Image();
+    probe.onload = function() {
+        if (roverCamEl && isStreamingActive) roverCamEl.src = probe.src;
+        frameInFlight = false;
+        // Paced at 125ms (~8 FPS max) - perfectly matched with Render cloud upload!
+        setTimeout(fetchLiveFrame, 125);
+    };
+    probe.onerror = function() {
+        frameInFlight = false;
+        setTimeout(fetchLiveFrame, 350);
+    };
+    probe.src = "/api/camera/live_frame?t=" + Date.now();
+}
+
+// Start continuous cloud streaming immediately
+fetchLiveFrame();
+
+function tryRoverLocalPiStream(piIp) {
+    if (roverLocalStreamTested || !piIp) return;
+    roverLocalStreamTested = true;
+    const probe = new Image();
+    probe.onload = function() {
+        logMessage("Local Pi stream found! Switching to direct 30 FPS feed.");
+        isStreamingActive = false; // Stop cloud frame polling
+        if (roverCamEl) roverCamEl.src = "http://" + piIp + ":8080/video_feed";
+    };
+    probe.src = "http://" + piIp + ":8080/snapshot?_=" + Date.now();
+}
+
+function refreshLiveStream() {
+    frameInFlight = false;
+    isStreamingActive = true;
+    fetchLiveFrame();
+    logMessage("Camera stream refreshed.");
+}
+
+// Keyboard arrow controls for PC testing
+window.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    if (e.key === "ArrowUp" || e.key === "w") sendSignal("forward");
+    else if (e.key === "ArrowDown" || e.key === "s") sendSignal("backward");
+    else if (e.key === "ArrowLeft" || e.key === "a") sendSignal("left");
+    else if (e.key === "ArrowRight" || e.key === "d") sendSignal("right");
+    else if (e.key === " " || e.key === "Escape") emergencyBrake();
+});
+
+window.addEventListener("keyup", (e) => {
+    if (driveMode === 'momentary') {
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "s", "a", "d"].includes(e.key)) {
+            sendSignal("stop", 0);
+        }
+    }
+});
+
+// Second-by-second auto-update (1000ms = 1 sec)
+syncRoverStatus();
+setInterval(syncRoverStatus, 1000);
+</script>
+</body>
+</html>
