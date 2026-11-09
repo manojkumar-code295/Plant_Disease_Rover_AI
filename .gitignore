@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Raw Dataset images (kept locally; trained models are committed in models/)
+dataset/
+
+# Logs & temp files
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db

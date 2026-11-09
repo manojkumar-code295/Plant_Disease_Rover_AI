@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriVision AI - Plant Leaf Detection & Automatic Smart Spraying System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">🌱</div>
+        <div>
+          <h1>AgriVision AI Rover</h1>
+          <p class="subtitle">Live Plant Leaf Detection & Automatic Water Spraying System</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="badge-status" id="platform-badge"><span class="pulse-dot"></span> Simulation Mode (Laptop)</span>
+        <button class="btn btn-danger btn-sm" id="btn-emergency-stop" title="Immediate Safety Cutoff">🛑 EMERGENCY STOP</button>
+        <button class="btn btn-outline btn-sm" id="btn-open-metrics">📊 Model Metrics</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    
+    <!-- Top System Architecture Strip -->
+    <section class="banner-card">
+      <div class="banner-content">
+        <div class="banner-text">
+          <h2>Continuous Plant Leaf Detection & Automatic Spraying Rover</h2>
+          <p>
+            Real-time YOLOv8 object detection, strict leaf verification, and CNN disease classification 
+            integrated with automated DC motor navigation and precision water spraying. Compatible with 
+            <strong>Laptop Testing</strong> and <strong>Raspberry Pi GPIO</strong>.
+          </p>
+        </div>
+        <div class="chip-container">
+          <span class="chip">📹 Continuous Webcam</span>
+          <span class="chip">🎯 YOLOv8 Object Detection</span>
+          <span class="chip">🌿 Strict Leaf Verifier</span>
+          <span class="chip">🧫 4 Disease Classes</span>
+          <span class="chip chip-pump">💦 Auto Water Sprayer</span>
+          <span class="chip chip-shield">🛑 Obstacle Auto-Braking</span>
+          <span class="chip">💾 Auto Image Archive</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real-Time Metrics & Statistics Counter Bar -->
+    <section class="stats-bar">
+      <div class="stat-pill">
+        <span class="stat-label">Total Leaves Detected:</span>
+        <span class="stat-value" id="stat-leaves-detected">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Healthy Leaves:</span>
+        <span class="stat-value text-success" id="stat-healthy-leaves">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Diseased Leaves:</span>
+        <span class="stat-value text-danger" id="stat-diseased-leaves">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Images Archived:</span>
+        <span class="stat-value text-primary" id="stat-images-stored">0</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Motor Speed:</span>
+        <span class="stat-value" id="stat-motor-speed">65% PWM</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-label">Water Pump:</span>
+        <span class="stat-value" id="stat-pump-status">STANDBY</span>
+      </div>
+    </section>
+
+    <!-- Workspace Grid -->
+    <div class="workspace-grid">
+
+      <!-- LEFT COLUMN: Live Camera, Object Bounding Canvas, Controls & Settings -->
+      <div class="left-column">
+
+        <!-- Card 1: Continuous Live Camera Viewfinder with Object Bounding Canvas -->
+        <section class="card camera-card">
+          <div class="card-header">
+            <div class="header-title-group">
+              <span class="live-indicator" id="live-indicator">LIVE</span>
+              <h3>Continuous Live Camera Detection</h3>
+            </div>
+            <div class="live-fps-group">
+              <span class="badge-hud" id="hud-fps">FPS: --</span>
+              <span class="badge-hud" id="hud-latency">Latency: -- ms</span>
+            </div>
+          </div>
+
+          <!-- Video Viewport with Live Canvas Overlay for Bounding Boxes -->
+          <div class="camera-viewport" id="camera-viewport">
+            <video id="webcam-video" autoplay playsinline muted></video>
+            <!-- Canvas over video for rendering object detection bounding boxes & disease labels -->
+            <canvas id="bounding-box-canvas"></canvas>
+            <canvas id="capture-canvas" hidden></canvas>
+            
+            <!-- Real-Time HUD Overlay -->
+            <div class="hud-overlay" id="hud-overlay">
+              <div class="hud-top">
+                <span class="hud-badge" id="hud-leaf-status">Scanning for Leaves...</span>
+                <span class="hud-badge hud-obs" id="hud-obs-badge" style="display: none;">OBSTACLE DETECTED</span>
+              </div>
+              <div class="hud-bottom">
+                <div class="hud-detection-pill" id="hud-detection-pill">
+                  <span class="pill-icon">🍃</span>
+                  <span class="pill-text" id="hud-status-text">Point camera at a plant leaf...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Continuous Camera Controls: Start Detection, Pause, Stop -->
+          <div class="camera-control-toolbar">
+            <button class="btn btn-primary" id="btn-start-detection">
+              <span>▶</span> Start Detection
+            </button>
+            <button class="btn btn-secondary" id="btn-pause-detection" disabled>
+              <span>⏸</span> Pause
+            </button>
+            <button class="btn btn-outline" id="btn-stop-detection" disabled>
+              <span>⏹</span> Stop
+            </button>
+            <button class="btn btn-outline" id="btn-toggle-upload">
+              <span>📁</span> Upload Image
+            </button>
+          </div>
+
+          <!-- Drop zone for static image files (hidden by default) -->
+          <div class="drop-zone-drawer" id="drop-zone-drawer" style="display: none;">
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" hidden>
+            <div class="drop-zone-mini" id="drop-zone">
+              <span>📤 Drag & drop leaf image or <button class="btn-link" id="btn-browse">Browse</button></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 2: Rover Motor Driving Controls -->
+        <section class="card rover-card">
+          <div class="card-header">
+            <h3>🎮 Smart Rover Navigation Controls</h3>
+            <span class="badge-subhead" id="nav-mode-badge">Manual Driving</span>
+          </div>
+
+          <div class="rover-layout">
+            
+            <!-- Directional Controller (D-Pad) -->
+            <div class="dpad-container">
+              <div class="dpad-grid">
+                <div></div>
+                <button class="dpad-btn" id="btn-forward" data-action="forward" title="Move Forward (W / Up)">
+                  <span class="dpad-arrow">▲</span>
+                  <span class="dpad-key">W</span>
+                </button>
+                <div></div>
+
+                <button class="dpad-btn" id="btn-left" data-action="left" title="Turn Left (A / Left)">
+                  <span class="dpad-arrow">◀</span>
+                  <span class="dpad-key">A</span>
+                </button>
+                <button class="dpad-btn dpad-stop" id="btn-stop" data-action="stop" title="Stop Motors (Spacebar)">
+                  <span class="dpad-arrow">⏹</span>
+                  <span class="dpad-key">STOP</span>
+                </button>
+                <button class="dpad-btn" id="btn-right" data-action="right" title="Turn Right (D / Right)">
+                  <span class="dpad-arrow">▶</span>
+                  <span class="dpad-key">D</span>
+                </button>
+
+                <div></div>
+                <button class="dpad-btn" id="btn-backward" data-action="backward" title="Move Backward (S / Down)">
+                  <span class="dpad-arrow">▼</span>
+                  <span class="dpad-key">S</span>
+                </button>
+                <div></div>
+              </div>
+              <p class="key-hint">Keys: <strong>W/A/S/D</strong> | <strong>Space</strong>: Stop | <strong>P</strong>: Pump | <strong>B</strong>: Spray</p>
+            </div>
+
+            <!-- Speed & Sprayer Panel -->
+            <div class="rover-aux-panel">
+              
+              <!-- Speed Regulation -->
+              <div class="aux-block">
+                <div class="block-title-row">
+                  <label class="block-title">⚡ Rover Motor Speed:</label>
+                  <span class="speed-val" id="speed-display">65% PWM</span>
+                </div>
+                <div class="speed-presets">
+                  <button class="btn-preset" data-speed="35">🐢 Low (35%)</button>
+                  <button class="btn-preset active" data-speed="65">🚗 Med (65%)</button>
+                  <button class="btn-preset" data-speed="100">⚡ High (100%)</button>
+                </div>
+                <input type="range" class="speed-slider" id="speed-slider" min="15" max="100" value="65" step="5">
+              </div>
+
+              <!-- Sprayer Pump Control (Water Only) -->
+              <div class="aux-block pump-block">
+                <div class="block-title-row">
+                  <label class="block-title">💦 Water Sprayer Pump:</label>
+                  <span class="pump-status-pill" id="pump-status-pill">PUMP OFF</span>
+                </div>
+                
+                <div class="pump-actions">
+                  <button class="btn btn-pump-toggle" id="btn-pump-toggle">
+                    <span id="pump-toggle-icon">💧</span> <span id="pump-toggle-text">Turn Pump ON</span>
+                  </button>
+                  <button class="btn btn-pump-burst" id="btn-pump-burst">
+                    <span>⚡</span> Spray Water (2s)
+                  </button>
+                </div>
+
+                <!-- Smart Auto-Spray Toggle -->
+                <div class="auto-spray-wrapper">
+                  <div class="auto-spray-info">
+                    <span class="auto-spray-title">🤖 Smart Auto-Spray</span>
+                    <span class="auto-spray-sub">Auto-sprays water when plant leaf is verified</span>
+                  </div>
+                  <label class="switch">
+                    <input type="checkbox" id="auto-spray-toggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Telemetry Status Strip -->
+          <div class="telemetry-strip" id="telemetry-strip">
+            <div class="tele-item">
+              <span class="tele-lbl">Direction:</span>
+              <span class="tele-val" id="tele-dir">STOP</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-lbl">Speed:</span>
+              <span class="tele-val" id="tele-speed">65%</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-lbl">Pump:</span>
+              <span class="tele-val" id="tele-pump">OFF</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-lbl">Auto-Spray:</span>
+              <span class="tele-val" id="tele-auto">ENABLED</span>
+            </div>
+            <div class="tele-item">
+              <span class="tele-lbl">Hardware:</span>
+              <span class="tele-val" id="tele-hardware">Simulation (Laptop)</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Card 3: New Dedicated Settings Section -->
+        <section class="card settings-card" id="settings-card">
+          <div class="card-header">
+            <h3>⚙️ LIVE MONITORING AND HARDWARE CONTROL</h3>
+            <span class="badge-subhead">System Settings</span>
+          </div>
+
+          <!-- Settings Accordion / Tabs -->
+          <div class="settings-accordion">
+            
+            <!-- A. Camera Settings -->
+            <div class="setting-group">
+              <h4 class="setting-title">A. Camera Settings</h4>
+              <div class="setting-grid">
+                <div class="setting-item">
+                  <label for="setting-camera-select">Select Webcam:</label>
+                  <select id="setting-camera-select" class="form-control">
+                    <option value="0">Default Camera (Webcam 0)</option>
+                    <option value="1">External USB Camera (Webcam 1)</option>
+                  </select>
+                </div>
+                <div class="setting-item buttons-inline">
+                  <button class="btn btn-primary btn-sm" id="btn-setting-cam-start">Start Camera</button>
+                  <button class="btn btn-outline btn-sm" id="btn-setting-cam-stop">Stop Camera</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- B. Detection Settings -->
+            <div class="setting-group">
+              <h4 class="setting-title">B. Detection Settings</h4>
+              <div class="setting-grid">
+                <div class="setting-item toggle-row">
+                  <span>Enable YOLO Object Detection:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-obj-detect" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item toggle-row">
+                  <span>Enable Disease Detection CNN:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-disease-detect" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item full-width">
+                  <div class="slider-label-row">
+                    <span>Confidence Threshold:</span>
+                    <strong id="setting-conf-val">70%</strong>
+                  </div>
+                  <input type="range" id="setting-conf-slider" min="50" max="95" value="70" step="5" class="speed-slider">
+                </div>
+              </div>
+            </div>
+
+            <!-- C. Motor Settings -->
+            <div class="setting-group">
+              <h4 class="setting-title">C. Motor Settings</h4>
+              <div class="setting-grid">
+                <div class="setting-item toggle-row">
+                  <span>Control Mode:</span>
+                  <div class="radio-pill-group">
+                    <button class="radio-pill active" id="btn-motor-manual" data-mode="manual">Manual</button>
+                    <button class="radio-pill" id="btn-motor-auto" data-mode="automatic">Automatic</button>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <label>Preset Speeds:</label>
+                  <div class="speed-presets">
+                    <button class="btn-preset" data-speed="35">Low (35%)</button>
+                    <button class="btn-preset active" data-speed="65">Medium (65%)</button>
+                    <button class="btn-preset" data-speed="100">High (100%)</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- D. Water Pump Settings (Water Only) -->
+            <div class="setting-group">
+              <h4 class="setting-title">D. Water Pump Settings (Water Only)</h4>
+              <div class="setting-grid">
+                <div class="setting-item toggle-row">
+                  <span>Enable Water Pump:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-pump-master" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item toggle-row">
+                  <span>Automatic Spraying Mode:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-auto-spray-toggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label for="setting-spray-dur">Spray Duration (Seconds):</label>
+                  <input type="number" id="setting-spray-dur" class="form-control" value="2.0" step="0.5" min="0.5" max="5.0">
+                </div>
+                <div class="setting-item">
+                  <label for="setting-spray-int">Spray Interval Cooldown (Seconds):</label>
+                  <input type="number" id="setting-spray-int" class="form-control" value="4.0" step="1" min="2" max="15">
+                </div>
+              </div>
+            </div>
+
+            <!-- E. Image Storage Settings -->
+            <div class="setting-group">
+              <h4 class="setting-title">E. Image Storage Settings</h4>
+              <div class="setting-grid">
+                <div class="setting-item toggle-row">
+                  <span>Auto-Save Detected Images:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-storage-toggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item toggle-row">
+                  <span>Save Diseased Leaf Images:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-save-diseased" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item toggle-row">
+                  <span>Save Healthy Leaf Images:</span>
+                  <label class="switch">
+                    <input type="checkbox" id="setting-save-healthy" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-item full-width">
+                  <span class="storage-path-hint">📁 Storage Location: <code>Plant_Leaf_Disease_Detection/detected_images/</code></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Real-Time Detection Results, Pathology, & Quick Presets -->
+      <div class="right-column">
+
+        <!-- Card 4: Diagnosis & Pathology Report -->
+        <section class="card results-card" id="results-card">
+          <div class="card-header">
+            <h3>🔬 Real-Time AI Diagnosis Report</h3>
+            <span class="badge-subhead">Strict Leaf Verification</span>
+          </div>
+
+          <!-- Default Blank State -->
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">🍃</div>
+            <h4>Waiting for Camera Frame...</h4>
+            <p>Click <strong>Start Detection</strong> to begin scanning. The AI will detect plant leaves, reject non-leaf objects, diagnose disease, and activate the water pump automatically.</p>
+          </div>
+
+          <!-- Rejection State (Non-Leaf Detected) -->
+          <div class="rejection-box" id="rejection-box" style="display: none;">
+            <div class="rejection-header">
+              <span class="rejection-icon">🚫</span>
+              <div>
+                <h3 class="rejection-title" id="rejection-title">Invalid Image! Please upload a clear plant leaf image.</h3>
+                <p class="rejection-reason" id="rejection-reason">Non-leaf object detected.</p>
+              </div>
+            </div>
+            <div class="rejection-body">
+              <p>
+                <strong>Strict Leaf-Only Filter:</strong> The AI model exclusively diagnoses verified crop leaves. 
+                Human faces, animals, vehicles, buildings, fruits, and everyday objects are rejected immediately.
+              </p>
+            </div>
+          </div>
+
+          <!-- Uncertain Prediction State -->
+          <div class="uncertain-box" id="uncertain-box" style="display: none;">
+            <div class="rejection-header">
+              <span class="rejection-icon">⚠️</span>
+              <div>
+                <h3 class="uncertain-title">Uncertain Prediction. Please upload another clear leaf image.</h3>
+                <p class="uncertain-reason">Confidence below threshold. Ensure good lighting and crisp leaf focus.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Valid Leaf Result Details -->
+          <div class="result-details" id="result-details" style="display: none;">
+            
+            <!-- Leaf Verification Badge -->
+            <div class="verifier-badge" id="verifier-badge">
+              <span class="verified-icon">🛡️</span>
+              <span id="verifier-text">Leaf Verified Successfully (Confidence: 99.8%)</span>
+            </div>
+
+            <!-- Main Prediction Banner -->
+            <div class="prediction-banner" id="prediction-banner">
+              <div class="prediction-info">
+                <span class="health-pill" id="health-pill">Healthy</span>
+                <h2 class="prediction-title" id="prediction-title">Healthy Leaf</h2>
+                <p class="prediction-pathogen" id="prediction-pathogen"></p>
+              </div>
+              <div class="confidence-circle" id="confidence-circle">
+                <span class="confidence-val" id="confidence-val">99.8%</span>
+                <span class="confidence-lbl">Confidence</span>
+              </div>
+            </div>
+
+            <!-- Smart Auto-Spray Notification Banner -->
+            <div class="spray-trigger-banner" id="spray-trigger-banner" style="display: none;">
+              <span class="spray-icon">💦</span>
+              <div>
+                <strong>Water Spraying Activated!</strong> Precision water sprayer pump running for <span id="spray-dur-disp">2.0</span>s.
+              </div>
+            </div>
+
+            <!-- Class Probabilities Bar Chart -->
+            <div class="card-section">
+              <h4 class="section-title">Classification Probability Distribution</h4>
+              <div class="prob-list" id="prob-list"></div>
+            </div>
+
+            <!-- Agronomic Guidance Card -->
+            <div class="card-section" id="pathology-section">
+              <h4 class="section-title">Agronomic Diagnosis & Treatment Plan</h4>
+              <p class="disease-desc" id="disease-desc"></p>
+
+              <div class="info-block">
+                <h5>🔍 Key Diagnostic Symptoms</h5>
+                <ul class="symptom-list" id="symptom-list"></ul>
+              </div>
+
+              <div class="treatment-grid">
+                <div class="treatment-box">
+                  <h5>🧪 Chemical Treatment</h5>
+                  <p id="treatment-chemical"></p>
+                </div>
+                <div class="treatment-box">
+                  <h5>🌿 Organic & Bio Control</h5>
+                  <p id="treatment-organic"></p>
+                </div>
+                <div class="treatment-box full-width">
+                  <h5>🛡️ Prevention & Agronomic Practices</h5>
+                  <p id="treatment-prevention"></p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Card 5: Quick Test Presets Library -->
+        <section class="card presets-card">
+          <div class="card-header">
+            <h3>⚡ Quick Test Presets Library</h3>
+            <span class="badge-subhead">Instant Validation</span>
+          </div>
+          <p class="presets-intro">Click any preset image to test real leaf classification or non-leaf rejection:</p>
+          <div class="presets-grid" id="presets-list"></div>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Metrics Modal -->
+  <div class="modal" id="metrics-modal">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🔬 CNN Model Architecture & Performance Evaluation</h3>
+        <button class="btn-close" id="btn-close-metrics">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="metrics-summary-grid">
+          <div class="metric-card">
+            <span class="metric-val">100.0%</span>
+            <span class="metric-label">Disease Model Test Accuracy</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">100.0%</span>
+            <span class="metric-label">Leaf Verifier Test Accuracy</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">4</span>
+            <span class="metric-label">Disease Categories</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-val">1,200+</span>
+            <span class="metric-label">Real Plant Images Trained</span>
+          </div>
+        </div>
+
+        <h4 class="modal-subhead">1. Disease Classification Model Training History (Loss & Accuracy)</h4>
+        <div class="graph-container">
+          <img src="/evaluation_results/disease_training_history.png" alt="Disease CNN Training History" class="modal-img">
+        </div>
+
+        <h4 class="modal-subhead">2. Disease Confusion Matrix (Unseen Test Set)</h4>
+        <div class="graph-container">
+          <img src="/evaluation_results/disease_confusion_matrix.png" alt="Disease Confusion Matrix" class="modal-img">
+        </div>
+
+        <h4 class="modal-subhead">3. Strict Leaf-Verifier Confusion Matrix & Training Curves</h4>
+        <div class="graphs-row">
+          <div class="graph-half">
+            <img src="/evaluation_results/leaf_verifier_training_history.png" alt="Leaf Verifier Training History" class="modal-img">
+          </div>
+          <div class="graph-half">
+            <img src="/evaluation_results/leaf_verifier_confusion_matrix.png" alt="Leaf Verifier Confusion Matrix" class="modal-img">
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>AgriVision AI &bull; Smart Agricultural Rover & Plant Pathology System &bull; Compatible with Laptop & Raspberry Pi</p>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

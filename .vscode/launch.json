@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Rover AI Web Server (app.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    {
+      "name": "Run Automated Tests (run_tests.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_tests.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Train Plant Disease CNN",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/train_disease_cnn.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Train Leaf Verifier CNN",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/train_leaf_verifier.py",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

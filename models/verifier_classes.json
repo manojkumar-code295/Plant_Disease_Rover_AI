@@ -1,0 +1,10 @@
+{
+  "class_to_idx": {
+    "leaf": 0,
+    "non_leaf": 1
+  },
+  "idx_to_class": {
+    "0": "leaf",
+    "1": "non_leaf"
+  }
+}

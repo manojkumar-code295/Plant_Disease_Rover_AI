@@ -1,0 +1,9 @@
+{
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}",
+    "${workspaceFolder}/src"
+  ],
+  "python.terminal.executeInFileDir": true,
+  "files.autoSave": "afterDelay",
+  "editor.formatOnSave": true
+}
